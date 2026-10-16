@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Keel: build the scrubbed, code-only export of the app for the private git repo.
+
+Copies an allow-list of code files from the project into the export tree,
+applies the private scrub map (real names -> placeholders), then scans the
+result for secrets and real names. Exits non-zero if anything is found, so
+nothing unsafe is ever committed.
+
+The scrub map and the real-name list live OUTSIDE the repo (in the private
+workspace) and must never be committed:
+  $KEEL_DIR/scrub_map.json   ordered replacement rules
+  $KEEL_DIR/names.json       real names pulled read-only from the database
+
+Usage: python3 scripts/git_export.py [--refresh-names]
+"""
+import os, re, sys, json, shutil, fnmatch, subprocess
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+KEEL = os.environ.get('KEEL_DIR', os.path.join(ROOT, 'work', 'keel'))
+OUT = os.environ.get('KEEL_EXPORT', os.path.join(KEEL, 'ari-app'))
+
+# Allow-list: only these paths are exported. Everything else stays private.
+INCLUDE = [
+    'web/ops.html', 'web/sw.js', 'web/vercel.json', 'web/build.json',
+    'web/ari.webmanifest', 'web/ari-fonts.css', 'web/ari-supabase.js',
+    'web/ari-*.png', 'web/ari-*.woff2',
+    'native/ari/App.tsx', 'native/ari/index.ts', 'native/ari/app.json',
+    'native/ari/package.json', 'native/ari/package-lock.json',
+    'native/ari/tsconfig.json', 'native/ari/AGENTS.md', 'native/ari/LICENSE',
+    'native/ari/.gitignore', 'native/ari/assets/*.png',
+    'native/supabase/migrations/*.sql', 'native/supabase/rollbacks/*.sql',
+    'native/supabase/pending/*.sql', 'native/supabase/functions/*/index.ts',
+    'scripts/brief_upsert.py', 'scripts/daily_report.py', 'scripts/db_backup.py',
+    'scripts/deploy_web.py', 'scripts/reply_ingest.py', 'scripts/retro_stats.py',
+    'scripts/sync_sheet_supabase.py', 'scripts/git_export.py', 'scripts/git_sync.sh', 'scripts/git_push_api.py',
+    'repo/README.md:README.md', 'repo/gitignore:.gitignore',
+]
+BINARY = ('.png', '.woff2', '.jpg', '.ico')
+
+# Public-by-design values that are allowed through (noted in README).
+ALLOW = [r'sb_publishable_[A-Za-z0-9_]+', r'[a-z]{20}\.supabase\.co', r'BNOi3VJ08tMJ[A-Za-z0-9_-]+']
+SECRET = {
+    'sb_secret': r'sb_secret_[A-Za-z0-9_]{8,}',
+    'jwt': r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}',
+    'github_token': r'\bgh[pousr]_[A-Za-z0-9]{20,}',
+    'supabase_mgmt': r'\bsbp_[a-f0-9]{30,}',
+    'vercel_token': r'\bvercel_[A-Za-z0-9]{20,}',
+    'private_key': r'-----BEGIN [A-Z ]*PRIVATE KEY',
+    'vapid_private_value': r'"d"\s*:\s*"[A-Za-z0-9_-]{40,}"',
+    'crm_id': r'\b00[1-9Q][A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?\b',
+    'apps_script': r'script\.google\.com/macros/s/',
+    'sheet_url': r'docs\.google\.com/spreadsheets/d/[A-Za-z0-9_-]{20,}',
+    'phone_in': r'\+91[ -]?\d{10}\b',
+}
+EMAIL_OK = re.compile(r'@(example\.com|linkedin\.com|users\.noreply\.github\.com)$|^[a-z0-9.-]+@[0-9.]+$', re.I)
+
+
+def word_re(w):
+    # Capitalised words also match inside camelCase identifiers (onFoo, sendFoo).
+    lead = r'(?<![A-Z])' if w[:1].isupper() else r'(?<![A-Za-z])'
+    return re.compile(lead + re.escape(w) + r'(?![a-z])')
+
+
+def load_rules():
+    rules = json.load(open(os.path.join(KEEL, 'scrub_map.json')))['rules']
+    out = []
+    for kind, src, dst in rules:
+        out.append((re.compile(re.escape(src)) if kind == 'l' else word_re(src), dst, src))
+    return out
+
+
+def refresh_names():
+    """Pull real names read-only from the database into names.json (best effort)."""
+    sql = ("select distinct v from (select name v from people union select company from people "
+           "union select company from accounts union select owner from accounts union select ae from accounts "
+           "union select meeting_person from accounts union select domain from accounts union select owner from people) x "
+           "where v is not null and length(v)>2")
+    try:
+        r = subprocess.run([sys.executable, os.path.join(ROOT, 'work', 'v17', 'sbexec.py'), 'query', sql],
+                           capture_output=True, text=True, timeout=110)
+        data = json.loads(r.stdout)
+        json.dump(data, open(os.path.join(KEEL, 'names.json'), 'w'))
+        print('names refreshed:', len(data))
+    except Exception as e:
+        print('WARN names refresh failed, using cached list:', e)
+
+
+def collect():
+    files = []
+    for spec in INCLUDE:
+        src, _, dst = spec.partition(':')
+        d = os.path.dirname(src)
+        base = os.path.join(ROOT, d)
+        if not os.path.isdir(base):
+            continue
+        for f in sorted(os.listdir(base)):
+            if fnmatch.fnmatch(f, os.path.basename(src)) and os.path.isfile(os.path.join(base, f)):
+                files.append((os.path.join(d, f), dst or os.path.join(d, f)))
+    return files
+
+
+def main():
+    if '--refresh-names' in sys.argv:
+        refresh_names()
+    rules = load_rules()
+    names = set(x['v'].strip() for x in json.load(open(os.path.join(KEEL, 'names.json'))))
+    names |= {src for _, _, src in rules if '@' not in src and len(src) >= 4}
+    ignore = set(json.load(open(os.path.join(KEEL, 'scrub_map.json'))).get('ignore', []))
+    names = {n for n in names if len(n) >= 4 and n not in ignore}
+    name_res = [word_re(n) for n in sorted(names, key=len, reverse=True)]
+    allow = re.compile('|'.join(ALLOW))
+
+    # fresh tree, keep .git
+    os.makedirs(OUT, exist_ok=True)
+    for e in os.listdir(OUT):
+        if e == '.git':
+            continue
+        p = os.path.join(OUT, e)
+        shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
+
+    problems, n = [], 0
+    for src, dst in collect():
+        sp, dp = os.path.join(ROOT, src), os.path.join(OUT, dst)
+        os.makedirs(os.path.dirname(dp), exist_ok=True)
+        n += 1
+        if src.endswith(BINARY):
+            shutil.copy2(sp, dp)
+            continue
+        t = open(sp, encoding='utf-8').read()
+        for rx, rep, _ in rules:
+            t = rx.sub(rep, t)
+        open(dp, 'w', encoding='utf-8').write(t)
+        scan = allow.sub('', t)
+        for k, p in SECRET.items():
+            for m in set(re.findall(p, scan)):
+                problems.append((dst, k, m if isinstance(m, str) else m[0]))
+        for m in set(re.findall(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', scan)):
+            if not EMAIL_OK.search(m) and not re.search(r'@\d|\.(png|js|css|woff2)$', m):
+                problems.append((dst, 'email', m))
+        if not src.endswith('ari-supabase.js'):  # vendored library, scanned for secrets only
+            for rx in name_res:
+                for m in set(rx.findall(t)):
+                    problems.append((dst, 'real_name', m))
+    print('exported files:', n, '->', OUT)
+    if problems:
+        print('SCAN FAILED, %d findings:' % len(problems))
+        for p in sorted(set(problems)):
+            print('  ', *p)
+        sys.exit(2)
+    print('scan clean')
+
+
+if __name__ == '__main__':
+    main()

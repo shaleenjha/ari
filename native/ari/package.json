@@ -1,0 +1,38 @@
+{
+  "name": "ari",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@expo-google-fonts/google-sans-flex": "^0.4.6",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.117.3",
+    "expo": "~57.0.29",
+    "expo-auth-session": "~57.0.16",
+    "expo-blur": "~57.0.3",
+    "expo-constants": "~57.0.22",
+    "expo-device": "~57.0.2",
+    "expo-font": "~57.0.4",
+    "expo-local-authentication": "~57.0.3",
+    "expo-notifications": "~57.0.23",
+    "expo-secure-store": "~57.0.4",
+    "expo-status-bar": "~57.0.1",
+    "expo-web-browser": "~57.0.3",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-reanimated": "4.5.1",
+    "react-native-url-polyfill": "^4.0.0",
+    "react-native-webview": "13.16.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "private": true
+}
