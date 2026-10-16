@@ -21,3 +21,11 @@ All applied staging first, rollback rehearsed on staging (0025, 0026, 0027, 0028
 Ledgers in step: both projects 0001..0028. Files moved to migrations/ (0025_offsite_encrypted replaced the worker-reads-backups
 draft, kept as work/maint1017/*.REJECTED.sql), rollbacks in rollbacks/. Edge functions ari-push + ari-backup redeployed on both.
 SSL enforcement on for both. Restore drill 34/34 tables, 2,316/2,316 rows. Nothing pending here.
+
+## Pending for the NEXT maintenance window (added Oct 17 2026, Phase 1 groundwork; needs a fresh short-lived PAT)
+| # | File | Kind | Check after | Rollback |
+|---|---|---|---|---|
+| 1 | 0029_data_hygiene.sql | SQL | run `native/supabase/tests/0029_data_hygiene_test.sql` on staging (self-contained transaction, rolls back) -> "ALL 0029 TESTS PASSED"; `python3 scripts/hygiene_scan.py` as ari_worker prints one hygiene line; worker allow-list 30 -> 32 (ari_hygiene_scan, ari_worker_hygiene); anon -> 401 on hygiene_open / hygiene_resolve | 0029_data_hygiene_rollback.sql |
+| 2 | Add `python3 scripts/hygiene_scan.py` after the sync step in task 56e17ef1 | task prompt | next sync prints the hygiene line, exit 0 | remove the step |
+| 3 | v18.8 front end "Tidy up" (work/v188_hygiene, spec plans/data-hygiene.md) | deploy | harness pass, then device check | redeploy v18.7.1 |
+Tested Oct 17 on local Postgres 17 with the prod schema (schema-only restore, synthetic rows): apply, tests, rollback, re-apply, tests: all pass.

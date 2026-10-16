@@ -13,7 +13,7 @@
 # Never make the repo public. Never add data, CSVs, drafts, plans or screenshots.
 set -euo pipefail
 MSG="${1:?usage: git_sync.sh \"vX.Y: summary\"}"
-[[ "$MSG" =~ ^v[0-9]+(\.[0-9]+)*:\ .+ ]] || { echo "message must look like 'vX.Y: summary'"; exit 1; }
+[[ "$MSG" =~ ^(v[0-9]+(\.[0-9]+)*|phase[0-9]+):\ .+ ]] || { echo "message must look like 'vX.Y: summary' or 'phaseN: summary'"; exit 1; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export KEEL_DIR="${KEEL_DIR:-$ROOT/work/keel}"
 export KEEL_EXPORT="${KEEL_EXPORT:-$KEEL_DIR/ari-app}"

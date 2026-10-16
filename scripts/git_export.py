@@ -34,11 +34,15 @@ INCLUDE = [
     'scripts/deploy_web.py', 'scripts/reply_ingest.py', 'scripts/retro_stats.py',
     'scripts/sync_sheet_supabase.py', 'scripts/git_export.py', 'scripts/git_sync.sh', 'scripts/git_push_api.py',
     'scripts/ari_db.py', 'scripts/backup_check.py', 'scripts/restore_drill.py', 'scripts/offsite_drive.py',
-    'scripts/health_check.py', 'scripts/phase0_metrics.py',
+    'scripts/health_check.py', 'scripts/phase0_metrics.py', 'scripts/hygiene_scan.py', 'scripts/test_hygiene_scan.py',
+    'native/supabase/tests/*.sql',
+    # Phase 1 (Oct 17 2026): app2 tree + CI, recursive ("dir/**"), build output and deps excluded
+    'app2/**', '.github/**',
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient.pem',
     'repo/README.md:README.md', 'repo/gitignore:.gitignore',
 ]
 BINARY = ('.png', '.woff2', '.jpg', '.ico')
+# package-lock files are machine-generated registry metadata: scanned for secrets, not for real names
 
 # Public-by-design values that are allowed through (noted in README).
 ALLOW = [r'sb_publishable_[A-Za-z0-9_]+', r'[a-z]{20}\.supabase\.co', r'BNOi3VJ08tMJ[A-Za-z0-9_-]+']
@@ -91,10 +95,21 @@ def refresh_names():
         print('WARN names refresh failed, using cached list:', e)
 
 
+SKIP_DIRS = {'node_modules', 'dist', 'test-results', 'playwright-report', '.vite', '__pycache__', 'coverage'}
+
+
 def collect():
     files = []
     for spec in INCLUDE:
         src, _, dst = spec.partition(':')
+        if src.endswith('/**'):
+            top = src[:-3]
+            for dp, dns, fns in os.walk(os.path.join(ROOT, top)):
+                dns[:] = sorted(d for d in dns if d not in SKIP_DIRS)
+                for f in sorted(fns):
+                    rel = os.path.relpath(os.path.join(dp, f), ROOT)
+                    files.append((rel, rel))
+            continue
         d = os.path.dirname(src)
         base = os.path.join(ROOT, d)
         if not os.path.isdir(base):
@@ -143,7 +158,7 @@ def main():
         for m in set(re.findall(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', scan)):
             if not EMAIL_OK.search(m) and not re.search(r'@\d|\.(png|js|css|woff2)$', m):
                 problems.append((dst, 'email', m))
-        if not src.endswith('ari-supabase.js'):  # vendored library, scanned for secrets only
+        if not src.endswith(('ari-supabase.js', 'package-lock.json')):  # vendored / generated, scanned for secrets only
             for rx in name_res:
                 for m in set(rx.findall(t)):
                     problems.append((dst, 'real_name', m))
