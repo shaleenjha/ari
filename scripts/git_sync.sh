@@ -22,5 +22,5 @@ cd "$KEEL_EXPORT"
 [ -d .git ] || git init -q -b main
 git add -A
 if git diff --cached --quiet; then echo "nothing to commit"; else
-  git -c user.name="Keel" -c user.email="keel@users.noreply.github.com" commit -q -m "$MSG"; fi
+  git -c user.name="Owner" -c user.email="36487118+shaleenjha@users.noreply.github.com" commit -q -m "$MSG"; fi
 python3 "$ROOT/scripts/git_push_api.py" "$KEEL_EXPORT"

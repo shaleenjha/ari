@@ -70,7 +70,7 @@ def main():
         print('remote already up to date', parent[:10])
         return
     c = gh('POST', '/repos/%s/git/commits' % repo, {'message': msg, 'tree': new_tree, 'parents': [parent],
-                                                   'author': {'name': 'Keel', 'email': 'keel@users.noreply.github.com'}})
+                                                   'author': {'name': 'Owner', 'email': '36487118+shaleenjha@users.noreply.github.com'}})
     gh('PATCH', '/repos/%s/git/refs/heads/main' % repo, {'sha': c['sha'], 'force': False})
     print('pushed %s -> %s main (%d files, %d blobs uploaded): %s' % (c['sha'][:10], repo, len(tree), uploaded, msg))
 

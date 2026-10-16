@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.5"><meta name="ari-rev" content="8c3435c1af">
+<meta name="ari-build" content="v18.6"><meta name="ari-rev" content="f5196e484a">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -3634,6 +3634,29 @@ html.v184fxon{overflow:hidden}
 .v184ld b{opacity:.7}
 @media (prefers-reduced-motion:reduce){.v184st .d.ld,.v184sk{animation:none}#v184toast{transition:none}}
 </style>
+<style>/* v18.6: two-step sign-in + where meetings come from */
+.v186err{margin:6px 0 0;font-size:13px;line-height:18px;color:var(--bad,#c4342d)}
+.v186code{width:100%;height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--bg);color:var(--ink);font:600 24px/52px var(--mono,ui-monospace,monospace);letter-spacing:.32em;text-align:center}
+.v186qr{display:grid;place-items:center;margin:var(--s3,12px) 0}
+.v186qr img{width:184px;height:184px;border-radius:16px;background:#fff;padding:8px}
+.v186sec{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:var(--s3,12px)}
+.v186sec code{font:500 13px/18px var(--mono,ui-monospace,monospace);word-break:break-all;flex:1 1 160px;color:var(--ink)}
+#v186gate{position:fixed;inset:0;z-index:2147483000;background:var(--bg);display:grid;place-items:center;padding:24px}
+.v186g{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;text-align:center}
+.v186g b{font-size:24px;line-height:30px;letter-spacing:-.02em}
+.v186g p{margin:0;color:var(--ink2);font-size:15px;line-height:21px}
+.v186out{font-size:14px;color:var(--ink2);padding:8px}
+.v186tri{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 12px}
+.v186tri div{display:flex;flex-direction:column;gap:2px}
+.v186tri b{font-size:26px;line-height:30px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.v186tri span{font-size:12px;line-height:16px;color:var(--ink2)}
+.v186row{display:grid;grid-template-columns:132px 1fr 28px;align-items:center;gap:10px;min-height:32px;font-size:14px}
+.v186row i{display:block;height:8px;border-radius:4px;background:var(--line2);position:relative;overflow:hidden}
+.v186row i:after{content:"";position:absolute;inset:0;width:var(--w);background:var(--acc);border-radius:4px}
+.v186row b{text-align:right;font-variant-numeric:tabular-nums}
+.v186none span{color:var(--bad,#c4342d)}
+.v186hint{margin:8px 0 0;font-size:12px;line-height:16px;color:var(--ink2)}
+</style>
 </head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -5863,7 +5886,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.5';
+const M=MOTION,APP=$('#app'),BUILD='v18.6';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5928,7 +5951,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.5'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.6'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6007,6 +6030,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.6',d:'Oct 17',items:['When you mark a meeting set, Ari asks where it came from: LinkedIn, email, inbound or other','Meeting booked from a reply opens the same quick form','The Report shows DMs sent, replies and meetings side by side, and where your meetings come from','Two-step sign-in: add a code from an authenticator app on top of Google, in Settings']},
  {v:'v18.5',d:'Oct 17',items:['Chat with me sticks to your outreach: people, accounts, drafts and your queue','App changes are handled in Hark, not here, so there is no change-request button in the app any more','Hark works with tighter permissions behind the scenes; nothing changes on your screen']},
  {v:'v18.4',d:'Oct 17',items:['Today starts with what to send: replies first, then your follow-ups, then Today’s 15 connects','A reply card pinned on top: paste what they said and Hark drafts three answers; tap one to send it','One person per screen: Copy & open LinkedIn, come back, tap Sent','Today’s 15 spreads connects across accounts and warns when one account is over the cap','No more than four DM2s to one account a day; the rest wait for tomorrow','Lock-screen names are off by default, with a switch in Settings','The status line only says Live when Hark is actually up to date','Today no longer sits on Checking your queue after it has loaded']},
  {v:'v18.3',d:'Oct 16',items:['The Face ID cover is now called what it is: a privacy screen on this phone. Google sign-in protects your account','One status line you can trust: Offline when you are offline, and it says so when Hark has not run for a while','No more All clear while Ari is still loading','The Report’s AE filter now filters every number, with an Unattributed chip for activity that has no AE yet','Edits that hit a connection hiccup are saved and retried instead of dropped','Lists keep working past 1,000 people','Ari no longer talks to the old Sheet web app; sign-in is Google only']},
@@ -6032,8 +6056,8 @@ const LOG=[
  {v:'v13',d:'Oct 15',items:['I became a character: the pebble, the ring, nine faces','Phase-aware lines through your shift']},
  {v:'v12',d:'Oct 14',items:['One chat with context chips, threads per person and task, @ tags']}];
 const SL=[
- {t:'Replies first',l:'Today opens on what to send. A reply sits on top: paste what they said and Hark writes three answers. Then your follow-ups, then Today’s 15 connects, spread so no account gets flooded.',demo:'faces',go:'Open Today',fn:()=>{closeWN();setTimeout(()=>goPage(0),300)}},
- {t:'One person at a time',l:'Tap Start and Ari shows one person per screen: Copy & open LinkedIn, send it there, come back and tap Sent. Lock-screen names stay off unless you turn them on in Settings.',demo:'faces',go:'Got it',fn:()=>{closeWN()}}
+ {t:'Where meetings come from',l:'Mark a meeting set and Ari asks one thing: LinkedIn, email, inbound or other. The Report then shows DMs sent, replies and meetings side by side, by source.',demo:'faces',go:'Open Report',fn:()=>{closeWN()}},
+ {t:'Two-step sign-in',l:'In Settings you can add a 6-digit code from an authenticator app on top of Google sign-in. Ari asks for it when you sign in on a phone.',demo:'faces',go:'Got it',fn:()=>{closeWN()}}
 ];
 let wnOn=false,wnI=0,wnLoop=null;
 const wn=document.createElement('div');wn.className='wn';wn.setAttribute('role','dialog');wn.setAttribute('aria-label','What’s new');
@@ -6958,19 +6982,24 @@ document.addEventListener('click',e=>{const b=e.target.closest('#v162today [data
 function meetForm(company){const x=buildAccts().find(z=>z.n===company||NC(z.n)===NC(company))||{n:company,pp:[],ae:''};const a=x.acc||{};buzz(8);
   const src=a.meeting_source||'',ppl=x.pp.map(p=>p.name);
   sheet(`<div class="v16mh"><span class="cap">Meeting · ${E(x.n)}</span><b>${a.meeting_status==='set'?'Meeting details':'Mark meeting set'}</b><p>Outreach at ${E(x.n)} is held while a meeting is set.</p></div>
-   <div class="v162form"><div><label>Source</label><div class="v162chips" data-f="src">${['Outbound','Inbound','Other or not a meeting'].map(s=>`<span class="press ${src===s?'on':''}" data-v="${s}">${s}</span>`).join('')}</div></div>
+   <div class="v162form"><div><label>Where it came from</label><div class="v162chips" data-f="src">${[['LinkedIn','LinkedIn (outbound)'],['Email','Email (outbound)'],['Inbound','Inbound'],['Other','Other']].map(([v,l])=>`<span class="press ${src===v?'on':''}" data-v="${v}">${l}</span>`).join('')}</div><p class="v186err" id="v186srcE" hidden>Pick where this meeting came from.</p></div>
+   <div><div class="v162chips" data-f="nm"><span class="press ${a.meeting_status==='not a meeting'?'on':''}" data-v="1">Not a meeting</span></div></div>
    <div><label>Who</label><input data-f="person" list="v162pl" value="${E(a.meeting_person||'')}" placeholder="Name"><datalist id="v162pl">${ppl.map(n=>`<option value="${E(n)}">`).join('')}</datalist></div>
    <div><label>Date</label><input data-f="date" type="date" value="${E(String(a.meeting_date||'').slice(0,10))}"></div>
    <div><label>AE</label><div class="v162chips" data-f="ae">${['Alex','Blake','Casey','Other'].map(s=>`<span class="press ${(AEOF(a.meeting_ae)||x.ae)===s?'on':''}" data-v="${s}">${s}</span>`).join('')}</div></div>
    <div><label>Notes</label><textarea data-f="notes" maxlength="900">${E(a.meeting_notes||'')}</textarea></div></div>
    <div class="v16btns"><div class="b sec2 press" data-x="no">Cancel</div><div class="b pri press" data-x="yes">Save to Sheet</div></div>`,(s,close)=>{
-    s.querySelectorAll('.v162chips[data-f] span').forEach(c=>c.onclick=()=>{c.parentNode.querySelectorAll('span').forEach(z=>z.classList.toggle('on',z===c));buzz(6)});
+    s.querySelectorAll('.v162chips[data-f] span').forEach(c=>c.onclick=()=>{const f=c.parentNode.dataset.f;if(f==='nm'){c.classList.toggle('on')}else c.parentNode.querySelectorAll('span').forEach(z=>z.classList.toggle('on',z===c));
+      if(f==='src'){const nm=s.querySelector('.v162chips[data-f="nm"] span');if(nm)nm.classList.remove('on');const er=s.querySelector('#v186srcE');if(er)er.hidden=true}
+      if(f==='nm'&&c.classList.contains('on'))s.querySelectorAll('.v162chips[data-f="src"] span').forEach(z=>z.classList.remove('on'));buzz(6)});
     s.querySelector('[data-x=no]').onclick=close;
-    s.querySelector('[data-x=yes]').onclick=()=>{const g=f=>(s.querySelector(`.v162chips[data-f="${f}"] .on`)||{}).dataset;const sv=(g('src')||{}).v||'',ae=(g('ae')||{}).v||'';
+    s.querySelector('[data-x=yes]').onclick=()=>{const g=f=>(s.querySelector(`.v162chips[data-f="${f}"] .on`)||{}).dataset;const nm=!!g('nm'),sv=nm?'':(g('src')||{}).v||'',ae=(g('ae')||{}).v||'';
+      if(!nm&&!sv){const er=s.querySelector('#v186srcE');if(er){er.hidden=false;er.scrollIntoView({block:'center',behavior:'smooth'})}buzz([10,40,10]);return}
       const AE={Alex:'Alex Rivera',Blake:'Blake Moreno',Casey:'Casey Brooks'}[ae]||ae;
-      const set={meeting_status:/not a meeting/i.test(sv)?'not a meeting':'set',meeting_source:sv,meeting_person:s.querySelector('[data-f=person]').value.trim(),meeting_date:s.querySelector('[data-f=date]').value,meeting_ae:AE,meeting_notes:s.querySelector('[data-f=notes]').value.trim()};
+      const set={meeting_status:nm?'not a meeting':'set',meeting_source:sv,meeting_person:s.querySelector('[data-f=person]').value.trim(),meeting_date:s.querySelector('[data-f=date]').value,meeting_ae:AE,meeting_notes:s.querySelector('[data-f=notes]').value.trim()};
       close();saveMeeting(x.n,set)}})}
-function saveMeeting(company,set){const k=NC(company);ACO[k]={company,set,t:Date.now()};saveACO();V162._ad=null;soon();
+window.ariMeetForm=c=>meetForm(c);window.ariSheet=(h,f)=>sheet(h,f);
+function saveMeeting(company,set){const k=NC(company);ACO[k]={company,set,t:Date.now()};saveACO();V162._ad=null;soon();try{window.ariV186&&ariV186.meetSaved()}catch(e){}
   mutate('setAccount',[company,set],set.meeting_status==='set'?`${E(company)}: meeting set. Outreach there is held.`:`${E(company)}: noted as not a meeting.`).catch(e=>{
     if(/unknown fn/.test(String(e&&e.message))){askHark([{action:'Meeting set',target:company,details:Object.entries(set).map(([k,v])=>k+': '+v).join(' | ')}],'Saved for Hark to write into the Sheet.')}else{delete ACO[k];saveACO();soon()}})}
 V162.meetForm=meetForm;V162.saveMeeting=saveMeeting;
@@ -9120,7 +9149,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.5',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.6',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9195,6 +9224,8 @@ function setHTML(){const L=k=>{try{return localStorage.getItem(k)}catch(e){retur
   <div class="v162hint">Names on a lock screen show who you prospect. Off keeps them private.</div>
   <div class="apcap"><span class="cap">Connects</span></div>
   <div class="aprow v181blk"><div><b>Invites per account per day</b><span>Today’s 15 spreads connects so no account gets flooded. DM2s are held to 4 per account a day.</span></div><div class="v171seg" role="radiogroup" aria-label="Invites per account per day">${[4,5].map(n=>`<span class="press ${(window.ariV184?+ariV184.prefs.today15_cap_per_account:4)===n?'on':''}" data-v184set="today15_cap_per_account" data-v="${n}" role="radio" aria-checked="${(window.ariV184?+ariV184.prefs.today15_cap_per_account:4)===n}">${n}</span>`).join('')}</div></div>
+  <div class="apcap"><span class="cap">Two-step sign-in</span></div><div class="v162hint">A 6-digit code from an authenticator app, on top of Google sign-in. Ari asks for it when you sign in on a phone.</div>
+  <div class="aprow" data-v186mfa="1"><div><b>Authenticator code</b><span>Checking…</span></div><span class="v171btn sm pri press">Set up</span></div>
   <div class="apcap"><span class="cap">Privacy screen</span></div><div class="v162hint">Covers Ari from people near your phone. It is not a second password: your account is protected by Google sign-in.</div>
   <div class="aprow"><div><b>Privacy screen with ${fid}</b><span>${pk.length?'On for this phone':'Off. Google sign-in opens the screen instead.'}</span></div>${pk.length?'<span class="v171btn sm press" data-s171="pkoff">Remove</span>':'<span class="v171btn sm pri press" data-s171="pkon">Set up</span>'}</div>
   <div class="aprow v181blk"><div><b>Lock when I leave</b><span>Home, the app switcher, the power button or LinkedIn.</span></div><div class="v171seg" role="radiogroup" aria-label="Lock">${[['0','Immediately'],['30','30 s'],['120','2 min']].map(o=>`<span class="press ${la===o[0]?'on':''}" data-lk171="${o[0]}" role="radio" aria-checked="${la===o[0]}">${o[1]}</span>`).join('')}</div></div>
@@ -9208,7 +9239,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.5';
+function aboutHTML(){const B='v18.6';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9918,7 +9949,7 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.4';try{localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();
@@ -10027,7 +10058,7 @@ V184.render=render;
 const FX={items:[],i:0,pending:false,sel:0,open:false,done:0};V184.FX=FX;
 const KF={DM1:['dm1_sent','dm'],DM2:['dm2_sent','dm2_text'],DM3:['dm3_sent','dm3_text']};
 function qItems(){return ((window.ariM&&ariM.Q)||[]).filter(q=>KF[q.tag]).map(q=>({k:'dm',tag:q.tag,pid:q.id,name:q.n,sub:q.c,why:q.why||'',body:String(q.msg||''),url:q.url||(q.p&&q.p.linkedin_url)||'',field:KF[q.tag][0],col:KF[q.tag][1]}))}
-function repItems(){return ((V184.top&&V184.top.replies)||[]).map(r=>({k:'reply',id:r.id,pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.snippet&&r.snippet_source!=='none'?'“'+r.snippet+'”':'They wrote back. Paste their words for a sharper draft, or answer with a safe opener.',drafts:Array.isArray(r.drafts)?r.drafts:[],url:r.thread_url||r.linkedin_url||'',snip:!!(r.snippet&&r.snippet_source!=='none')}))}
+function repItems(){return ((V184.top&&V184.top.replies)||[]).map(r=>({k:'reply',id:r.id,pid:r.person_id,co:r.company||'',name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.snippet&&r.snippet_source!=='none'?'“'+r.snippet+'”':'They wrote back. Paste their words for a sharper draft, or answer with a safe opener.',drafts:Array.isArray(r.drafts)?r.drafts:[],url:r.thread_url||r.linkedin_url||'',snip:!!(r.snippet&&r.snippet_source!=='none')}))}
 function conItems(){const T=V184.top||{},A={};((T.meta||{}).accounts_today||[]).forEach(a=>{A[String(a.account_id||a.company||'').toLowerCase()]=a});
   return (T.connects||[]).map(r=>{const a=A[String(r.account_id||'').toLowerCase()]||A[String(r.company||'').toLowerCase()];return {k:'connect',pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.why||'',url:r.linkedin_url||'',company:r.company,full:a&&+a.cap_left===0,sentAcct:a&&a.sent_today}})}
 function openFocus(items,i,sel){if(!items.length)return;FX.items=items;FX.i=Math.max(0,Math.min(i||0,items.length-1));FX.sel=sel||0;FX.pending=false;FX.open=true;FX.done=0;
@@ -10057,7 +10088,7 @@ function fxRender(){const o=$('#v184fx'),it=cur();if(!o)return;
 function showSheet(){const s=$('#v184fx .fxsheet');if(s&&FX.pending){s.hidden=false;FX.sheetAt=Date.now()}}
 function advance(){FX.pending=false;FX.i++;FX.sel=0;fxRender()}
 async function logSent(text,outcome){const it=cur();if(!it)return;FX.pending=false;buzz(10);
-  try{if(it.k==='reply'){await rpc('ari_reply_done',{p_id:it.id,p_outcome:outcome||'answered',p_body:text||null});const T=V184.top;if(T&&T.replies)T.replies=T.replies.filter(r=>r.id!==it.id);toast(outcome==='meeting'?`Logged a meeting with ${E(firstN(it.name))}. Add the details from their file.`:`Logged your answer to ${E(firstN(it.name))}.`)}
+  try{if(it.k==='reply'){await rpc('ari_reply_done',{p_id:it.id,p_outcome:outcome||'answered',p_body:text||null});const T=V184.top;if(T&&T.replies)T.replies=T.replies.filter(r=>r.id!==it.id);if(outcome==='meeting'&&it.co)setTimeout(()=>{try{window.ariMeetForm&&ariMeetForm(it.co)}catch(e){}},700);toast(outcome==='meeting'?`Logged a meeting with ${E(firstN(it.name))}. Say where it came from.`:`Logged your answer to ${E(firstN(it.name))}.`)}
     else if(it.k==='dm'){const mu=window.ariV16&&ariV16.mutate;if(!mu)throw new Error('not ready');if(text&&text!==it.body)await mu('setFields',[it.pid,{[it.col]:text}]);await mu('mark',[it.pid,it.field]);toast(`${E(it.tag)} sent · ${E(firstN(it.name))}.`)}
     else{const mu=window.ariV16&&ariV16.mutate;if(!mu)throw new Error('not ready');await mu('mark',[it.pid,'connect_sent']);toast(`Connect sent · ${E(firstN(it.name))}.`);setTimeout(()=>load('connect'),1200)}
     FX.done++;V184.logged=(V184.logged||0)+1;advance();render()}
@@ -10129,6 +10160,103 @@ function boot(){render();const rd=$('#ready');if(rd)new MutationObserver(()=>{co
   try{const _p=window.ariV162&&ariV162.patch;if(_p)ariV162.patch=function(m,o){const r=_p.apply(this,arguments);setTimeout(render,0);return r}}catch(e){}
   if(signed()){load('boot');prefsLoad();live();flushAcks()}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script>
+<script>/* =====================================================================
+   v18.6 (Oct 17): two-step sign-in (an authenticator code on top of Google), and where meetings come from in the Report.
+   Owner session only. Uses the signed-in client from v17 (ariV17.ready()).
+   ===================================================================== */
+(function(){
+const V186=window.ariV186={v:'v18.6',errs:[],mfa:null,att:{},attKey:''};
+const $=s=>document.querySelector(s);
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const bz=p=>{try{buzz(p)}catch(e){}};
+const tst=m=>{try{toast(m)}catch(e){}};
+const sheet=(h,f)=>window.ariSheet(h,f);
+const client=async()=>{try{return window.ariV17&&ariV17.ready?await ariV17.ready():null}catch(e){return null}};
+const signed=()=>!!(window.ariV17&&ariV17.signed&&ariV17.signed());
+
+/* ---------- two-step sign-in ---------- */
+async function mfaState(){const c=await client();if(!c||!c.auth||!c.auth.mfa)return null;
+  try{const [{data:f},{data:a}]=await Promise.all([c.auth.mfa.listFactors(),c.auth.mfa.getAuthenticatorAssuranceLevel()]);
+    const all=(f&&f.all)||[],tot=all.filter(x=>x.factor_type==='totp');
+    V186.mfa={on:tot.some(x=>x.status==='verified'),factor:tot.find(x=>x.status==='verified')||null,stale:tot.filter(x=>x.status!=='verified'),cur:a&&a.currentLevel,next:a&&a.nextLevel};
+    return V186.mfa}catch(e){V186.errs.push('step2 '+e);return null}}
+V186.mfaState=mfaState;
+function paintMfa(){const m=V186.mfa;document.querySelectorAll('[data-v186mfa]').forEach(el=>{
+  const s=el.querySelector('span');const b=el.querySelector('.v171btn');
+  if(s)s.textContent=!m?'Checking…':m.on?'On. Google sign-in plus a 6-digit code from your authenticator app.':'Off. Add a 6-digit code from an authenticator app on top of Google sign-in.';
+  if(b){b.textContent=m&&m.on?'Remove':'Set up';b.classList.toggle('pri',!(m&&m.on))}})}
+function codeInput(id){return `<input id="${id}" class="v186code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="123456" aria-label="6-digit code">`}
+async function enroll(){const c=await client();if(!c)return tst('Sign in first.');
+  const m=await mfaState();if(m&&m.on)return remove();
+  for(const f of (m&&m.stale)||[]){try{await c.auth.mfa.unenroll({factorId:f.id})}catch(e){}}
+  let d;try{const r=await c.auth.mfa.enroll({factorType:'totp',friendlyName:'Ari '+new Date().toISOString().slice(0,10)});if(r.error)throw r.error;d=r.data}
+  catch(e){V186.errs.push('enroll '+(e&&e.message||e));return tst('Couldn’t start setup. Try again when you’re online.')}
+  const qr0=d.totp&&d.totp.qr_code||'',sec=d.totp&&d.totp.secret||'';const qm=/^(?:data:image\/svg\+xml;[^,]*,)*(<svg[\s\S]*)$/.exec(qr0);const qr=qm?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(qm[1]):qr0;
+  sheet(`<div class="v16mh"><span class="cap">Two-step sign-in</span><b>Add Ari to your authenticator app</b><p>Scan this in Google Authenticator, 1Password or similar, then type the 6-digit code it shows.</p></div>
+   <div class="v186qr">${qr?`<img alt="Setup code" src="${E(qr)}">`:''}</div>
+   <div class="v186sec"><span class="cap">Or type this key</span><code>${E(sec)}</code><span class="v171btn sm press" data-v186x="copy">Copy</span></div>
+   <div class="v162form"><div><label>Code</label>${codeInput('v186c1')}</div><p class="v186err" id="v186e1" hidden></p></div>
+   <div class="v16btns"><div class="b sec2 press" data-x="no">Cancel</div><div class="b pri press" data-x="yes">Turn on</div></div>`,(s,close)=>{
+    s.querySelector('[data-v186x=copy]').onclick=()=>{try{navigator.clipboard.writeText(sec);tst('Key copied.')}catch(e){}};
+    s.querySelector('[data-x=no]').onclick=async()=>{close();try{await c.auth.mfa.unenroll({factorId:d.id})}catch(e){}};
+    s.querySelector('[data-x=yes]').onclick=async()=>{const code=(s.querySelector('#v186c1').value||'').replace(/\D/g,'');const er=s.querySelector('#v186e1');
+      if(code.length!==6){er.hidden=false;er.textContent='Type the 6 digits your app shows.';return}
+      const r=await c.auth.mfa.challengeAndVerify({factorId:d.id,code});
+      if(r.error){er.hidden=false;er.textContent='That code didn’t match. Codes change every 30 seconds; try the new one.';bz([10,40,10]);return}
+      close();bz([8,30,10]);await mfaState();paintMfa();tst('Two-step sign-in is on. New sign-ins will ask for a code.')}})}
+async function remove(){const c=await client();const m=V186.mfa;if(!c||!m||!m.factor)return;
+  sheet(`<div class="v16mh"><span class="cap">Two-step sign-in</span><b>Turn it off?</b><p>Type a current code to confirm. After this, Google sign-in alone opens Ari.</p></div>
+   <div class="v162form"><div><label>Code</label>${codeInput('v186c2')}</div><p class="v186err" id="v186e2" hidden></p></div>
+   <div class="v16btns"><div class="b sec2 press" data-x="no">Keep it on</div><div class="b pri press" data-x="yes">Turn off</div></div>`,(s,close)=>{
+    s.querySelector('[data-x=no]').onclick=close;
+    s.querySelector('[data-x=yes]').onclick=async()=>{const code=(s.querySelector('#v186c2').value||'').replace(/\D/g,'');const er=s.querySelector('#v186e2');
+      const v=await c.auth.mfa.challengeAndVerify({factorId:m.factor.id,code});if(v.error){er.hidden=false;er.textContent='That code didn’t match. Try the new one.';return}
+      const r=await c.auth.mfa.unenroll({factorId:m.factor.id});if(r.error){er.hidden=false;er.textContent='Couldn’t turn it off. Try again.';return}
+      close();await mfaState();paintMfa();tst('Two-step sign-in is off.')}})}
+/* the code screen: a session that signed in with Google only, on an account with two-step on */
+let gateUp=false;
+async function gate(){if(gateUp||!signed())return;const m=await mfaState();paintMfa();if(!m||!(m.cur==='aal1'&&m.next==='aal2'&&m.factor))return;
+  gateUp=true;const el=document.createElement('div');el.id='v186gate';el.setAttribute('role','dialog');el.setAttribute('aria-label','Enter your code');
+  el.innerHTML=`<div class="v186g"><span class="cap">Two-step sign-in</span><b>Enter your code</b><p>Open your authenticator app and type the 6-digit code for Ari.</p>${codeInput('v186c3')}<p class="v186err" id="v186e3" hidden></p><div class="b pri press" id="v186go">Continue</div><span class="v186out press" id="v186so">Sign out</span></div>`;
+  document.body.appendChild(el);const inp=el.querySelector('#v186c3');setTimeout(()=>inp.focus(),300);
+  const go=async()=>{const code=(inp.value||'').replace(/\D/g,'');const er=el.querySelector('#v186e3');if(code.length!==6){er.hidden=false;er.textContent='Type the 6 digits your app shows.';return}
+    const c=await client();const r=await c.auth.mfa.challengeAndVerify({factorId:m.factor.id,code});
+    if(r.error){er.hidden=false;er.textContent='That code didn’t match. Codes change every 30 seconds; try the new one.';bz([10,40,10]);inp.select();return}
+    bz([8,30,10]);el.remove();gateUp=false;setTimeout(()=>location.reload(),150)};
+  el.querySelector('#v186go').onclick=go;inp.addEventListener('keyup',e=>{if(e.key==='Enter'||(inp.value||'').replace(/\D/g,'').length===6)go()});
+  el.querySelector('#v186so').onclick=async()=>{const c=await client();try{await c.auth.signOut()}catch(e){}location.reload()}}
+V186.gate=gate;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v186mfa]');if(!b)return;e.preventDefault();e.stopPropagation();bz(8);(V186.mfa&&V186.mfa.on)?remove():enroll()},true);
+new MutationObserver(()=>{if(document.querySelector('[data-v186mfa]:not([data-v186p])')){document.querySelectorAll('[data-v186mfa]').forEach(x=>x.dataset.v186p='1');paintMfa();if(!V186.mfa)mfaState().then(paintMfa)}}).observe(document.body,{childList:true,subtree:true});
+
+/* ---------- Report: sent, replied, meetings, and where meetings came from ---------- */
+const SRC=[['LinkedIn','LinkedIn (outbound)'],['Email','Email (outbound)'],['Inbound','Inbound'],['Other','Other'],['none','No source yet']];
+function attArgs(){const D=window.ariV18&&ariV18.D;if(!D||!D.r)return null;const F=D.F||{};
+  return {p_period:'custom',p_from:D.r.from,p_to:D.r.to,p_ae:F.ae||null,p_play:F.play||null,p_stage:F.stage||null}}
+const pc=(a,b)=>b?Math.round(a/b*100)+'%':'–';
+function attHTML(A){if(!A)return `<div class="v18cap"><span>Where meetings come from</span></div><div class="v18sk"><i></i><i></i></div>`;
+  const bs=A.by_source||{},mx=Math.max(1,...SRC.map(([k])=>+bs[k]||0));
+  const rows=SRC.filter(([k])=>k!=='none'||+bs.none).map(([k,l])=>`<div class="v186row${k==='none'?' v186none press':''}"${k==='none'&&A.no_source&&A.no_source[0]?` data-v186fix="${E(A.no_source[0])}"`:''}><span>${l}</span><i style="--w:${Math.round((+bs[k]||0)/mx*100)}%"></i><b>${+bs[k]||0}</b></div>`).join('');
+  return `<div class="v18cap"><span>Where meetings come from</span><span>${E(window.ariV18&&ariV18.D&&ariV18.D.F&&ariV18.D.F.ae||'')}</span></div>
+   <div class="v186tri"><div><b>${+A.sent||0}</b><span>DMs sent</span></div><div><b>${+A.replied||0}</b><span>Replied · ${pc(+A.replied||0,+A.sent||0)}</span></div><div><b>${+A.meetings||0}</b><span>Meetings · ${pc(+A.meetings||0,+A.replied||0)} of replies</span></div></div>
+   ${+A.meetings?rows:'<p class="v18e">No meetings in this period yet.</p>'}
+   ${+bs.none?`<p class="v186hint">Tap No source yet to say where ${+bs.none===1?'that meeting':'those meetings'} came from.</p>`:''}`}
+async function attLoad(){const a=attArgs();if(!a||!signed())return;const k=JSON.stringify(a);if(V186.attBusy===k)return;V186.attBusy=k;
+  try{const c=await client();const r=await c.rpc('report_attribution',a);if(r.error)throw r.error;V186.att[k]=r.data;V186.attKey=k;paintAtt()}
+  catch(e){V186.errs.push('att '+(e&&e.message||e))}finally{V186.attBusy=''}}
+function paintAtt(){const box=$('#v18cards');if(!box||!box.children.length)return;let el=$('#v186att');
+  if(!el){el=document.createElement('section');el.className='v18c qin';el.id='v186att';el.dataset.v18card='att';const ref=box.querySelector('[data-v18card="pulse"]');ref&&ref.nextSibling?box.insertBefore(el,ref.nextSibling):box.appendChild(el)}
+  const a=attArgs(),k=a?JSON.stringify(a):'';const html=attHTML(V186.att[k]);if(el.innerHTML!==html)el.innerHTML=html;if(a&&!V186.att[k])attLoad()}
+V186.paintAtt=paintAtt;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v186fix]');if(!b)return;e.preventDefault();e.stopPropagation();try{window.ariMeetForm(b.dataset.v186fix)}catch(x){V186.errs.push('fix '+x)}},true);
+let attT=0;new MutationObserver(()=>{clearTimeout(attT);attT=setTimeout(()=>{if($('#v18cards')&&!$('#v186att'))paintAtt()},60)}).observe(document.body,{childList:true,subtree:true});
+V186.meetSaved=()=>{V186.att={};setTimeout(()=>{if($('#v186att'))paintAtt()},1500)};
+
+/* ---------- boot ---------- */
+let n=0;const t=setInterval(()=>{n++;if(signed()){gate();clearInterval(t)}if(n>200)clearInterval(t)},1500);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&signed()&&V186.mfa&&V186.mfa.on)gate()});
 })();
 </script>
 </body>
