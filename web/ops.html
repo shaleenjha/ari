@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.4"><meta name="ari-rev" content="469b373611">
+<meta name="ari-build" content="v18.5"><meta name="ari-rev" content="8c3435c1af">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -197,7 +197,7 @@ window.ARI_MEM={
   ['LinkedIn only','LinkedIn only. The email lane is parked.'],
   ['Your hours','I never name the city. It’s your hours and your shift.'],
   ['I prepare, you send','I draft and remind. You press send on LinkedIn. I never do.'],
-  ['Changes','Want me different? Tap me on About. That’s the one door for app changes.'],
+  ['Changes','App changes are handled in Hark, not here. In here I stick to your outreach.'],
   ['v16','I’m real now: your actual Sheet, not prototype numbers.']],
  chat:'I’m Ari, the same Hark underneath in a new shape. I remember how I got here: I was Den first, you chose the pebble over your Claude’s visor robot, the ring went below me, the mouth was your idea, and the app was told to pop. I prepare, you send. This chat is saved to your Sheet, and Hark picks it up within about 10 minutes, day or night.'};
 </script>
@@ -5674,10 +5674,9 @@ window.ariV14={
   ack:()=> 'This is the one place for changes to the app. Describe what you want different, as roughly as you like, and I’ll pass it to Hark with the screen you mean.',
   head:h=>{h.innerHTML='<span class="cap">About · change the app</span><div class="it">Change the app</div><div class="is">Requests here go to Hark. Nothing else in the app takes them, so nothing gets lost.</div>';return h},
   respond(txt,att,c){
-    if(c&&c.entity_type==='app'&&!att){const t=escH(txt.trim());return {a:`Noted, and it’s with Hark now: “${t}”. I’ll tell you here when it ships, usually as an over the air update rather than a new install.`}}
-    if(!(c&&c.entity_type==='app')&&/(change|redesign|fix|tweak)\s+(the\s+)?(app|ui|design)|feature request|add a feature/i.test(txt))return {a:'App changes have one door, so nothing gets lost: open me from the header, go to About, and tap me there.'};
+    if((c&&c.entity_type==='app')||/(change|redesign|fix|tweak|update|edit)\s+(the\s+|this\s+)?(app|ui|design|screen|layout|button|prompt)\b|feature request|add a feature|bug in (the )?app|supabase|vercel|github|\brepo\b|api key|service.role|system prompt|scheduled task|\bcron\b|tech stack|source code|how (are|were|is) (you|ari|this app) (built|made|run|hosted|coded)|(your|ari.?s|the app.?s) (database|backend|server|tables|code|prompts?|keys|instructions)\b/i.test(String(txt||'')))return {a:'That’s handled in Hark, not here.'};
     return null}};
-function openChange(from){const a=q1(from);a&&ari13.ringPulse(a,1);buzz(M.haptic.select);ari12.openAri({ctx:CHG,scoped:true,fromEl:from})}
+function openChange(from){const a=q1(from);a&&ari13.ringPulse(a,1);buzz(M.haptic.select)} /* v18.5: no change-the-app thread; app changes are handled in Hark */
 
 /* =========================================================
    6. the Ari page: Today, Look, About in one full-page overlay
@@ -5701,7 +5700,7 @@ const pg_=document.createElement('div');pg_.className='apg';pg_.id='ariPage';pg_
 pg_.innerHTML=`<div class="apbg"></div>
 <div class="aptop"><span class="apbk press" id="apBk" aria-label="Back">${CHEV}</span><span class="aptt" id="apTt">Ari</span><span class="apver">V14</span></div>
 <div class="apsc" id="apSc">
- <div class="aphero"><div class="apstage" id="apStage"><div class="orb"><i></i></div>${AF('idle','xxl',' id="apAri"')}<span class="tapl">Tap me to change the app</span></div>
+ <div class="aphero"><div class="apstage" id="apStage"><div class="orb"><i></i></div>${AF('idle','xxl',' id="apAri"')}<span class="tapl">Tap me to say hi</span></div>
   <div class="apmood"><span class="cap" id="apK">Right now · at rest</span><div class="ml" id="apL"></div></div>
   <div class="apfaces" id="apF">${FACES.map((m,i)=>`<span class="fc press" data-i="${i}" aria-label="${m[1]}">${AF(m[0],'s')}</span>`).join('')}</div></div>
  <div class="apseg" id="apSeg"><i></i><span class="on" data-s="0">Today</span><span data-s="1">Look</span><span data-s="2">About</span></div>
@@ -5738,7 +5737,7 @@ pg_.innerHTML=`<div class="apbg"></div>
    <div class="apnever">I never press send. I find the people, write the notes and queue them, and you send each one from LinkedIn yourself. <b>Your name, your thumb.</b></div>
    <div class="apcap"><span class="cap">How I talk</span></div>
    <p>Short, dry, and on your side. I’ll push back once, and after that it’s your call.</p>
-   <div class="apchg press" id="apChg"><span class="ar2">${UP}</span><div><b>Want something changed?</b>Tap me up top and describe it. It goes straight to Hark, and it’s the only place that does.</div></div>
+   <div class="apchg press" id="apChg"><span class="ar2">${UP}</span><div><b>Want something changed?</b>App changes are handled in Hark, not here. In here I stick to your outreach.</div></div>
   </div></section>
  </div>
 </div>`;
@@ -5864,7 +5863,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.4';
+const M=MOTION,APP=$('#app'),BUILD='v18.5';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5929,7 +5928,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.4'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.5'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6008,8 +6007,9 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.5',d:'Oct 17',items:['Chat with me sticks to your outreach: people, accounts, drafts and your queue','App changes are handled in Hark, not here, so there is no change-request button in the app any more','Hark works with tighter permissions behind the scenes; nothing changes on your screen']},
  {v:'v18.4',d:'Oct 17',items:['Today starts with what to send: replies first, then your follow-ups, then Today’s 15 connects','A reply card pinned on top: paste what they said and Hark drafts three answers; tap one to send it','One person per screen: Copy & open LinkedIn, come back, tap Sent','Today’s 15 spreads connects across accounts and warns when one account is over the cap','No more than four DM2s to one account a day; the rest wait for tomorrow','Lock-screen names are off by default, with a switch in Settings','The status line only says Live when Hark is actually up to date','Today no longer sits on Checking your queue after it has loaded']},
- {v:'v18.3',d:'Oct 16',items:['The Face ID cover is now called what it is: a privacy screen on this phone. Google sign-in protects your account','One status line you can trust: Offline when you are offline, and it says so when Hark has not run for a while','No more All clear while Ari is still loading','The Report’s AE filter now filters every number, with an Unattributed chip for activity that has no AE yet','Edits that hit a server hiccup are saved and retried instead of dropped','Lists keep working past 1,000 people','Ari no longer talks to the old Sheet web app; sign-in is Google only']},
+ {v:'v18.3',d:'Oct 16',items:['The Face ID cover is now called what it is: a privacy screen on this phone. Google sign-in protects your account','One status line you can trust: Offline when you are offline, and it says so when Hark has not run for a while','No more All clear while Ari is still loading','The Report’s AE filter now filters every number, with an Unattributed chip for activity that has no AE yet','Edits that hit a connection hiccup are saved and retried instead of dropped','Lists keep working past 1,000 people','Ari no longer talks to the old Sheet web app; sign-in is Google only']},
  {v:'v18.2.3',d:'Oct 16',items:['Pings: Send a test ping now goes through Apple or Google to every device, and Devices shows whether each phone actually showed the last ping']},
  {v:'v18.2.2',d:'Oct 16',items:['Unlock once: one Face ID or fingerprint per open. Setting up a passkey, updating Ari or the phone’s own unlock sheet no longer asks a second time','Briefs now ping you when ready']},
  {v:'v18.2.1',d:'Oct 16',items:['Account pages have tabs: Brief, People, Email and File, under a header with the stage, health and task chain that stays put while you scroll','Brief opens on one summary card: the thesis, three key facts and the angle. Why now, data flow and softer angles fold into cards you tap','Swipe left or right to change tabs. Each account remembers its tab: Brief until the quick check is done, then People']},
@@ -6019,10 +6019,10 @@ const LOG=[
  {v:'v18.0.1',d:'Oct 16',items:['On iPhone the tab bar sits flush at the bottom again, and the first-run tip no longer covers your notes']},
  {v:'v18',d:'Oct 16',items:['Report is rebuilt: pick Today, Yesterday, this or last week, this month or any range, and filter by AE, stage or play','The top answers it at a glance: connects, DMs, accepts, replies, meetings, opps and accounts worked, against your goals and the period before','Day by day bars, 8 week trends, the funnel with time in stage, accept and reply rates, a split by AE, an activity calendar, the accounts you worked, best DM angles and my own work','Tap any number to see exactly who is behind it, by day or by account','I add one line on what changed, and the card that explains it moves up','Ask a report in plain words and Hark answers right there, or tap a ready-made question','Numbers update by themselves while you work']},
  {v:'v17.5',d:'Oct 16',items:['Accounts have stages now, Target to Opportunity created, plus Hold, Customer, Closed lost and Not a fit','A Pipeline tab with a column per stage: swipe across, filter by AE, see how many make it to the next stage','I move accounts myself when people accept, reply or a meeting lands, and every move says why with an Undo','Your moves stick. Change a stage and I never move it back','Find people searches Apollo now. You can watch me look while it runs','Tasks moved into Today, one tap from the top','Chat shows when I am typing again, until the answer lands']},
- {v:'v17.1.2',d:'Oct 16',items:['A small hourglass next to Synced live drains toward Hark’s next scan, every 10 minutes','When a scan starts it flips over and I look busy; when the results land it settles and starts again','Tap it for the countdown, when the last scan ran, what it found, and what each scan checks','It only shows real scans. If one is late, it says so instead of pretending']},
+ {v:'v17.1.2',d:'Oct 16',items:['A small hourglass next to Synced live drains toward Hark’s next check','When a scan starts it flips over and I look busy; when the results land it settles and starts again','Tap it for the countdown, when the last scan ran, what it found, and what each scan checks','It only shows real scans. If one is late, it says so instead of pretending']},
  {v:'v17.1.1',d:'Oct 16',items:['Accounts filters let go: tap a chip again to clear it, counts match what a tap shows, and Clear filters resets everything','The note card and the big number can never overlap again, whatever the font or the length of the note','Every row lines up: same avatar size, names that end cleanly, due dates like DM2 · Tue','I read while research runs, and the bar moves','While you type, the tab bar and floating bits get out of the way','Ari updates itself when you open it, so the Home Screen app never sits on an old build']},
  {v:'v17.1',d:'Oct 16',items:['Today never doubles up: the list is rebuilt from your data on every live update, and checks itself','Assign account works: search your accounts and the Book, or add a new one; the AE, play and why come with it','iPhone Home Screen app fills the whole screen, and the tab bar never covers Mark sent, Replied, Snooze, Skip or Save','Locks the moment you leave (change it in Settings), and Settings now live in one place: tap me up top','Account pages with logos, contacts and research in sections; LinkedIn URL on every person file','Send to Founder shows up in Founder at once, every stage change has Undo, and an undone reply cancels its draft','Smoother on Android: no glass blur, fewer shadows, idle animations stopped, the notes stack drags on the GPU']},
- {v:'v17',d:'Oct 16',items:['Live: when Hark drafts, researches or finds people, it lands on your screen within seconds, no reload, nothing jumps','Opens instantly with your last data, then catches up; the line under my name says Synced live and when Hark last scanned','Every tap saves straight to the new backend first, with the outbox and Undo kept; your Sheet still gets everything','Assign account and Personal context save properly now, and every draft uses them','Pings: new accepts, replies, drafts ready, meetings and tonight’s follow-ups (Android now; iPhone from the Home Screen app)']},
+ {v:'v17',d:'Oct 16',items:['Live: when Hark drafts, researches or finds people, it lands on your screen within seconds, no reload, nothing jumps','Opens instantly with your last data, then catches up; the line under my name says Synced live and when Hark last scanned','Every tap saves instantly, with the outbox and Undo kept; your Sheet still gets everything','Assign account and Personal context save properly now, and every draft uses them','Pings: new accepts, replies, drafts ready, meetings and tonight’s follow-ups (Android now; iPhone from the Home Screen app)']},
  {v:'v16.3',d:'Oct 15',items:['Fresh every time: I fetch the moment you open or come back, show your last data while I do, and never show zeros. The line under my name says when I last synced and when Hark last scanned','Tap your pace under Up next to see today, yesterday and the whole week','Marks are instant and can’t get lost: they wait in an outbox and retry until your Sheet has them, with Undo','One Today tab: tonight’s list grouped by Eastern, Central and Pacific send windows in your time, then the pipeline. Follow-ups and Log folded in; every tab has a label','Every person shows the next step (Mark DM2 sent, Mark replied, Mark meeting set) with Undo, wherever they appear','Draft message on every contact, trigger or not; edit it in place and copy it','Assign account for people with no account, and Personal context on every file, used in every draft','Find 4 to 5 people here replaces Map this account','A calmer chat, consistent buttons, no Updated pills, and the scan is back']},
  {v:'v16.2',d:'Oct 15',items:['Ari locks every time you open it: Face ID, fingerprint or your device PIN, with Google as the fallback. Nothing shows before you unlock','Every account in Alex’s, Blake’s and Casey’s books, searchable, with research status, last scan and every person you and Hark found','Account research is back on real scans, with Map this account','Send to Founder from any person file, and the Founder lane lists the real exec people','Lead or Personal on every person file, any time','Each card names the next step: Mark connect sent, Mark DM1 sent, with Undo','Meetings: mark an account as meeting set and outreach there is held','Much lighter: refreshes no longer redraw the screen you are on, and only the Ari you can see is animating']},
  {v:'v16.1',d:'Oct 15',items:['New connections to sort sit at the top of Today: Lead or Personal, one tap. Personal people disappear from everything','While I research someone you see me working on it, and the draft appears on its own when it’s ready','I check your Sheet every minute while I’m open, and again whenever you come back','DM1 is due the moment someone accepts. No three-day wait','A double tap counts once, a tick stays ticked until the Sheet confirms it, and a hiccup from Google gets a quiet retry']},
@@ -6454,13 +6454,13 @@ function memAnswer(low){const T=window.ARI_MEM.timeline;
   return ''}
 const _v14r=window.ariV14&&ariV14.respond;
 if(window.ariV14)ariV14.respond=function(txt,att,c){const low=String(txt||'').toLowerCase(),app=c&&c.entity_type==='app';
+  if(app||/(change|redesign|fix|tweak|update|edit)\s+(the\s+|this\s+)?(app|ui|design|screen|layout|button|prompt)\b|feature request|add a feature|bug in (the )?app|supabase|vercel|github|\brepo\b|api key|service.role|system prompt|scheduled task|\bcron\b|tech stack|source code|how (are|were|is) (you|ari|this app) (built|made|run|hosted|coded)|(your|ari.?s|the app.?s) (database|backend|server|tables|code|prompts?|keys|instructions)\b/i.test(String(txt||'')))return {a:'That’s handled in Hark, not here.'}; /* v18.5: never filed, never sent to the queue */
   const ctxs=c?` [context: ${[c.screen,c.entity_type,c.label].filter(Boolean).join(' / ')}]`:'';
   if(att)return {a:'Attachments stay on this phone for now. Type what matters and I’ll pass it to Hark.'};
   const local=memAnswer(low);
   const pace=/pace|how am i|how.?s it going|numbers|stats/.test(low)?`This week: ${M.stats.tw.c} connects against 75, ${M.stats.tw.a} accepted, ${M.stats.tw.r} ${M.stats.tw.r===1?'reply':'replies'}. ${Q.length?W(Q.length)+' things are waiting in Ready.':'Ready is clear.'}`:'';
   const nxt=/next|warm|who should|first/.test(low)&&Q[0]?`${Q[0].n} at ${Q[0].c.split(' · ').pop()} is first: ${Q[0].tag==='CONNECT'?'a blank connect':Q[0].tag}.`:'';
-  if(!local||app){try{window.ariV175&&ariV175.chatSent()}catch(e){}api('queueRun',[{action:app?'App change':'Chat',target:c&&c.entity_type==='person'?((PF[c.entity_id]||{}).id||c.entity_id):(c?c.entity_id:''),details:String(txt).slice(0,1500)+ctxs}]).then(d=>{if(d&&d.queue){const last=d.queue[d.queue.length-1];if(last)V16.sentIds.add(last.id);accept(d,{quiet:true})}}).catch(e=>{if(netErr(e)){const o=outbox();o.push({fn:'queueRun',args:[[{action:'Chat',target:'',details:String(txt)+ctxs}]]});setOutbox(o)}})}
-  if(app)return {a:`Noted, and it’s in your Sheet for Hark: “${E(txt.trim())}”. It reads change requests on its next run.`};
+  if(!local||app){try{window.ariV175&&ariV175.chatSent()}catch(e){}api('queueRun',[{action:'Chat',target:c&&c.entity_type==='person'?((PF[c.entity_id]||{}).id||c.entity_id):(c?c.entity_id:''),details:String(txt).slice(0,1500)+ctxs}]).then(d=>{if(d&&d.queue){const last=d.queue[d.queue.length-1];if(last)V16.sentIds.add(last.id);accept(d,{quiet:true})}}).catch(e=>{if(netErr(e)){const o=outbox();o.push({fn:'queueRun',args:[[{action:'Chat',target:'',details:String(txt)+ctxs}]]});setOutbox(o)}})}
   if(local)return {a:local};
   return {a:pace||nxt?(pace||nxt):'\u2063'}};
 
@@ -9120,7 +9120,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.4',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.5',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9208,7 +9208,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.4';
+function aboutHTML(){const B='v18.5';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9219,7 +9219,6 @@ function aboutHTML(){const B='v18.4';
   <div class="apcap"><span class="cap">Your data</span></div>
   <p>Your pipeline is stored in a private database and can be mirrored to a connected spreadsheet. Only your signed-in Google account can access it. The device keeps an encrypted copy so Ari opens quickly and works offline. Nothing is shared with third parties.</p>
   <div class="apcap"><span class="cap">Help and changes</span></div>
-  <div class="aprow press" id="v181chg"><div><b>Request a change or report a problem</b><span>Goes straight to Hark, with what you are looking at.</span></div><span class="v181ch" aria-hidden="true">›</span></div>
   <div class="aprow press" data-s171="wn"><div><b>What’s new</b><span>Everything in ${B}</span></div><span class="v181ch" aria-hidden="true">›</span></div>
   <div class="aprow"><div><b>Version</b><span>Ari ${B} · October 16, 2026</span></div></div>
   <p class="v181sig">Built by Hark. I prepare, you send.</p></div>`}

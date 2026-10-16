@@ -70,18 +70,21 @@ def load_rules():
 
 
 def refresh_names():
-    """Pull real names read-only from the database into names.json (best effort)."""
-    sql = ("select distinct v from (select name v from people union select company from people "
-           "union select company from accounts union select owner from accounts union select ae from accounts "
-           "union select meeting_person from accounts union select domain from accounts union select owner from people) x "
-           "where v is not null and length(v)>2")
+    """Pull real names read-only from the database into names.json (best effort). v18.5: PostgREST reads as the
+    restricted worker role (scripts/ari_db.py), no SQL function."""
     try:
-        r = subprocess.run([sys.executable, os.path.join(ROOT, 'work', 'v17', 'sbexec.py'), 'query', sql],
-                           capture_output=True, text=True, timeout=110)
-        data = json.loads(r.stdout)
+        sys.path.insert(0, os.path.join(ROOT, 'scripts'))
+        from ari_db import get
+        vals = set()
+        for r in get('people?select=name,company,owner'):
+            vals |= {r.get('name'), r.get('company'), r.get('owner')}
+        for r in get('accounts?select=company,owner,ae,meeting_person,domain'):
+            vals |= {r.get('company'), r.get('owner'), r.get('ae'), r.get('meeting_person'), r.get('domain')}
+        data = [{'v': v} for v in sorted(x for x in vals if x and len(x) > 2)]
+        if not data: raise RuntimeError('no names returned')
         json.dump(data, open(os.path.join(KEEL, 'names.json'), 'w'))
         print('names refreshed:', len(data))
-    except Exception as e:
+    except BaseException as e:
         print('WARN names refresh failed, using cached list:', e)
 
 

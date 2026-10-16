@@ -21,8 +21,8 @@ from zoneinfo import ZoneInfo
 SHEET = 'SHEET_ID_PLACEHOLDER'
 TO = 'work@example.com'
 TZ = ZoneInfo('Asia/Kolkata')
-SB_URL = 'https://rbkrqlzlblquvgmuohro.supabase.co'
-SB_PUBLISHABLE = 'sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl'
+SB_URL = os.environ.get('ARI_SB_URL') or 'https://rbkrqlzlblquvgmuohro.supabase.co'
+SB_PUBLISHABLE = os.environ.get('ARI_SB_APIKEY') or 'sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl'
 MAX_ACCOUNTS = 30
 MAX_DUE = 8
 STAGE_FIELDS = {'connect': 'connect_sent', 'accept': 'accepted', 'dm1': 'dm1_sent', 'dm2': 'dm2_sent',
@@ -48,9 +48,9 @@ def sheet_table(name):
 
 def sb(path, body=None):
     h = {'apikey': SB_PUBLISHABLE, 'Content-Type': 'application/json', 'x-ari-actor': 'hark'}
-    key = os.environ.get('SUPABASE_SERVICE_ROLE_KEY') or ''
-    if key.count('.') == 2:  # a real key outside Hark; inside Hark the proxy injects the service bearer
-        h['apikey'] = key; h['Authorization'] = 'Bearer ' + key
+    jf = os.environ.get('ARI_SB_JWT_FILE')  # tests / outside Hark; in Hark the proxy injects the ari_worker bearer (v18.5)
+    if jf:
+        h['Authorization'] = 'Bearer ' + open(jf).read().strip()
     req = urllib.request.Request(SB_URL + '/rest/v1/' + path, method='POST' if body is not None else 'GET',
                                  data=json.dumps(body).encode() if body is not None else None, headers=h)
     with urllib.request.urlopen(req, timeout=40) as r:

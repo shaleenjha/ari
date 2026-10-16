@@ -14,19 +14,20 @@ changes at the end) for the app header hourglass. Best effort: never fails the s
 Tabs: People, Accounts, Queue, Emails, Brief (two-way, per field); Log (two-way, append-only, deduped by a
 row hash); Book (Sheet -> Supabase only, worker-owned).
 
-Run (Hark sandbox; one command: the gws Google credentials and the Supabase service_role binding are both injected by the proxy, verified Oct 16):
+Run (Hark sandbox; one command: the gws Google credentials and the Supabase ari_worker binding (v18.5, least privilege) are both injected by the proxy):
     shell(command="python3 scripts/sync_sheet_supabase.py", credentials=[{provider: google, email: owner@example.com}])
 Flags: --dry-run (plan only, no writes), --backfill (first load: writes are tagged 'backfill', so no pushes fire),
        --tabs People,Log (subset), --verify (print row counts on both sides and exit).
-Outside Hark: set SUPABASE_SERVICE_ROLE_KEY and have `gws` authenticated as owner@example.com.
+Outside Hark / tests: set ARI_SB_URL, ARI_SB_APIKEY and ARI_SB_JWT_FILE (an ari_worker JWT) and have `gws` authenticated.
+Database rights: role ari_worker only (native/supabase/migrations/0018_least_privilege_worker.sql); no service_role, no raw SQL.
 """
 import argparse, datetime as dt, hashlib, json, os, re, subprocess, sys, time, urllib.error, urllib.parse, urllib.request
 
 SHEET_ID = "SHEET_ID_PLACEHOLDER"
-SB_URL = "https://rbkrqlzlblquvgmuohro.supabase.co"
+SB_URL = os.environ.get("ARI_SB_URL") or "https://rbkrqlzlblquvgmuohro.supabase.co"
 # Public publishable key (safe to ship). In Hark the proxy binding "supabase-ari-bearer" injects
-# "Authorization: Bearer <service_role JWT>"; the gateway also needs an apikey, so we send the publishable one.
-SB_PUBLISHABLE = "sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl"
+# "Authorization: Bearer <ari_worker JWT>" (v18.5); the gateway also needs an apikey, so we send the publishable one.
+SB_PUBLISHABLE = os.environ.get("ARI_SB_APIKEY") or "sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl"
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 LOCK_MINUTES = 8
 
@@ -209,12 +210,10 @@ def sheet_append(tab, rows):
 def sb(method, path, body=None, actor="sheet", prefer=None, rng=None):
     url = SB_URL + "/rest/v1/" + path
     h = {"Content-Type": "application/json", "x-ari-actor": actor}
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or ""
     h["apikey"] = SB_PUBLISHABLE
-    if key.count(".") == 2 or key.startswith("sb_secret_"):  # a real key (outside Hark); ignore proxy sentinels
-        h["apikey"] = key
-        if key.count(".") == 2:  # legacy JWT key; new sb_secret_ keys go in apikey only
-            h["Authorization"] = "Bearer " + key
+    jf = os.environ.get("ARI_SB_JWT_FILE")
+    if jf:  # tests / outside Hark; in Hark the proxy injects the ari_worker bearer
+        h["Authorization"] = "Bearer " + open(jf).read().strip()
     if prefer:
         h["Prefer"] = prefer
     if rng:
@@ -247,11 +246,9 @@ def sb_all(table, select="*"):
 
 _COLS = {}
 def sb_columns(table):
-    # The OpenAPI root needs a secret apikey (not available behind Hark's proxy), so read the catalog through
-    # the service_role-only rpc hark_query (created in the dashboard SQL editor, see work/v17/hark_helpers.sql).
+    # v18.5: the column catalogue comes from rpc ari_worker_columns (information_schema as role ari_worker), not hark_query.
     if not _COLS:
-        rows = sb("POST", "rpc/hark_query", {"sql": "select table_name, column_name from information_schema.columns "
-                  "where table_schema = 'public' order by table_name, ordinal_position"})
+        rows = sb("POST", "rpc/ari_worker_columns", {})
         for r in rows:
             _COLS.setdefault(r["table_name"], []).append(r["column_name"])
     return _COLS[table]
