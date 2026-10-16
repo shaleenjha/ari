@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.6"><meta name="ari-rev" content="f5196e484a">
+<meta name="ari-build" content="v18.7"><meta name="ari-rev" content="e67279a196">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -3657,6 +3657,15 @@ html.v184fxon{overflow:hidden}
 .v186none span{color:var(--bad,#c4342d)}
 .v186hint{margin:8px 0 0;font-size:12px;line-height:16px;color:var(--ink2)}
 </style>
+<style>/* ===== v18.7 (Oct 17): Phase 0 cut list, hide-only. The code paths stay; these surfaces are off the default view. ===== */
+.tbi[data-i="3"],.tbi[data-i="4"]{display:none!important}              /* Founder lane + Pipeline tabs */
+#v1712hg,#v1712pop{display:none!important}                             /* scan hourglass: the "Synced live" line stays */
+.v181hc{display:none!important}                                        /* health score chip */
+.v182feed,#v182feed{display:none!important}                            /* live activity feed */
+.v182seq{display:none!important}                                       /* email tracks (deferred) */
+.v182morebtn,[data-v182more],[data-v18card="ask"]{display:none!important} /* Report extras + Ask a report */
+#v18flt [data-v18fst],#v18flt [data-v18fpl],#v18flt .sep{display:none!important} /* Report filters: period + AE only */
+</style>
 </head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -5886,7 +5895,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.6';
+const M=MOTION,APP=$('#app'),BUILD='v18.7';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5951,7 +5960,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.6'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.7'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6030,6 +6039,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.7',d:'Oct 17',items:['A calmer app: Pipeline and Founder tabs, the health score, the live feed, email tracks and the extra Report charts are tucked away for now', 'The Report filters by period and AE only', 'What\'s new no longer pops up after an update; it is listed here in About', 'Ari notes how long you spend in the app each day, so we can keep that number small']},
  {v:'v18.6',d:'Oct 17',items:['When you mark a meeting set, Ari asks where it came from: LinkedIn, email, inbound or other','Meeting booked from a reply opens the same quick form','The Report shows DMs sent, replies and meetings side by side, and where your meetings come from','Two-step sign-in: add a code from an authenticator app on top of Google, in Settings']},
  {v:'v18.5',d:'Oct 17',items:['Chat with me sticks to your outreach: people, accounts, drafts and your queue','App changes are handled in Hark, not here, so there is no change-request button in the app any more','Hark works with tighter permissions behind the scenes; nothing changes on your screen']},
  {v:'v18.4',d:'Oct 17',items:['Today starts with what to send: replies first, then your follow-ups, then Today’s 15 connects','A reply card pinned on top: paste what they said and Hark drafts three answers; tap one to send it','One person per screen: Copy & open LinkedIn, come back, tap Sent','Today’s 15 spreads connects across accounts and warns when one account is over the cap','No more than four DM2s to one account a day; the rest wait for tomorrow','Lock-screen names are off by default, with a switch in Settings','The status line only says Live when Hark is actually up to date','Today no longer sits on Checking your queue after it has loaded']},
@@ -9149,7 +9159,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.6',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.7',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9239,7 +9249,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.6';
+function aboutHTML(){const B='v18.7';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9949,7 +9959,7 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();
@@ -10257,6 +10267,33 @@ V186.meetSaved=()=>{V186.att={};setTimeout(()=>{if($('#v186att'))paintAtt()},150
 /* ---------- boot ---------- */
 let n=0;const t=setInterval(()=>{n++;if(signed()){gate();clearInterval(t)}if(n>200)clearInterval(t)},1500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&signed()&&V186.mfa&&V186.mfa.on)gate()});
+})();
+</script>
+<script>/* ===== v18.7 (Oct 17): hide-only cut list + time-in-app measurement ===== */
+(function(){
+const V187=window.ariV187={v:'v18.7',errs:[]};
+/* Report: the stage and play filters are hidden, so clear any that were left on */
+function clearHiddenFilters(){try{const F=window.ariV18&&ariV18.D&&ariV18.D.F;if(!F)return;let ch=false;
+  if(F.stage&&F.stage!=='all'){const c=document.querySelector('#v18flt [data-v18fst="all"]');if(c){c.click();ch=true}}
+  if(F.play&&F.play!=='all'){const c=document.querySelector('#v18flt [data-v18fpl="all"]');if(c){c.click();ch=true}}
+  V187.cleared=ch}catch(e){V187.errs.push('flt '+e)}}
+/* if the app was left on a hidden tab, go to Today */
+function leaveHidden(){try{const on=document.querySelector('.tbi.on,.tbi[aria-selected="true"]');if(on&&/^(3|4)$/.test(on.dataset.i||'')){const t=document.querySelector('.tbi[data-i="0"]');t&&t.click()}}catch(e){V187.errs.push('tab '+e)}}
+/* time in app: seconds visible per day (your clock), kept on the phone and sent when the server accepts it */
+const UK='ari-usage';let U={};try{U=JSON.parse(localStorage.getItem(UK)||'{}')}catch(e){U={}}
+const day=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+let last=document.hidden?0:Date.now(),noRpc=false,sent={};
+function tick(){const now=Date.now();if(last&&!document.hidden){const k=day();const add=Math.min(120,Math.max(0,(now-last)/1000));U[k]=U[k]||{s:0,o:0};U[k].s=Math.round(U[k].s+add)}
+  last=document.hidden?0:now;const keys=Object.keys(U).sort();while(keys.length>35)delete U[keys.shift()];try{localStorage.setItem(UK,JSON.stringify(U))}catch(e){}}
+function opened(){const k=day();U[k]=U[k]||{s:0,o:0};U[k].o++;tick()}
+async function flush(){if(noRpc||!window.ariV17||!navigator.onLine)return;try{const c=await ariV17.ready();if(!c||!c.rpc)return;
+  for(const k of Object.keys(U)){if(sent[k]===U[k].s)continue;const r=await c.rpc('usage_ping',{p_day:k,p_seconds:U[k].s,p_opens:U[k].o});
+    if(r&&r.error){if(/404|not find|does not exist|PGRST202/i.test((r.error.code||'')+' '+(r.error.message||''))){noRpc=true}return}sent[k]=U[k].s}}catch(e){V187.errs.push('usage '+(e&&e.message||e))}}
+V187.usage=()=>JSON.parse(JSON.stringify(U));
+document.addEventListener('visibilitychange',()=>{if(document.hidden){tick();flush()}else{last=Date.now();opened()}});
+setInterval(()=>{tick()},30000);setInterval(flush,120000);opened();
+let n=0;const t=setInterval(()=>{n++;clearHiddenFilters();leaveHidden();if(n>40)clearInterval(t)},1500);
+document.addEventListener('click',e=>{if(e.target.closest('.tbi[data-i="5"]'))setTimeout(clearHiddenFilters,400)},true);
 })();
 </script>
 </body>

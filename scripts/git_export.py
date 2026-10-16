@@ -33,6 +33,9 @@ INCLUDE = [
     'scripts/brief_upsert.py', 'scripts/daily_report.py', 'scripts/db_backup.py',
     'scripts/deploy_web.py', 'scripts/reply_ingest.py', 'scripts/retro_stats.py',
     'scripts/sync_sheet_supabase.py', 'scripts/git_export.py', 'scripts/git_sync.sh', 'scripts/git_push_api.py',
+    'scripts/ari_db.py', 'scripts/backup_check.py', 'scripts/restore_drill.py', 'scripts/offsite_drive.py',
+    'scripts/health_check.py', 'scripts/phase0_metrics.py',
+    'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient.pem',
     'repo/README.md:README.md', 'repo/gitignore:.gitignore',
 ]
 BINARY = ('.png', '.woff2', '.jpg', '.ico')
