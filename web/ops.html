@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.3"><meta name="ari-rev" content="6fee45d072">
+<meta name="ari-build" content="v18.4"><meta name="ari-rev" content="469b373611">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -3574,6 +3574,66 @@ html.v181still .v1821ps .ch,html.v181still .v1821it .ch,html.v171still .v1821it 
 @media (max-width:380px){#v182wr .v1821ts{font-size:18px!important;line-height:25px!important}#v182wr .v1821ts.s{font-size:17px!important;line-height:24px!important}.v1821ps .lb>span{display:none}.v1821ps{gap:6px}#v182wr .v1821tr{font-size:14.5px!important;line-height:21px!important}}
 </style>
 <style>/* v18.3 loading state */html.v183load #readyN,html.v183load #readyS,html.v183load #goN{opacity:.55}html.v183load #go .arr{opacity:.3}</style>
+<style>/* v18.4 Relay: queue first on Today, replies pinned, Today's 15, focus mode */
+#v184top{margin:0 0 6px}
+.v184st{display:flex;align-items:center;gap:8px;font:500 13px/1.3 var(--mono);color:var(--ink2);padding:2px 2px 10px;letter-spacing:.01em}
+.v184st .d{width:8px;height:8px;border-radius:50%;background:var(--ink3);flex:none}
+.v184st .d.live{background:#2fa36b}.v184st .d.ok{background:var(--acc)}.v184st .d.off{background:#c9772b}.v184st .d.ld{background:var(--ink3);animation:v184p 1.2s ease-in-out infinite}
+@keyframes v184p{50%{opacity:.35}}
+.v184cap{display:flex;justify-content:space-between;font:600 11px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin:4px 2px 8px}
+.v184rc{border-radius:var(--r3,16px);background:var(--bg2);box-shadow:inset 0 0 0 1.5px var(--acc);padding:14px 14px 12px;margin:0 0 10px;cursor:pointer}
+.v184rh{display:flex;align-items:center;gap:8px;font:600 11px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+.v184rh .co{margin-left:auto;text-transform:none;letter-spacing:0;font:500 13px/1.2 var(--sans);color:var(--ink2);max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v184dot{width:8px;height:8px;border-radius:50%;background:#2fa36b;flex:none}.v184dot.amb{background:#d39a1f}.v184dot.red{background:#d2453a}
+.v184rn{font:600 16px/1.3 var(--sans);color:var(--ink);margin:6px 0 8px}
+.v184q{font:400 15px/1.4 var(--sans);color:var(--ink);background:var(--bg3);border-radius:12px;padding:10px 12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+.v184paste{display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:12px;background:var(--acc);color:var(--inv,#fff);font:600 15px/1 var(--sans);margin-bottom:8px}
+.v184ls{font:400 13px/1.35 var(--sans);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px}
+.v184chips{display:flex;flex-wrap:wrap;gap:8px}.v184chips span{min-height:36px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line2,var(--line));font:500 13px/1 var(--sans);color:var(--ink);background:var(--bg)}
+.v184sk{font:500 13px/1.3 var(--sans);color:var(--ink3);padding:8px 0;animation:v184p 1.6s ease-in-out infinite}
+.v184qgo{margin-left:auto;font:600 12px/1 var(--sans);color:var(--acc);padding:8px 0 8px 12px;min-height:32px;display:inline-flex;align-items:center;text-transform:none;letter-spacing:0}
+.v184hint{font:400 13px/1.4 var(--sans);color:var(--ink2);padding:8px 2px}
+#v184t15{margin:12px 0 18px}
+.v184card{border-radius:var(--r3,16px);box-shadow:inset 0 0 0 1px var(--line);padding:14px;background:var(--bg)}
+.v184skel{opacity:.6}
+.v184h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.v184h b{font:600 16px/1.2 var(--sans);color:var(--ink)}.v184h span{font:500 12px/1 var(--mono);color:var(--ink2)}
+.v184wk{display:flex;align-items:center;gap:8px;font:500 11px/1 var(--mono);color:var(--ink2);margin:10px 0 6px}.v184wk i{flex:1;height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;display:block}.v184wk i b{display:block;height:100%;background:var(--acc)}.v184wk i.amb b{background:#d39a1f}.v184wk i.red b{background:#d2453a}
+.v184row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:flex-start;cursor:pointer}.v184row .rk{font:600 12px/20px var(--mono);color:var(--ink3);width:20px;text-align:right;flex:none}
+.v184row .t{min-width:0;font:400 14px/1.35 var(--sans);color:var(--ink2)}.v184row .t b{color:var(--ink);font-weight:600}.v184row small{display:block;font:400 12px/1.35 var(--sans);color:var(--ink3);margin-top:2px}
+.v184warn{font:500 13px/1.35 var(--sans);color:#a5521a;padding:8px 0 0}
+.v184empty{font:400 14px/1.4 var(--sans);color:var(--ink2);padding:12px 0 4px}
+.v184start{margin-top:12px;min-height:48px;border-radius:14px;background:var(--acc);color:var(--inv,#fff);display:flex;align-items:center;justify-content:center;font:600 15px/1 var(--sans)}
+html.v184fxon{overflow:hidden}
+.v184fx{position:fixed;inset:0;z-index:2147483000;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+.v184fx[hidden]{display:none}
+.v184fx .fxin{flex:1;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 18px 0;max-width:560px;width:100%;margin:0 auto;box-sizing:border-box;min-height:0}
+.fxtop{display:flex;align-items:center;gap:6px;min-height:44px}.fxp{font:600 13px/1 var(--mono);color:var(--ink2);margin-right:auto}
+.fxx,.fxmore{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font:500 22px/1 var(--sans);color:var(--ink2);border-radius:12px}
+.fxwho{margin:6px 0 4px}.fxwho b{display:block;font:600 22px/1.2 var(--sans)}.fxwho span{font:400 14px/1.35 var(--sans);color:var(--ink2)}
+.fxwhy{font:400 14px/1.4 var(--sans);color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:6px 0 10px}
+.fxlink{align-self:flex-start;font:600 14px/1 var(--sans);color:var(--acc);padding:8px 0;min-height:36px;display:inline-flex;align-items:center}
+.fxseg{display:flex;gap:6px;margin:4px 0 10px;flex-wrap:wrap}.fxseg span{min-height:36px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);font:500 13px/1 var(--sans)}.fxseg span.on{background:var(--ink);color:var(--bg)}
+.fxdraft,.fxfinal,.v184ask textarea{width:100%;box-sizing:border-box;font:400 16px/1.45 var(--sans);color:var(--ink);background:var(--bg2);border:0;border-radius:14px;padding:12px;resize:none;box-shadow:inset 0 0 0 1px var(--line)}
+.fxdraft{flex:1;min-height:120px;max-height:46vh}
+.fxnote{font:400 14px/1.45 var(--sans);color:var(--ink2);background:var(--bg2);border-radius:14px;padding:12px;margin-bottom:8px}
+.fxcap{font:500 14px/1.4 var(--sans);color:#a5521a;margin:10px 0}.fxcap span{color:var(--acc);font-weight:600;margin-left:6px;padding:6px 0;display:inline-block}
+.fxmenu{display:flex;flex-direction:column;gap:2px;background:var(--bg2);border-radius:14px;padding:6px;margin:8px 0}.fxmenu[hidden]{display:none}.fxmenu span{min-height:44px;display:flex;align-items:center;padding:0 12px;font:500 15px/1 var(--sans)}
+.fxbar{margin-top:auto;padding:12px 0 calc(env(safe-area-inset-bottom,0px) + 14px)}
+.fxpri{min-height:54px;border-radius:16px;background:var(--acc);color:var(--inv,#fff);display:flex;align-items:center;justify-content:center;font:600 16px/1 var(--sans)}.fxpri.dim{opacity:.45}
+.fxsheet{position:fixed;left:0;right:0;bottom:0;background:var(--bg);box-shadow:0 -10px 30px rgba(0,0,0,.18);border-radius:20px 20px 0 0;padding:16px 18px calc(env(safe-area-inset-bottom,0px) + 16px);max-width:560px;margin:0 auto;box-sizing:border-box}
+.fxsheet[hidden]{display:none}.fxsheet>b{display:block;font:600 17px/1.2 var(--sans);margin-bottom:12px}
+.fxbtns{display:flex;flex-wrap:wrap;gap:8px}.fxbtns span,.fxok{flex:1 1 40%;min-height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font:600 15px/1 var(--sans);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
+.fxbtns span.pri,.fxok{background:var(--acc);color:var(--inv,#fff);box-shadow:none}
+.fxedit{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}.fxedit[hidden]{display:none}
+.fxdone{margin:auto 0;text-align:center}.fxdone b{display:block;font:600 26px/1.2 var(--sans);margin-bottom:8px}.fxdone span{font:400 15px/1.4 var(--sans);color:var(--ink2)}
+#v184toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:2147483001;background:var(--ink);color:var(--bg);font:500 14px/1.35 var(--sans);padding:10px 14px;border-radius:12px;max-width:88vw;transition:opacity .2s,transform .2s}
+#v184toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}.v184undo{text-decoration:underline;margin-left:6px;cursor:pointer}
+.v184ask{position:fixed;inset:0;z-index:2147483002;background:rgba(0,0,0,.35);display:flex;align-items:flex-end}.v184ask[hidden]{display:none}
+.v184ask .in{background:var(--bg);width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;padding:16px 18px calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;gap:10px}
+.v184ask .in b{font:600 17px/1.2 var(--sans)}.v184ask .b{display:flex;gap:8px}.v184ask .b span{flex:1;min-height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font:600 15px/1 var(--sans);box-shadow:inset 0 0 0 1px var(--line)}.v184ask .b span.pri{background:var(--acc);color:var(--inv,#fff);box-shadow:none}
+.v184ld b{opacity:.7}
+@media (prefers-reduced-motion:reduce){.v184st .d.ld,.v184sk{animation:none}#v184toast{transition:none}}
+</style>
 </head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -5804,7 +5864,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.3';
+const M=MOTION,APP=$('#app'),BUILD='v18.4';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5869,7 +5929,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.3'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.4'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -5948,6 +6008,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.4',d:'Oct 17',items:['Today starts with what to send: replies first, then your follow-ups, then Today’s 15 connects','A reply card pinned on top: paste what they said and Hark drafts three answers; tap one to send it','One person per screen: Copy & open LinkedIn, come back, tap Sent','Today’s 15 spreads connects across accounts and warns when one account is over the cap','No more than four DM2s to one account a day; the rest wait for tomorrow','Lock-screen names are off by default, with a switch in Settings','The status line only says Live when Hark is actually up to date','Today no longer sits on Checking your queue after it has loaded']},
  {v:'v18.3',d:'Oct 16',items:['The Face ID cover is now called what it is: a privacy screen on this phone. Google sign-in protects your account','One status line you can trust: Offline when you are offline, and it says so when Hark has not run for a while','No more All clear while Ari is still loading','The Report’s AE filter now filters every number, with an Unattributed chip for activity that has no AE yet','Edits that hit a server hiccup are saved and retried instead of dropped','Lists keep working past 1,000 people','Ari no longer talks to the old Sheet web app; sign-in is Google only']},
  {v:'v18.2.3',d:'Oct 16',items:['Pings: Send a test ping now goes through Apple or Google to every device, and Devices shows whether each phone actually showed the last ping']},
  {v:'v18.2.2',d:'Oct 16',items:['Unlock once: one Face ID or fingerprint per open. Setting up a passkey, updating Ari or the phone’s own unlock sheet no longer asks a second time','Briefs now ping you when ready']},
@@ -5971,8 +6032,8 @@ const LOG=[
  {v:'v13',d:'Oct 15',items:['I became a character: the pebble, the ring, nine faces','Phase-aware lines through your shift']},
  {v:'v12',d:'Oct 14',items:['One chat with context chips, threads per person and task, @ tags']}];
 const SL=[
- {t:'Honest numbers',l:'One status line: it says Offline when you are, and tells you when Hark has not run for a while. No All clear until your queue has actually loaded, and the Report’s AE filter now filters every number.',demo:'faces',go:'Open Today',fn:()=>{closeWN();setTimeout(()=>goPage(0),300)}},
- {t:'Privacy screen',l:'The Face ID cover is a privacy screen on this phone, so people nearby don’t see your prospects. Your account itself is protected by Google sign-in, which is now the only way in.',demo:'faces',go:'Got it',fn:()=>{closeWN()}}
+ {t:'Replies first',l:'Today opens on what to send. A reply sits on top: paste what they said and Hark writes three answers. Then your follow-ups, then Today’s 15 connects, spread so no account gets flooded.',demo:'faces',go:'Open Today',fn:()=>{closeWN();setTimeout(()=>goPage(0),300)}},
+ {t:'One person at a time',l:'Tap Start and Ari shows one person per screen: Copy & open LinkedIn, send it there, come back and tap Sent. Lock-screen names stay off unless you turn them on in Settings.',demo:'faces',go:'Got it',fn:()=>{closeWN()}}
 ];
 let wnOn=false,wnI=0,wnLoop=null;
 const wn=document.createElement('div');wn.className='wn';wn.setAttribute('role','dialog');wn.setAttribute('aria-label','What’s new');
@@ -6146,6 +6207,7 @@ function accept(d,o={}){if(!d)return;if(window.ariV162&&ariV162.locked&&ariV162.
   lastSig=sg;const m=window.ariModel(v);if(window.ariV162&&ariV162.booted&&(o.auto||o.quiet))ariV162.patch(m,o);else{apply(m,o);if(window.ariV162&&m.stats.people)ariV162.booted=true}syncState()}
 
 /* ---------- apply a model to the screens ---------- */
+V16.reaccept=()=>{lastSig='';if(DATA)accept(DATA,{quiet:true})};
 function same(a,b){a.splice(0,a.length,...b)}
 function apply(m,o={}){M=m;
   same(Q,m.Q);same(FU,m.FU);same(BG,m.BG);same(ACC,m.ACC);same(M8,m.M8);same(X8,m.X8);
@@ -6205,6 +6267,7 @@ const KB={CONNECT:['Open profile','Connect sent'],DM1:['Copy & open','DM1 sent']
 const FIELD={CONNECT:'connect_sent',DM1:'dm1_sent',DM2:'dm2_sent',DM3:'dm3_sent',WITHDRAW:'withdrawn'};
 function liA(url,cls,label,ic){const h=LI.href(url);return h?`<a class="${cls}" href="${E(h)}" data-li="${E(LI.https(url))}" rel="noopener">${ic||''}${label}</a>`:''}
 renderQueue=function(){const box=$('#queue');if(!box)return;const openId=(box.querySelector('.q.open')||{dataset:{}}).dataset.id;renderReview();box.innerHTML='';
+  if(!Q.length&&V16.loading){box.innerHTML=`<div class="v16empty v184ld">${AF('think','m')}<div><b>Loading your queue…</b><span>One moment.</span></div></div>`;return}
   if(!Q.length){box.innerHTML=`<div class="v16empty">${AF('happy','m')}<div><b>Queue clear.</b><span>${M.stats.people?'Nothing due tonight. New accepts and follow-ups land here as they come due.':'Sign in and I’ll fill this from your Sheet.'}</span></div></div>`;return}
   Q.forEach((p,i)=>{const el=document.createElement('div');el.className='q v16q k-'+p.tag.toLowerCase();el.dataset.i=i;el.dataset.id=p.id;
     const hasMsg=!!String(p.msg||'').trim(),needsDraft=/DM1|DM2|DM3|REPLY/.test(p.tag);
@@ -7304,7 +7367,7 @@ const _stkNext_v3=stkNext;stkNext=function(dir,ax,v){const L=liveN();if(dir===1&
 const _stkAct_v3=stkAct;stkAct=function(c,a){if(a!=='later'){NREAD[nKey(c.n.t)]=Date.now();saveNR()}else if(liveN().length===1){NREAD[nKey(c.n.t)]=Date.now();saveNR();c.n.read=true;return _stkAct_v3(c,'ok')}return _stkAct_v3(c,a)};
 stkEmpty=function(){stkFoot();ariBadge();const st=$('#stkSt');if($('#stkEmpty'))return;const el=document.createElement('div');el.className='sc empty v163calm';el.id='stkEmpty';el.style.position='relative';
   const left=(window.ariM&&ariM.Q||[]).length;
-  el.innerHTML=`${scanHTML(left?'All caught up on notes.':'All caught up.',left?`${left} in the queue below, ordered by send window.`:'Nothing needs you. I keep watching the accounts.','idle')}`;
+  el.innerHTML=(window.ariV16&&ariV16.loading)?`${scanHTML('Checking your queue…','One moment.','idle')}`:`${scanHTML(left?'All caught up on notes.':'All caught up.',left?`${left} in the queue below, ordered by send window.`:'Nothing needs you. I keep watching the accounts.','idle')}`;
   st.appendChild(el);st.style.height=el.offsetHeight+'px';watchScans()};
 V163.resetNotes=()=>{Object.keys(NREAD).forEach(k=>delete NREAD[k]);saveNR()};
 
@@ -7489,7 +7552,9 @@ V17.fetch=function(why){
   F17=(async()=>{const c=await READY17;if(!c){const e=new Error('Failed to fetch');throw e}
     if(!ST17.session){const {data}=await c.auth.getSession();ST17.session=data&&data.session||null;if(!ST17.session){const e=new Error('signed out');e.sbAuth=1;throw e}}
     const full=!S17.loaded;
-    await Promise.all([full?fullLoad(c):incLoad(c),(!S17.book.length||Date.now()-S17.bookAt>30*60e3)?loadBook(c).catch(e=>console.warn('book',e)):null]);
+    /* v18.4: the Book (1,100+ rows, several pages) loads on its own; the queue paints as soon as people/accounts/queue are in */
+    if(!V17.bookP&&(!S17.book.length||Date.now()-S17.bookAt>30*60e3))V17.bookP=loadBook(c).then(()=>{if(S17.loaded)publish17('book')}).catch(e=>console.warn('book',e)).finally(()=>{V17.bookP=null});
+    await (full?fullLoad(c):incLoad(c));if(full)V17.firstAt=Date.now();
     SY17.lastFetch=Date.now();SYNC.lastOk=Date.now();SY17.lastOk=SYNC.lastOk;LS17.s('ari-last-ok',String(SYNC.lastOk));SYNC.err='';V17.fetchMs=Math.round(performance.now()-t0);V17.lastWhy=why;
     live17(c);publish17('fetch',true);
     if(outbox().length)flushSoon(0);
@@ -7591,7 +7656,7 @@ V17.line=function(){const el=$('#v163sync');if(!el)return;const ob=outbox().leng
   if(!on){t=ob?`Offline · ${ob} waiting`:'Offline · showing your last data';warn=true}
   else if(ob){t=`Saving ${ob}…`;warn=true}
   else if(!S17.loaded&&!SYNC.lastOk)t=SYNC.busy?'Syncing…':'Connecting…';
-  else if(RT17.state==='SUBSCRIBED'&&S17.loaded)t=innerWidth<380?'Live':'Synced live';
+  else if(RT17.state==='SUBSCRIBED'&&S17.loaded)t=(hAge!=null&&hAge<=45*60e3)?(innerWidth<380?'Live':'Synced live'):'Synced';
   else if(SYNC.lastOk){t=RT17.down?'Reconnecting…':(`Synced ${agoShort(SYNC.lastOk)}`).replace('Synced just now','Synced now');if(Date.now()-SYNC.lastOk>15*60e3)warn=true}
   else t='Connecting…';
   if(on&&hAge!=null&&hAge>45*60e3){t+=` · Hark last ran ${agoShort(hl)}`;warn=true}else if(sc)t+=` · Hark updated ${sc}`;
@@ -8365,7 +8430,7 @@ function renderToday(){const r=$('#ready');if(!r)return;const days=$('#v163days'
   now.innerHTML=w?`<div class="v175now" role="status">${scene(w.k,'sm')}<div><b>${E5(w.t)}</b><span>${E5(w.s)}</span></div></div>`:'';
   tk.innerHTML=`<span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span><div><b>Tasks</b><span>${open?`${open} with Hark`:'Nothing waiting on Hark'}${sig?` · ${sig} new signal${sig>1?'s':''} today`:''}</span></div>${open?`<em>${open}</em>`:''}<span class="ch">›</span>`;
   fill(now)}
-function decorEmpty(){const e=document.querySelector('#queue .v16empty');if(!e||e.querySelector('[data-v175sc]'))return;const n=waitingOnAccepts();
+function decorEmpty(){const e=document.querySelector('#queue .v16empty:not(.v184ld)');if(!e||e.querySelector('[data-v175sc]'))return;const n=waitingOnAccepts();
   e.insertAdjacentHTML('afterbegin',n?`<div class="v175emp">${scene('clock')}<span>Waiting on ${n} accept${n>1?'s':''}. I’ll have DM1 ready the moment one lands.</span></div>`:`<div class="v175emp">${scene('idle')}<span>All caught up.</span></div>`);e.classList.add('v175has');fill(e)}
 
 /* ---------- Tasks: a full-screen page from Today (the tab bar holds Pipeline now) ---------- */
@@ -9055,7 +9120,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.3',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.4',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9126,6 +9191,10 @@ function setHTML(){const L=k=>{try{return localStorage.getItem(k)}catch(e){retur
   ${ps==='granted'&&ok?`<div class="aprow press" data-s171="pushtest"><div><b>Send a test ping</b><span>Arrives on this phone now.</span></div></div>`:''}
   <div class="aprow press" data-v181="dev" aria-expanded="${devOpen}"><div><b>Phones getting pings</b><span id="v181devn">${V181.devN==null?'Tap to see':V181.devN+' active'}</span></div><span class="v181ch ${devOpen?'on':''}" aria-hidden="true">›</span></div>
   <div id="v1711dev" class="v181dev" ${devOpen?'':'hidden'}><div class="v162hint">Loading…</div></div>
+  <div class="aprow press" data-v184set="push_show_names" role="switch" aria-checked="${!!(window.ariV184&&ariV184.prefs.push_show_names)}"><div><b>Show names on the lock screen</b><span>${!!(window.ariV184&&ariV184.prefs.push_show_names)?'On. Pushes name the person. Anyone who sees your lock screen sees who you prospect.':'Off. Pushes say “New reply on LinkedIn”, never a name.'}</span></div>${SW(!!(window.ariV184&&ariV184.prefs.push_show_names))}</div>
+  <div class="v162hint">Names on a lock screen show who you prospect. Off keeps them private.</div>
+  <div class="apcap"><span class="cap">Connects</span></div>
+  <div class="aprow v181blk"><div><b>Invites per account per day</b><span>Today’s 15 spreads connects so no account gets flooded. DM2s are held to 4 per account a day.</span></div><div class="v171seg" role="radiogroup" aria-label="Invites per account per day">${[4,5].map(n=>`<span class="press ${(window.ariV184?+ariV184.prefs.today15_cap_per_account:4)===n?'on':''}" data-v184set="today15_cap_per_account" data-v="${n}" role="radio" aria-checked="${(window.ariV184?+ariV184.prefs.today15_cap_per_account:4)===n}">${n}</span>`).join('')}</div></div>
   <div class="apcap"><span class="cap">Privacy screen</span></div><div class="v162hint">Covers Ari from people near your phone. It is not a second password: your account is protected by Google sign-in.</div>
   <div class="aprow"><div><b>Privacy screen with ${fid}</b><span>${pk.length?'On for this phone':'Off. Google sign-in opens the screen instead.'}</span></div>${pk.length?'<span class="v171btn sm press" data-s171="pkoff">Remove</span>':'<span class="v171btn sm pri press" data-s171="pkon">Set up</span>'}</div>
   <div class="aprow v181blk"><div><b>Lock when I leave</b><span>Home, the app switcher, the power button or LinkedIn.</span></div><div class="v171seg" role="radiogroup" aria-label="Lock">${[['0','Immediately'],['30','30 s'],['120','2 min']].map(o=>`<span class="press ${la===o[0]?'on':''}" data-lk171="${o[0]}" role="radio" aria-checked="${la===o[0]}">${o[1]}</span>`).join('')}</div></div>
@@ -9139,7 +9208,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.3';
+function aboutHTML(){const B='v18.4';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9850,13 +9919,218 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.3';try{localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.4';try{localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();
 
 })();
 
+</script>
+<script>/* ===== Ari v18.4 Relay: queue first on Today, replies pinned #1, Today's 15, one person per screen (board fixes #9, #10) ===== */
+(function(){'use strict';
+const V184=window.ariV184={v:'v18.4',top:null,at:0,err:'',errs:[],prefs:{push_show_names:false,today15_cap_per_account:4},drafting:{},spread:[],acked:0,loads:0};
+const DM_CAP=4;/* per-account cap applies to DM2s too: at most 4 DM2s to one account per day */
+const $=s=>document.querySelector(s);
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const V17=()=>window.ariV17||{};const signed=()=>{try{return !!(V17().signed&&V17().signed())}catch(e){return false}};
+async function rpc(fn,args){const c=await V17().ready();if(!c||!signed())throw new Error('offline');const {data,error}=await c.rpc(fn,args||{});if(error)throw new Error(error.message||String(error));return data}
+const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n||8)}catch(e){}};
+function toast(t){let el=$('#v184toast');if(!el){el=document.createElement('div');el.id='v184toast';el.setAttribute('role','status');el.setAttribute('aria-live','polite');document.body.appendChild(el)}
+  el.innerHTML=t;el.classList.add('on');clearTimeout(V184.tt);V184.tt=setTimeout(()=>el.classList.remove('on'),3600)}
+async function copy(t){t=String(t||'');if(!t)return false;try{await navigator.clipboard.writeText(t);return true}catch(e){}
+  try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;opacity:0;top:0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok}catch(e){return false}}
+function openLI(url){try{window.ariV162&&(ariV162.noLockOnce=true)}catch(e){}try{window.ariV16&&ariV16.openLI?ariV16.openLI(url):window.open(url,'_blank','noopener')}catch(e){V184.errs.push('open '+e)}}
+const coOf=q=>String((q.p&&q.p.company)||String(q.c||'').split(' · ').pop()||'').trim();
+const firstN=n=>String(n||'').split(' ')[0];
+
+/* ---------- the model: Today's 15 owns connects; DM2s spread at most 4 per account per day ---------- */
+const _model=window.ariModel;
+window.ariModel=function(d,o){const m=_model(d,o);try{
+  if(V184.top&&Array.isArray(V184.top.connects))m.Q=m.Q.filter(q=>q.tag!=='CONNECT');
+  const cnt={},sp={},keep=[];
+  m.Q.forEach(q=>{if(q.tag==='DM2'){const co=coOf(q),k=co.toLowerCase();cnt[k]=(cnt[k]||0)+1;if(cnt[k]>DM_CAP){(sp[k]=sp[k]||{company:co,n:0}).n++;return}}keep.push(q)});
+  m.Q=keep;V184.spread=Object.values(sp);V184.qn=keep.length;
+}catch(e){V184.errs.push('model '+e)}return m};
+function reaccept(){try{window.ariV16&&ariV16.reaccept&&ariV16.reaccept()}catch(e){V184.errs.push('reaccept '+e)}}
+
+/* ---------- data ---------- */
+let LP=null;
+function load(why){if(LP)return LP;if(!signed())return Promise.resolve();
+  LP=(async()=>{const had=!!(V184.top&&Array.isArray(V184.top.connects));try{
+    const d=await rpc('ari_today_top',{p_day:null});V184.top=d||{replies:[],connects:[],meta:{}};V184.at=Date.now();V184.err='';V184.loads++;V184.why=why;
+    if(typeof V184.top.push_show_names==='boolean')V184.prefs.push_show_names=V184.top.push_show_names;
+    (V184.top.replies||[]).forEach(r=>{if(V184.drafting[r.id]&&Array.isArray(r.drafts)&&r.drafts.length)delete V184.drafting[r.id]});
+    Object.keys(V184.drafting).forEach(id=>{if(!(V184.top.replies||[]).some(r=>String(r.id)===String(id)))delete V184.drafting[id]});
+  }catch(e){V184.err=String(e&&e.message||e);V184.errs.push('load '+V184.err)}
+  finally{LP=null}
+  render();if(!had&&V184.top&&Array.isArray(V184.top.connects))reaccept();else render();
+  clearTimeout(V184.fastT);if(Object.keys(V184.drafting).length)V184.fastT=setTimeout(()=>load('drafting'),6000);
+  deepLink()})();return LP}
+V184.load=load;
+async function prefsLoad(){try{const c=await V17().ready();if(!c||!signed())return;const {data}=await c.from('ari_prefs').select('key,value');(data||[]).forEach(r=>{if(r.key in V184.prefs)V184.prefs[r.key]=r.value})}catch(e){}}
+let RCH=null;
+async function live(){if(RCH||!signed())return;try{const c=await V17().ready();if(!c)return;
+  RCH=c.channel('ari-relay-'+Math.random().toString(36).slice(2,7)).on('postgres_changes',{event:'*',schema:'public',table:'replies'},()=>{clearTimeout(V184.rtT);V184.rtT=setTimeout(()=>load('rt'),400)}).subscribe()}catch(e){RCH=null;V184.errs.push('rt '+e)}}
+
+/* ---------- push receipts: the service worker no longer calls the API itself (no anon key path); the page stamps them with the session ---------- */
+async function flushAcks(){try{if(!('caches' in window)||!signed())return;const cc=await caches.open('ari-acks');const ks=await cc.keys();if(!ks.length)return;const c=await V17().ready();if(!c)return;
+  for(const k of ks){let j=null;try{const r=await cc.match(k);j=r?await r.json():null}catch(e){}
+    if(j&&j.endpoint){const {error}=await c.rpc('ari_push_ack',{p_endpoint:j.endpoint,p_tag:String(j.tag||'ari').slice(0,64)});if(error){V184.errs.push('ack '+error.message);continue}V184.acked++}
+    await cc.delete(k)}}catch(e){V184.errs.push('ack '+e)}}
+V184.flushAcks=flushAcks;
+try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='ari-push-ack')setTimeout(flushAcks,200)})}catch(e){}
+
+/* ---------- layout: header, status, replies, send queue, Today's 15; everything else below ---------- */
+function mount(){const rd=$('#ready');if(!rd)return false;let top=$('#v184top');
+  if(!top){top=document.createElement('div');top.id='v184top';top.innerHTML='<div id="v184st" class="v184st" aria-live="polite"></div><div id="v184rep"></div>';}
+  if(rd.firstElementChild!==top)rd.insertBefore(top,rd.firstElementChild);
+  const q=$('#queue');if(!q||q.parentNode!==rd)return true;
+  let sec=rd.querySelector('[data-v184="qsec"]');if(!sec){const p=q.previousElementSibling;if(p&&p.classList.contains('sec')){sec=p;sec.dataset.v184='qsec'}}
+  let sp=$('#v184sp');if(!sp){sp=document.createElement('div');sp.id='v184sp'}
+  let t=$('#v184t15');if(!t){t=document.createElement('div');t.id='v184t15'}
+  let after=top;[sec,q,sp,$('#v162qmore'),t].forEach(n=>{if(n&&(n.parentNode===rd||!n.parentNode)){if(after.nextSibling!==n)rd.insertBefore(n,after.nextSibling);after=n}});
+  if(sec&&!sec.querySelector('[data-v184go]')){sec.insertAdjacentHTML('beforeend','<span class="v184qgo press" data-v184go="q" role="button" hidden></span>')}
+  return true}
+function hbAge(){try{const hb=window.ariV1712&&ariV1712.hb;const t=hb&&hb.last_scan_at?Date.parse(hb.last_scan_at):NaN;return isNaN(t)?null:Date.now()-t}catch(e){return null}}
+function ld(){try{return !!(window.ariV16&&ariV16.loading)}catch(e){return false}}
+function stHTML(){const on=navigator.onLine!==false,loaded=!!(V17().store&&V17().store.loaded),rt=!!(V17().RT&&V17().RT.state==='SUBSCRIBED'),a=hbAge(),fresh=a!=null&&a<=45*60e3;
+  let cls,lab;if(!on){cls='off';lab='Offline'}else if(!loaded||ld()){cls='ld';lab='Loading'}else if(rt&&fresh){cls='live';lab='Live'}else{cls='ok';lab='Synced'}
+  const T=V184.top||{},rp=(T.replies||[]).length,qn=ld()?null:((window.ariM&&ariM.Q)||[]).filter(q=>q.tag!=='CONNECT').length,cn=Array.isArray(T.connects)?T.connects.length:null;
+  const bits=[lab];if(cls==='ld'&&!rp){bits.push('checking your queue')}else{if(rp)bits.push(rp+' '+(rp===1?'reply':'replies'));if(qn!=null)bits.push(qn+' to send');if(cn!=null)bits.push(cn+' connect'+(cn===1?'':'s'))}
+  return `<span class="d ${cls}"></span>${E(bits.join(' · '))}`}
+const ago=m=>{m=Math.max(0,+m||0);return m<1?'just now':m<60?Math.round(m)+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
+function repHTML(r){const age=+r.age_min||0,dc=age>240?'red':age>60?'amb':'';const hasSnip=!!(r.snippet&&r.snippet_source&&r.snippet_source!=='none');
+  const dr=V184.drafting[r.id],drafts=Array.isArray(r.drafts)&&r.drafts.length?r.drafts:null;
+  const chips=dr?'<div class="v184sk">Drafting with their words…</div>':drafts?`<div class="v184chips">${drafts.map((d,j)=>`<span class="press" role="button" data-v184chip="${E(r.id)}:${j}">${E(d.label||d.key)}</span>`).join('')}</div>`:'<div class="v184sk">Drafting 3 replies…</div>';
+  return `<div class="v184rc press" role="button" tabindex="0" data-v184r="${E(r.id)}"><div class="v184rh"><span class="v184dot ${dc}"></span><b>Reply · ${E(ago(age))}</b><span class="co">${E(r.company||'')}</span></div>
+  <div class="v184rn">${E(r.name||'')}${r.title?' · '+E(r.title):''}</div>
+  ${hasSnip?`<div class="v184q">“${E(r.snippet)}”</div>`:`<div class="v184paste press" role="button" data-v184p="${E(r.id)}">Paste what they said</div>`}
+  ${r.last_sent?`<div class="v184ls">You last sent: “${E(String(r.last_sent).slice(0,110))}”</div>`:''}${chips}</div>`}
+function t15HTML(){const T=V184.top;if(!signed())return '';if(!T||!Array.isArray(T.connects))return V184.err?'':'<div class="v184card v184skel"><div class="v184h"><b>Today’s 15 connects</b><span>Loading…</span></div></div>';
+  const m=T.meta||{},L=T.connects,cap=m.cap_per_account||4,ceil=+m.weekly_ceiling||100,s7=+m.sent_7d||0,pct=Math.min(100,Math.round(s7/ceil*100)),bc=pct>=100?'red':pct>=80?'amb':'';
+  const warn=(m.over_cap_today||[]).map(o=>{const co=typeof o==='string'?o:(o&&(o.company||o.account))||'';const n=o&&typeof o==='object'?(o.sent_today!=null?o.sent_today:o.n):null;
+    return `<div class="v184warn" role="note">⚠ ${E(co)}: ${n!=null?E(n)+' invites today':'over the cap today'} (cap ${E(cap)}).</div>`}).join('');
+  const hd=`<div class="v184h"><b>Today’s ${E(m.size||15)} connects</b><span>${E(+m.sent_today||0)} sent today</span></div>`;
+  if(!L.length)return `<div class="v184card">${hd}<div class="v184empty">No connects queued. Map an account to fill tomorrow.</div>${warn}</div>`;
+  const rows=L.map((r,i)=>`<div class="v184row press" role="button" data-v184c="${i}"><span class="rk">${E(r.rank||i+1)}</span><div class="t"><b>${E(r.company||'')}</b><span> · ${E(r.title||'')}</span><small>${E(r.why||'')}</small></div></div>`).join('');
+  return `<div class="v184card">${hd}<div class="v184wk"><span>${E(s7)} of ${E(ceil)} this week</span><i class="${bc}"><b style="width:${pct}%"></b></i><span>cap ${E(cap)}/account</span></div>${rows}${warn}
+  <div class="v184start press" role="button" data-v184go="c">Start, ${L.length} to send</div></div>`}
+function render(){try{if(!mount())return;const st=$('#v184st');if(st)st.innerHTML=stHTML();
+  const rp=$('#v184rep'),R=(V184.top&&V184.top.replies)||[];if(rp){const h=R.length?`<div class="v184cap"><span>Replies</span><span>${R.length}</span></div>`+R.map(repHTML).join(''):'';if(rp.innerHTML!==h)rp.innerHTML=h}
+  const t=$('#v184t15');if(t){const h=t15HTML();if(t.innerHTML!==h)t.innerHTML=h}
+  const sp=$('#v184sp');if(sp){const h=V184.spread.length?V184.spread.map(s=>`<div class="v184hint">${E(s.n)} more DM2${s.n===1?'':'s'} at ${E(s.company)} wait for tomorrow: at most ${DM_CAP} to one account a day.</div>`).join(''):'';if(sp.innerHTML!==h)sp.innerHTML=h}
+  const g=document.querySelector('[data-v184go="q"]');if(g){const n=qItems().length;g.hidden=!n||ld();g.textContent=n?`Start · ${n}`:''}
+}catch(e){V184.errs.push('render '+e)}}
+V184.render=render;
+
+/* ---------- focus mode: one person per screen ---------- */
+const FX={items:[],i:0,pending:false,sel:0,open:false,done:0};V184.FX=FX;
+const KF={DM1:['dm1_sent','dm'],DM2:['dm2_sent','dm2_text'],DM3:['dm3_sent','dm3_text']};
+function qItems(){return ((window.ariM&&ariM.Q)||[]).filter(q=>KF[q.tag]).map(q=>({k:'dm',tag:q.tag,pid:q.id,name:q.n,sub:q.c,why:q.why||'',body:String(q.msg||''),url:q.url||(q.p&&q.p.linkedin_url)||'',field:KF[q.tag][0],col:KF[q.tag][1]}))}
+function repItems(){return ((V184.top&&V184.top.replies)||[]).map(r=>({k:'reply',id:r.id,pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.snippet&&r.snippet_source!=='none'?'“'+r.snippet+'”':'They wrote back. Paste their words for a sharper draft, or answer with a safe opener.',drafts:Array.isArray(r.drafts)?r.drafts:[],url:r.thread_url||r.linkedin_url||'',snip:!!(r.snippet&&r.snippet_source!=='none')}))}
+function conItems(){const T=V184.top||{},A={};((T.meta||{}).accounts_today||[]).forEach(a=>{A[String(a.account_id||a.company||'').toLowerCase()]=a});
+  return (T.connects||[]).map(r=>{const a=A[String(r.account_id||'').toLowerCase()]||A[String(r.company||'').toLowerCase()];return {k:'connect',pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.why||'',url:r.linkedin_url||'',company:r.company,full:a&&+a.cap_left===0,sentAcct:a&&a.sent_today}})}
+function openFocus(items,i,sel){if(!items.length)return;FX.items=items;FX.i=Math.max(0,Math.min(i||0,items.length-1));FX.sel=sel||0;FX.pending=false;FX.open=true;FX.done=0;
+  let o=$('#v184fx');if(!o){o=document.createElement('div');o.id='v184fx';o.className='v184fx';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','One person at a time');document.body.appendChild(o);wireFx(o)}
+  o.hidden=false;document.documentElement.classList.add('v184fxon');fxRender();buzz(6)}
+V184.openFocus=openFocus;
+function closeFocus(){const o=$('#v184fx');if(o)o.hidden=true;FX.open=false;FX.pending=false;document.documentElement.classList.remove('v184fxon');render()}
+function cur(){return FX.items[FX.i]}
+function curText(){const it=cur();if(!it)return '';const ta=$('#v184fx .fxdraft');return ta?ta.value:(it.k==='reply'?((it.drafts[FX.sel]||{}).body||''):(it.body||''))}
+function fxRender(){const o=$('#v184fx'),it=cur();if(!o)return;
+  if(!it){o.innerHTML=`<div class="fxin"><div class="fxtop"><span></span><span class="press fxx" data-fx="close" role="button" aria-label="Close">×</span></div><div class="fxdone"><b>That’s today.</b><span>${FX.done?E(FX.done)+' logged. ':''}Next: replies and follow-ups land here as they come due.</span></div><div class="fxbar"><div class="fxpri press" data-fx="close" role="button">Back to Today</div></div></div>`;return}
+  const seg=it.k==='reply'&&it.drafts.length?`<div class="fxseg" role="tablist">${it.drafts.map((d,j)=>`<span class="press ${j===FX.sel?'on':''}" role="tab" aria-selected="${j===FX.sel}" data-fxsel="${j}">${E(d.label||d.key)}</span>`).join('')}</div>`:'';
+  const body=it.k==='reply'?((it.drafts[FX.sel]||{}).body||''):it.body;
+  const mid=it.k==='connect'?`<div class="fxnote">Blank invite, no note. At this level a bare invite gets accepted more often.</div>`
+    :it.k==='reply'&&!it.drafts.length?`<div class="fxnote">${V184.drafting[it.id]?'Drafting with their words…':'Drafting 3 replies…'} You can write your own below.</div><textarea class="fxdraft" aria-label="Your reply" rows="5"></textarea>`
+    :`<textarea class="fxdraft" aria-label="Message" rows="6">${E(body)}</textarea>`;
+  const capN=it.k==='connect'&&it.full?`<div class="fxcap" role="note">${E(it.sentAcct||4)} invites to ${E(it.company)} today already. Tomorrow is better. <span class="press" data-fx="anyway" role="button">Send anyway</span></div>`:'';
+  const paste=it.k==='reply'&&!it.snip?`<span class="press fxlink" data-fx="paste" role="button">Paste what they said</span>`:'';
+  o.innerHTML=`<div class="fxin"><div class="fxtop"><span class="fxp">${FX.i+1} of ${FX.items.length}</span><span class="press fxmore" data-fx="more" role="button" aria-label="More">…</span><span class="press fxx" data-fx="close" role="button" aria-label="Close">×</span></div>
+  <div class="fxwho"><b>${E(it.name||'')}</b><span>${E(it.sub||'')}</span></div><div class="fxwhy">${E(it.why||'')}</div>${paste}
+  ${seg}${mid}${capN}
+  <div class="fxmenu" hidden><span class="press" data-fx="skip" role="button">Skip for now</span>${it.k==='reply'?'<span class="press" data-fx="notnow" role="button">Not now (dismiss)</span>':''}<span class="press" data-fx="close" role="button">Close</span></div>
+  <div class="fxbar"><div class="fxpri press" role="button" data-fx="go">${it.k==='connect'?'Open profile':'Copy &amp; open LinkedIn'}</div></div>
+  <div class="fxsheet" hidden><b>Sent it?</b><div class="fxedit" hidden><textarea class="fxfinal" rows="4" aria-label="The text you sent" placeholder="Paste the text you sent"></textarea><span class="press fxok" data-fx="editok" role="button">Log it</span></div>
+   <div class="fxbtns"><span class="press pri" data-fx="sent" role="button">Sent</span>${it.k==='connect'?'':'<span class="press" data-fx="edited" role="button">Edited</span>'}${it.k==='reply'?'<span class="press" data-fx="meeting" role="button">Meeting booked</span>':''}<span class="press" data-fx="notyet" role="button">Not yet</span></div></div></div>`;
+  if(it.k==='connect'&&it.full)o.querySelector('[data-fx="go"]').classList.add('dim')}
+function showSheet(){const s=$('#v184fx .fxsheet');if(s&&FX.pending){s.hidden=false;FX.sheetAt=Date.now()}}
+function advance(){FX.pending=false;FX.i++;FX.sel=0;fxRender()}
+async function logSent(text,outcome){const it=cur();if(!it)return;FX.pending=false;buzz(10);
+  try{if(it.k==='reply'){await rpc('ari_reply_done',{p_id:it.id,p_outcome:outcome||'answered',p_body:text||null});const T=V184.top;if(T&&T.replies)T.replies=T.replies.filter(r=>r.id!==it.id);toast(outcome==='meeting'?`Logged a meeting with ${E(firstN(it.name))}. Add the details from their file.`:`Logged your answer to ${E(firstN(it.name))}.`)}
+    else if(it.k==='dm'){const mu=window.ariV16&&ariV16.mutate;if(!mu)throw new Error('not ready');if(text&&text!==it.body)await mu('setFields',[it.pid,{[it.col]:text}]);await mu('mark',[it.pid,it.field]);toast(`${E(it.tag)} sent · ${E(firstN(it.name))}.`)}
+    else{const mu=window.ariV16&&ariV16.mutate;if(!mu)throw new Error('not ready');await mu('mark',[it.pid,'connect_sent']);toast(`Connect sent · ${E(firstN(it.name))}.`);setTimeout(()=>load('connect'),1200)}
+    FX.done++;V184.logged=(V184.logged||0)+1;advance();render()}
+  catch(e){V184.errs.push('log '+e);toast('Couldn’t log that yet. Saved taps retry on their own; try Sent again in a moment.')}}
+async function pasteFor(id,viaFx){let t='';try{t=(await navigator.clipboard.readText()||'').trim()}catch(e){}
+  if(!t){t=await askText('Paste what they said','Their message');}if(!t)return;
+  V184.drafting[id]=true;render();if(viaFx)fxRender();
+  try{await rpc('ari_reply_paste',{p_id:+id||id,p_text:t.slice(0,2000)});const r=((V184.top||{}).replies||[]).find(x=>String(x.id)===String(id));if(r){r.snippet=t;r.snippet_source='pasted';r.drafts=null}
+    toast('Got their words. Hark is drafting 3 answers.');render();clearTimeout(V184.fastT);V184.fastT=setTimeout(()=>load('drafting'),6000);if(viaFx){FX.items=repItems();fxRender()}}
+  catch(e){delete V184.drafting[id];render();toast('Couldn’t save that. Check your connection and paste again.')}}
+function askText(title,label){return new Promise(res=>{let s=$('#v184ask');if(!s){s=document.createElement('div');s.id='v184ask';s.className='v184ask';s.setAttribute('role','dialog');s.setAttribute('aria-modal','true');document.body.appendChild(s)}
+  s.innerHTML=`<div class="in"><b>${E(title)}</b><textarea rows="5" aria-label="${E(label)}" placeholder="${E(label)}"></textarea><div class="b"><span class="press" data-a="x" role="button">Cancel</span><span class="press pri" data-a="ok" role="button">Save</span></div></div>`;s.hidden=false;const ta=s.querySelector('textarea');setTimeout(()=>ta.focus(),50);
+  s.onclick=e=>{const a=e.target.closest('[data-a]');if(!a)return;s.hidden=true;res(a.dataset.a==='ok'?ta.value.trim():'')}})}
+function wireFx(o){o.addEventListener('click',async e=>{const s=e.target.closest('[data-fxsel]');if(s){FX.sel=+s.dataset.fxsel;fxRender();return}
+  const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx,it=cur();
+  if(a==='close')return closeFocus();
+  if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
+  if(a==='skip')return advance();
+  if(a==='anyway'){it.full=false;fxRender();return}
+  if(a==='paste')return pasteFor(it.id,true);
+  if(a==='notnow'){try{await rpc('ari_reply_done',{p_id:it.id,p_outcome:'dismissed',p_body:null});const T=V184.top;if(T&&T.replies)T.replies=T.replies.filter(r=>r.id!==it.id);
+      toast(`Dismissed ${E(firstN(it.name))}. <span class="press v184undo" data-v184undo="${E(it.id)}" role="button">Undo</span>`);advance();render()}catch(x){toast('Couldn’t dismiss that yet.')}return}
+  if(a==='go'){const t=curText();if(it.k!=='connect'||t){if(t){const ok=await copy(t);if(!ok)toast('Copy didn’t work on this phone. Long-press the text to copy it.')}}
+    if(!it.url){toast('No LinkedIn URL on file for this person.');return}
+    FX.pending=true;FX.goAt=Date.now();V184.opened=(V184.opened||0)+1;V184.lastOpen=it.url;openLI(it.url);clearTimeout(FX.sT);FX.sT=setTimeout(()=>{if(!document.hidden)showSheet()},2500);return}
+  if(a==='sent')return logSent(curText());
+  if(a==='meeting')return logSent(curText(),'meeting');
+  if(a==='edited'){const ed=o.querySelector('.fxedit');if(ed){ed.hidden=false;ed.querySelector('textarea').value=curText();ed.querySelector('textarea').focus()}return}
+  if(a==='editok'){const v=(o.querySelector('.fxfinal')||{}).value||'';return logSent(v.trim()||curText())}
+  if(a==='notyet'){FX.pending=false;const sh=o.querySelector('.fxsheet');if(sh)sh.hidden=true;return}});
+  let x0=null,y0=0;o.addEventListener('touchstart',e=>{if(e.target.closest('textarea'))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  o.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>70&&Math.abs(dy)<50&&!FX.pending){FX.i=Math.max(0,Math.min(FX.items.length-1,FX.i+(dx<0?1:-1)));FX.sel=0;fxRender()}},{passive:true})}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(FX.open&&FX.pending)setTimeout(showSheet,250);if(signed()&&Date.now()-V184.at>60e3)load('visible');flushAcks()});
+
+/* ---------- Today taps (delegated; capture so older handlers on #ready don't also act) ---------- */
+let lpT=0,lpFired=false;
+document.addEventListener('pointerdown',e=>{const c=e.target.closest&&e.target.closest('[data-v184chip]');if(!c)return;lpFired=false;clearTimeout(lpT);lpT=setTimeout(async()=>{lpFired=true;const [id,j]=c.dataset.v184chip.split(':');const r=((V184.top||{}).replies||[]).find(x=>String(x.id)===id);const d=r&&r.drafts&&r.drafts[+j];if(d&&await copy(d.body)){buzz(14);toast(`Copied “${E(d.label||d.key)}”.`)}},520)},true);
+['pointerup','pointercancel','pointerleave'].forEach(t=>document.addEventListener(t,()=>clearTimeout(lpT),true));
+document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
+  const u=t.closest('[data-v184undo]');if(u){e.preventDefault();rpc('ari_reply_done',{p_id:+u.dataset.v184undo,p_outcome:'new',p_body:null}).then(()=>{toast('Back in your replies.');load('undo')}).catch(()=>toast('Couldn’t undo that yet.'));return}
+  const st=t.closest('[data-v184set]');if(st){e.preventDefault();e.stopPropagation();setPref(st);return}
+  if(!t.closest('#v184top,#v184t15,[data-v184="qsec"]'))return;
+  const ch=t.closest('[data-v184chip]');if(ch){e.preventDefault();e.stopPropagation();if(lpFired){lpFired=false;return}const [id,j]=ch.dataset.v184chip.split(':');const R=repItems();openFocus(R,R.findIndex(x=>String(x.id)===id),+j);return}
+  const p=t.closest('[data-v184p]');if(p){e.preventDefault();e.stopPropagation();pasteFor(p.dataset.v184p,false);return}
+  const r=t.closest('[data-v184r]');if(r){e.preventDefault();e.stopPropagation();const R=repItems();openFocus(R,R.findIndex(x=>String(x.id)===r.dataset.v184r),0);return}
+  const c=t.closest('[data-v184c]');if(c){e.preventDefault();e.stopPropagation();openFocus(conItems(),+c.dataset.v184c);return}
+  const g=t.closest('[data-v184go]');if(g){e.preventDefault();e.stopPropagation();openFocus(g.dataset.v184go==='c'?conItems():qItems(),0);return}},true);
+
+/* ---------- settings: lock-screen names, invites per account ---------- */
+async function setPref(el){const k=el.dataset.v184set;let v;
+  if(k==='push_show_names')v=!V184.prefs.push_show_names;else if(k==='today15_cap_per_account')v=+el.dataset.v||4;else return;
+  const was=V184.prefs[k];V184.prefs[k]=v;paintPrefs();buzz(8);
+  try{await rpc('ari_pref_set',{p_key:k,p_value:v});toast(k==='push_show_names'?(v?'Names will show on the lock screen.':'Lock screen stays private: no names.'):`Up to ${v} invites per account a day.`);if(k!=='push_show_names')load('pref')}
+  catch(e){V184.prefs[k]=was;paintPrefs();toast('Couldn’t save that setting. Try again when you’re online.')}}
+function paintPrefs(){document.querySelectorAll('[data-v184set="push_show_names"]').forEach(el=>{const on=!!V184.prefs.push_show_names;el.setAttribute('aria-checked',String(on));const sw=el.querySelector('.sw');if(sw)sw.classList.toggle('on',on);const s=el.querySelector('span');if(s)s.textContent=on?'On. Pushes name the person. Anyone who sees your lock screen sees who you prospect.':'Off. Pushes say “New reply on LinkedIn”, never a name.'});
+  document.querySelectorAll('[data-v184set="today15_cap_per_account"]').forEach(el=>{const on=+el.dataset.v===+V184.prefs.today15_cap_per_account;el.classList.toggle('on',on);el.setAttribute('aria-checked',String(on))})}
+V184.paintPrefs=paintPrefs;
+new MutationObserver(()=>{if(document.querySelector('[data-v184set]:not([data-v184p1])')){document.querySelectorAll('[data-v184set]').forEach(x=>x.dataset.v184p1='1');paintPrefs()}}).observe(document.body,{childList:true,subtree:true});
+
+/* ---------- deep link from a reply push: /ops?open=person:<id> lands on that reply in focus mode ---------- */
+let DL=(()=>{try{const v=new URLSearchParams(location.search).get('open')||'';return /^person:/.test(v)?v.split(':')[1]:''}catch(e){return ''}})();
+function deepLink(){if(!DL||!V184.top)return;const R=repItems(),i=R.findIndex(x=>x.pid===DL);DL='';if(i>=0)setTimeout(()=>openFocus(R,i,0),900)}
+
+/* ---------- boot ---------- */
+function boot(){render();const rd=$('#ready');if(rd)new MutationObserver(()=>{const top=$('#v184top');if(top&&rd.firstElementChild!==top)render()}).observe(rd,{childList:true});
+  let n=0;const t=setInterval(()=>{n++;if(signed()&&!V184.at&&!LP){load('boot');prefsLoad();live();flushAcks()}render();if(n>600)clearInterval(t)},1500);
+  setInterval(()=>{if(!document.hidden&&signed())load('timer')},120e3);
+  addEventListener('online',()=>{render();if(signed())load('online')});addEventListener('offline',render);
+  try{const _p=window.ariV162&&ariV162.patch;if(_p)ariV162.patch=function(m,o){const r=_p.apply(this,arguments);setTimeout(render,0);return r}}catch(e){}
+  if(signed()){load('boot');prefsLoad();live();flushAcks()}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
 </script>
 </body>
 </html>

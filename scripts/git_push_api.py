@@ -7,7 +7,7 @@ requests to api.github.com when the shell call carries credentials
 as one commit carrying the local commit message (only changed blobs upload).
 
 Usage: python3 scripts/git_push_api.py <export_dir> [owner/repo]
-Repo defaults to $KEEL_REPO or shaleenjha/ari-app. Refuses to push to a public repo.
+Repo defaults to $KEEL_REPO or shaleenjha/crm.os. Refuses to push to a public repo.
 """
 import os, sys, json, base64, subprocess, urllib.request, urllib.error
 
@@ -36,7 +36,7 @@ def git(*a, cwd):
 
 def main():
     src = os.path.abspath(sys.argv[1])
-    repo = sys.argv[2] if len(sys.argv) > 2 else os.environ.get('KEEL_REPO', 'shaleenjha/ari-app')
+    repo = sys.argv[2] if len(sys.argv) > 2 else os.environ.get('KEEL_REPO', 'shaleenjha/crm.os')
     info = gh('GET', '/repos/' + repo)
     if not info.get('private'):
         raise SystemExit('REFUSING: %s is not private' % repo)
