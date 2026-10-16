@@ -1,7 +1,8 @@
 # Ari Phase 0: the five measurements (product.md Section 9/10), from data that exists today, as ari_worker (read-only).
 #   python3 scripts/phase0_metrics.py  -> JSON on stdout. Values a source can't give yet are null with a reason.
 # 1 Ari-sourced meetings: report_attribution (meeting source is mandatory since v18.6).
-# 2 Accept-to-DM1: people.accepted -> dm1_sent. NOTE: both are filled as DATES today (time defaults), so this is day-granular.
+# 2 Accept-to-DM1 in HOURS: ari_worker_accept_dm1() (migration 0028). Exact pairs only for the median; values that arrived as a
+#   bare date are flagged in people.ts_approx (noon IST) and reported separately as all-pairs.
 # 3 Draft edit distance + 4 quick-check skip rate + 5 minutes in app: ari_worker_metrics() (migration 0027); null until then.
 import os, sys, json, statistics, datetime
 sys.path.insert(0, os.path.dirname(__file__))
@@ -21,12 +22,12 @@ wk = ari_db.rpc('report_attribution', {'p_period': 'this_week'})
 al = ari_db.rpc('report_attribution', {'p_period': 'all'})
 out['1_ari_sourced_meetings'] = {'this_week': (wk.get('by_source') or {}).get('LinkedIn', 0), 'all_time_by_source': al.get('by_source'),
                                  'all_time_meetings': al.get('meetings'), 'unsourced_accounts': len(al.get('no_source') or [])}
-P = ari_db.get('people?select=id,accepted,dm1_sent,review,flags&deleted_at=is.null')
-iso = lambda s: datetime.datetime.fromisoformat(s)
-d = [(iso(x['dm1_sent']) - iso(x['accepted'])).total_seconds() / 3600 for x in P if x['accepted'] and x['dm1_sent']]
-waiting = [x for x in P if x['accepted'] and not x['dm1_sent'] and x.get('review') != 'personal']
-out['2_accept_to_dm1'] = {'pairs': len(d), 'median_hours': statistics.median(d) if d else None,
-                          'granularity': 'day (accepted and dm1_sent are stored as dates)', 'accepted_waiting_for_dm1': len(waiting),
+P = ari_db.get('people?select=id,flags&deleted_at=is.null')
+a = ari_db.request('POST', 'rpc/ari_worker_accept_dm1', {}, timeout=30) or {}
+out['2_accept_to_dm1'] = {'unit': 'hours', 'exact_pairs': a.get('exact_pairs'), 'median_hours_exact': a.get('exact_median_h'),
+                          'under_4h_exact': a.get('under_4h'), 'all_pairs_incl_approx': a.get('all_pairs'),
+                          'median_hours_all_incl_approx': a.get('all_median_h'), 'accepted_waiting_for_dm1': a.get('waiting'),
+                          'note': 'approx = a bare date stored as noon IST (before v18.7.1 or a date typed in the Sheet)',
                           'flagged_no_connect_tick': sum(1 for x in P if 'no_connect_tick' in (x.get('flags') or []))}
 try: m = ari_db.request('POST', 'rpc/ari_worker_metrics', {}, timeout=30)
 except SystemExit as e: m = None; why = 'needs migration 0027 (' + str(e)[:60] + ')'

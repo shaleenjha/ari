@@ -2,9 +2,11 @@
 # Daily: take the newest Ari backup, encrypt it to the offsite recipient certificate (public key only, so this job never
 # holds a secret), upload it to the private Google Drive folder "Ari backups" of ops@example.com, keep the newest 14.
 #
-# Source, in order:
-#   1. the newest object in Supabase bucket ari-backups (the in-Supabase nightly export) - readable by ari_worker only after
-#      pending migration 0025 (read-only storage policy for that bucket). Until then the storage API answers 400.
+# Source, in order (v18.7.1, migration 0025_offsite_encrypted):
+#   1. the newest ari_*.json.gz.cms in private bucket ari-offsite: the full nightly export (every public table, auth users and
+#      identities, migration ledger, function/policy/cron definitions), ALREADY encrypted by the ari-backup edge function to
+#      the same recipient cert. ari_worker can read only that bucket and only *.cms, so this job never sees plaintext.
+#      Copied to Drive as-is; its sha256 must equal backup_runs.enc_sha256 (rpc ari_worker_backup_status).
 #   2. fallback "worker-scope export": every table ari_worker can SELECT (11 tables + 3 report views), gzip JSON. Labelled
 #      in the filename (ari_w_*) so nobody mistakes it for the full export (no auth.users, no ledger, no other tables).
 # Encryption: openssl cms, AES-256-CBC content key wrapped to the recipient cert (EC P-384, ECDH). The private key lives only
@@ -33,17 +35,20 @@ def gws(*args, upload=None):
     return json.loads(out) if out.startswith('{') or out.startswith('[') else out
 
 
+BUCKET = 'ari-offsite'
+
+
 def newest_storage_object():
-    """Return (name, bytes) of newest ari_*.json.gz in bucket ari-backups, or (None, reason)."""
+    """Return (name, bytes) of newest ari_*.json.gz.cms in bucket ari-offsite (already encrypted), or (None, reason)."""
     base = ari_db.SB_URL + '/storage/v1/object'
     h = ari_db.headers()
     try:
-        req = urllib.request.Request(base + '/list/ari-backups', method='POST', headers=h, data=json.dumps(
+        req = urllib.request.Request(base + '/list/' + BUCKET, method='POST', headers=h, data=json.dumps(
             {'prefix': '', 'limit': 100, 'sortBy': {'column': 'name', 'order': 'desc'}}).encode())
-        names = sorted([o['name'] for o in json.loads(urllib.request.urlopen(req, timeout=60).read()) if o['name'].startswith('ari_')])
+        names = sorted([o['name'] for o in json.loads(urllib.request.urlopen(req, timeout=60).read()) if o['name'].startswith('ari_') and o['name'].endswith('.cms')])
         if not names: return None, 'bucket empty or not visible to ari_worker'
         name = names[-1]
-        req = urllib.request.Request(base + '/authenticated/ari-backups/' + name, headers=h)
+        req = urllib.request.Request(base + '/authenticated/' + BUCKET + '/' + name, headers=h)
         return name, urllib.request.urlopen(req, timeout=120).read()
     except urllib.error.HTTPError as e:
         return None, 'storage %s %s' % (e.code, e.read().decode()[:120])
@@ -70,12 +75,22 @@ def encrypt(plain: bytes) -> bytes:
 
 def main():
     name, blob = newest_storage_object()
-    source, counts = 'ari-backups', None
+    source, counts = BUCKET, None
     if name is None:
         reason = blob
         name, blob, counts = worker_scope_export()
         source = 'worker-scope (storage: %s)' % reason
-    enc = encrypt(blob)
+        enc = encrypt(blob)
+    else:
+        enc = blob  # already CMS-encrypted inside Supabase
+        name = name[:-4]  # target adds .cms back
+        runs = ari_db.rpc('ari_worker_backup_status') or []
+        run = next((r for r in runs if r.get('enc_file') == name + '.cms'), None)
+        if not run or run.get('enc_sha256') != hashlib.sha256(enc).hexdigest():
+            raise SystemExit('FAIL %s.cms does not match backup_runs.enc_sha256' % name)
+        counts = {'tables': run.get('tables'), 'rows': run.get('rows'), 'verified': run.get('verified'),
+                  'has_auth_users': 'auth.users' in (run.get('counts') or {}),
+                  'has_migration_ledger': 'supabase_migrations.schema_migrations' in (run.get('counts') or {})}
     digest = hashlib.sha256(enc).hexdigest()
     q = "name = '%s' and mimeType = 'application/vnd.google-apps.folder' and 'root' in parents and trashed = false" % FOLDER
     found = gws('drive', 'files', 'list', '--params', json.dumps({'q': q, 'fields': 'files(id,name)'})).get('files', [])

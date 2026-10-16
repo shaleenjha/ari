@@ -7,6 +7,10 @@
 # compares row counts with the backup manifest. Result: work/backups/drill_<object>.json (counts only, no rows).
 import os, sys, json, glob, gzip, shutil, subprocess, urllib.request
 REF = 'rbkrqlzlblquvgmuohro'
+# v18.7.1: maintenance-only. Refuses to touch the Management API unless a maintenance session opts in explicitly
+# (ARI_MAINT=1) with a fresh short-lived token. No scheduled or worker run sets it.
+if __name__ == '__main__' and os.environ.get('ARI_MAINT') != '1':
+    raise SystemExit('maintenance only: set ARI_MAINT=1 in a maintenance session with a fresh short-lived token')
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 OUT = os.path.join(ROOT, 'work', 'backups')
 BIN = '/usr/lib/postgresql/17/bin'

@@ -7,6 +7,10 @@
 # Needs /usr/lib/postgresql/17/bin (sudo apt-get install -y postgresql-17 on a fresh sandbox; the script installs it if missing).
 import os, sys, json, glob, secrets, subprocess, datetime, time, shutil
 REF = 'rbkrqlzlblquvgmuohro'
+# v18.7.1: maintenance-only. Refuses to touch the Management API unless a maintenance session opts in explicitly
+# (ARI_MAINT=1) with a fresh short-lived token. No scheduled or worker run sets it.
+if __name__ == '__main__' and os.environ.get('ARI_MAINT') != '1':
+    raise SystemExit('maintenance only: set ARI_MAINT=1 in a maintenance session with a fresh short-lived token')
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 OUT = os.path.join(ROOT, 'work', 'backups')
 BIN = '/usr/lib/postgresql/17/bin'

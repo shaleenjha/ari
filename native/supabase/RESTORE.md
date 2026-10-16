@@ -79,9 +79,10 @@ Column rules (the drill does exactly this):
 6. Log the restore (object name, scope, counts, times) in the day's fixlog.
 
 ## Offsite copy on Google Drive (v18.7, second vendor)
-- Where: private folder "Ari backups" in the Google Drive of ops@example.com, newest 14 files `ari_*.json.gz.cms` (full export) or `ari_w_*.json.gz.cms` (worker-scope export, until migration 0025).
+- Where: private folder "Ari backups" in the Google Drive of ops@example.com, newest 14 files `ari_*.json.gz.cms` (full export: every public table, auth users + identities, migration ledger, function/policy/cron definitions) or `ari_w_*.json.gz.cms` (worker-scope fallback, only if the encrypted copy was unreadable).
+- Since v18.7.1 (migration 0025_offsite_encrypted) the ari-backup edge function encrypts the export itself and writes it to private bucket ari-offsite; ari_worker can read only that bucket and only *.cms, so the Drive job never sees plaintext. The Drive file is that object byte for byte; its sha256 equals backup_runs.enc_sha256.
 - Written nightly by task d497bf61 step 2 (scripts/offsite_drive.py). Encrypted with openssl CMS (AES-256-CBC, key wrapped to EC P-384 certificate native/supabase/offsite/ari-offsite-recipient.pem, sha256 fingerprint 89:F0:82:D8:...:CD:77). The job holds only the public certificate.
 - Private key: Hark vault, "Ari offsite backup private key (EC P-384, PKCS8 PEM...)". No other copy exists.
 - Decrypt: download the file from Drive, put the key in key.pem (chmod 600), then
   `openssl cms -decrypt -binary -inform DER -in FILE.cms -inkey key.pem -recip ari-offsite-recipient.pem -out FILE.json.gz`, then gunzip.
-  Shred key.pem afterwards. Round trip verified Oct 17 2026 04:1x IST (counts matched, 14 tables, 2,748 rows).
+  Shred key.pem afterwards. Round trip verified Oct 17 2026 04:1x IST (counts matched, 14 tables, 2,748 rows). The in-function encryption (pkijs CMS, same format) was round-tripped on ari-staging with a throwaway cert on Oct 17 04:4x IST: openssl decrypt OK, 36 tables incl. auth.users and the ledger, every count matched.

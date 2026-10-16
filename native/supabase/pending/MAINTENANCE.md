@@ -15,3 +15,9 @@ Order: apply each step on **ari-staging** first, run its check, then on **prod (
 Not touched on purpose: legacy JWT keys stay enabled (the worker JWT is signed with the legacy secret until it is re-minted, by 2027-04-01).
 Already verified without a PAT (Oct 17 04:2x IST): /auth/v1/settings shows disable_signup=true and only Google enabled; anon signup -> 422.
 is_owner() is pinned to the owner uid (+ aal2 once a factor is enrolled) and trusts no email claim, so the "email_verified default false" item is moot.
+
+## Done Oct 17 2026, 04:35 to 05:10 IST (v18.7.1 maintenance session, PAT hark-maint-2026-10-17)
+All applied staging first, rollback rehearsed on staging (0025, 0026, 0027, 0028 rollback + re-apply; SSL false + true), then prod.
+Ledgers in step: both projects 0001..0028. Files moved to migrations/ (0025_offsite_encrypted replaced the worker-reads-backups
+draft, kept as work/maint1017/*.REJECTED.sql), rollbacks in rollbacks/. Edge functions ari-push + ari-backup redeployed on both.
+SSL enforcement on for both. Restore drill 34/34 tables, 2,316/2,316 rows. Nothing pending here.
