@@ -24,6 +24,5 @@ demo/
 app/
 web/_archive/
 web/ops_v*.html
-native/supabase/baseline/
 native/ari/.git/
 *.png.bak
