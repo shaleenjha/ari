@@ -11,4 +11,8 @@ assert.equal(await m.challenge('dBjftJeZ4CVP-mJ92K1QqoAjhCfdhyWeAqH7MJ7vY3M'), '
 assert.ok(m.safeEq(m.ALLOW, 'owner@example.com'));
 assert.ok(!m.safeEq(m.ALLOW.slice(0, -1), m.ALLOW));
 assert.ok(m.rand(48).length >= 64 && /^[A-Za-z0-9_-]+$/.test(m.rand(48)));
-console.log('oauth helpers OK (PKCE S256, exact scope, allowlist, random)');
+// v18.10.1: browser outcomes redirect back to the app, never render HTML
+assert.equal(m.backTo(null), 'https://ari-web.vercel.app/ops?gmail=connected');
+assert.equal(m.backTo('scope'), 'https://ari-web.vercel.app/ops?gmail=failed&r=scope');
+assert.equal(m.backTo('<script>'), 'https://ari-web.vercel.app/ops?gmail=failed&r=error');
+console.log('oauth helpers OK (PKCE S256, exact scope, allowlist, random, redirect back)');

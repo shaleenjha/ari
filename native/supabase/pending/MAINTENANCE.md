@@ -45,3 +45,8 @@ Tested Oct 17 on local Postgres 17 with the prod schema (schema-only restore, sy
 - Purely additive (new tables/functions only), so no pre-apply dump; next 03:00 IST backup picks the new tables up.
 - Session helper work/maint_gmail.py (ARI_MAINT-gated) deleted at the end. NOT mine but found: work/sec_q.py (Oct 16) calls the Management API with no ARI_MAINT gate; it should be deleted.
 - Pending: the Google OAuth client (blocked, see app2/docs/gmail-fetch.md §4) and the two function secrets on both projects.
+
+## Done Oct 17 2026, 14:40 to 15:20 IST (v18.10.1, PAT hark-maint-2026-10-17c, 24 h, approved by Owner 14:38 IST)
+- 0031_copy_tags_edits_rescan_push: local PG17 + staging apply / tests (ALL 0031 TESTS PASSED) / rollback / re-apply / tests, then prod (ledger 0031). Rollback rollbacks/0031_rollback.sql matches prod's pre-0031 function bodies.
+- ari-gmail-oauth redeployed (v3) on staging then prod: browser outcomes redirect to /ops?gmail=...
+- Helper work/maint_0031.py deleted; token revoked on supabase.com (list empty); api.supabase.com 401. Nothing pending here.
