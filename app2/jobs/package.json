@@ -6,7 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "eval:drafts": "vitest run src/drafts --reporter=verbose"
+    "eval:drafts": "vitest run src/quill --reporter=verbose"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

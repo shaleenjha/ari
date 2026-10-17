@@ -29,3 +29,10 @@ SSL enforcement on for both. Restore drill 34/34 tables, 2,316/2,316 rows. Nothi
 | 2 | Add `python3 scripts/hygiene_scan.py` after the sync step in task 56e17ef1 | task prompt | next sync prints the hygiene line, exit 0 | remove the step |
 | 3 | v18.8 front end "Tidy up" (work/v188_hygiene, spec plans/data-hygiene.md) | deploy | harness pass, then device check | redeploy v18.7.1 |
 Tested Oct 17 on local Postgres 17 with the prod schema (schema-only restore, synthetic rows): apply, tests, rollback, re-apply, tests: all pass.
+
+## Done Oct 17 2026, 06:05 to 06:40 IST (maintenance window #2, v18.8, PAT hark-maint-2026-10-17b)
+- Fresh verified backup first: ari_20261017_0039Z.dump, restore-test 34/34 tables, 2,317/2,317 rows (only benign "role ari_worker does not exist" grant errors in the throwaway restore).
+- 0029 on staging: applied, test file run inside one transaction (staging's own 2 synthetic people/accounts hidden in-transaction; the run ends in a deliberate raise so nothing persists) -> "ALL 0029 TESTS PASSED"; rollback, re-apply, tests pass again. Anon -> 401 on hygiene_open, hygiene_resolve, ari_hygiene_scan. Worker-executable public functions +2 (ari_hygiene_scan, ari_worker_hygiene; catalogue count 32 -> 34 including non-app helpers).
+- 0029 on prod: applied, ledger 0001..0029 on both, 46 hand-set no_connect_tick flags removed by the backfill, anon 401 x3, worker +2. Files: migrations/0029_data_hygiene.sql, rollbacks/0029_rollback.sql.
+- hygiene_scan.py added after the sync step in task 56e17ef1 (prompt only). First prod scan as ari_worker: 43 accept_no_connect, 42 no_account_link, 14 dm1_past_due, 0 duplicate_account, 0 stale_stage; rescan idempotent.
+- v18.8 "Tidy up" deployed (frozen base web/ops_v1871.html). Nothing pending here.

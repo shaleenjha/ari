@@ -1,12 +1,12 @@
 # Quill: draft-engine evaluation harness (Phase 1, synthetic only)
 
 Ari's drafting engine is judged by code before any model or prompt change ships. No real prospect, account or DM is used:
-personas and the labelled corpus are invented (`jobs/src/drafts/synthetic.ts`).
+personas and the labelled corpus are invented (`jobs/src/quill/synthetic.ts`).
 
 | Piece | Where |
 |---|---|
-| Style scorer (deterministic): 1 to 2 lines, ≤ 300 chars (works as a connection note), no em/en/figure dashes or a spaced hyphen used as one, no hedging (whole-word list), no banned phrases, no unfilled placeholders = hard gates; > 1 question, not naming the person or company, stiff opener, > 1 "!" = soft costs | `jobs/src/drafts/style.ts` |
-| Harness: `DraftEngine` interface, baseline engine, `evaluate()` → report `ari.draft-eval/v1` (pass rate, mean score, violations by rule), scorer self-check against 14 labelled drafts, `gate()` thresholds (pass ≥ 90 %, mean ≥ 85, scorer agreement 100 %) | `jobs/src/drafts/eval.ts` |
+| Style scorer (deterministic): 1 to 2 lines, ≤ 300 chars (works as a connection note), no em/en/figure dashes or a spaced hyphen used as one, no hedging (whole-word list), no banned phrases, no unfilled placeholders = hard gates; > 1 question, not naming the person or company, stiff opener, > 1 "!" = soft costs | `jobs/src/quill/style.ts` |
+| Harness: `DraftEngine` interface, baseline engine, `evaluate()` → report `ari.draft-eval/v1` (pass rate, mean score, violations by rule), scorer self-check against 14 labelled drafts, `gate()` thresholds (pass ≥ 90 %, mean ≥ 85, scorer agreement 100 %) | `jobs/src/quill/eval.ts` |
 | CI | job `drafts-eval` runs `npm run eval:drafts` (vitest, prints the report) |
 
 ## How Quill uses it
