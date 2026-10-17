@@ -24,6 +24,7 @@ Rules:
 Subject "Exec track requests · YYYY-MM-DD" (IST date, middle dot), from owner@example.com.
 
 Usage: python3 scripts/exec_track_handoff.py            (dry run: prints the email, sends and writes nothing)
+       python3 scripts/exec_track_handoff.py --needs-notes   (read-only: exec-track people still needing a note, for worker step 2b)
        python3 scripts/exec_track_handoff.py --send     (needs shell credentials google owner@example.com)
 Supabase is read/written as the restricted worker role (proxy-injected bearer, same as scripts/daily_report.py sb()).
 """
@@ -232,7 +233,23 @@ def mark(ready, day):
                            'detail': 'Emailed to your work inbox %s with the connection note' % day, 'source': 'hark'})
 
 
+def needs_notes():
+    """--needs-notes (read-only): the exec-track people the worker must write a note for (worker step 2b), one per line."""
+    rows, done, hold, accts = exec_rows()
+    n = 0
+    for p in rows:
+        k, t = status_of(p, done, hold)
+        if k == 'drafting':
+            n += 1
+            print('%s\t%s\t%s\t%s\t%s' % (p['id'], p.get('name'), clean_title(p.get('title')), p.get('company') or '-', t))
+    if not n:
+        print('none')
+    return 0
+
+
 def main():
+    if '--needs-notes' in sys.argv:
+        return needs_notes()
     send = '--send' in sys.argv
     day = dt.datetime.now(TZ).date().isoformat()
     subject = SUBJECT % day
