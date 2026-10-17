@@ -40,3 +40,16 @@ Written Oct 17 2026 (Forge, for Relay's capability). Nothing here reads a real m
 - Replies join by Gmail id first, then same person within 10 min. First accept email per person wins (same as `person_mark`).
 - `agree` = no missing / extra / person / time mismatches and unmatched ≤ 1. Stored with `app.shadow_report_put`; promotion = `app.shadow_promotion_ready` (3 consecutive nights, latest no older than yesterday).
 - The markdown render prints ids only, never names or snippets, so reports can go in logs and CI artefacts.
+
+## 4. Live wiring in the current app (v18.8.1, Oct 17 2026, approved by Owner 08:25 IST): SHADOW MODE
+The first real connection is built on the current Supabase projects (not app2 yet), same rules as above, single mailbox.
+| Piece | Where |
+|---|---|
+| Tables + functions + cron, rollback, tests | `native/supabase/migrations/0030_gmail_shadow.sql`, `rollbacks/0030_rollback.sql`, `tests/0030_gmail_shadow_test.sql` |
+| Connect flow: one-time app ticket (owner) -> `start` (state + PKCE S256) -> Google -> `callback` (one-time state, exact scope `gmail.readonly`, `users.getProfile` address, allowlist owner@example.com, else the grant is revoked) -> refresh token into Supabase Vault | edge fn `ari-gmail-oauth` (verify_jwt off), `tests/gmail_oauth_helpers.test.ts` |
+| Every 10 min while connected: refresh -> access token in memory -> `messages.list` q=`from:linkedin.com (subject:accepted OR subject:connected OR subject:message OR subject:messaged OR subject:replied) after:<cursor-1h>` (first run 2 days) -> `messages.get format=full` -> verbatim parser -> only msg id, kind, profile URL, name, exact time stored; cursor = newest internalDate, forward-only (`greatest`), not moved on a truncated pass | edge fn `ari-gmail-ingest` (x-ari-hook from Vault, constant-time), `tests/gmail_ingest_port.test.ts` (parser parity on the synthetic fixtures) |
+| Nightly 00:30 IST: `ari_gmail_shadow_diff()` -> `gmail_shadow_diffs` (ari.shadow-diff/v1, ids only, match_rate) vs `people.accepted` (+ts_approx) and `replies` (source gmail). Matching: vanity, else a name unique among live people, else unmatched | SQL in 0030 |
+| Health: 3 failed runs in a row -> one `ops_alert` push per 12 h ("Ari could not read your Gmail the last few times"); `invalid_grant` -> status needs_reconnect | `ari_gmail_ingest_fail` |
+| App: Settings > Gmail > "Connect Gmail (read-only)" (connect / reconnect / disconnect; status, last read, 7-night agree rate) | v18.8.1, `work/v1881_gmail/` |
+Shadow output never writes people, replies or anything the worker reads; the LLM worker e8fbd86f is unchanged. Promotion to live is a later, separate decision (3 agreeing nights).
+Blocked Oct 17: Google refused the remote browser's re-verification for ops@example.com after the project `ari-ingest` was created, so the OAuth client and the function secrets ARI_GMAIL_CLIENT_ID / ARI_GMAIL_CLIENT_SECRET do not exist yet. Until they do, `start` answers "Not set up yet" (503) and nothing reads mail.

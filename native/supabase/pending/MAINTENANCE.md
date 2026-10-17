@@ -37,3 +37,11 @@ Tested Oct 17 on local Postgres 17 with the prod schema (schema-only restore, sy
 - hygiene_scan.py added after the sync step in task 56e17ef1 (prompt only). First prod scan as ari_worker: 43 accept_no_connect, 42 no_account_link, 14 dm1_past_due, 0 duplicate_account, 0 stale_stage; rescan idempotent.
 - v18.8 "Tidy up" deployed (frozen base web/ops_v1871.html); live /build.json v18.8. Device check owed (remote browsers stop at the passkey gate by design).
 - After: worker 06:19 clean; scheduled sync 06:25 clean with the hygiene line, no ALERT; test ping delivered 3/3. Session helper using the token deleted. Nothing pending here.
+
+## Done Oct 17 2026, 08:26 to 08:50 IST (v18.8.1 Gmail shadow, PAT bound as supabase-mgmt, approved by Owner 08:25 IST)
+- 0030_gmail_shadow on staging: apply; tests/0030_gmail_shadow_test.sql in one transaction ending in a deliberate raise -> "ALL 0030 TESTS PASSED" (vanity, privileges, one-time ticket + state, allowlist, Vault round trip + update, idempotent record, forward-only cursor, diff counts 2 match / 1 time mismatch / 1 unmatched with no names in the report, alert on the 3rd failure only, needs_reconnect, kick refuses while not connected, people untouched). Rollback -> ledger 0029, 0 functions/tables/cron/Vault entries; re-apply; tests pass again. Staging app_config gmail_fn_base set to its own ref.
+- Edge functions ari-gmail-oauth + ari-gmail-ingest deployed (verify_jwt off) on staging then prod: wrong/no hook -> 401; right hook (sent from SQL) -> 200 {"skipped":"disconnected"}; start without the OAuth client -> 503 "Not set up yet".
+- Prod: 0030 applied, ledger 0030, 2 cron jobs (ari-gmail-ingest */10, ari-gmail-shadow-diff 19:00 UTC = 00:30 IST), status disconnected. Anon (publishable key) -> 403 on ari_gmail_status / connect_ticket / ingest_config / hook / disconnect and on gmail_shadow_events.
+- Purely additive (new tables/functions only), so no pre-apply dump; next 03:00 IST backup picks the new tables up.
+- Session helper work/maint_gmail.py (ARI_MAINT-gated) deleted at the end. NOT mine but found: work/sec_q.py (Oct 16) calls the Management API with no ARI_MAINT gate; it should be deleted.
+- Pending: the Google OAuth client (blocked, see app2/docs/gmail-fetch.md §4) and the two function secrets on both projects.

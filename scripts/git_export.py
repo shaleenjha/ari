@@ -35,7 +35,7 @@ INCLUDE = [
     'scripts/sync_sheet_supabase.py', 'scripts/git_export.py', 'scripts/git_sync.sh', 'scripts/git_push_api.py',
     'scripts/ari_db.py', 'scripts/backup_check.py', 'scripts/restore_drill.py', 'scripts/offsite_drive.py',
     'scripts/health_check.py', 'scripts/phase0_metrics.py', 'scripts/hygiene_scan.py', 'scripts/test_hygiene_scan.py',
-    'native/supabase/tests/*.sql',
+    'native/supabase/tests/*.sql', 'native/supabase/tests/*.ts',
     # Phase 1 (Oct 17 2026): app2 tree + CI, recursive ("dir/**"), build output and deps excluded
     'app2/**', '.github/**',
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient.pem',
