@@ -33,8 +33,12 @@ try: m = ari_db.request('POST', 'rpc/ari_worker_metrics', {}, timeout=30)
 except SystemExit as e: m = None; why = 'needs migration 0027 (' + str(e)[:60] + ')'
 if m:
     E = [e for e in m.get('edits') or [] if e.get('before') and e.get('after')]
+    try:  # v18.11.2: a one-tap switch to Ari's alternative is not an edit
+        import copy_switch
+        alts, logs, _ = copy_switch.load_live(); n0 = len(E); E = copy_switch.filter_metric_edits(E, alts, logs); sw_out = n0 - len(E)
+    except BaseException: sw_out = None
     r = [lev(e['before'], e['after']) / max(len(e['before']), 1) for e in E]
-    out['3_draft_edit_distance'] = {'edits': len(E), 'mean_normalised': round(statistics.mean(r), 3) if r else None}
+    out['3_draft_edit_distance'] = {'edits': len(E), 'mean_normalised': round(statistics.mean(r), 3) if r else None, 'switches_left_out': sw_out}
     q = m.get('quick_check') or {}; done = (q.get('answered') or 0) + (q.get('skip') or 0)
     out['4_quick_check_skip_rate'] = {**q, 'skip_rate': round(q.get('skip', 0) / done, 3) if done else None}
     U = m.get('usage') or []

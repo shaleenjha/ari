@@ -21,7 +21,9 @@
 #        -> store the exact asset an offer draft (S5 / F3) would send next; the app shows it beside the DM with Approve / Switch.
 #           Only approved asset types (today three_line_read). variant "role=asset;type=<type>;of=<pick id>".
 #   python3 scripts/draft_tag.py untagged [limit]   -> unsent drafts whose current text has no tag yet (JSON list)
-#   python3 scripts/draft_tag.py stats [from] [to]  -> the copy read for a window (YYYY-MM-DD; default last 14 days)
+#   python3 scripts/draft_tag.py stats [from] [to] [--raw]  -> the copy read for a window (YYYY-MM-DD; default last 14 days).
+#        v18.11.2: sends that went out as Ari's one-tap alternative are credited to the alternative's structure and not
+#        counted as edits (copy_switch.py); 'switched', 'by_structure_switched', raw_edited / raw_by_structure added. --raw = DB only.
 import sys, os, json, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ari_db import rpc, request
@@ -76,9 +78,18 @@ def main(a):
         print(json.dumps(rpc('ari_worker_untagged_drafts', {'p_limit': int(a[1]) if len(a) > 1 else 50}), indent=1, default=str)); return 0
     if cmd == 'stats':
         args = {}
-        if len(a) > 1: args['p_from'] = a[1]
-        if len(a) > 2: args['p_to'] = a[2]
-        print(json.dumps(rpc('ari_worker_copy_stats', args), indent=1, default=str)); return 0
+        d = [x for x in a[1:] if x != '--raw']
+        if len(d) > 0: args['p_from'] = d[0]
+        if len(d) > 1: args['p_to'] = d[1]
+        st = rpc('ari_worker_copy_stats', args)
+        if '--raw' not in a:
+            try:
+                import copy_switch
+                alts, logs, _ = copy_switch.load_live()
+                st = copy_switch.fix_stats(st, alts, logs)
+            except BaseException as e:
+                print('stats: switch attribution unavailable (%s); database numbers shown' % str(e)[:120], file=sys.stderr)
+        print(json.dumps(st, indent=1, default=str)); return 0
     print(__doc__ or 'usage: draft_tag.py tag|untagged|stats'); return 2
 
 if __name__ == '__main__':

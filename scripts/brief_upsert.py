@@ -4,6 +4,8 @@
 #   python3 scripts/brief_upsert.py building <account_id>  -> mark it building (the app shows "Researching now")
 #   python3 scripts/brief_upsert.py write <brief.json>     -> validate and upsert a finished brief (status ready)
 #   python3 scripts/brief_upsert.py guidance [ae]         -> Owner's recent draft edits (before/after) to follow as style guidance
+#                                                             (v18.11.2: one-tap switches to Ari's alternative are dropped, see copy_switch.py;
+#                                                             --raw prints the database rows unfiltered)
 #   python3 scripts/brief_upsert.py account <company>      -> v18.10 Re-scan: the account (id, hook fields) + its people, as JSON, for a brief rebuild
 #                                                             of an account whose brief is already ready (then research and `write` as usual)
 # brief.json keys: account_id, thesis, why_now[], data_flow[], committee[], angle, soft_angles[], quick_check[], sequences[], doc_url (optional)
@@ -60,5 +62,15 @@ elif cmd == 'account':
     for x in a['people']: x['dm'] = (x.get('dm') or '')[:400]
     print(json.dumps(a, indent=1, default=str))
 elif cmd == 'guidance':
-    ae = sys.argv[2] if len(sys.argv) > 2 else None
-    print(json.dumps(rpc('ari_worker_guidance', {'p_ae': ae}), indent=1, default=str))
+    args = [x for x in sys.argv[2:] if x != '--raw']
+    ae = args[0] if args else None
+    rows = rpc('ari_worker_guidance', {'p_ae': ae}) or []
+    if '--raw' not in sys.argv:
+        try:
+            import copy_switch
+            alts, logs, _ = copy_switch.load_live()
+            rows, dropped = copy_switch.filter_guidance(rows, alts, logs)
+            if dropped: print('guidance: left out %d switch(es) to Ari\'s alternative (not your edits)' % len(dropped), file=sys.stderr)
+        except BaseException as e:  # never block drafting: fall back to the unfiltered rows, say so
+            print('guidance: switch filter unavailable (%s); showing unfiltered rows' % str(e)[:120], file=sys.stderr)
+    print(json.dumps(rows, indent=1, default=str))
