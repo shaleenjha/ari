@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.11"><meta name="ari-rev" content="81e444fb63">
+<meta name="ari-build" content="v18.11.1"><meta name="ari-rev" content="8bd84ced11">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -3658,7 +3658,7 @@ html.v184fxon{overflow:hidden}
 .v186hint{margin:8px 0 0;font-size:12px;line-height:16px;color:var(--ink2)}
 </style>
 <style>/* ===== v18.7 (Oct 17): Phase 0 cut list, hide-only. The code paths stay; these surfaces are off the default view. ===== */
-.tbi[data-i="4"]{display:none!important}              /* Pipeline tab (the exec track tab is back since v18.10) */
+.tbi[data-i="3"],.tbi[data-i="4"],.tab[data-i="3"],.ri[data-i="3"]{display:none!important} /* Exec track + Pipeline tabs (exec track lives on Home since v18.11.1) */
 #v1712hg,#v1712pop{display:none!important}                             /* scan hourglass: the "Synced live" line stays */
 .v181hc{display:none!important}                                        /* health score chip */
 .v182feed,#v182feed{display:none!important}                            /* live activity feed */
@@ -3678,7 +3678,7 @@ html.v184fxon{overflow:hidden}
 .hyb{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line,rgba(0,0,0,.12));background:transparent;font:inherit}
 .hyb:first-child{background:var(--ink,#111);color:var(--bg,#fff);border-color:transparent}
 </style>
-<style>#founder .ex .cb{display:none!important}#founder .ex .exh{grid-template-columns:1fr auto!important}#sendbar,#mailSheet{display:none!important}</style><style>/* v18.10 */.v1810co{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 6px;font-size:13px}.v1810co span{opacity:.6}.v1810st{display:inline-block;margin:6px 6px 0 0;padding:2px 8px;border-radius:999px;font-size:12px;line-height:18px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--ink)}.v1810st.s-drafting{background:color-mix(in srgb,var(--ink) 8%,transparent)}.v1810st.s-hold,.v1810st.s-handed{background:color-mix(in srgb,var(--ink) 6%,transparent);opacity:.75}#founder .v1810ex .note{margin:8px 0 0;font-size:14px;line-height:20px}.v1810pk{display:flex;gap:10px;align-items:flex-start;margin:8px 0 10px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--acc) 10%,transparent)}.v1810pk p{margin:0;display:flex;flex-direction:column;gap:2px}.v1810pk em{font-style:normal;font-size:12px;opacity:.7}.v1810pk b{font-size:14px}.v1810pk span{font-size:13px;opacity:.8;line-height:18px}.v1810rs{display:flex;align-items:center;justify-content:space-between;gap:12px}.v1810rs .r{display:flex;gap:10px;align-items:flex-start;min-width:0}.v1810rs .r div{display:flex;flex-direction:column;gap:2px}.v1810rs .r span{font-size:13px;opacity:.8;line-height:18px}.v1810rs.stale{border-color:color-mix(in srgb,var(--acc) 40%,transparent)}</style><style>/* v18.10.1 edit drafts inside Ari */.v18101ed{display:block}textarea.v18101ta{display:block;width:100%;box-sizing:border-box;resize:none;overflow:hidden;font:inherit;font-size:17px;line-height:26px;letter-spacing:-.015em;color:var(--ink);border:0;outline:none;-webkit-appearance:none;appearance:none;-webkit-user-select:text;user-select:text;min-height:60px;transition:box-shadow .18s ease}textarea.v18101ta:focus{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--acc) 70%,transparent)}.v18101meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 2px 0;font-size:12.5px;line-height:18px;color:var(--ink);opacity:.72;min-height:18px}.v18101meta .v18101st{display:flex;align-items:center;gap:8px;min-width:0}.v18101cc.over{color:var(--acc);opacity:1}.v18101dot{width:6px;height:6px;border-radius:50%;background:var(--acc);flex:none}.v18101mine{font-weight:600}.v18101lnk{border:0;background:none;padding:2px 0;font:inherit;color:var(--acc);text-decoration:underline;text-underline-offset:2px;cursor:pointer}.v18101orig{margin-top:8px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--ink) 5%,transparent)}.v18101orig p{margin:4px 0 10px;font-size:15px;line-height:22px;white-space:pre-wrap;overflow-wrap:anywhere;opacity:.85}</style><style>/* v18.11 pick and switch */.v1811pk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 2px 0}.v1811lab{font-size:12.5px;line-height:18px;font-weight:600;color:var(--ink);opacity:.8}.v1811chip{border:1px solid color-mix(in srgb,var(--acc) 55%,transparent);background:color-mix(in srgb,var(--acc) 8%,transparent);color:var(--ink);font:inherit;font-size:13px;line-height:18px;padding:7px 12px;border-radius:999px;min-height:36px;cursor:pointer}.v1811flag{display:inline-flex;align-items:center;font-size:12.5px;line-height:18px;font-weight:600;padding:5px 10px;border-radius:999px;color:#b3261e;background:color-mix(in srgb,#b3261e 12%,transparent)}.v1811miss{margin:10px 2px 0;font-size:13px;line-height:19px;font-weight:600;color:#b3261e}.v1811off{opacity:.38!important;pointer-events:none!important}.v1811fade{animation:v1811x .32s ease}@keyframes v1811x{0%{opacity:.15}100%{opacity:1}}.v1811dm{border-bottom-left-radius:0}.v1811as{margin-top:8px;padding:12px 14px;border-radius:14px;border-left:3px solid color-mix(in srgb,var(--acc) 60%,transparent);background:color-mix(in srgb,var(--ink) 4%,transparent)}.v1811cap{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;line-height:18px;font-weight:600;opacity:.75}.v1811ok{display:inline-flex;gap:4px;align-items:center;color:var(--acc);opacity:1}.v1811ast{margin:6px 0 10px;font-size:15px;line-height:22px;white-space:pre-wrap;overflow-wrap:anywhere;opacity:.85;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.v1811as.open .v1811ast{-webkit-line-clamp:unset;display:block}.v1811row{display:flex;gap:8px;flex-wrap:wrap}@media (prefers-reduced-motion:reduce){.v1811fade{animation:none}}</style></head>
+<style>#founder .ex .cb{display:none!important}#founder .ex .exh{grid-template-columns:1fr auto!important}#sendbar,#mailSheet{display:none!important}</style><style>/* v18.10 */.v1810co{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 6px;font-size:13px}.v1810co span{opacity:.6}.v1810st{display:inline-block;margin:6px 6px 0 0;padding:2px 8px;border-radius:999px;font-size:12px;line-height:18px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--ink)}.v1810st.s-drafting{background:color-mix(in srgb,var(--ink) 8%,transparent)}.v1810st.s-hold,.v1810st.s-handed{background:color-mix(in srgb,var(--ink) 6%,transparent);opacity:.75}#founder .v1810ex .note{margin:8px 0 0;font-size:14px;line-height:20px}.v1810pk{display:flex;gap:10px;align-items:flex-start;margin:8px 0 10px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--acc) 10%,transparent)}.v1810pk p{margin:0;display:flex;flex-direction:column;gap:2px}.v1810pk em{font-style:normal;font-size:12px;opacity:.7}.v1810pk b{font-size:14px}.v1810pk span{font-size:13px;opacity:.8;line-height:18px}.v1810rs{display:flex;align-items:center;justify-content:space-between;gap:12px}.v1810rs .r{display:flex;gap:10px;align-items:flex-start;min-width:0}.v1810rs .r div{display:flex;flex-direction:column;gap:2px}.v1810rs .r span{font-size:13px;opacity:.8;line-height:18px}.v1810rs.stale{border-color:color-mix(in srgb,var(--acc) 40%,transparent)}</style><style>/* v18.10.1 edit drafts inside Ari */.v18101ed{display:block}textarea.v18101ta{display:block;width:100%;box-sizing:border-box;resize:none;overflow:hidden;font:inherit;font-size:17px;line-height:26px;letter-spacing:-.015em;color:var(--ink);border:0;outline:none;-webkit-appearance:none;appearance:none;-webkit-user-select:text;user-select:text;min-height:60px;transition:box-shadow .18s ease}textarea.v18101ta:focus{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--acc) 70%,transparent)}.v18101meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 2px 0;font-size:12.5px;line-height:18px;color:var(--ink);opacity:.72;min-height:18px}.v18101meta .v18101st{display:flex;align-items:center;gap:8px;min-width:0}.v18101cc.over{color:var(--acc);opacity:1}.v18101dot{width:6px;height:6px;border-radius:50%;background:var(--acc);flex:none}.v18101mine{font-weight:600}.v18101lnk{border:0;background:none;padding:2px 0;font:inherit;color:var(--acc);text-decoration:underline;text-underline-offset:2px;cursor:pointer}.v18101orig{margin-top:8px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--ink) 5%,transparent)}.v18101orig p{margin:4px 0 10px;font-size:15px;line-height:22px;white-space:pre-wrap;overflow-wrap:anywhere;opacity:.85}</style><style>/* v18.11 pick and switch */.v1811pk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 2px 0}.v1811lab{font-size:12.5px;line-height:18px;font-weight:600;color:var(--ink);opacity:.8}.v1811chip{border:1px solid color-mix(in srgb,var(--acc) 55%,transparent);background:color-mix(in srgb,var(--acc) 8%,transparent);color:var(--ink);font:inherit;font-size:13px;line-height:18px;padding:7px 12px;border-radius:999px;min-height:36px;cursor:pointer}.v1811flag{display:inline-flex;align-items:center;font-size:12.5px;line-height:18px;font-weight:600;padding:5px 10px;border-radius:999px;color:#b3261e;background:color-mix(in srgb,#b3261e 12%,transparent)}.v1811miss{margin:10px 2px 0;font-size:13px;line-height:19px;font-weight:600;color:#b3261e}.v1811off{opacity:.38!important;pointer-events:none!important}.v1811fade{animation:v1811x .32s ease}@keyframes v1811x{0%{opacity:.15}100%{opacity:1}}.v1811dm{border-bottom-left-radius:0}.v1811as{margin-top:8px;padding:12px 14px;border-radius:14px;border-left:3px solid color-mix(in srgb,var(--acc) 60%,transparent);background:color-mix(in srgb,var(--ink) 4%,transparent)}.v1811cap{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;line-height:18px;font-weight:600;opacity:.75}.v1811ok{display:inline-flex;gap:4px;align-items:center;color:var(--acc);opacity:1}.v1811ast{margin:6px 0 10px;font-size:15px;line-height:22px;white-space:pre-wrap;overflow-wrap:anywhere;opacity:.85;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.v1811as.open .v1811ast{-webkit-line-clamp:unset;display:block}.v1811row{display:flex;gap:8px;flex-wrap:wrap}@media (prefers-reduced-motion:reduce){.v1811fade{animation:none}}</style><style>/* v18.11.1 Home cleanup */#ready>#done,#ready>.sec:has(+#done),#ready>#v163days,#ready>#v175now{display:none!important}#v163pipe .v163cad{display:none!important}#v163pipe .v163stats>[data-v18111st="bg"]{display:none!important}#v163pipe .v163stats{grid-template-columns:repeat(3,1fr)!important}#v163pipe .v18111bg,#v163pipe .v18111bg+.list{display:none!important}#ready>.hero-t.press{cursor:pointer}.v18111hd{cursor:pointer;-webkit-tap-highlight-color:transparent}.v18111ch{font-style:normal;margin-left:6px;opacity:.6}.v18111ex{margin:12px 0 0}.v18111xh{display:flex;align-items:center;gap:12px;min-height:56px;padding:12px 16px;border-radius:16px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer}.v18111xh>div{flex:1;min-width:0}.v18111xh b{display:block;font-size:15px;line-height:20px;font-weight:600}.v18111xh span{display:block;font-size:13px;line-height:18px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v18111xh em{font-style:normal;font:600 12px/1 var(--mono);padding:6px 9px;border-radius:999px;background:color-mix(in srgb,var(--ink) 8%,transparent)}.v18111cv{font-style:normal;font-size:18px;line-height:1;opacity:.55;transition:transform .2s}.v18111ex.open .v18111cv{transform:rotate(90deg)}.v18111xl{margin-top:4px;border-radius:16px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}.v18111xr{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}.v18111xr:first-child{border-top:0}.v18111xr .t{min-width:0}.v18111xr .t b{display:block;font-size:14px;line-height:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v18111xr .t span{display:block;font-size:12.5px;line-height:17px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v18111xr .v1810st{justify-self:end;max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v18111xa{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}.v18111xa span{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;font-size:13px;box-shadow:inset 0 0 0 1px var(--line2);cursor:pointer}.v18111e{margin:0;padding:14px 16px;font-size:13px;color:var(--ink3)}.v18111pace{display:flex;align-items:center;gap:12px;margin:16px 0 4px;padding:12px 16px;border-radius:16px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer}.v18111pace>div{flex:1}.v18111pace b{display:block;font-size:15px;line-height:20px}.v18111pace span{display:block;font-size:13px;color:var(--ink3)}.v18111rd{display:flex;gap:10px;align-items:center;margin:0 0 8px;padding:10px 12px;border-radius:12px;font-size:13px;line-height:18px;background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--ink)}.v18111sp{flex:none;width:8px;height:8px;border-radius:50%;background:var(--acc);animation:v18111p 1.2s ease-in-out infinite}@keyframes v18111p{0%,100%{opacity:.35}50%{opacity:1}}.v163draft:has(.v18111rd) .msg{opacity:.6}.v163draft:has(.v18111rd) .v1811pk{display:none!important}.v18111off{opacity:.5;pointer-events:none}@media (prefers-reduced-motion:reduce){.v18111sp{animation:none}.v18111cv{transition:none}}</style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
   <div class="rscrim" id="rscrim"></div><nav class="rail" id="rail"><div class="rhd"><span class="cap">Ari · sections</span></div><div class="ri press on" data-i="0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></svg></span><span class="rl">Ready</span></div><div class="ri press" data-i="1"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/></svg><b>4</b></span><span class="rl">Follow</span></div><div class="ri press" data-i="2"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></span><span class="rl">Prospect</span></div><div class="ri press" data-i="3"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M5 15l-1-8 4.5 3.5L12 5l3.5 5.5L20 7l-1 8z"/></svg></span><span class="rl">Exec track</span></div><div class="ri press" data-i="4"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg><b>2</b></span><span class="rl">Tasks</span></div><div class="ri press" data-i="5"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></span><span class="rl">Report</span></div><div class="ri press" data-i="6"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span class="rl">Log</span></div><i class="rind" id="rind"></i><div class="rsp"></div><div class="ri sync press" id="syncBtn"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></span><span class="rl" id="syncL">Sync</span></div></nav>
@@ -5907,7 +5907,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.11';
+const M=MOTION,APP=$('#app'),BUILD='v18.11.1';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5972,7 +5972,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.11'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.11.1'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6051,6 +6051,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.11.1',d:'Oct 17',items:['The Exec track tab is gone, and so is the jump back to Today when you tapped it. The exec track is now one folded row on Today: tap it to see who is on it and where each one stands, with Open file and Reach out myself right there', 'Today is shorter and only shows what you can act on. Your history, what you did today and your pace live in Report', 'The email steps are off Today', 'Read before you send and While invites are pending now open what they count when you tap them, and the big ready line takes you to your list', 'After you tap Redraft, the draft says Ari is redrafting until the new one lands']},
  {v:'v18.11',d:'Oct 17',items:['Every draft shows Ari’s pick and the structure behind it, with one tap to switch to the next best version Ari already wrote, and one tap back', 'When a message offers something, you see the exact thing it would send next right under it. Approve it to unlock its Copy, or switch to the version without the offer', 'A draft Ari could not clear is marked Flagged and is never shown as Ari’s pick', 'Marking a message sent now waits for your edit to save first, so the sent copy is always your words']},
  {v:'v18.10.1',d:'Oct 17',items:['Edit a draft right where it sits: tap the message, change it, and Copy takes your words', 'Ari keeps its own draft next to yours and learns from what you change. Under an edited message, tap Ari’s draft to see it or go back to it', 'A ping when a Re-scan finishes, straight to the refreshed Brief', 'Connecting Gmail now brings you straight back to Ari']},
  {v:'v18.10',d:'Oct 17',items:['The Exec track tab is back: everyone parked for the exec, grouped by account, with where each one stands and their note', 'Reach out myself takes someone off the exec track, and Ari drafts your own first message', 'Drafts, sequences and people on an account open straight away. The quick check is optional and shows Ari’s pick with the reason', 'Re-scan on an account’s Brief: Ari looks for fresh triggers and rebuilds the brief, usually within ten minutes']},
@@ -7292,7 +7293,7 @@ V163.askDraft=askDraft;
 function draftBlockHTML(p,o={}){if(!p)return '';const df=dmField(p),msg=df.field?String(p[df.field]||''):'',dq=draftQ(p,df.act),rs=V162S.rs(p);
   const researching=df.tag==='DM1'&&!msg&&RS_LIVE(rs);
   let body='';
-  if(msg)body=`<div class="msg v163msg" data-msg>${E(msg)}</div><div class="v163row"><button type="button" class="v163btn sec press" data-dr="edit">Edit</button><button type="button" class="v163btn sec press" data-dr="copy">${ICO.copy}<span>Copy</span></button><button type="button" class="v163btn ghost press" data-dr="draft">Redraft</button></div>`;
+  if(msg){const rd=!!(dq&&dq.st==='queued');body=(rd?'<div class="v18111rd" role="status"><span class="v18111sp" aria-hidden="true"></span><span><b>Ari is redrafting.</b> The new draft replaces this one when it lands.</span></div>':'')+`<div class="msg v163msg" data-msg>${E(msg)}</div><div class="v163row"><button type="button" class="v163btn sec press" data-dr="edit">Edit</button><button type="button" class="v163btn sec press" data-dr="copy">${ICO.copy}<span>Copy</span></button>${rd?'<button type="button" class="v163btn ghost v18111off" disabled aria-disabled="true">Redrafting…</button>':'<button type="button" class="v163btn ghost press" data-dr="draft">Redraft</button>'}</div>`}
   else if(dq&&dq.st==='queued'||researching)body=scanHTML(researching&&!(dq&&dq.st==='queued')?'Ari is researching…':'Ari is drafting…',dq&&dq.st==='queued'?`Hark picks it up within minutes. The ${df.label} lands here on its own.`:`${E(first(p.name))} is in the research queue.`);
   else{const why=dq&&dq.st==='done'&&dq.q.result?`<div class="v163last">Last try: ${E(String(dq.q.result).slice(0,220))}</div>`:/no signal|flagged|personal/i.test(rs)?`<div class="v163last">${E(rs)}. Ari drafts from the account hypothesis instead.</div>`:'';
     body=`${why}<button type="button" class="v163btn pri big press" data-dr="draft">${ICO.pen||''}<span>Draft message</span></button><button type="button" class="v163lnk press" data-dr="write">Write it myself</button>`}
@@ -7404,7 +7405,7 @@ function pipeHTML(m){const s=m.stats||{},due=m.Q.filter(q=>/DM1|DM2|DM3|WITHDRAW
    <div class="sec"><span class="cap">Coming up</span><span class="cap">Next 7 days · ${m.FU.length}</span></div><div class="list">${fuRows||'<p class="wit">Nothing scheduled this week.</p>'}</div>
    <div class="sec"><span class="cap">Waiting on accept</span><span class="cap">${wait.length}</span></div><div class="list">${wait.slice(0,WMAX).map(w=>row(w.p,[w.p.company||'No account',`day ${w.age}/14`])).join('')||'<p class="wit">No invites out.</p>'}</div>
    ${wait.length>WMAX?`<div class="v162more press" id="v163wall">Show all ${wait.length}</div>`:''}
-   ${m.BG.length?`<div class="sec"><span class="cap">In the background</span><span class="cap">${m.BG.length}</span></div><div class="list">${m.BG.map(b=>{const p=(PF[b.n]||{}).p;return p?row(p,[b.c,b.back]):''}).join('')}</div>`:''}`}
+   ${m.BG.length?`<div class="sec v18111bg"><span class="cap">In the background</span><span class="cap">${m.BG.length}</span></div><div class="list">${m.BG.map(b=>{const p=(PF[b.n]||{}).p;return p?row(p,[b.c,b.back]):''}).join('')}</div>`:''}`}
 function renderPipe(){const m=window.ariM;if(!m||!m.WAIT)return;let box=$('#v163pipe');const done=$('#done');
   if(!box){box=document.createElement('div');box.id='v163pipe';const ready=$('#ready');const sec=done&&done.previousElementSibling;(sec&&sec.parentNode===ready?ready.insertBefore(box,sec):ready.appendChild(box))}
   const sig=JSON.stringify([m.WAIT.map(w=>[w.p.id,w.age]),m.FU.map(f=>[f.n,f.step,f.day]),m.BG.length,m.Q.length,!!V163.waitAll]);if(box.dataset.sig===sig)return;box.dataset.sig=sig;
@@ -9196,7 +9197,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.11',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.11.1',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9288,7 +9289,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.11';
+function aboutHTML(){const B='v18.11.1';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9858,15 +9859,15 @@ function feedHTML(){const L=(V182.act||[]).slice();if(!L.length)return '';
   return `<div class="v171card v182feed" id="v182feed"><div class="cap"><span>Ari right now</span><span>${nowG.length?'Working':ago(V182.actAt)==='now'?'Updated just now':'Updated '+ago(V182.actAt)+' ago'}</span></div>
    ${nowG.map(row).join('')}${P.length?`<div class="v182fdh">Just found</div>${P.map(row).join('')}`:''}${past.length>4?`<span class="v182lk press" data-v182tdo="1">${tdOpen?'Show less':'Show '+(Math.min(14,past.length)-4)+' more'}</span>`:''}</div>`}
 function readHTML(){const R=[...V182.briefs.values()].filter(b=>ready(b)&&(!b.checked_at||!b.reviewed_at)).sort((a,b)=>String(b.built_at||'').localeCompare(String(a.built_at||'')));if(!R.length)return '';
-  return `<div class="v171card v182read"><div class="cap"><span>Read before you send</span><span>${R.length}</span></div>${R.slice(0,3).map(b=>`<div class="v182rd press" data-v182acc2="${E1(b.company)}">${logo(b.company,40)}<div class="qm"><b>${E1(b.company)}</b><span>${E1(b.checked_at?'Brief read. Review the drafts':'Brief ready. Read it, then a quick check')}</span></div><span class="v182lb ${b.checked_at?'l-i':'l-h'}">${b.checked_at?'Review copy':'Quick check'}</span></div>`).join('')}</div>`}
+  return `<div class="v171card v182read"><div class="cap v18111hd press" role="button" tabindex="0" data-v18111rd="${R.length>3?'all':E1(R[0].company)}"><span>Read before you send</span><span>${R.length>3?(window.__v18111rdAll?'Show fewer':'See all '+R.length):R.length}<i class="v18111ch" aria-hidden="true">›</i></span></div>${R.slice(0,window.__v18111rdAll?R.length:3).map(b=>`<div class="v182rd press" data-v182acc2="${E1(b.company)}">${logo(b.company,40)}<div class="qm"><b>${E1(b.company)}</b><span>${E1(b.checked_at?'Brief read. Review the drafts':'Brief ready. Read it, then a quick check')}</span></div><span class="v182lb ${b.checked_at?'l-i':'l-h'}">${b.checked_at?'Review copy':'Quick check'}</span></div>`).join('')}</div>`}
 function todayMoves(){const acc=new Map();(DATA().people||[]).filter(p=>pend(p)&&low(p.review)!=='personal'&&p.company).forEach(p=>acc.set(NC(p.company),p.company));
-  const L=[];[...acc.values()].sort((a,b)=>(briefFor(b)?1:0)-(briefFor(a)?1:0)).slice(0,6).forEach(n=>{const {M}=movesFor(n,null);const m=M.find(x=>!mvDone(n,x.id));if(m)L.push([n,m])});return L.slice(0,3)}
+  const L=[];[...acc.values()].sort((a,b)=>(briefFor(b)?1:0)-(briefFor(a)?1:0)).slice(0,6).forEach(n=>{const {M}=movesFor(n,null);const m=M.find(x=>x.k!=='email'&&!mvDone(n,x.id));if(m)L.push([n,m])});return L.slice(0,3)}
 function waitHTML(){const L=todayMoves();if(!L.length)return '';const n=(DATA().people||[]).filter(p=>pend(p)&&low(p.review)!=='personal').length;
-  return `<div class="v171card v182mv v182tdm"><div class="cap"><span>While invites are pending</span><span>${n} waiting</span></div>${L.map(([acc,m])=>`<div class="v182mi k-${m.k} press" role="button" tabindex="0" data-v182mv="${E1(m.id)}" data-v182acc="${E1(acc)}">${logo(acc,28)}<div class="qm"><b>${E1(m.t.length>64?m.t.slice(0,62)+'…':m.t)}</b><span>${E1(acc)} · ${E1(m.s)}</span></div>${m.k==='soft'?'<span class="v182lb l-s">Softer</span>':''}</div>`).join('')}</div>`}
+  return `<div class="v171card v182mv v182tdm"><div class="cap v18111hd press" role="button" tabindex="0" data-v18111wait="1"><span>While invites are pending</span><span>${n} waiting<i class="v18111ch" aria-hidden="true">›</i></span></div>${L.map(([acc,m])=>`<div class="v182mi k-${m.k} press" role="button" tabindex="0" data-v182mv="${E1(m.id)}" data-v182acc="${E1(acc)}">${logo(acc,28)}<div class="qm"><b>${E1(m.t.length>64?m.t.slice(0,62)+'…':m.t)}</b><span>${E1(acc)} · ${E1(m.s)}</span></div>${m.k==='soft'?'<span class="v182lb l-s">Softer</span>':''}</div>`).join('')}</div>`}
 let tdSig='';
 function paintToday(){const r=document.getElementById('ready');if(!r||locked())return;const anchor=document.getElementById('v181cold')||document.getElementById('v175tk');if(!anchor)return;
   let box=document.getElementById('v182today');
-  const sig=JSON.stringify([V182.act.map(x=>[x.kind,x.title,x.ts]),[...V182.briefs.values()].map(b=>[b.account_id,b.status,b.checked_at,b.reviewed_at]),tdOpen,mvAll(),(DATA().people||[]).filter(pend).length,Math.floor(Date.now()/60e3)]);
+  const sig=JSON.stringify([V182.act.map(x=>[x.kind,x.title,x.ts]),[...V182.briefs.values()].map(b=>[b.account_id,b.status,b.checked_at,b.reviewed_at]),tdOpen,!!window.__v18111rdAll,mvAll(),(DATA().people||[]).filter(pend).length,Math.floor(Date.now()/60e3)]);
   if(box&&sig===tdSig&&box.previousElementSibling===anchor)return;tdSig=sig;
   if(!box){box=document.createElement('div');box.id='v182today'}
   if(box.previousElementSibling!==anchor)anchor.after(box);
@@ -10022,7 +10023,7 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.9','1');localStorage.setItem('ari-wn-v18.10','1');localStorage.setItem('ari-wn-v18.10.1','1');localStorage.setItem('ari-wn-v18.11','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.9','1');localStorage.setItem('ari-wn-v18.10','1');localStorage.setItem('ari-wn-v18.10.1','1');localStorage.setItem('ari-wn-v18.11','1');localStorage.setItem('ari-wn-v18.11.1','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();
@@ -10341,7 +10342,7 @@ function clearHiddenFilters(){try{const F=window.ariV18&&ariV18.D&&ariV18.D.F;if
   if(F.play&&F.play!=='all'){const c=document.querySelector('#v18flt [data-v18fpl="all"]');if(c){c.click();ch=true}}
   V187.cleared=ch}catch(e){V187.errs.push('flt '+e)}}
 /* if the app was left on a hidden tab, go to Today */
-function leaveHidden(){try{const on=document.querySelector('.tbi.on,.tbi[aria-selected="true"]');if(on&&/^(3|4)$/.test(on.dataset.i||'')){const t=document.querySelector('.tbi[data-i="0"]');t&&t.click()}}catch(e){V187.errs.push('tab '+e)}}
+function leaveHidden(){try{const on=document.querySelector('.tbi.on,.tbi[aria-selected="true"]');if(on&&(/^(3|4)$/.test(on.dataset.i||'')||getComputedStyle(on).display==='none')){const t=document.querySelector('.tbi[data-i="0"]');t&&t.click()}}catch(e){V187.errs.push('tab '+e)}}
 /* time in app: seconds visible per day (your clock), kept on the phone and sent when the server accepts it */
 const UK='ari-usage';let U={};try{U=JSON.parse(localStorage.getItem(UK)||'{}')}catch(e){U={}}
 const day=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -10805,6 +10806,96 @@ window.ariPreOp=function(fn,args){if(fn!=='mark'||!args||!SENT[args[1]])return n
   E.pend&&E.pend.forEach((pr,k)=>{if(k.split('|')[0]===pid)waits.push(pr)});
   V.marks++;if(!waits.length)return null;V.waited++;
   return Promise.race([Promise.all(waits),new Promise(r=>setTimeout(r,20000))]).catch(()=>{})};
+})();
+</script><script>/* =====================================================================
+   v18.11.1 (Sat Oct 17, Tony): Home cleanup from Owner's Android notes.
+   1. No Exec track tab (the old tab-bounce came from the v18.7 "leave hidden tab" timer that still treated tab 3 as hidden).
+      Tabs 3 and 4 leave the pager, their panes are parked; anything that asks for page 3 or 4 lands on Home instead.
+   2. Exec track lives on Home as one collapsed row (title + count). Expanded rows mirror the parked exec pane
+      (same status rule, same buttons: Open file, Reach out myself) by tapping the pane's own buttons, so behaviour is unchanged.
+   3/5. History, activity and the email-track rows are off Home (CSS + build). "Your pace" moves to Report.
+   4. Card headers that looked tappable now open what they summarise; no dead taps.
+   Wording rule: "exec track" only, never a person's name for the exec side.
+   ===================================================================== */
+(function(){
+const V=window.ariV18111={v:'v18.11.1',errs:[],open:false,renders:0};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* the parked exec pane (found through its list, never by its old id) */
+const xPane=()=>{const l=document.getElementById('execs');return l&&l.closest('.pane')};
+const bz=n=>{try{buzz(n||6)}catch(e){}};
+const smooth=(el,top)=>{try{smoothTop(el,Math.max(0,top))}catch(e){try{el.scrollTop=Math.max(0,top)}catch(x){}}};
+const offIn=(el,pane)=>{let y=0,x=el;while(x&&x!==pane){y+=x.offsetTop||0;x=x.offsetParent;if(x&&!pane.contains(x))break}return y};
+function toHome(after){try{const tb=document.querySelector('.tbar .tbi.on');if(!tb||tb.dataset.i!=='0'){goPage(0)}}catch(e){V.errs.push('home '+e)}if(after)setTimeout(after,360)}
+
+/* ---------- 1. tabs: 3 (exec track) and 4 (pipeline) leave the pager ---------- */
+function pager(){try{const VIS=window.ariV163&&ariV163.VIS;if(Array.isArray(VIS))[3,4].forEach(k=>{const i=VIS.indexOf(k);if(i>=0)VIS.splice(i,1)})}catch(e){V.errs.push('vis '+e)}
+  [xPane(),document.getElementById('pipeline')].forEach(p=>{if(p)p.classList.add('v163parked')});
+  try{if(typeof page!=='undefined'&&(page===3||page===4))goPage(0)}catch(e){}}
+pager();
+try{const _gp=goPage;goPage=function(i,from){
+    if(i===3){_gp(0);setTimeout(()=>openExec(true),360);return}
+    if(i===4){_gp(0);setTimeout(()=>{const p=$('#v163pipe'),r=$('#ready');if(p&&r)smooth(r,offIn(p,r)-72)},360);return}
+    return _gp(i,from)}}catch(e){V.errs.push('gp '+e)}
+
+/* ---------- 2. exec track on Home ---------- */
+function execRows(){const out=[];[['#execs','parked'],['#execs2','handed']].forEach(([sel,grp])=>{const box=$(sel);if(!box)return;let co='';
+  [...box.children].forEach(el=>{if(el.classList.contains('v1810co')){co=(el.querySelector('b')||{}).textContent||'';return}
+    if(!el.classList.contains('v1810ex'))return;const st=el.querySelector('.v1810st');
+    out.push({pid:el.dataset.pid,grp,co,name:(el.querySelector('.nm')||{}).textContent||'',title:(el.querySelector('.co')||{}).textContent||'',
+      st:st?st.textContent:'',k:st?((st.className.match(/s-(\w+)/)||[])[1]||''):'',back:!!el.querySelector('[data-an2="back"]'),li:(el.querySelector('a[data-li]')||{}).href||''})})});return out}
+function execHTML(){const R=execRows(),parked=R.filter(r=>r.grp==='parked').length;
+  const sub=R.length?[parked?parked+' parked':'',R.length-parked?(R.length-parked)+' handed off':''].filter(Boolean).join(' · '):'Nobody on it';
+  const row=r=>`<div class="v18111xr" data-v18111pid="${E(r.pid)}"><div class="t"><b>${E(r.name)}</b><span>${E([r.title,r.co].filter(Boolean).join(', '))}</span></div>
+    <span class="v1810st s-${E(r.k)}">${E(r.st)}</span><div class="v18111xa"><span class="press" role="button" data-v18111x="file">Open file</span>${r.back?'<span class="press" role="button" data-v18111x="back">Reach out myself</span>':''}</div></div>`;
+  return `<div class="v18111xh press" role="button" tabindex="0" aria-expanded="${V.open}" data-v18111xt="1"><div><b>Exec track</b><span>${E(sub)}</span></div><em>${R.length}</em><i class="v18111cv" aria-hidden="true">›</i></div>
+   ${V.open?`<div class="v18111xl">${R.map(row).join('')||'<p class="v18111e">Nobody on the exec track. Send someone from their person file.</p>'}</div>`:''}`}
+let xSig='';
+function renderExec(force){const r=$('#ready');if(!r)return;let box=$('#v18111ex');
+  if(!box){box=document.createElement('div');box.id='v18111ex';box.className='v18111ex'}
+  const anchor=$('#v163pipe');if(anchor&&anchor.parentNode===r){if(box.nextElementSibling!==anchor)r.insertBefore(box,anchor)}else if(box.parentNode!==r){const d=$('#done');const sec=d&&d.previousElementSibling;sec&&sec.parentNode===r?r.insertBefore(box,sec):r.appendChild(box)}
+  const h=execHTML();if(!force&&h===xSig)return;xSig=h;box.innerHTML=h;box.classList.toggle('open',V.open);V.renders++;try{window.ariExecText&&0}catch(e){}}
+function openExec(scroll){V.open=true;renderExec(true);if(scroll){const b=$('#v18111ex'),r=$('#ready');if(b&&r)smooth(r,offIn(b,r)-72)}}
+V.renderExec=renderExec;V.openExec=openExec;V.rows=execRows;
+function hiddenBtn(pid,kind){const pn=xPane();const el=pn&&[...pn.querySelectorAll('.v1810ex')].find(x=>x.dataset.pid===pid);return el&&el.querySelector(`[data-an2="${kind}"]`)}
+
+/* ---------- 3. Your pace moves to Report ---------- */
+function paceLink(){const rp=$('#report');if(!rp||$('#v18111pace'))return;const sech=rp.querySelector('.v163sech');
+  const d=document.createElement('div');d.id='v18111pace';d.className='v18111pace press';d.setAttribute('role','button');d.tabIndex=0;
+  d.innerHTML='<div><b>Your pace</b><span>Today, yesterday and the week</span></div><i class="v18111cv" aria-hidden="true">›</i>';
+  sech?rp.insertBefore(d,sech):rp.appendChild(d)}
+
+/* ---------- 4. no dead taps on Home ---------- */
+function decorate(){const h=$('#ready > .hero-t');if(h&&!h.dataset.v18111){h.dataset.v18111='1';h.classList.add('press');h.setAttribute('role','button');h.tabIndex=0}
+  const st=$('#v163pipe .v163stats');if(st&&!st.dataset.v18111){st.dataset.v18111='1';[...st.children].forEach((c,i)=>{c.dataset.v18111st=['wait','due','soon','bg'][i]||'';c.classList.add('press');c.setAttribute('role','button')})}}
+function scrollToCap(re){const r=$('#ready');const c=$$('#v163pipe .sec').find(s=>re.test(s.textContent||''));if(r&&c)smooth(r,offIn(c,r)-72)}
+function toQueue(){const r=$('#ready'),q=$('#queue');if(r&&q)smooth(r,offIn(q,r)-120)}
+function showWaiting(){try{ariV163.waitAll=true;ariV163.renderPipe()}catch(e){V.errs.push('wait '+e)}setTimeout(()=>{decorate();scrollToCap(/Waiting on accept/)},60)}
+V.showWaiting=showWaiting;
+
+document.addEventListener('click',e=>{const t=e.target;let b;
+  if((b=t.closest('[data-v18111xt]'))){e.preventDefault();bz(6);V.open=!V.open;renderExec(true);return}
+  if((b=t.closest('[data-v18111x]'))){e.preventDefault();e.stopPropagation();const row=b.closest('[data-v18111pid]');const hb=row&&hiddenBtn(row.dataset.v18111pid,b.dataset.v18111x);
+    if(hb){bz(8);hb.click();setTimeout(()=>renderExec(true),80)}else{try{toast('Still syncing. Try again in a moment.')}catch(x){}}return}
+  if((b=t.closest('#v18111pace'))){e.preventDefault();const d=$('#v163days');if(d)d.click();return}
+  if((b=t.closest('[data-v18111rd]'))){e.preventDefault();e.stopPropagation();bz(6);const v=b.dataset.v18111rd;
+    if(v==='all'){window.__v18111rdAll=!window.__v18111rdAll;try{ariV182.paintToday()}catch(x){V.errs.push('rd '+x)}}
+    else{try{ariV171.openAcct(v)}catch(x){V.errs.push('acc '+x)}}return}
+  if((b=t.closest('[data-v18111wait]'))){e.preventDefault();e.stopPropagation();bz(6);showWaiting();return}
+  if((b=t.closest('#ready > .hero-t'))){e.preventDefault();bz(6);toQueue();return}
+  if((b=t.closest('[data-v18111st]'))){e.preventDefault();bz(6);const k=b.dataset.v18111st;
+    if(k==='wait')showWaiting();else if(k==='due')toQueue();else if(k==='soon')scrollToCap(/Coming up/);return}
+},true);
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest('[data-v18111xt],#v18111pace,[data-v18111rd],[data-v18111wait]')){e.preventDefault();document.activeElement.click()}});
+
+/* keep everything in place as the app redraws */
+let T=0;function kick(){clearTimeout(T);T=setTimeout(()=>{try{pager();renderExec();paceLink();decorate();watchPipe()}catch(e){V.errs.push('kick '+e)}},80)}
+try{const r=$('#ready');if(r)new MutationObserver(kick).observe(r,{childList:true});
+  ['execs','execs2'].forEach(id=>{const el=document.getElementById(id);if(el)new MutationObserver(kick).observe(el,{childList:true,subtree:true,characterData:true})});
+}catch(e){V.errs.push('mo '+e)}
+function watchPipe(){const pp=document.getElementById('v163pipe');if(!pp||pp.dataset.v18111w)return;pp.dataset.v18111w='1';new MutationObserver(()=>{const s=$('#v163pipe .v163stats');if(s&&!s.dataset.v18111)decorate()}).observe(pp,{childList:true})}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick()});
+kick();setTimeout(kick,1500);setTimeout(kick,5000);
 })();
 </script></body>
 </html>
