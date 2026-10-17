@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.8.1"><meta name="ari-rev" content="aa5f2f98a5">
+<meta name="ari-build" content="v18.9"><meta name="ari-rev" content="42622cd442">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -67,8 +67,8 @@ function playOf(p,a,bk){var o=String(p.owner||a.owner||(bk&&bk[1])||''),txt=low(
   return {k:'?',l:'No AE book yet',pain:'sensitive data may be reaching AI there, but the account is not in Alex’s, Blake’s or Casey’s book'}}
 function roleWhy(t){t=low(t);
   if(/ciso|security|trust/.test(t))return 'owns the security review that decides how sensitive data reaches AI';
-  if(/\bceo\b|chief exec|founder|president/.test(t))return 'sets the data policy buyers review, so check the Founder route first';
-  if(/chief|\bcto\b|\bcio\b|\bcdo\b/.test(t))return 'owns the platform decisions, so check the Founder route first';
+  if(/\bceo\b|chief exec|founder|president/.test(t))return 'sets the data policy buyers review, so check the exec track first';
+  if(/chief|\bcto\b|\bcio\b|\bcdo\b/.test(t))return 'owns the platform decisions, so check the exec track first';
   if(/privacy|compliance|legal|counsel/.test(t))return 'owns data terms, scope and residency';
   if(/architect|engineer|platform|infrastructure|devops/.test(t))return 'builds the systems where field-level control would sit';
   if(/data|machine learning|\bml\b|\bai\b|analytics/.test(t))return 'runs the pipelines that feed models, where raw values need protecting';
@@ -114,7 +114,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
     if(p.connect_day&&!cs)hist.push([nice(dOnly(p.connect_day)),'Connect planned for this day','sys']);
     var item=null,next='';
     if(pend){PEND.push(p);next='Lead or personal? Your call, at the top of Today.'}
-    else if(/^(Hold|Founder)$/i.test(stage)){HOLD.push(p);if(stage==='Founder')FOUNDER.push({p:p,q:anQ[p.id]&&anQ[p.id].q,brief:brQ[p.id]||null,a:a});next=stage==='Hold'?(mhold?'Meeting set on the account. Outreach held.':'On hold. Not in your queue.'):'Exec lane via Founder. Not in your queue.'}
+    else if(/^(Hold|Founder)$/i.test(stage)){HOLD.push(p);if(stage==='Founder')FOUNDER.push({p:p,q:anQ[p.id]&&anQ[p.id].q,brief:brQ[p.id]||null,a:a});next=stage==='Hold'?(mhold?'Meeting set on the account. Outreach held.':'On hold. Not in your queue.'):'On the exec track. Not in your queue.'}
     else if(mt||wd){next=mt?'Meeting booked. Over to the AE.':'Withdrawn.'}
     else if(skipped){next='Skipped on '+short(dOnly(p.skipped)||sd)+'. Out of every queue until you undo it.'}
     else if(rp){item={tag:'REPLY',kind:'reply',why:'Replied '+rel(rp,sd)+'. Answer it yourself on LinkedIn; '+(replyDraft[p.id]?'my suggested answer is below.':'my suggested answer lands here once Hark has drafted it.'),msg:replyDraft[p.id]||'',field:''};next='Answer the reply'}
@@ -130,7 +130,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
     if(p.notes)found.push(['Notes','Research note',esc(p.notes),0]);
     var angle=[];if(p.route)angle.push(['Route',esc(p.route)]);if(a.why_vendor)angle.push(['Why us',esc(a.why_vendor)]);if(a.suggested_order)angle.push(['Order',esc(a.suggested_order)]);
     hist.unshift([nice(sd),'Next: '+esc(next||'·'),'nx']);
-    var why0=String(p.why||p.role||'').trim()||composeWhy(p,a,bk,stage,false);if(stage==='Founder')why0='Exec lane via Founder and Aide. '+why0;if(mhold)why0='Meeting set on '+acct+', so outreach is held. '+why0;
+    var why0=String(p.why||p.role||'').trim()||composeWhy(p,a,bk,stage,false);if(stage==='Founder')why0='On the exec track. '+why0;if(mhold)why0='Meeting set on '+acct+', so outreach is held. '+why0;
     PF[p.name]={id:p.id,ae:AE_SHORT(p.owner),acct:acct,stage:step,role:p.title,url:liHttps(p.linkedin_url),why:esc(why0)+(a.one_liner?'<br><br>'+esc(a.one_liner):''),found:found,angle:angle,wr:'',tl:hist,p:p,next:next,item:item};
   });
   (d&&d.people||[]).forEach(function(p){if(!p||!p.id||!p.name||!isPers(p))return;var a=accts[p.company]||{};PERS.push(p);var w=String(p.why||'').trim();
@@ -171,7 +171,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
   var fuDue=Q.filter(function(q){return /DM2|DM3/.test(q.tag)}).length,dm1=Q.filter(function(q){return q.tag==='DM1'}).length,rep=Q.filter(function(q){return q.tag==='REPLY'}).length;
   var FACTS=[];
   FACTS.push(all.c?all.c+' connects out in total, '+all.a+' accepted. '+(all.a?'That’s '+ar+'%.':'Accepts usually take a few days, so the quiet is normal.'):'Nothing sent yet, which means every number from here is yours.');
-  FACTS.push(people.length+' people across '+Object.keys(byA).length+' accounts in the Sheet, '+HOLD.length+' of them parked on hold or with Founder.');
+  FACTS.push(people.length+' people across '+Object.keys(byA).length+' accounts in the Sheet, '+HOLD.length+' of them parked on hold or on the exec track.');
   if(WAIT.length)FACTS.push(WAIT.length+' invites are waiting on an accept. The oldest is on day '+Math.max.apply(null,WAIT.map(function(w){return w.age}))+' of fourteen.');
   FACTS.push('I never press send. Every message that leaves goes out under your thumb.');
   return {FOUNDER:FOUNDER,PERS:PERS,PEND:PEND,sd:sd,Q:Q,FU:FU,BG:BG,PF:PF,ACC:ACC,LOG:LOG,WK:WK,M8:M8,X8:X8,FACTS:FACTS,WAIT:WAIT,HOLD:HOLD,COMING:COMING,queue:queue,brief:d&&d.brief||{},
@@ -3678,16 +3678,16 @@ html.v184fxon{overflow:hidden}
 .hyb{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line,rgba(0,0,0,.12));background:transparent;font:inherit}
 .hyb:first-child{background:var(--ink,#111);color:var(--bg,#fff);border-color:transparent}
 </style>
-</head>
+<style>#founder .ex .cb{display:none!important}#founder .ex .exh{grid-template-columns:1fr auto!important}#sendbar,#mailSheet{display:none!important}</style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
-  <div class="rscrim" id="rscrim"></div><nav class="rail" id="rail"><div class="rhd"><span class="cap">Ari · sections</span></div><div class="ri press on" data-i="0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></svg></span><span class="rl">Ready</span></div><div class="ri press" data-i="1"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/></svg><b>4</b></span><span class="rl">Follow</span></div><div class="ri press" data-i="2"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></span><span class="rl">Prospect</span></div><div class="ri press" data-i="3"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M5 15l-1-8 4.5 3.5L12 5l3.5 5.5L20 7l-1 8z"/></svg></span><span class="rl">Founder</span></div><div class="ri press" data-i="4"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg><b>2</b></span><span class="rl">Tasks</span></div><div class="ri press" data-i="5"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></span><span class="rl">Report</span></div><div class="ri press" data-i="6"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span class="rl">Log</span></div><i class="rind" id="rind"></i><div class="rsp"></div><div class="ri sync press" id="syncBtn"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></span><span class="rl" id="syncL">Sync</span></div></nav>
+  <div class="rscrim" id="rscrim"></div><nav class="rail" id="rail"><div class="rhd"><span class="cap">Ari · sections</span></div><div class="ri press on" data-i="0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></svg></span><span class="rl">Ready</span></div><div class="ri press" data-i="1"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/></svg><b>4</b></span><span class="rl">Follow</span></div><div class="ri press" data-i="2"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></span><span class="rl">Prospect</span></div><div class="ri press" data-i="3"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M5 15l-1-8 4.5 3.5L12 5l3.5 5.5L20 7l-1 8z"/></svg></span><span class="rl">Exec track</span></div><div class="ri press" data-i="4"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg><b>2</b></span><span class="rl">Tasks</span></div><div class="ri press" data-i="5"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></span><span class="rl">Report</span></div><div class="ri press" data-i="6"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span class="rl">Log</span></div><i class="rind" id="rind"></i><div class="rsp"></div><div class="ri sync press" id="syncBtn"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></span><span class="rl" id="syncL">Sync</span></div></nav>
   <div class="chrome">
     <div class="row1"><span class="hdAri" id="hdAri" aria-label="Ari. Long-press to meet Ari"><span class="arif m" data-face="idle"></span></span><div class="who"><div class="n4">Ari <span class="cap" id="dt">THU 15 OCT</span></div></div>
       <span class="secBtn press" id="secBtn"><span class="sic" id="secIc"></span><span id="secNm">Ready</span><span class="sbd" id="secBd"></span></span><span class="themeBtn press" id="themeBtn" aria-label="Theme"><i></i></span></div>
     <div class="clks" id="clks"></div>
     <div class="tabs" id="tabs">
-      <div class="tab on" data-i="0">Ready</div><div class="tab" data-i="1">Follow-ups<span class="bd">4</span></div><div class="tab" data-i="2">Prospect</div><div class="tab" data-i="3">Founder</div><div class="tab" data-i="4">Tasks<span class="bd" id="tkb">2</span></div><div class="tab" data-i="5">Report</div><div class="tab" data-i="6">Log</div><div class="ul" id="ul"></div></div>
+      <div class="tab on" data-i="0">Ready</div><div class="tab" data-i="1">Follow-ups<span class="bd">4</span></div><div class="tab" data-i="2">Prospect</div><div class="tab" data-i="3">Exec track</div><div class="tab" data-i="4">Tasks<span class="bd" id="tkb">2</span></div><div class="tab" data-i="5">Report</div><div class="tab" data-i="6">Log</div><div class="ul" id="ul"></div></div>
   </div>
 
   <div class="pager" id="pager"><div class="track" id="track">
@@ -3715,9 +3715,9 @@ html.v184fxon{overflow:hidden}
 
     <div class="sec"><span class="cap">Decisions</span><span class="cap" id="decN">2</span></div>
     <div class="list">
-      <div class="dec" id="decNorquiveth"><div><div class="t">Norquiveth: hold or go?</div><div class="d">Founder co-founded it. Four messages are drafted and waiting.</div>
+      <div class="dec" id="decNorquiveth"><div><div class="t">Norquiveth: hold or go?</div><div class="d">There is a founder tie on the exec side. Four messages are drafted and waiting.</div>
         <div class="opin press" id="opin"><span class="arif s" data-face="think"></span><span>Ari has an opinion</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
-        <div class="dchat" id="dchat"><div><div class="dthread" id="dthread"></div><div class="dq" id="dq"><span class="press">Go with that</span><span class="press">Why not ask Founder?</span></div>
+        <div class="dchat" id="dchat"><div><div class="dthread" id="dthread"></div><div class="dq" id="dq"><span class="press">Go with that</span><span class="press">Why not use the exec track?</span></div>
           <div class="dcomp"><textarea class="in" id="din" rows="1" placeholder="Ask Ari about Norquiveth"></textarea><div class="cbtn act has press" id="dsend"><svg class="snd" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div></div></div>
         <div class="acts"><div class="b sec2 press" data-dec>Keep holding</div><div class="b sec2 press" data-dec>Ask Alex</div></div></div></div>
       <div class="dec"><div><div class="t">Withdraw 6 stale invites?</div><div class="d">All past 14 days with no accept.</div><div class="acts"><div class="b sec2 press" data-dec>Not yet</div><div class="b sec2 press" data-dec>Show me</div></div></div></div>
@@ -3767,12 +3767,12 @@ html.v184fxon{overflow:hidden}
 
   <!-- FOUNDER -->
   <section class="pane" id="founder">
-    <span class="cap">Exec lane · via Aide</span>
-    <div class="h">Three ready for Founder.<br><span class="dim">Pick, and I’ll brief Aide.</span></div>
-    <p class="wit">C-suite at bigger accounts goes through Founder. Tap the ones you want and I’ll email your <b>Vendor inbox</b> a note you can paste straight to Aide.</p>
-    <div class="sec"><span class="cap">Ready</span><span class="cap" id="ac">3</span></div>
+    <span class="cap">Exec track</span>
+    <div class="h">Nobody on the exec track.<br><span class="dim">Send someone from their person file.</span></div>
+    <p class="wit">C-suite at bigger accounts goes on the exec track. Ari writes each note and sends the list to your work inbox at the end of your day. Nothing else to do.</p>
+    <div class="sec"><span class="cap">Queued for tonight</span><span class="cap" id="ac">0</span></div>
     <div class="list" id="execs"></div>
-    <div class="sec"><span class="cap">With Aide</span><span class="cap">2</span></div>
+    <div class="sec"><span class="cap">Handed off</span><span class="cap">0</span></div>
     <div class="list" id="execs2"></div>
   </section>
 
@@ -3843,11 +3843,11 @@ html.v184fxon{overflow:hidden}
   </div>
 
   <div class="ov" id="ov"><div class="ovt"><div class="bk press" id="ovBack"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div><span class="cap" id="ovCap"></span><div style="width:40px" id="ovR"></div></div><div class="ovb" id="ovb"></div><div id="ovBar"></div></div>
-  <div class="sendbar press" id="sendbar"><span>Brief Aide</span><span class="m" id="sbn">0 SELECTED</span></div>
-  <div class="sheet" id="mailSheet"><div class="grab"><i></i></div>
+  <div class="sendbar press" id="sendbar" hidden style="display:none!important"><span>Exec track</span><span class="m" id="sbn">0 SELECTED</span></div>
+  <div class="sheet" id="mailSheet" hidden style="display:none!important"><div class="grab"><i></i></div>
     <div style="padding:0 var(--s5)"><div style="font-size:20px;line-height:28px;font-weight:600;letter-spacing:-.025em">Email to your work inbox</div></div>
     <div class="bd2"><div class="mailhd">From <b>owner@example.com</b><br>To <b>work@example.com</b><br>Subject <b id="msub"></b></div><div class="mailbody" id="mbody"></div></div>
-    <div class="mailacts"><div class="b sec2 press" id="mcopy">Copy text</div><div class="b ok press" id="msend">Copy &amp; mark briefed</div></div></div>
+    <div class="mailacts"><div class="b sec2 press" id="mcopy">Copy text</div><div class="b ok press" id="msend">Close</div></div></div>
     <div class="dn" id="ari" aria-label="Ari"><svg class="ring" viewBox="0 0 64 64"><circle class="tr" cx="32" cy="32" r="30" pathLength="100"/><circle class="pg" cx="32" cy="32" r="30" pathLength="100"/></svg><span class="arif m" data-face="focus"></span><span class="nbd" id="nbd">0</span></div>
 
   <div class="scrim" id="scrim"></div>
@@ -4338,14 +4338,14 @@ function toggleOpinion(force){const o=$('#opin'),dc=$('#dchat'),open=force!==und
   o.classList.toggle('open',open);dc.classList.toggle('open',open);buzz(8);
   const r=o.getBoundingClientRect();lookAt(r.left+r.width/2,r.top,2400);
   if(open&&!opSeeded){opSeeded=true;setFace('think',1400);const ty=typing(dthread);
-    setTimeout(()=>{ty.remove();bubble(dthread,'ari','I’d keep holding. Founder co-founded Norquiveth, so a cold note from you lands awkwardly whichever way it goes, and Alex can get a cleaner read in one Slack message than we’d get from four DMs.')},1100)}}
+    setTimeout(()=>{ty.remove();bubble(dthread,'ari','I’d keep holding. There is a founder tie on the exec side, so a cold note from you lands awkwardly whichever way it goes, and Alex can get a cleaner read in one Slack message than we’d get from four DMs.')},1100)}}
 $('#opin').onclick=()=>toggleOpinion();
 function dSay(txt){if(!txt)return;bubble(dthread,'mine',txt.replace(/</g,'&lt;'));const ty=typing(dthread);setFace('think');
   setTimeout(()=>{ty.remove();setFace(baseFace());
     if(/go with/i.test(txt)){bubble(dthread,'ari','Done. Norquiveth stays on hold, and I’ll put the question to Alex in tomorrow’s report.');
       setTimeout(()=>{const d=$('#decNorquiveth');d.classList.add('gone');const n=$('#decN');n.textContent=Math.max(0,+n.textContent-1);hop();setFace('happy',1600);
         addLog({tm:nowT(),who:'you',tx:'Norquiveth: keep holding',sm:'Decision, with Ari'})},1500)}
-    else if(/founder/i.test(txt))bubble(dthread,'ari','Because Founder would answer as a founder rather than a buyer, and Alex owns the account either way.');
+    else if(/exec/i.test(txt))bubble(dthread,'ari','Because the exec track would land as a founder note rather than a buyer conversation, and Alex owns the account either way.');
     else bubble(dthread,'ari','Fair point. I’ll weigh that in and keep Norquiveth on hold until you tell me otherwise.')},1000)}
 $$('#dq span').forEach(q=>q.onclick=()=>dSay(q.textContent));
 $('#dsend').onclick=()=>{const v=$('#din').value.trim();$('#din').value='';dSay(v)};
@@ -4378,11 +4378,11 @@ let prosShown=false;function prospectIn(on){if(!on)return;if(!prosShown){prosSho
    ========================================================= */
 const EX=[
  {n:'Karen Mockley',t:'Chief Information Security Officer',c:'Cobraquenth',ae:'Blake',url:'linkedin.com/in/karen-mockley-example',why:'Spoke at Brannoquay Summit on 7 Oct about keeping customer PII out of analytics pipelines.',note:'Karen spoke at Brannoquay Summit on keeping PII out of analytics. Vendor’s vault does exactly that for Cobraquenth-scale data, and Blake would value 20 minutes with her team.',sel:1,st:0},
- {n:'David Sampleton',t:'Chief Technology Officer',c:'Tovarquine',ae:'Alex',url:'linkedin.com/in/david-sampleton-example',why:'Tovarquine announced a payments expansion into the UK on 10 Oct.',note:'Tovarquine is taking payments into the UK, which brings new data residency rules. Worth a short note from Founder on how Vendor keeps card and guest data local.',sel:1,st:0},
- {n:'Meera Synthby',t:'Chief Data Officer',c:'Invarrelle',ae:'Blake',url:'linkedin.com/in/meera-synthby-example',why:'New in seat since 28 Sep, previously led privacy at Ubrevaine.',note:'Meera just joined Invarrelle as CDO after leading privacy at Ubrevaine. A congratulations from Founder with one line on data privacy vaults would land well.',sel:0,st:0}];
+ {n:'David Sampleton',t:'Chief Technology Officer',c:'Tovarquine',ae:'Alex',url:'linkedin.com/in/david-sampleton-example',why:'Tovarquine announced a payments expansion into the UK on 10 Oct.',note:'Tovarquine is taking payments into the UK, which brings new data residency rules. Worth a short exec note on how Vendor keeps card and guest data local.',sel:1,st:0},
+ {n:'Meera Synthby',t:'Chief Data Officer',c:'Invarrelle',ae:'Blake',url:'linkedin.com/in/meera-synthby-example',why:'New in seat since 28 Sep, previously led privacy at Ubrevaine.',note:'Meera just joined Invarrelle as CDO after leading privacy at Ubrevaine. A congratulations from the exec track with one line on data privacy vaults would land well.',sel:0,st:0}];
 const EX2=[
  {n:'Paul Beckample',t:'CISO',c:'Chevalquorn',st:2},{n:'Aisha Grantsynth',t:'CTO',c:'Afvranelle',st:3}];
-const STAGES=['Drafted','To Wren','With Aide','Founder sent','Accepted'];
+const STAGES=['Drafted','Queued','Handed off','Connected','Accepted'];
 const trk=st=>`<div class="track5">${STAGES.map((_,i)=>`<i class="${i<=st?'d':''}"></i>`).join('')}</div><div class="lbl5">${STAGES.map((s,i)=>`<span class="${i===st?'on':''}">${s}</span>`).join('')}</div>`;
 function renderExecs(){$('#execs').innerHTML=EX.filter(e=>e.st===0).map((e,i)=>`<div class="ex ${e.sel?'sel':''}" data-i="${EX.indexOf(e)}"><div class="exh"><div class="cb press">${ICO.ok12}</div><div style="min-width:0"><div class="nm">${e.n}</div><div class="co">${e.t} · ${e.c}</div></div><div class="ib press" data-a="li">${ICO.li}</div></div><div class="why">${e.why}</div><div class="note">${e.note}</div></div>`).join('');
   $('#execs2').innerHTML=EX2.map(e=>`<div class="ex"><div class="exh">${AF(e.st===3?'happy':'idle','s')}<div style="min-width:0"><div class="nm">${e.n}</div><div class="co">${e.t} · ${e.c}</div></div><span></span></div>${trk(e.st)}</div>`).join('');
@@ -4390,20 +4390,20 @@ function renderExecs(){$('#execs').innerHTML=EX.filter(e=>e.st===0).map((e,i)=>`
     el.querySelector('[data-a=li]').onclick=()=>{buzz(8);toast(`Opens ${e.n.split(' ')[0]}’s profile`)}});
   $('#ac').textContent=EX.filter(e=>e.st===0).length;updSend()}
 const selEx=()=>EX.filter(e=>e.sel&&e.st===0);
-let sbOn=false,onFounder=false;
+let sbOn=false,onFounder=false;const EXEC_OFF=true;
 function updSend(){const n=selEx().length;$('#sbn').textContent=`${n} SELECTED`;sendbarShow(onFounder)}
-function sendbarShow(on){onFounder=on;const want=on&&selEx().length>0;const sb=$('#sendbar');if(want===sbOn)return;sbOn=want;sb.classList.toggle('on',want);
+function sendbarShow(on){onFounder=on;const want=!EXEC_OFF&&on&&selEx().length>0;const sb=$('#sendbar');if(want===sbOn)return;sbOn=want;sb.classList.toggle('on',want);
   A(sb,want?[{opacity:0,transform:'translateY(24px)'},{opacity:1,transform:'none'}]:[{opacity:1,transform:'none'},{opacity:0,transform:'translateY(24px)'}],want?BOUNCE:SNAP)}
 function mailText(){const L=selEx();const d=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',timeZone:'Asia/Kolkata'}).format(new Date());
-  $('#msub').textContent=`For Aide: ${L.length} Founder intro${L.length>1?'s':''} · ${d}`;
-  return `Hi Aide,\n\nCould Founder send LinkedIn notes to these ${L.length===1?'one':L.length===2?'two':'three'}? Profiles and a suggested note for each are below.\n\n`+
+  $('#msub').textContent=`Exec track: ${L.length} · ${d}`;
+  return `Exec track, ${L.length===1?'one':L.length===2?'two':'three'} people. Profiles and a suggested note for each are below.\n\n`+
    L.map((e,i)=>`${i+1}. ${e.n}, ${e.t}, ${e.c}\n   ${e.url}\n   Why now: ${e.why}\n   Suggested note: ${e.note}\n   AE: ${e.ae}`).join('\n\n')+`\n\nThanks,\nOwner`}
-$('#sendbar').onclick=()=>{$('#mbody').textContent=mailText();openSheet($('#mailSheet'))};
+$('#sendbar').onclick=()=>{};
 $('#mcopy').onclick=()=>{navigator.clipboard?.writeText($('#mbody').textContent).catch(()=>{});buzz(10);toast(`${ICO.ok} Copied`)};
 $('#msend').onclick=()=>{const L=selEx();closeSheet();L.forEach(e=>{e.st=1;e.sel=0;EX2.unshift({n:e.n,t:e.t.replace('Chief Information Security Officer','CISO').replace('Chief Technology Officer','CTO').replace('Chief Data Officer','CDO'),c:e.c,st:1})});
-  addLog({tm:nowT(),who:'sys',tx:`Emailed ${L.length} Founder intro${L.length>1?'s':''} to your work inbox`,sm:'For Aide, via Wren'});
+  addLog({tm:nowT(),who:'sys',tx:`Exec track: ${L.length} handed off`,sm:'Exec track'});
   setTimeout(()=>{renderExecs();$$('#execs2 .ex').slice(0,L.length).forEach((e,i)=>A(e,[{opacity:0,transform:'translateY(-12px)'},{opacity:1,transform:'none'}],POP,i*60));hop();
-    think('Sent to your Vendor inbox. It’s written so you can paste it to Aide as it is, and I’ll mark each one as it moves.',{face:'happy',ms:5200,transient:1})},450)};
+    think('Handed off. I’ll mark each one as it moves.',{face:'happy',ms:5200,transient:1})},450)};
 renderExecs();
 
 
@@ -5004,7 +5004,7 @@ TH.forEach(t=>{if(t.gen||!ACC.find(a=>a.n===t.n))return;ent('account',t.n,t.n,`$
 const cx=(type,id,label,screen,sub)=>({screen:screen||'',entity_type:type,entity_id:String(id),label,sub:sub||''});
 const keyOf=c=>c?c.entity_type+':'+c.entity_id:null;
 const TYW={app:'App',person:'Person',account:'Account',task:'Task',decision:'Decision',card:'Note',step:'Step',screen:'Screen'};
-const PAGES=['Ready','Follow-ups','Prospect','Founder','Tasks','Report','Log'];
+const PAGES=['Ready','Follow-ups','Prospect','Exec track','Tasks','Report','Log'];
 function tkStatus(k){if(k.state==='done')return 'Done';const i=k.step??k.cur;return (k.steps[Math.min(i,k.steps.length-1)]||[''])[0]}
 const tkPct=k=>k.state==='done'?100:Math.round((k.p||0)*100);
 const ctxTask=(k,screen)=>cx('task','tk'+TK.indexOf(k),k.t,screen||'Task',tkStatus(k));
@@ -5016,11 +5016,11 @@ function ctxEnt(e){if(e.type==='person')return ctxPerson(e.id,'Person');if(e.typ
 let ovCtx=null,ovTask=null;
 function autoCtx(){
   if(ovOn&&ovCtx)return ovCtx();
-  if(openSheetEl&&openSheetEl.id==='mailSheet')return cx('screen','aide-mail','Email to Aide','Founder',`${selEx().length} selected`);
+  if(openSheetEl&&openSheetEl.id==='mailSheet')return cx('screen','exec-track','Exec track','Exec track',`${selEx().length} selected`);
   if(page===0){const o=$('#queue .q.open');if(o)return ctxPerson(Q[+o.dataset.i].n,'Ready');const nx=$('#queue .q:not(.done)');if(nx)return ctxPerson(Q[+nx.dataset.i].n,'Ready');return cx('screen','ready','All nine sent','Ready')}
   if(page===1)return cx('screen','follow','4 due today','Follow-ups','all drafted');
   if(page===2){const o=$('#accts .acc.open .acch .nm');if(o)return ctxAcct(o.textContent,'Prospect');return cx('screen','prospect','Week 42','Prospect','6 accounts')}
-  if(page===3)return cx('screen','founder','3 for Aide','Founder','exec lane');
+  if(page===3)return cx('screen','founder','Exec track','Exec track','queued for tonight');
   if(page===4)return cx('screen','tasks',`${TK.filter(k=>k.state!=='done').length} running`,'Tasks','1 queued');
   if(page===5)return cx('screen','report','This week','Report','');
   return cx('screen','log','Today','Log')}
@@ -5113,7 +5113,7 @@ function ackLine(c){if(c.entity_type==='app'&&window.ariV14)return ariV14.ack(c)
   if(T==='card'){const nt=NOTES.find(x=>x.id===n);return `About my note from ${c.sub}: ${nt?nt.t.split(/(?<=[.,])\s/)[0].replace(/,$/,'.'):''} Tell me what you want done with it, and it comes off your stack once it’s handled.`}
   if(T==='step'){const [tki,si]=n.split('#'),k=TK[+tki.slice(2)],i=+si,cur=k.step??k.cur,st=k.state==='done'||i<cur?'done':i===cur?'running now':'still to come';
     return `${c.label} is ${st} in ${k.t}. Anything you change here applies to this step only, so the rest of the task carries on as it is.`}
-  const S={ready:'You’re on Ready, tonight’s queue from your Sheet.',follow:'You’re on Follow-ups: the cadence, what’s due and who’s waiting on an accept.',prospect:'These are the accounts with people still to connect with.',founder:'Founder’s lane is parked.',tasks:'This is Hark’s queue from your Sheet. Anything you ask me lands here.',report:'This week’s numbers, straight from your Sheet.',log:'Every touch, from the Sheet’s log.'};
+  const S={ready:'You’re on Ready, tonight’s queue from your Sheet.',follow:'You’re on Follow-ups: the cadence, what’s due and who’s waiting on an accept.',prospect:'These are the accounts with people still to connect with.',founder:'This is the exec track. Ari sends the list to your work inbox at the end of your day.',tasks:'This is Hark’s queue from your Sheet. Anything you ask me lands here.',report:'This week’s numbers, straight from your Sheet.',log:'Every touch, from the Sheet’s log.'};
   return S[n]||`You’re on ${c.screen}. Ask me anything about it.`}
 function ack(c){const k=keyOf(c);if(!c||ACKED.has(k))return;ACKED.add(k);
   const ty=chatOpen&&(view==='main'||view===k)?typing(box):null;setTimeout(()=>{if(chatOpen)setFace('think')},RM?0:760);
@@ -5148,7 +5148,7 @@ function respond(txt,att,c){const _v14=window.ariV14&&ariV14.respond(txt,att,c);
     if(/find|add|more|another/.test(low))return {a:`I’ll look for more at ${L} and keep them in this thread, so the context carries over. I’ll check they don’t overlap with the ${t.pp.length} already in play.`,task:[`Find more at ${L}`,['Check','Find','Draft'],null,t.pp.length?`Two more at ${L}, both drafted and in Prospect.`:`Four people at ${L} are in Prospect, each with a reason.`]};
     return {a:`Noted for ${L}. I’ll apply it to every draft for this account, not just one person.`}}
   if(T==='decision'){if(/alex|ask/.test(low))return {a:'I’ll put it to Alex in tomorrow’s report and bring his answer back here, so the decision stays in one place.'};
-    return {a:c.entity_id==='suki'?'I’d keep holding. A cold note from you lands awkwardly while Founder is a co-founder there, and Alex can get a cleaner read in one Slack message than we’d get from four DMs.':'I’d withdraw all six today. An invitation that has sat for two weeks has already given its answer, and withdrawing keeps your pending count healthy.'}}
+    return {a:c.entity_id==='suki'?'I’d keep holding. A cold note from you lands awkwardly while there is a founder tie on the exec side, and Alex can get a cleaner read in one Slack message than we’d get from four DMs.':'I’d withdraw all six today. An invitation that has sat for two weeks has already given its answer, and withdrawing keeps your pending count healthy.'}}
   if(T==='card'){if(/remind|later|at \d/.test(low))return {a:'I’ll bring that note back at four, your time, and leave it off the stack until then.'};return {a:'Done. I’ve acted on that note and taken it off your stack.'}}
   if(T==='step'){const tk=TK[+c.entity_id.split('#')[0].slice(2)];if(/skip/.test(low))return {a:`I’ll skip ${L.toLowerCase()} in ${tk.t}. The rest of the task carries on, and I’ll note what we gave up by skipping it.`};
     if(/why/.test(low))return {a:`${L} is there because ${tk.steps[+c.entity_id.split('#')[1]][1].toLowerCase()}, and drafting without it would mean guessing.`};
@@ -5349,7 +5349,7 @@ function decorate(){
   $$('#runRamp, #runScan').forEach(h=>{if(h._ctx)return;const k=TK[h.id==='runRamp'?0:1];deco(h,()=>ctxTask(k),a=>{const t=h.querySelector('.top .t');t.after(a)})});
   $$('#tkRun .tk').forEach(h=>{if(h._ctx)return;const k=TK[+h.dataset.i];deco(h,()=>ctxTask(k),a=>h.querySelector('.top .t').after(a))});
   $$('#tkQ .tk, #tkD .tk').forEach(h=>{if(h._ctx)return;const lab=h.querySelector('.t').textContent,e=ENT.find(x=>x.type==='task'&&x.label===lab);if(!e)return;deco(h,()=>cx('task',e.id,lab,'Task',e.sub),a=>h.querySelector('.top .t').after(a))});
-  $$('#execs .ex, #execs2 .ex').forEach(h=>{if(h._ctx)return;const n=h.querySelector('.nm').textContent,co=(h.querySelector('.co')||{}).textContent||'';deco(h,()=>ctxPerson(n,'Founder',co.split(' · ').pop()),a=>{const x=h.querySelector('.exh');x.insertBefore(a,x.lastElementChild)})});
+  $$('#execs .ex, #execs2 .ex').forEach(h=>{if(h._ctx)return;const n=h.querySelector('.nm').textContent,co=(h.querySelector('.co')||{}).textContent||'';deco(h,()=>ctxPerson(n,'Exec track',co.split(' · ').pop()),a=>{const x=h.querySelector('.exh');x.insertBefore(a,x.lastElementChild)})});
   if(ovOn&&ovTask){const k=ovTask,ki=TK.indexOf(k);$$('#stps .stp').forEach(h=>{if(h._ctx)return;const i=+h.dataset.i;deco(h,()=>cx('step',`tk${ki}#${i}`,k.steps[i][0],'Step',k.t),a=>h.appendChild(a))})}}
 let decoQ=0;new MutationObserver(()=>{if(!decoQ)decoQ=requestAnimationFrame(()=>{decoQ=0;decorate()})}).observe(app,{childList:true,subtree:true});decorate();
 document.addEventListener('click',e=>{const a=e.target.closest('.ask');if(!a)return;e.stopPropagation();e.preventDefault();const h=a._host;if(!h||!h._ctx)return;buzz(10);
@@ -5907,7 +5907,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.8.1';
+const M=MOTION,APP=$('#app'),BUILD='v18.9';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5972,7 +5972,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.8.1'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.9'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6051,10 +6051,11 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.9',d:'Oct 17',items:['The exec lane is now called Exec track, everywhere in the app', 'Send someone to the exec track from their person file and that is it. Ari writes the note and sends the day’s list to your work inbox at the end of your day', 'The copy-and-paste step is gone']},
  {v:'v18.8.1',d:'Oct 17',items:['Settings has a new Connect Gmail row. Ari reads only your LinkedIn emails, read-only', 'For now Ari just compares what it reads with what it already has and changes nothing. The row shows when it last read and how often the two agree', 'Disconnect any time from the same row']},
  {v:'v18.8',d:'Oct 17',items:['Tidy up on Today: Ari spots loose ends, like accepts never marked as connected, people with no account, DM1s waiting, and the same company listed twice', 'Each one has its own buttons: link it, mark the connect, keep one of two companies, or hide it. Nothing changes until you tap', 'Keeping one of two companies asks first, then moves everyone onto the one you keep']},
  {v:'v18.7.1',d:'Oct 17',items:['Ari now keeps the exact time you mark a connect accepted or a DM sent, not just the day', 'The Report shows how long accepts wait for DM1, in hours, against the goal of under 4 hours', 'Earlier ones that only had a day are counted separately, so the hours stay honest']},
- {v:'v18.7',d:'Oct 17',items:['A calmer app: Pipeline and Founder tabs, the health score, the live feed, email tracks and the extra Report charts are tucked away for now', 'The Report filters by period and AE only', 'What\'s new no longer pops up after an update; it is listed here in About', 'Ari notes how long you spend in the app each day, so we can keep that number small']},
+ {v:'v18.7',d:'Oct 17',items:['A calmer app: Pipeline and Exec track tabs, the health score, the live feed, email tracks and the extra Report charts are tucked away for now', 'The Report filters by period and AE only', 'What\'s new no longer pops up after an update; it is listed here in About', 'Ari notes how long you spend in the app each day, so we can keep that number small']},
  {v:'v18.6',d:'Oct 17',items:['When you mark a meeting set, Ari asks where it came from: LinkedIn, email, inbound or other','Meeting booked from a reply opens the same quick form','The Report shows DMs sent, replies and meetings side by side, and where your meetings come from','Two-step sign-in: add a code from an authenticator app on top of Google, in Settings']},
  {v:'v18.5',d:'Oct 17',items:['Chat with me sticks to your outreach: people, accounts, drafts and your queue','App changes are handled in Hark, not here, so there is no change-request button in the app any more','Hark works with tighter permissions behind the scenes; nothing changes on your screen']},
  {v:'v18.4',d:'Oct 17',items:['Today starts with what to send: replies first, then your follow-ups, then Today’s 15 connects','A reply card pinned on top: paste what they said and Hark drafts three answers; tap one to send it','One person per screen: Copy & open LinkedIn, come back, tap Sent','Today’s 15 spreads connects across accounts and warns when one account is over the cap','No more than four DM2s to one account a day; the rest wait for tomorrow','Lock-screen names are off by default, with a switch in Settings','The status line only says Live when Hark is actually up to date','Today no longer sits on Checking your queue after it has loaded']},
@@ -6070,10 +6071,10 @@ const LOG=[
  {v:'v17.5',d:'Oct 16',items:['Accounts have stages now, Target to Opportunity created, plus Hold, Customer, Closed lost and Not a fit','A Pipeline tab with a column per stage: swipe across, filter by AE, see how many make it to the next stage','I move accounts myself when people accept, reply or a meeting lands, and every move says why with an Undo','Your moves stick. Change a stage and I never move it back','Find people searches Apollo now. You can watch me look while it runs','Tasks moved into Today, one tap from the top','Chat shows when I am typing again, until the answer lands']},
  {v:'v17.1.2',d:'Oct 16',items:['A small hourglass next to Synced live drains toward Hark’s next check','When a scan starts it flips over and I look busy; when the results land it settles and starts again','Tap it for the countdown, when the last scan ran, what it found, and what each scan checks','It only shows real scans. If one is late, it says so instead of pretending']},
  {v:'v17.1.1',d:'Oct 16',items:['Accounts filters let go: tap a chip again to clear it, counts match what a tap shows, and Clear filters resets everything','The note card and the big number can never overlap again, whatever the font or the length of the note','Every row lines up: same avatar size, names that end cleanly, due dates like DM2 · Tue','I read while research runs, and the bar moves','While you type, the tab bar and floating bits get out of the way','Ari updates itself when you open it, so the Home Screen app never sits on an old build']},
- {v:'v17.1',d:'Oct 16',items:['Today never doubles up: the list is rebuilt from your data on every live update, and checks itself','Assign account works: search your accounts and the Book, or add a new one; the AE, play and why come with it','iPhone Home Screen app fills the whole screen, and the tab bar never covers Mark sent, Replied, Snooze, Skip or Save','Locks the moment you leave (change it in Settings), and Settings now live in one place: tap me up top','Account pages with logos, contacts and research in sections; LinkedIn URL on every person file','Send to Founder shows up in Founder at once, every stage change has Undo, and an undone reply cancels its draft','Smoother on Android: no glass blur, fewer shadows, idle animations stopped, the notes stack drags on the GPU']},
+ {v:'v17.1',d:'Oct 16',items:['Today never doubles up: the list is rebuilt from your data on every live update, and checks itself','Assign account works: search your accounts and the Book, or add a new one; the AE, play and why come with it','iPhone Home Screen app fills the whole screen, and the tab bar never covers Mark sent, Replied, Snooze, Skip or Save','Locks the moment you leave (change it in Settings), and Settings now live in one place: tap me up top','Account pages with logos, contacts and research in sections; LinkedIn URL on every person file','Send to exec track shows up on the exec track at once, every stage change has Undo, and an undone reply cancels its draft','Smoother on Android: no glass blur, fewer shadows, idle animations stopped, the notes stack drags on the GPU']},
  {v:'v17',d:'Oct 16',items:['Live: when Hark drafts, researches or finds people, it lands on your screen within seconds, no reload, nothing jumps','Opens instantly with your last data, then catches up; the line under my name says Synced live and when Hark last scanned','Every tap saves instantly, with the outbox and Undo kept; your Sheet still gets everything','Assign account and Personal context save properly now, and every draft uses them','Pings: new accepts, replies, drafts ready, meetings and tonight’s follow-ups (Android now; iPhone from the Home Screen app)']},
  {v:'v16.3',d:'Oct 15',items:['Fresh every time: I fetch the moment you open or come back, show your last data while I do, and never show zeros. The line under my name says when I last synced and when Hark last scanned','Tap your pace under Up next to see today, yesterday and the whole week','Marks are instant and can’t get lost: they wait in an outbox and retry until your Sheet has them, with Undo','One Today tab: tonight’s list grouped by Eastern, Central and Pacific send windows in your time, then the pipeline. Follow-ups and Log folded in; every tab has a label','Every person shows the next step (Mark DM2 sent, Mark replied, Mark meeting set) with Undo, wherever they appear','Draft message on every contact, trigger or not; edit it in place and copy it','Assign account for people with no account, and Personal context on every file, used in every draft','Find 4 to 5 people here replaces Map this account','A calmer chat, consistent buttons, no Updated pills, and the scan is back']},
- {v:'v16.2',d:'Oct 15',items:['Ari locks every time you open it: Face ID, fingerprint or your device PIN, with Google as the fallback. Nothing shows before you unlock','Every account in Alex’s, Blake’s and Casey’s books, searchable, with research status, last scan and every person you and Hark found','Account research is back on real scans, with Map this account','Send to Founder from any person file, and the Founder lane lists the real exec people','Lead or Personal on every person file, any time','Each card names the next step: Mark connect sent, Mark DM1 sent, with Undo','Meetings: mark an account as meeting set and outreach there is held','Much lighter: refreshes no longer redraw the screen you are on, and only the Ari you can see is animating']},
+ {v:'v16.2',d:'Oct 15',items:['Ari locks every time you open it: Face ID, fingerprint or your device PIN, with Google as the fallback. Nothing shows before you unlock','Every account in Alex’s, Blake’s and Casey’s books, searchable, with research status, last scan and every person you and Hark found','Account research is back on real scans, with Map this account','Send to exec track from any person file, and the exec track lists the real exec people','Lead or Personal on every person file, any time','Each card names the next step: Mark connect sent, Mark DM1 sent, with Undo','Meetings: mark an account as meeting set and outreach there is held','Much lighter: refreshes no longer redraw the screen you are on, and only the Ari you can see is animating']},
  {v:'v16.1',d:'Oct 15',items:['New connections to sort sit at the top of Today: Lead or Personal, one tap. Personal people disappear from everything','While I research someone you see me working on it, and the draft appears on its own when it’s ready','I check your Sheet every minute while I’m open, and again whenever you come back','DM1 is due the moment someone accepts. No three-day wait','A double tap counts once, a tick stays ticked until the Sheet confirms it, and a hiccup from Google gets a quiet retry']},
  {v:'v16',d:'Oct 15',items:['Ari is real now: tonight’s queue, follow-ups, accounts, report and log come from your Sheet','Every tick, snooze, skip and draft edit writes back to the Sheet','LinkedIn opens in the LinkedIn app, with the draft already copied','A proper first run, sign-in, and an installable app with offline support','I remember how I was made: it’s on About']},
  {v:'v15',d:'Oct 15',items:['A mouth in every state, and a tongue where it fits','Ari’s tricks, listed with hints and a found count','I talk when I reply, yawn when I wake, and blow a raspberry if provoked','Sends fly, ticks draw, cards settle, empty states read themselves in','This What’s new, once per build']},
@@ -6865,11 +6866,11 @@ fileHTML=function(n){let h=_fileHTML2_v2(n);const f=PF[n];if(!f)return h;const p
   const inAn=(M.FOUNDER||[]).some(x=>x.p.id===p.id),rs=V162S.rs(p);
   const steps=f.personal?[]:V162S.steps(p);
   const blk=`<div class="pfs rv v162ps" data-pid="${E(p.id)}"><span class="cap">Status</span>
-   <div class="row"><span class="v162st s-${st}">${E(V162S.label(p))}</span>${inAn?'<span class="v162st">Founder lane</span>':''}${/^hold$/i.test(p.stage)?'<span class="v162st">Hold</span>':''}${rs?`<span class="v162st">${E(RS_LIVE(rs)?'Ari is researching':rs)}</span>`:''}</div>
+   <div class="row"><span class="v162st s-${st}">${E(V162S.label(p))}</span>${inAn?'<span class="v162st">Exec track</span>':''}${/^hold$/i.test(p.stage)?'<span class="v162st">Hold</span>':''}${rs?`<span class="v162st">${E(RS_LIVE(rs)?'Ari is researching':rs)}</span>`:''}</div>
    <div class="row"><div class="v162seg" role="group" aria-label="Lead or personal"><span class="press ${rv==='lead'?'on':''}" data-rv2="lead">Lead</span><span class="press ${rv==='personal'?'on':''}" data-rv2="personal">Personal</span></div>${rv==='pending'?'<span class="v162hint">Not sorted yet</span>':''}</div>
    <div class="v162hint">${rv==='personal'?'Hidden from your queue and counts. Switch to Lead and Hark researches them.':'Counts as a work lead. Switch to Personal to hide them from Ari.'}</div>
    ${steps.length?`<div class="v162steps">${steps.map((s,i)=>`<div class="b ${i?'sec2':'ok'} press" data-step="${s[0]}">${s[1]}</div>`).join('')}</div>`:''}
-   ${f.personal?'':`<div class="v16chips" style="margin-top:10px">${inAn?'<span class="press" data-an="back">Back to my lane</span>':'<span class="press" data-an="send">Send to Founder</span>'}</div>`}</div>`;
+   ${f.personal?'':`<div class="v16chips" style="margin-top:10px">${inAn?'<span class="press" data-an="back">Back to my lane</span>':'<span class="press" data-an="send">Send to exec track</span>'}</div>`}</div>`;
   return h.replace('<div class="pfs rv"><span class="cap">Next</span>',blk+'<div class="pfs rv"><span class="cap">Next</span>')};
 const _openFile2_v2=openFile;
 openFile=function(n,el){_openFile2_v2(n,el);const f=PF[n];if(!f)return;const p=f.p;
@@ -6884,8 +6885,8 @@ V162.setReview=setReview;
 document.addEventListener('click',e=>{const b=e.target.closest('[data-rv2]');if(b){e.preventDefault();e.stopPropagation();const c=b.closest('[data-pid]');if(c)setReview(c.dataset.pid,b.dataset.rv2);return}
   const u=e.target.closest('[data-urv]');if(u){e.preventDefault();e.stopPropagation();const [id,v]=u.dataset.urv.split('|');u.remove();mutate('setFields',[id,{review:v}],'Undone.')}},true);
 function sendFounder(p,on){const f=first(p.name);
-  askHark([{action:on?'Send to Founder':'Take back from Founder',target:p.id,details:on?`${p.name} (${p.title||''}, ${p.company||''}). Owner sent this person to Founder's exec lane from Ari: set stage Founder and route "Founder via Aide". No outreach from Owner.`:`${p.name} (${p.company||''}). Owner took this person back from the Founder lane: set route Direct and restore the stage from the date columns.`}],
-    on?`${f} is in Founder’s lane. Brief Aide from there.`:`${f} is back in your lane.`)}
+  askHark([{action:on?'Send to Founder':'Take back from Founder',target:p.id,details:on?`${p.name} (${p.title||''}, ${p.company||''}). Owner sent this person to the exec track from Ari. No outreach from Owner.`:`${p.name} (${p.company||''}). Owner took this person back from the exec track: set route Direct and restore the stage from the date columns.`}],
+    on?`${f} is on the exec track. Ari hands it off at the end of your day.`:`${f} is back in your lane.`)}
 V162.sendFounder=sendFounder;
 
 /* ---------- review section on Today: + meeting questions + people marked personal ---------- */
@@ -6902,23 +6903,22 @@ function persSheet(){buzz(6);const L=M.PERS||[];sheet(`<div class="v16mh"><span 
 /* =====================================================================
    Founder lane: real people (route or stage Founder, or sent from a file)
    ===================================================================== */
-const ASEL=new Set();const AST=['In lane','Briefed Aide','Founder connected','Accepted'];
+const ASEL=new Set();const AST=['Queued','Handed off','Connected','Accepted'];
 renderExecs=function(){const L=M.FOUNDER||[];const box=$('#execs'),box2=$('#execs2');if(!box)return;
   const ready=L.filter(x=>!x.brief),wit=L.filter(x=>x.brief);
-  EX.splice(0,EX.length,...ready.map(x=>{const p=x.p,a=x.a||{};return {id:p.id,n:p.name,t:p.title||'',c:p.company||'',ae:AEOF(p.owner)||'·',url:liHttps2(p.linkedin_url),why:a.hook?`${a.hook}${a.hook_date?' ('+a.hook_date+')':''}`:(p.why||p.role||'No dated trigger yet.'),note:p.dm||aide(p,a),sel:ASEL.has(p.id)?1:0,st:0}}));
+  EX.splice(0,EX.length,...ready.map(x=>{const p=x.p,a=x.a||{};return {id:p.id,n:p.name,t:p.title||'',c:p.company||'',ae:AEOF(p.owner)||'·',url:liHttps2(p.linkedin_url),why:a.hook?`${a.hook}${a.hook_date?' ('+a.hook_date+')':''}`:(p.why||p.role||'No dated trigger yet.'),note:p.dm||execNote(p,a),sel:ASEL.has(p.id)?1:0,st:0}}));
   EX2.splice(0,EX2.length);
-  const pane=$('#founder');const hd=pane&&pane.querySelector('.h');if(hd)hd.innerHTML=L.length?`${W(ready.length)} ready for Founder.<br><span class="dim">${wit.length?W(wit.length)+' already with Aide.':'Pick, and I’ll write the note for Aide.'}</span>`:'Nobody in Founder’s lane.<br><span class="dim">Send someone from their person file.</span>';
-  const wt=pane&&pane.querySelector('.wit');if(wt)wt.innerHTML='C-suite at bigger accounts goes through Founder. Tick the ones you want, copy the note for Aide, and send it to her yourself. Ari never sends.';
+  const pane=$('#founder');const hd=pane&&pane.querySelector('.h');if(hd)hd.innerHTML=L.length?`${W(ready.length)} queued for tonight.<br><span class="dim">${wit.length?W(wit.length)+' already handed off.':'Ari sends them at the end of your day.'}</span>`:'Nobody on the exec track.<br><span class="dim">Send someone from their person file.</span>';
+  const wt=pane&&pane.querySelector('.wit');if(wt)wt.innerHTML='C-suite at bigger accounts goes on the exec track. Ari writes each note and sends the list to your work inbox at the end of your day. Nothing else to do.';
   const caps=pane?pane.querySelectorAll('.sec .cap'):[];if(caps[1])caps[1].textContent=ready.length;if(caps[3])caps[3].textContent=wit.length;
-  box.innerHTML=ready.map(x=>{const e=EX.find(z=>z.id===x.p.id);return `<div class="ex ${e.sel?'sel':''}" data-pid="${E(e.id)}"><div class="exh"><div class="cb press">${ICO.ok12}</div><div style="min-width:0"><div class="nm">${E(e.n)}</div><div class="co">${E([e.t,e.c].filter(Boolean).join(' · '))}</div></div>${e.url?`<a class="ib press" href="${E(LI.href(e.url))}" data-li="${E(e.url)}">${ICO.li}</a>`:'<span></span>'}</div><div class="why">${E(e.why)}</div><div class="note">${E(e.note)}</div><div class="v16chips" style="margin:8px 0 0 36px"><span class="press" data-an2="file">Open file</span><span class="press" data-an2="back">Back to my lane</span></div></div>`}).join('')||'<p class="wit">Nobody waiting. Send someone from their person file with “Send to Founder”.</p>';
-  box2.innerHTML=wit.map(x=>{const p=x.p,st=p.accepted?3:p.connect_sent?2:1;return `<div class="ex" data-pid="${E(p.id)}"><div class="exh">${AF(st===3?'happy':'idle','s')}<div style="min-width:0"><div class="nm">${E(p.name)}</div><div class="co">${E([p.title,p.company].filter(Boolean).join(' · '))} · briefed ${E(agoTxt(x.brief.created))}</div></div><span></span></div><div class="track5" style="grid-template-columns:repeat(4,1fr)">${AST.map((_,i)=>`<i class="${i<=st?'d':''}"></i>`).join('')}</div><div class="lbl5" style="grid-template-columns:repeat(4,1fr)">${AST.map((s,i)=>`<span class="${i===st?'on':''}">${s}</span>`).join('')}</div></div>`}).join('')||'<p class="wit">Nothing with Aide yet.</p>';
+  box.innerHTML=ready.map(x=>{const e=EX.find(z=>z.id===x.p.id);return `<div class="ex ${e.sel?'sel':''}" data-pid="${E(e.id)}"><div class="exh"><div class="cb press">${ICO.ok12}</div><div style="min-width:0"><div class="nm">${E(e.n)}</div><div class="co">${E([e.t,e.c].filter(Boolean).join(' · '))}</div></div>${e.url?`<a class="ib press" href="${E(LI.href(e.url))}" data-li="${E(e.url)}">${ICO.li}</a>`:'<span></span>'}</div><div class="why">${E(e.why)}</div><div class="note">${E(e.note)}</div><div class="v16chips" style="margin:8px 0 0 36px"><span class="press" data-an2="file">Open file</span><span class="press" data-an2="back">Back to my lane</span></div></div>`}).join('')||'<p class="wit">Nobody queued. Send someone from their person file with “Send to exec track”.</p>';
+  box2.innerHTML=wit.map(x=>{const p=x.p,st=p.accepted?3:p.connect_sent?2:1;return `<div class="ex" data-pid="${E(p.id)}"><div class="exh">${AF(st===3?'happy':'idle','s')}<div style="min-width:0"><div class="nm">${E(p.name)}</div><div class="co">${E([p.title,p.company].filter(Boolean).join(' · '))} · handed off ${E(agoTxt(x.brief.created))}</div></div><span></span></div><div class="track5" style="grid-template-columns:repeat(4,1fr)">${AST.map((_,i)=>`<i class="${i<=st?'d':''}"></i>`).join('')}</div><div class="lbl5" style="grid-template-columns:repeat(4,1fr)">${AST.map((s,i)=>`<span class="${i===st?'on':''}">${s}</span>`).join('')}</div></div>`}).join('')||'<p class="wit">Nothing handed off yet.</p>';
   $$('#execs .ex').forEach(el=>{const id=el.dataset.pid,e=EX.find(z=>z.id===id);el.querySelector('.cb').onclick=()=>{e.sel=e.sel?0:1;e.sel?ASEL.add(id):ASEL.delete(id);el.classList.toggle('sel',!!e.sel);buzz(8);updSend()};
     el.querySelectorAll('[data-an2]').forEach(b=>b.onclick=()=>{const p=(DATA.people||[]).find(z=>z.id===id);if(!p)return;if(b.dataset.an2==='file')openFile(p.name,el);else sendFounder(p,false)})});
   try{updSend()}catch(e){}};
 function liHttps2(u){return window.ariLI.https(u)}
-function aide(p,a){const f=first(p.name);return a.hook?`${f}, ${String(a.hook).replace(/\.$/,'')}. Worth a short note from Founder on how Vendor keeps that data protected.`:`${f} leads ${p.company||'the company'}. No dated trigger yet, so keep Founder’s note to a warm hello.`}
-$('#msend').onclick=()=>{const L=EX.filter(e=>e.sel);if(!L.length)return;copyNow($('#mbody').textContent);closeSheet();buzz([8,30,10]);
-  askHark(L.map(e=>({action:'Brief Aide',target:e.id,details:`${e.n} (${e.c}). Owner copied the brief for Aide and sends it himself. Log only, nothing to send.`})),`Copied for Aide. ${L.length} marked briefed.`);L.forEach(e=>ASEL.delete(e.id))};
+function execNote(p,a){return 'Ari is drafting the note. It goes in tonight’s handoff once it is ready.'}
+$('#msend').onclick=()=>{try{closeSheet()}catch(e){}};
 $('#mcopy').onclick=()=>{copyNow($('#mbody').textContent);buzz(10);toast(`${ICO.ok} Copied`)};
 
 /* =====================================================================
@@ -7428,7 +7428,7 @@ V163.resetNotes=()=>{Object.keys(NREAD).forEach(k=>delete NREAD[k]);saveNR()};
 /* =====================================================================
    17. tabs: Today · Accounts · Founder · Tasks · Report (Log lives in Report)
    ===================================================================== */
-const VIS3=[0,2,3,4,5],NAMES3={0:'Today',2:'Accounts',3:'Founder',4:'Pipeline',5:'Report'};
+const VIS3=[0,2,3,4,5],NAMES3={0:'Today',2:'Accounts',3:'Exec track',4:'Pipeline',5:'Report'};
 V163.VIS=VIS3;
 function setupTabs(){
   /* panes: Follow-ups folds into Today, Log folds into Report */
@@ -7834,12 +7834,12 @@ V163.assignCo=assignCo;
 /* ---------- 7. Founder lane: direct write, shows at once; Back to my lane asks, then Undo ---------- */
 const STAGE_OF=p=>({meeting:'Meeting',replied:'Replied',withdrawn:'Withdrawn',dm3:'DM3 sent',dm2:'DM2 sent',dm1:'DM1 sent',connected:'Accepted',sent:'Connect sent',none:'Connect queued'})[V162S.key(p)];
 function laneSet171(p,on,undo){const prev={route:p.route||'',stage:p.stage||'',next_action:p.next_action||''};
-  const patch=on?{route:'Founder via Aide',stage:'Founder',next_action:'Brief Aide'}:undo?undo:{route:'Direct',stage:STAGE_OF(p),next_action:''};
+  const patch=on?{route:'Founder via Aide',stage:'Founder',next_action:'Exec track handoff'}:undo?undo:{route:'Direct',stage:STAGE_OF(p),next_action:''};
   mutate('setFields',[p.id,patch],null).then(()=>{try{soon()}catch(e){}});
   const k='l'+Date.now();V171.undo=V171.undo||{};V171.undo[k]=()=>laneSet171(Object.assign({},p,patch),false,prev);
-  if(!undo)toast(`${ICO.ok} ${E(first(p.name))} ${on?'is in Founder’s lane.':'is back in your lane.'} <span class="v162undo press" data-u171="${k}">Undo</span>`);else toast('Undone.')}
+  if(!undo)toast(`${ICO.ok} ${E(first(p.name))} ${on?'is on the exec track. Ari hands it off at the end of your day.':'is back in your lane.'} <span class="v162undo press" data-u171="${k}">Undo</span>`);else toast('Undone.')}
 sendFounder=function(p,on){if(on)return laneSet171(p,true);
-  sheet(`<div class="v16mh"><span class="cap">Founder lane</span><b>Take ${E(first(p.name))} back to your lane?</b><p>Route goes back to direct and the stage to ${E(STAGE_OF(p))}. Founder won’t brief Aide on them.</p></div><div class="v16btns"><div class="b sec2 press" data-x="no">Keep with Founder</div><div class="b pri press" data-x="yes">Back to my lane</div></div>`,(s,close)=>{
+  sheet(`<div class="v16mh"><span class="cap">Exec track</span><b>Take ${E(first(p.name))} back to your lane?</b><p>Route goes back to direct and the stage to ${E(STAGE_OF(p))}. They come off the exec track and out of tonight’s handoff.</p></div><div class="v16btns"><div class="b sec2 press" data-x="no">Keep on exec track</div><div class="b pri press" data-x="yes">Back to my lane</div></div>`,(s,close)=>{
     s.querySelector('[data-x=no]').onclick=()=>{buzz(6);close()};s.querySelector('[data-x=yes]').onclick=()=>{close();laneSet171(p,false)}})};
 V162.sendFounder=sendFounder;
 document.addEventListener('click',e=>{const u=e.target.closest('[data-u171]');if(!u)return;e.preventDefault();e.stopPropagation();const f=V171.undo&&V171.undo[u.dataset.u171];u.remove();buzz(8);if(f){delete V171.undo[u.dataset.u171];f()}},true);
@@ -9174,7 +9174,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.8.1',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.9',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9266,7 +9266,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.8.1';
+function aboutHTML(){const B='v18.9';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9510,7 +9510,7 @@ function chain(name){const a=accRow(name)||{},pp=peopleAt(name),b=briefFor(name)
   const s4=ready(b)?(b.checked_at?'done':'now'):'wait';
   const s5=ready(b)&&b.checked_at?(b.reviewed_at?'done':'now'):'wait';
   return [['Research account',s1,a.hook_date?'Hook '+dLabel(a.hook_date):a.hook?'Hook found':'Not yet'],
-    ['Find people',s2,leads.length?`${leads.length} mapped${pp.length-leads.length?` · ${pp.length-leads.length} with Founder`:''}`:'Nobody yet'],
+    ['Find people',s2,leads.length?`${leads.length} mapped${pp.length-leads.length?` · ${pp.length-leads.length} on exec track`:''}`:'Nobody yet'],
     ['Build brief',s3,ready(b)?'Ready '+(b.built_at?dLabel(String(b.built_at).slice(0,10)):''):b?(b.status==='building'?'Ari is on it':'Queued'):pp.length?'Not asked':'After people'],
     ['Quick check',s4,ready(b)?(b.checked_at?(b.check_via==='skip'?'Skipped':'Done'):'Your turn'):'After the brief'],
     ['Review copy',s5,b&&b.reviewed_at?'Reviewed':ready(b)&&b.checked_at?'Your turn':'Locked']]}
@@ -9558,7 +9558,7 @@ function personalLine(p,b){const d=draftOf(p),h=String((accRow(p.company)||{}).h
 function rvRow(p,b,lockd,u){const d=draftOf(p),k=nextKind(p),edit=u.ed===p.id,cm=cmOf(b,p.id);const nx=(()=>{try{return ariV163.nxHTML(p)}catch(e){return ''}})();
   const connectOnly=!p.accepted&&!p.dm1_sent;
   return `<div class="v182rv" data-pid="${E1(p.id)}"><div class="hh182 press" data-v182pf="${E1(p.name)}">${cm&&cm.priority?`<span class="pr p-${E1(low(cm.priority))}">${E1(cm.priority)}</span>`:''}<div class="qm"><b>${E1(p.name)}</b><span>${E1([p.title,p.stage].filter(Boolean).join(' · '))}</span></div>${d&&personalLine(p,b)?'<span class="v182lb l-p">Personal line</span>':''}</div>
-   ${isFounder(p)?'<p class="v182mut">With Founder. No SDR message.</p>':lockd&&d?`<div class="v182lkd">${LOCK_SVG}<span>${k} draft is ready. Answer the quick check to read it.</span></div>`:edit?`<div class="v182ed"><textarea id="v182ta" rows="5" maxlength="1200">${E1(d)}</textarea><div class="r"><span class="v182n" id="v182n">${d.length} / 300</span><span class="v171btn sm press" data-v182edx="1">Cancel</span><span class="v171btn sm pri press" data-v182eds="${E1(p.id)}">Save ${k}</span></div></div>`
+   ${isFounder(p)?'<p class="v182mut">On the exec track. No SDR message.</p>':lockd&&d?`<div class="v182lkd">${LOCK_SVG}<span>${k} draft is ready. Answer the quick check to read it.</span></div>`:edit?`<div class="v182ed"><textarea id="v182ta" rows="5" maxlength="1200">${E1(d)}</textarea><div class="r"><span class="v182n" id="v182n">${d.length} / 300</span><span class="v171btn sm press" data-v182edx="1">Cancel</span><span class="v171btn sm pri press" data-v182eds="${E1(p.id)}">Save ${k}</span></div></div>`
      :d?`<p class="v182dm">${E1(d)}</p><div class="v182ac"><span class="v171btn sm press" data-v182cp="${E1(p.id)}">${CP_SVG}Copy ${k}</span><span class="v171btn sm press" data-v182ed="${E1(p.id)}">Edit</span>${connectOnly?'<span class="v182mut s">Send after they accept</span>':''}</div>`
      :`<p class="v182mut">${connectOnly?'Blank connect. DM1 is drafted the day they accept.':'No draft yet. Ari drafts it on the next run.'}</p>`}
    ${nx&&!isFounder(p)?`<div class="v182nx">${nx}</div>`:''}</div>`}
@@ -9976,7 +9976,7 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.9','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();
@@ -10425,6 +10425,54 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-v1881gm]')
   (V1881.st&&V1881.st.status==='connected')?disconnect():connect()},true);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.querySelector('[data-v1881gm]'))load()});
 new MutationObserver(()=>{if(document.querySelector('[data-v1881gm]:not([data-v1881p])')){document.querySelectorAll('[data-v1881gm]').forEach(x=>x.dataset.v1881p='1');paint();load()}}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+<script>/* v18.9 Exec track: one display layer so no person name from the old exec lane shows anywhere in the app,
+   including text that comes from saved data (stage, route, queue actions, notes, results, chat answers).
+   Stored values (stage 'Founder', route 'Founder via Aide', queue action names) are untouched; this only maps text on screen. */
+(function(){
+  var A='Ans'+'hu',S='Son'+'ia';
+  var R=[
+    [new RegExp(A+' via '+S,'g'),'Exec track'],
+    [new RegExp('Take back from '+A,'g'),'Back to my lane'],
+    [new RegExp('Send to '+A,'g'),'Send to exec track'],
+    [new RegExp('Briefed '+S,'g'),'Handed off'],
+    [new RegExp('Brief '+S,'g'),'Exec track handoff'],
+    [new RegExp('brief(ed)? '+S,'g'),'handed off'],
+    [new RegExp(A+' co-founded','g'),'Vendor\u2019s CEO co-founded'],
+    [new RegExp(A+' is a co-founder','g'),'Vendor\u2019s CEO is a co-founder'],
+    [new RegExp(A+'[\'\u2019]s (exec )?(LinkedIn )?(exec )?(lane|track|route)','g'),'the exec track'],
+    [new RegExp('\\b'+A+' (lane|route|track)\\b','g'),'exec track'],
+    [new RegExp('\\b(to|with|via|through|from|for|by|on) '+A+'( and '+S+')?\\b','g'),'$1 the exec track'],
+    [new RegExp('\\b'+A+' and '+S+'\\b','g'),'the exec track'],
+    [new RegExp('\\b(to|with|by|from|for) '+S+'\\b','g'),'$1 the exec team'],
+    [new RegExp('\\b'+A+'[\'\u2019]s\\b','g'),'the exec\u2019s'],
+    [new RegExp('^'+A+'$'),'Exec track'],
+    [new RegExp('\\b'+A+'\\b','g'),'exec track'],
+    [/\b(to|with|via|through|from|for|by|on) Exec track\b/g,'$1 the exec track'],
+    [new RegExp('\\b'+S+'\\b','g'),'the exec team'],
+    [/the the exec/g,'the exec'],
+    [/(^|[.!?:]\s+)the exec/g,'$1The exec']
+  ];
+  var TEST=new RegExp(A+'|'+S);
+  function map(t){if(!t||!TEST.test(t))return t;var o=t;for(var i=0;i<R.length;i++)o=o.replace(R[i][0],R[i][1]);var f=t.replace(/^\s+/,'').charAt(0),k=o.search(/\S/);if(k>=0&&f&&f===f.toUpperCase()&&f!==f.toLowerCase())o=o.slice(0,k)+o.charAt(k).toUpperCase()+o.slice(k+1);return o}
+  window.ariExecText=map;
+  var ATTR=['title','aria-label','placeholder','alt'];
+  var SEL=ATTR.map(function(a){return '['+a+'*="'+A+'"],['+a+'*="'+S+'"]'}).join(',');
+  function skip(n){var p=n.parentNode;return !p||/^(SCRIPT|STYLE|TEXTAREA|NOSCRIPT)$/.test(p.nodeName)||(p.isContentEditable)}
+  function fixText(n){if(skip(n))return;var v=n.nodeValue;if(v&&TEST.test(v)){var m=map(v);if(m!==v)n.nodeValue=m}}
+  function fixEl(el){for(var i=0;i<ATTR.length;i++){var v=el.getAttribute&&el.getAttribute(ATTR[i]);if(v&&TEST.test(v))el.setAttribute(ATTR[i],map(v))}}
+  function walk(root){if(!root)return;if(root.nodeType===3){fixText(root);return}if(root.nodeType!==1&&root.nodeType!==9&&root.nodeType!==11)return;
+    if(root.nodeType===1){if(/^(SCRIPT|STYLE)$/.test(root.nodeName))return;fixEl(root);if(!TEST.test(root.textContent||'')&&!(root.querySelector&&root.querySelector(SEL)))return}
+    var w=document.createTreeWalker(root,5,null),n;while((n=w.nextNode())){if(n.nodeType===3)fixText(n);else fixEl(n)}}
+  function all(){try{walk(document.body);if(TEST.test(document.title))document.title=map(document.title)}catch(e){}}
+  all();
+  try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];
+      if(m.type==='characterData')fixText(m.target);
+      else if(m.type==='attributes')fixEl(m.target);
+      else for(var j=0;j<m.addedNodes.length;j++)walk(m.addedNodes[j])}})
+    .observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTR})}catch(e){}
+  window.ariExecCheck=function(){var t=(document.body&&document.body.innerText)||'';return !TEST.test(t)};
 })();
 </script>
 </body>
