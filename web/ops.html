@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.9"><meta name="ari-rev" content="42622cd442">
+<meta name="ari-build" content="v18.10"><meta name="ari-rev" content="bb61ccc0bc">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -3658,7 +3658,7 @@ html.v184fxon{overflow:hidden}
 .v186hint{margin:8px 0 0;font-size:12px;line-height:16px;color:var(--ink2)}
 </style>
 <style>/* ===== v18.7 (Oct 17): Phase 0 cut list, hide-only. The code paths stay; these surfaces are off the default view. ===== */
-.tbi[data-i="3"],.tbi[data-i="4"]{display:none!important}              /* Founder lane + Pipeline tabs */
+.tbi[data-i="4"]{display:none!important}              /* Pipeline tab (the exec track tab is back since v18.10) */
 #v1712hg,#v1712pop{display:none!important}                             /* scan hourglass: the "Synced live" line stays */
 .v181hc{display:none!important}                                        /* health score chip */
 .v182feed,#v182feed{display:none!important}                            /* live activity feed */
@@ -3678,7 +3678,7 @@ html.v184fxon{overflow:hidden}
 .hyb{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line,rgba(0,0,0,.12));background:transparent;font:inherit}
 .hyb:first-child{background:var(--ink,#111);color:var(--bg,#fff);border-color:transparent}
 </style>
-<style>#founder .ex .cb{display:none!important}#founder .ex .exh{grid-template-columns:1fr auto!important}#sendbar,#mailSheet{display:none!important}</style></head>
+<style>#founder .ex .cb{display:none!important}#founder .ex .exh{grid-template-columns:1fr auto!important}#sendbar,#mailSheet{display:none!important}</style><style>/* v18.10 */.v1810co{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 6px;font-size:13px}.v1810co span{opacity:.6}.v1810st{display:inline-block;margin:6px 6px 0 0;padding:2px 8px;border-radius:999px;font-size:12px;line-height:18px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--ink)}.v1810st.s-drafting{background:color-mix(in srgb,var(--ink) 8%,transparent)}.v1810st.s-hold,.v1810st.s-handed{background:color-mix(in srgb,var(--ink) 6%,transparent);opacity:.75}#founder .v1810ex .note{margin:8px 0 0;font-size:14px;line-height:20px}.v1810pk{display:flex;gap:10px;align-items:flex-start;margin:8px 0 10px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--acc) 10%,transparent)}.v1810pk p{margin:0;display:flex;flex-direction:column;gap:2px}.v1810pk em{font-style:normal;font-size:12px;opacity:.7}.v1810pk b{font-size:14px}.v1810pk span{font-size:13px;opacity:.8;line-height:18px}.v1810rs{display:flex;align-items:center;justify-content:space-between;gap:12px}.v1810rs .r{display:flex;gap:10px;align-items:flex-start;min-width:0}.v1810rs .r div{display:flex;flex-direction:column;gap:2px}.v1810rs .r span{font-size:13px;opacity:.8;line-height:18px}.v1810rs.stale{border-color:color-mix(in srgb,var(--acc) 40%,transparent)}</style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
   <div class="rscrim" id="rscrim"></div><nav class="rail" id="rail"><div class="rhd"><span class="cap">Ari · sections</span></div><div class="ri press on" data-i="0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></svg></span><span class="rl">Ready</span></div><div class="ri press" data-i="1"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/></svg><b>4</b></span><span class="rl">Follow</span></div><div class="ri press" data-i="2"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></span><span class="rl">Prospect</span></div><div class="ri press" data-i="3"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M5 15l-1-8 4.5 3.5L12 5l3.5 5.5L20 7l-1 8z"/></svg></span><span class="rl">Exec track</span></div><div class="ri press" data-i="4"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg><b>2</b></span><span class="rl">Tasks</span></div><div class="ri press" data-i="5"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></span><span class="rl">Report</span></div><div class="ri press" data-i="6"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span class="rl">Log</span></div><i class="rind" id="rind"></i><div class="rsp"></div><div class="ri sync press" id="syncBtn"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></span><span class="rl" id="syncL">Sync</span></div></nav>
@@ -3769,8 +3769,8 @@ html.v184fxon{overflow:hidden}
   <section class="pane" id="founder">
     <span class="cap">Exec track</span>
     <div class="h">Nobody on the exec track.<br><span class="dim">Send someone from their person file.</span></div>
-    <p class="wit">C-suite at bigger accounts goes on the exec track. Ari writes each note and sends the list to your work inbox at the end of your day. Nothing else to do.</p>
-    <div class="sec"><span class="cap">Queued for tonight</span><span class="cap" id="ac">0</span></div>
+    <p class="wit">C-suite at bigger accounts is parked here for the exec. Ari writes each note and sends the day’s list to your work inbox at the end of your day. Anyone here is still yours to reach out to.</p>
+    <div class="sec"><span class="cap">Parked for the exec</span><span class="cap" id="ac">0</span></div>
     <div class="list" id="execs"></div>
     <div class="sec"><span class="cap">Handed off</span><span class="cap">0</span></div>
     <div class="list" id="execs2"></div>
@@ -5020,7 +5020,7 @@ function autoCtx(){
   if(page===0){const o=$('#queue .q.open');if(o)return ctxPerson(Q[+o.dataset.i].n,'Ready');const nx=$('#queue .q:not(.done)');if(nx)return ctxPerson(Q[+nx.dataset.i].n,'Ready');return cx('screen','ready','All nine sent','Ready')}
   if(page===1)return cx('screen','follow','4 due today','Follow-ups','all drafted');
   if(page===2){const o=$('#accts .acc.open .acch .nm');if(o)return ctxAcct(o.textContent,'Prospect');return cx('screen','prospect','Week 42','Prospect','6 accounts')}
-  if(page===3)return cx('screen','founder','Exec track','Exec track','queued for tonight');
+  if(page===3)return cx('screen','founder','Exec track','Exec track','parked for the exec');
   if(page===4)return cx('screen','tasks',`${TK.filter(k=>k.state!=='done').length} running`,'Tasks','1 queued');
   if(page===5)return cx('screen','report','This week','Report','');
   return cx('screen','log','Today','Log')}
@@ -5113,7 +5113,7 @@ function ackLine(c){if(c.entity_type==='app'&&window.ariV14)return ariV14.ack(c)
   if(T==='card'){const nt=NOTES.find(x=>x.id===n);return `About my note from ${c.sub}: ${nt?nt.t.split(/(?<=[.,])\s/)[0].replace(/,$/,'.'):''} Tell me what you want done with it, and it comes off your stack once it’s handled.`}
   if(T==='step'){const [tki,si]=n.split('#'),k=TK[+tki.slice(2)],i=+si,cur=k.step??k.cur,st=k.state==='done'||i<cur?'done':i===cur?'running now':'still to come';
     return `${c.label} is ${st} in ${k.t}. Anything you change here applies to this step only, so the rest of the task carries on as it is.`}
-  const S={ready:'You’re on Ready, tonight’s queue from your Sheet.',follow:'You’re on Follow-ups: the cadence, what’s due and who’s waiting on an accept.',prospect:'These are the accounts with people still to connect with.',founder:'This is the exec track. Ari sends the list to your work inbox at the end of your day.',tasks:'This is Hark’s queue from your Sheet. Anything you ask me lands here.',report:'This week’s numbers, straight from your Sheet.',log:'Every touch, from the Sheet’s log.'};
+  const S={ready:'You’re on Ready, tonight’s queue from your Sheet.',follow:'You’re on Follow-ups: the cadence, what’s due and who’s waiting on an accept.',prospect:'These are the accounts with people still to connect with.',founder:'This is the exec track: everyone parked for the exec, by account. Anyone here is still yours to reach out to.',tasks:'This is Hark’s queue from your Sheet. Anything you ask me lands here.',report:'This week’s numbers, straight from your Sheet.',log:'Every touch, from the Sheet’s log.'};
   return S[n]||`You’re on ${c.screen}. Ask me anything about it.`}
 function ack(c){const k=keyOf(c);if(!c||ACKED.has(k))return;ACKED.add(k);
   const ty=chatOpen&&(view==='main'||view===k)?typing(box):null;setTimeout(()=>{if(chatOpen)setFace('think')},RM?0:760);
@@ -5907,7 +5907,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.9';
+const M=MOTION,APP=$('#app'),BUILD='v18.10';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5972,7 +5972,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.9'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.10'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6051,6 +6051,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.10',d:'Oct 17',items:['The Exec track tab is back: everyone parked for the exec, grouped by account, with where each one stands and their note', 'Reach out myself takes someone off the exec track, and Ari drafts your own first message', 'Drafts, sequences and people on an account open straight away. The quick check is optional and shows Ari’s pick with the reason', 'Re-scan on an account’s Brief: Ari looks for fresh triggers and rebuilds the brief, usually within ten minutes']},
  {v:'v18.9',d:'Oct 17',items:['The exec lane is now called Exec track, everywhere in the app', 'Send someone to the exec track from their person file and that is it. Ari writes the note and sends the day’s list to your work inbox at the end of your day', 'The copy-and-paste step is gone']},
  {v:'v18.8.1',d:'Oct 17',items:['Settings has a new Connect Gmail row. Ari reads only your LinkedIn emails, read-only', 'For now Ari just compares what it reads with what it already has and changes nothing. The row shows when it last read and how often the two agree', 'Disconnect any time from the same row']},
  {v:'v18.8',d:'Oct 17',items:['Tidy up on Today: Ari spots loose ends, like accepts never marked as connected, people with no account, DM1s waiting, and the same company listed twice', 'Each one has its own buttons: link it, mark the connect, keep one of two companies, or hide it. Nothing changes until you tap', 'Keeping one of two companies asks first, then moves everyone onto the one you keep']},
@@ -6870,7 +6871,7 @@ fileHTML=function(n){let h=_fileHTML2_v2(n);const f=PF[n];if(!f)return h;const p
    <div class="row"><div class="v162seg" role="group" aria-label="Lead or personal"><span class="press ${rv==='lead'?'on':''}" data-rv2="lead">Lead</span><span class="press ${rv==='personal'?'on':''}" data-rv2="personal">Personal</span></div>${rv==='pending'?'<span class="v162hint">Not sorted yet</span>':''}</div>
    <div class="v162hint">${rv==='personal'?'Hidden from your queue and counts. Switch to Lead and Hark researches them.':'Counts as a work lead. Switch to Personal to hide them from Ari.'}</div>
    ${steps.length?`<div class="v162steps">${steps.map((s,i)=>`<div class="b ${i?'sec2':'ok'} press" data-step="${s[0]}">${s[1]}</div>`).join('')}</div>`:''}
-   ${f.personal?'':`<div class="v16chips" style="margin-top:10px">${inAn?'<span class="press" data-an="back">Back to my lane</span>':'<span class="press" data-an="send">Send to exec track</span>'}</div>`}</div>`;
+   ${f.personal?'':`<div class="v16chips" style="margin-top:10px">${inAn?'<span class="press" data-an="back">Reach out myself</span>':'<span class="press" data-an="send">Send to exec track</span>'}</div>`}</div>`;
   return h.replace('<div class="pfs rv"><span class="cap">Next</span>',blk+'<div class="pfs rv"><span class="cap">Next</span>')};
 const _openFile2_v2=openFile;
 openFile=function(n,el){_openFile2_v2(n,el);const f=PF[n];if(!f)return;const p=f.p;
@@ -6905,16 +6906,32 @@ function persSheet(){buzz(6);const L=M.PERS||[];sheet(`<div class="v16mh"><span 
    ===================================================================== */
 const ASEL=new Set();const AST=['Queued','Handed off','Connected','Accepted'];
 renderExecs=function(){const L=M.FOUNDER||[];const box=$('#execs'),box2=$('#execs2');if(!box)return;
-  const ready=L.filter(x=>!x.brief),wit=L.filter(x=>x.brief);
-  EX.splice(0,EX.length,...ready.map(x=>{const p=x.p,a=x.a||{};return {id:p.id,n:p.name,t:p.title||'',c:p.company||'',ae:AEOF(p.owner)||'·',url:liHttps2(p.linkedin_url),why:a.hook?`${a.hook}${a.hook_date?' ('+a.hook_date+')':''}`:(p.why||p.role||'No dated trigger yet.'),note:p.dm||execNote(p,a),sel:ASEL.has(p.id)?1:0,st:0}}));
-  EX2.splice(0,EX2.length);
-  const pane=$('#founder');const hd=pane&&pane.querySelector('.h');if(hd)hd.innerHTML=L.length?`${W(ready.length)} queued for tonight.<br><span class="dim">${wit.length?W(wit.length)+' already handed off.':'Ari sends them at the end of your day.'}</span>`:'Nobody on the exec track.<br><span class="dim">Send someone from their person file.</span>';
-  const wt=pane&&pane.querySelector('.wit');if(wt)wt.innerHTML='C-suite at bigger accounts goes on the exec track. Ari writes each note and sends the list to your work inbox at the end of your day. Nothing else to do.';
-  const caps=pane?pane.querySelectorAll('.sec .cap'):[];if(caps[1])caps[1].textContent=ready.length;if(caps[3])caps[3].textContent=wit.length;
-  box.innerHTML=ready.map(x=>{const e=EX.find(z=>z.id===x.p.id);return `<div class="ex ${e.sel?'sel':''}" data-pid="${E(e.id)}"><div class="exh"><div class="cb press">${ICO.ok12}</div><div style="min-width:0"><div class="nm">${E(e.n)}</div><div class="co">${E([e.t,e.c].filter(Boolean).join(' · '))}</div></div>${e.url?`<a class="ib press" href="${E(LI.href(e.url))}" data-li="${E(e.url)}">${ICO.li}</a>`:'<span></span>'}</div><div class="why">${E(e.why)}</div><div class="note">${E(e.note)}</div><div class="v16chips" style="margin:8px 0 0 36px"><span class="press" data-an2="file">Open file</span><span class="press" data-an2="back">Back to my lane</span></div></div>`}).join('')||'<p class="wit">Nobody queued. Send someone from their person file with “Send to exec track”.</p>';
-  box2.innerHTML=wit.map(x=>{const p=x.p,st=p.accepted?3:p.connect_sent?2:1;return `<div class="ex" data-pid="${E(p.id)}"><div class="exh">${AF(st===3?'happy':'idle','s')}<div style="min-width:0"><div class="nm">${E(p.name)}</div><div class="co">${E([p.title,p.company].filter(Boolean).join(' · '))} · handed off ${E(agoTxt(x.brief.created))}</div></div><span></span></div><div class="track5" style="grid-template-columns:repeat(4,1fr)">${AST.map((_,i)=>`<i class="${i<=st?'d':''}"></i>`).join('')}</div><div class="lbl5" style="grid-template-columns:repeat(4,1fr)">${AST.map((s,i)=>`<span class="${i===st?'on':''}">${s}</span>`).join('')}</div></div>`}).join('')||'<p class="wit">Nothing handed off yet.</p>';
-  $$('#execs .ex').forEach(el=>{const id=el.dataset.pid,e=EX.find(z=>z.id===id);el.querySelector('.cb').onclick=()=>{e.sel=e.sel?0:1;e.sel?ASEL.add(id):ASEL.delete(id);el.classList.toggle('sel',!!e.sel);buzz(8);updSend()};
-    el.querySelectorAll('[data-an2]').forEach(b=>b.onclick=()=>{const p=(DATA.people||[]).find(z=>z.id===id);if(!p)return;if(b.dataset.an2==='file')openFile(p.name,el);else sendFounder(p,false)})});
+  /* v18.10 (Owner, Oct 17): the exec track is a parked list, not a hidden one. Same status rule as scripts/exec_track_handoff.py status_of() */
+  const HOLDST=/^(hold|customer|closed lost|not a fit)$/i;
+  const stOf=x=>{const p=x.p,a=x.a||{};if(x.brief)return ['handed','Handed off '+agoTxt(x.brief.created)];
+    if(/^hold$/i.test(p.stage||'')||HOLDST.test(a.stage||'')||/^on hold/i.test(String(p.why||p.why_this_person||'').trim()))return ['hold','On hold, the account owner decides first'];
+    const n=String(p.dm||'').trim();
+    if(n&&n.length<=300&&!/[\u2012\u2013\u2014]/.test(n)&&p.linkedin_url)return ['ready','Ready for tonight'];
+    return ['drafting',n?'Ari is redrafting the note':'Ari is drafting the note']};
+  const ORD={ready:0,drafting:1,hold:2,handed:3};
+  const rows=L.map(x=>{const s=stOf(x);return {x,k:s[0],t:s[1]}});
+  const parked=rows.filter(r=>r.k!=='handed'),handed=rows.filter(r=>r.k==='handed');
+  const cnt=k=>rows.filter(r=>r.k===k).length;
+  EX.splice(0,EX.length);EX2.splice(0,EX2.length);
+  const pane=$('#founder');const hd=pane&&pane.querySelector('.h');
+  if(hd)hd.innerHTML=L.length?`${W(parked.length)} parked for the exec.<br><span class="dim">${[cnt('ready')?cnt('ready')+' ready for tonight':'',cnt('drafting')?cnt('drafting')+' with a note on the way':'',cnt('hold')?cnt('hold')+' on hold':'',handed.length?handed.length+' handed off':''].filter(Boolean).join(' · ')||'Ari sends them at the end of your day.'}</span>`:'Nobody on the exec track.<br><span class="dim">Send someone from their person file.</span>';
+  const wt=pane&&pane.querySelector('.wit');if(wt)wt.innerHTML='C-suite at bigger accounts is parked here for the exec. Ari writes each note and sends the day’s list to your work inbox at the end of your day. Anyone here is still yours to reach out to.';
+  const caps=pane?pane.querySelectorAll('.sec .cap'):[];if(caps[0])caps[0].textContent='Parked for the exec';if(caps[1])caps[1].textContent=parked.length;if(caps[3])caps[3].textContent=handed.length;
+  const group=list=>{const by=new Map();list.slice().sort((a,b)=>ORD[a.k]-ORD[b.k]).forEach(r=>{const c=r.x.p.company||'No account';if(!by.has(c))by.set(c,[]);by.get(c).push(r)});
+    return [...by.entries()].sort((a,b)=>Math.min(...a[1].map(r=>ORD[r.k]))-Math.min(...b[1].map(r=>ORD[r.k]))||a[0].localeCompare(b[0]))};
+  const row=r=>{const p=r.x.p,url=liHttps2(p.linkedin_url),n=String(p.dm||'').trim();
+    return `<div class="ex v1810ex" data-pid="${E(p.id)}"><div class="exh"><div style="min-width:0"><div class="nm">${E(p.name)}</div><div class="co">${E(p.title||'')}</div></div>${url?`<a class="ib press" href="${E(LI.href(url))}" data-li="${E(url)}">${ICO.li}</a>`:'<span></span>'}</div>
+      <span class="v1810st s-${r.k}">${E(r.t)}</span>${n&&r.k!=='handed'?`<div class="note">${E(n)}</div>`:''}
+      <div class="v16chips" style="margin:8px 0 0"><span class="press" data-an2="file">Open file</span>${r.k!=='handed'&&r.k!=='hold'?'<span class="press" data-an2="back">Reach out myself</span>':''}</div></div>`};
+  box.innerHTML=group(parked).map(([c,rs])=>`<div class="v1810co"><b>${E(c)}</b><span>${rs.length}</span></div>`+rs.map(row).join('')).join('')||'<p class="wit">Nobody parked. Send someone from their person file with “Send to exec track”.</p>';
+  box2.innerHTML=group(handed).map(([c,rs])=>`<div class="v1810co"><b>${E(c)}</b><span>${rs.length}</span></div>`+rs.map(row).join('')).join('')||'<p class="wit">Nothing handed off yet.</p>';
+  [box,box2].forEach(bx=>bx.querySelectorAll('.ex').forEach(el=>{const id=el.dataset.pid;
+    el.querySelectorAll('[data-an2]').forEach(b=>b.onclick=()=>{const p=(DATA.people||[]).find(z=>z.id===id);if(!p)return;buzz(8);if(b.dataset.an2==='file')openFile(p.name,el);else sendFounder(p,false)})}));
   try{updSend()}catch(e){}};
 function liHttps2(u){return window.ariLI.https(u)}
 function execNote(p,a){return 'Ari is drafting the note. It goes in tonight’s handoff once it is ready.'}
@@ -7833,13 +7850,14 @@ V163.assignCo=assignCo;
 
 /* ---------- 7. Founder lane: direct write, shows at once; Back to my lane asks, then Undo ---------- */
 const STAGE_OF=p=>({meeting:'Meeting',replied:'Replied',withdrawn:'Withdrawn',dm3:'DM3 sent',dm2:'DM2 sent',dm1:'DM1 sent',connected:'Accepted',sent:'Connect sent',none:'Connect queued'})[V162S.key(p)];
-function laneSet171(p,on,undo){const prev={route:p.route||'',stage:p.stage||'',next_action:p.next_action||''};
-  const patch=on?{route:'Founder via Aide',stage:'Founder',next_action:'Exec track handoff'}:undo?undo:{route:'Direct',stage:STAGE_OF(p),next_action:''};
+function laneSet171(p,on,undo){const prev={route:p.route||'',stage:p.stage||'',next_action:p.next_action||'',dm:p.dm||'',research:p.research||''};
+  const exNote=/^Hi \S+, hope all is well\./.test(String(p.dm||'').trim());
+  const patch=on?{route:'Founder via Aide',stage:'Founder',next_action:'Exec track handoff'}:undo?undo:Object.assign({route:'Direct',stage:STAGE_OF(p),next_action:''},exNote?{dm:'',research:'Researching'}:{});
   mutate('setFields',[p.id,patch],null).then(()=>{try{soon()}catch(e){}});
   const k='l'+Date.now();V171.undo=V171.undo||{};V171.undo[k]=()=>laneSet171(Object.assign({},p,patch),false,prev);
   if(!undo)toast(`${ICO.ok} ${E(first(p.name))} ${on?'is on the exec track. Ari hands it off at the end of your day.':'is back in your lane.'} <span class="v162undo press" data-u171="${k}">Undo</span>`);else toast('Undone.')}
 sendFounder=function(p,on){if(on)return laneSet171(p,true);
-  sheet(`<div class="v16mh"><span class="cap">Exec track</span><b>Take ${E(first(p.name))} back to your lane?</b><p>Route goes back to direct and the stage to ${E(STAGE_OF(p))}. They come off the exec track and out of tonight’s handoff.</p></div><div class="v16btns"><div class="b sec2 press" data-x="no">Keep on exec track</div><div class="b pri press" data-x="yes">Back to my lane</div></div>`,(s,close)=>{
+  sheet(`<div class="v16mh"><span class="cap">Exec track</span><b>Reach out to ${E(first(p.name))} yourself?</b><p>They come off the exec track and out of the end-of-day handoff, and the stage goes to ${E(STAGE_OF(p))}. Ari drafts your own first message. Undo puts them back.</p></div><div class="v16btns"><div class="b sec2 press" data-x="no">Keep on exec track</div><div class="b pri press" data-x="yes">Reach out myself</div></div>`,(s,close)=>{
     s.querySelector('[data-x=no]').onclick=()=>{buzz(6);close()};s.querySelector('[data-x=yes]').onclick=()=>{close();laneSet171(p,false)}})};
 V162.sendFounder=sendFounder;
 document.addEventListener('click',e=>{const u=e.target.closest('[data-u171]');if(!u)return;e.preventDefault();e.stopPropagation();const f=V171.undo&&V171.undo[u.dataset.u171];u.remove();buzz(8);if(f){delete V171.undo[u.dataset.u171];f()}},true);
@@ -9174,7 +9192,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.9',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.10',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9266,7 +9284,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.9';
+function aboutHTML(){const B='v18.10';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9472,7 +9490,7 @@ function pById(id){return (DATA().people||[]).find(p=>p.id===id)||null}
 function briefFor(name){const a=accRow(name);return a&&a._id?V182.briefs.get(a._id)||null:null}
 V182.briefFor=briefFor;
 const ready=b=>b&&b.status==='ready';
-const gatedB=b=>ready(b)&&!b.checked_at&&(b.quick_check||[]).length>0;
+const gatedB=b=>false; /* v18.10 (Owner, Oct 17): the quick check is optional and never locks drafts, sequences or people */
 function gatedPerson(p){if(!p)return false;const b=briefFor(p.company);return gatedB(b)}
 V182.gatedPerson=gatedPerson;
 function teamOf(b,pid,name){for(const t of (b&&b.committee)||[])for(const x of t.people||[])if((pid&&x.person_id===pid)||(name&&NC(x.name)===NC(name)))return t.team;return null}
@@ -9507,13 +9525,13 @@ function chain(name){const a=accRow(name)||{},pp=peopleAt(name),b=briefFor(name)
   const s1=st(!!(a.hook||a.one_liner||ready(b)),false);
   const s2=st(leads.length>=4,leads.length>0&&leads.length<4);
   const s3=ready(b)?'done':b?'run':pp.length?'todo':'wait';
-  const s4=ready(b)?(b.checked_at?'done':'now'):'wait';
-  const s5=ready(b)&&b.checked_at?(b.reviewed_at?'done':'now'):'wait';
+  const s4=ready(b)?'done':'wait';
+  const s5=ready(b)?(b.reviewed_at?'done':'now'):'wait';
   return [['Research account',s1,a.hook_date?'Hook '+dLabel(a.hook_date):a.hook?'Hook found':'Not yet'],
     ['Find people',s2,leads.length?`${leads.length} mapped${pp.length-leads.length?` · ${pp.length-leads.length} on exec track`:''}`:'Nobody yet'],
     ['Build brief',s3,ready(b)?'Ready '+(b.built_at?dLabel(String(b.built_at).slice(0,10)):''):b?(b.status==='building'?'Ari is on it':'Queued'):pp.length?'Not asked':'After people'],
-    ['Quick check',s4,ready(b)?(b.checked_at?(b.check_via==='skip'?'Skipped':'Done'):'Your turn'):'After the brief'],
-    ['Review copy',s5,b&&b.reviewed_at?'Reviewed':ready(b)&&b.checked_at?'Your turn':'Locked']]}
+    ['Quick check',s4,ready(b)?(b.checked_at?(b.check_via==='skip'?'Skipped':'Done'):'Optional'):'After the brief'],
+    ['Review copy',s5,b&&b.reviewed_at?'Reviewed':ready(b)?'Your turn':'After the brief']]}
 V182.chain=chain;
 function chainHTML(name){const C=chain(name);const cur=C.findIndex(c=>c[1]!=='done');
   return `<div class="v182chain" role="list" aria-label="Account task chain">${C.map((c,i)=>`<div class="v182ck s-${c[1]}${i===cur?' cur':''}" role="listitem"><i>${c[1]==='done'?OK_SVG:c[1]==='run'?'<b class="v182sp"></b>':i+1}</i><div><b>${E1(c[0])}</b><span>${E1(c[2])}</span></div></div>`).join('')}</div>`}
@@ -9545,12 +9563,13 @@ function briefHTML(name,b){const u=uiOf(NC(name));const W=(b.why_now||[]).slice(
 
 /* quick check */
 function qcHTML(name,b){const u=uiOf(NC(name)),Q=b.quick_check||[];
-  if(b.checked_at)return `<div class="v171card v182qc done"><div class="cap"><span>Quick check</span><span>${b.check_via==='skip'?'Skipped':'Done'}</span></div><p class="v182ok">${OK_SVG}<span>${b.check_via==='skip'?'You skipped the check. Drafts are open.':'You have the account. Drafts are open below.'}</span></p><span class="v182lk press" data-v182qcr="1">Take it again</span></div>`;
+  /* v18.10: optional, never a lock; Ari's pick (the stored answer and why) shows before Owner answers */
+  const pick=q=>{const o=(q.options||[])[q.answer];if(o==null)return '';return `<div class="v1810pk">${af('happy','s')}<p><em>${q.kind==='ack'?'What Ari holds to':'Ari’s pick'}</em><b>${E1(o)}</b>${q.why?`<span>${E1(q.why)}</span>`:''}</p></div>`};
+  if(b.checked_at)return `<div class="v171card v182qc done" id="v182qc"><div class="cap"><span>Quick check</span><span>${b.check_via==='skip'?'Skipped':'Done'}</span></div>${Q.map(q=>`<b>${E1(q.q)}</b>${pick(q)}`).join('')}<span class="v182lk press" data-v182qcr="1">Take it again</span></div>`;
   const all=Q.every(q=>u.ans[q.id]===q.answer);
-  return `<div class="v171card v182qc" id="v182qc"><div class="cap"><span>Quick check</span><span>${Q.filter(q=>u.ans[q.id]===q.answer).length} of ${Q.length}</span></div><p class="v182mut">Before the drafts open: ${Q.length===1?'one tap':Q.length+' taps'} on what matters at ${E1(name)}.</p>
-   ${Q.map((q,qi)=>{const a=u.ans[q.id],ok=a===q.answer,tried=u.ans['_'+q.id];return `<div class="v182q${ok?' ok':''}"><b>${qi+1}. ${E1(q.q)}</b><div class="v182qo">${(q.options||[]).map((o,oi)=>`<span class="press ${a===oi?(oi===q.answer?'on':'no'):''} ${q.kind==='ack'?'ack':''}" role="button" data-v182qa="${E1(q.id)}|${oi}">${a===oi&&oi===q.answer?OK_SVG:''}${E1(o)}</span>`).join('')}</div>${ok||tried?`<p class="v182why ${ok?'':'no'}">${ok?'':'Not quite. '}${E1(q.why||'')}</p>`:''}</div>`}).join('')}
-   ${all?`<button type="button" class="v163btn ok big press" data-v182qcd="1">${OK_SVG}<span>Unlock the drafts</span></button>`:''}
-   ${u.skip?`<div class="v182skip"><label for="v182sk">Type skip to open the drafts without the check</label><div><input id="v182sk" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="skip"><span class="v171btn sm press" data-v182sko="1">Open drafts</span></div></div>`:`<span class="v182lk press" data-v182sk="1">Skip the check</span>`}</div>`}
+  return `<div class="v171card v182qc" id="v182qc"><div class="cap"><span>Quick check · optional</span><span>${Q.filter(q=>u.ans[q.id]===q.answer).length} of ${Q.length}</span></div><p class="v182mut">Drafts and sequences are already open. This is Ari’s read on what matters at ${E1(name)}. Tap to agree, or pick another.</p>
+   ${Q.map((q,qi)=>{const a=u.ans[q.id],ok=a===q.answer,tried=u.ans['_'+q.id];return `<div class="v182q${ok?' ok':''}"><b>${qi+1}. ${E1(q.q)}</b>${pick(q)}<div class="v182qo">${(q.options||[]).map((o,oi)=>`<span class="press ${a===oi?(oi===q.answer?'on':'no'):''} ${q.kind==='ack'?'ack':''}" role="button" data-v182qa="${E1(q.id)}|${oi}">${a===oi&&oi===q.answer?OK_SVG:''}${E1(o)}</span>`).join('')}</div>${tried&&!ok?`<p class="v182why no">Ari would lead with its pick above. ${E1(q.why||'')}</p>`:''}</div>`}).join('')}
+   ${all?`<button type="button" class="v163btn ok big press" data-v182qcd="1">${OK_SVG}<span>Got it</span></button>`:''}</div>`}
 
 /* review copy: one card for the whole account, by team */
 function personalLine(p,b){const d=draftOf(p),h=String((accRow(p.company)||{}).hook||'');if(!d)return false;
@@ -9558,7 +9577,7 @@ function personalLine(p,b){const d=draftOf(p),h=String((accRow(p.company)||{}).h
 function rvRow(p,b,lockd,u){const d=draftOf(p),k=nextKind(p),edit=u.ed===p.id,cm=cmOf(b,p.id);const nx=(()=>{try{return ariV163.nxHTML(p)}catch(e){return ''}})();
   const connectOnly=!p.accepted&&!p.dm1_sent;
   return `<div class="v182rv" data-pid="${E1(p.id)}"><div class="hh182 press" data-v182pf="${E1(p.name)}">${cm&&cm.priority?`<span class="pr p-${E1(low(cm.priority))}">${E1(cm.priority)}</span>`:''}<div class="qm"><b>${E1(p.name)}</b><span>${E1([p.title,p.stage].filter(Boolean).join(' · '))}</span></div>${d&&personalLine(p,b)?'<span class="v182lb l-p">Personal line</span>':''}</div>
-   ${isFounder(p)?'<p class="v182mut">On the exec track. No SDR message.</p>':lockd&&d?`<div class="v182lkd">${LOCK_SVG}<span>${k} draft is ready. Answer the quick check to read it.</span></div>`:edit?`<div class="v182ed"><textarea id="v182ta" rows="5" maxlength="1200">${E1(d)}</textarea><div class="r"><span class="v182n" id="v182n">${d.length} / 300</span><span class="v171btn sm press" data-v182edx="1">Cancel</span><span class="v171btn sm pri press" data-v182eds="${E1(p.id)}">Save ${k}</span></div></div>`
+   ${isFounder(p)?'<p class="v182mut"><span class="v1810st">Exec track</span> Parked for the exec. Open their file to reach out yourself.</p>':lockd&&d?`<div class="v182lkd">${LOCK_SVG}<span>${k} draft is ready. Answer the quick check to read it.</span></div>`:edit?`<div class="v182ed"><textarea id="v182ta" rows="5" maxlength="1200">${E1(d)}</textarea><div class="r"><span class="v182n" id="v182n">${d.length} / 300</span><span class="v171btn sm press" data-v182edx="1">Cancel</span><span class="v171btn sm pri press" data-v182eds="${E1(p.id)}">Save ${k}</span></div></div>`
      :d?`<p class="v182dm">${E1(d)}</p><div class="v182ac"><span class="v171btn sm press" data-v182cp="${E1(p.id)}">${CP_SVG}Copy ${k}</span><span class="v171btn sm press" data-v182ed="${E1(p.id)}">Edit</span>${connectOnly?'<span class="v182mut s">Send after they accept</span>':''}</div>`
      :`<p class="v182mut">${connectOnly?'Blank connect. DM1 is drafted the day they accept.':'No draft yet. Ari drafts it on the next run.'}</p>`}
    ${nx&&!isFounder(p)?`<div class="v182nx">${nx}</div>`:''}</div>`}
@@ -9681,9 +9700,32 @@ function stateCard(name){const b=briefFor(name),pp=peopleAt(name),a=accRow(name)
   if(pp.length&&!a._id)return `<div class="v171card v182bld"><div class="v182bl">${af('idle','m')}<div><b>No brief yet</b><span>Briefs are built for accounts on your worked list. This one is only in the Book so far.</span></div></div><span class="v171btn sm press v1821fb" data-v1821t="file">Open the account file</span></div>`;
   if(pp.length)return `<div class="v171card v182bld"><div class="v182bl">${af('idle','m')}<div><b>No brief yet</b><span>Asking Ari to build one now.</span></div></div></div>`;
   return `<div class="v171card v182bld"><div class="v182bl">${af('idle','m')}<div><b>Find people first</b><span>The brief is built once four to five people are mapped.</span></div></div><span class="v171btn sm press v1821fb" data-v1821t="file">Find people in File</span></div>`}
+/* v18.10 Re-scan (Owner, Oct 17): a Queue "Rescan account" request; Ari's worker picks it up first on its next run,
+   looks for fresh dated triggers, refreshes the hook and rebuilds the brief. In-progress while the row is queued/working. */
+const RS_DAYS=45;
+function rsRows(name){const k=NC(name);return (DATA().queue||[]).filter(q=>/^rescan account$/i.test(q.action||'')&&NC(q.target)===k)}
+function rsAgo(t){const a=ago(t);return !a?'':a==='now'?'just now':a+' ago'}
+function rescanHTML(name,b){const a=accRow(name);if(!a)return '';if(/^(hold|customer|closed lost|not a fit)$/i.test(stOf(a)))return '';const k=NC(name);
+  const Q=rsRows(name);V182.rsLocal=V182.rsLocal||{};
+  const open=Q.find(q=>/^(queued|working)$/i.test(q.status||''))||(V182.rsLocal[k]&&Date.now()-V182.rsLocal[k]<15*60e3?{status:'queued'}:null);
+  const last=Q.filter(q=>/^done/i.test(q.status||'')).sort((x,y)=>String(y.updated_at||y.created_at||'').localeCompare(String(x.updated_at||x.created_at||'')))[0];
+  const hd=String(a.hook_date||'').slice(0,10);const age=/^\d{4}-\d\d-\d\d$/.test(hd)?Math.max(0,Math.round((Date.now()-Date.parse(hd+'T12:00:00+05:30'))/864e5)):null;
+  const stale=age==null||age>=RS_DAYS;
+  const line=open?(/^working$/i.test(open.status)?'Ari is re-scanning now: fresh triggers, why now and the brief.':'Re-scan asked. Ari picks it up on its next run, usually within ten minutes.'):
+    (age==null?'No dated trigger on file yet.':`The last trigger is ${age===0?'from today':age===1?'a day old':age+' days old'}${stale?', so it may be stale.':'.'}`)+(last?` Last re-scan ${rsAgo(last.updated_at||last.created_at)}.`:'');
+  return `<div class="v171card v1810rs${stale&&!open?' stale':''}" id="v1810rs"><div class="r">${af(open?'focus':'idle','s')}<div><b>${open?'Re-scanning':'Triggers'}</b><span>${E1(line)}</span></div></div>${open?'':`<span class="v171btn sm${stale?' pri':''} press" data-v1810rs="${E1(name)}">Re-scan</span>`}</div>`}
+function rsWatch(){const Q=(DATA().queue||[]).filter(q=>/^rescan account$/i.test(q.action||''));const cur={};Q.forEach(q=>cur[q.id]=q.status||'');
+  if(V182.rsSeen)Q.forEach(q=>{const was=V182.rsSeen[q.id];if(was!=null&&!/^done/i.test(was)&&/^done/i.test(q.status||'')){tst(`${OK_SVG} Re-scan done: ${E1(q.target)}`);try{delete V182.rsLocal[NC(q.target)]}catch(e){}}});
+  V182.rsSeen=cur}
+document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.target.closest('[data-v1810rs]');if(!t)return;e.preventDefault();e.stopPropagation();
+  const name=t.dataset.v1810rs,a=accRow(name)||{},co=a.company||name,hd=String(a.hook_date||'').slice(0,10);
+  if(rsRows(name).some(q=>/^(queued|working)$/i.test(q.status||'')))return;
+  V182.rsLocal=V182.rsLocal||{};V182.rsLocal[NC(name)]=Date.now();bz([8,30,10]);
+  try{ariV162.askHark([{action:'Rescan account',target:co,details:`Owner asked Ari to re-scan ${co} from the account page: fresh dated triggers, why now and the brief.${hd?' Last trigger on file '+hd+'.':' No dated trigger on file.'}`}],'Re-scan asked. Ari picks it up on its next run.')}catch(x){delete V182.rsLocal[NC(name)];tst('That did not go through. Try again in a moment.')}
+  try{inject(true)}catch(x){}},true);
 function briefPane(name){const b=briefFor(name);
-  if(ready(b))return sumHTML(name,b)+qcHTML(name,b)+whyHTML(name,b)+flowHTML(name,b)+softHTML(name,b)+(b.doc_url?`<a class="v182doc press" href="${E1(b.doc_url)}" target="_blank" rel="noopener"><span>Open the full account plan</span>${AR_SVG}</a>`:'');
-  return acctSum(name)+stateCard(name)+movesHTML(name,null)}
+  if(ready(b))return rescanHTML(name,b)+sumHTML(name,b)+qcHTML(name,b)+whyHTML(name,b)+flowHTML(name,b)+softHTML(name,b)+(b.doc_url?`<a class="v182doc press" href="${E1(b.doc_url)}" target="_blank" rel="noopener"><span>Open the full account plan</span>${AR_SVG}</a>`:'');
+  return acctSum(name)+rescanHTML(name,b)+stateCard(name)+movesHTML(name,null)}
 
 /* People: buying committee by team, review copy, moves while you wait */
 function teamsHTML(name,b){const C=(b&&b.committee)||[];if(!C.length)return '';const u=uiOf(NC(name));u.tm=u.tm||{};
@@ -9835,7 +9877,7 @@ function gateQueue(){const box=document.getElementById('queue');if(!box)return;b
 new MutationObserver(()=>{clearTimeout(V182.gT);V182.gT=setTimeout(gateQueue,60)}).observe(document.getElementById('queue')||document.body,{childList:true,subtree:false});
 V182.gateQueue=gateQueue;
 
-function paintAll(why){paintAcct();paintPerson();paintToday();gateQueue()}
+function paintAll(why){paintAcct();paintPerson();paintToday();gateQueue();try{rsWatch()}catch(e){}}
 
 /* ---------- clicks ---------- */
 function curAcc(el){const w=el.closest('#v182wr');return w?w.dataset.acc:null}
@@ -9872,7 +9914,7 @@ document.addEventListener('click',e=>{let b,t=e.target;
   if(t.closest('[data-v182soft]')){e.preventDefault();u.soft=true;inject(true);return}
   if((b=t.closest('[data-v182qa]'))){e.preventDefault();const [qid,oi]=b.dataset.v182qa.split('|');const q=(bf.quick_check||[]).find(x=>x.id===qid);if(!q)return;u.ans[qid]=+oi;u.ans['_'+qid]=1;bz(+oi===q.answer?[8,30,10]:16);inject(true);return}
   if(t.closest('[data-v182qcd]')){e.preventDefault();const ans={};(bf.quick_check||[]).forEach(q=>ans[q.id]=u.ans[q.id]);bf.checked_at=new Date().toISOString();bf.check_via='answered';bz([10,40,16]);setTab(acc,'people');V1821.top=true;inject(true);
-    rpc('ari_brief_check',{p_account_id:bf.account_id,p_answers:ans,p_via:'answered'}).then(r=>{putBrief(r);paintAll()}).catch(x=>{bf.checked_at=null;tst('That didn’t save: '+E1(x.message));inject(true)});tst(`${OK_SVG} Drafts unlocked for ${E1(acc)}`);return}
+    rpc('ari_brief_check',{p_account_id:bf.account_id,p_answers:ans,p_via:'answered'}).then(r=>{putBrief(r);paintAll()}).catch(x=>{bf.checked_at=null;tst('That didn’t save: '+E1(x.message));inject(true)});tst(`${OK_SVG} Noted for ${E1(acc)}`);return}
   if(t.closest('[data-v182sk]')){e.preventDefault();u.skip=true;inject(true);setTimeout(()=>{const x=document.getElementById('v182sk');if(x)x.focus()},30);return}
   if(t.closest('[data-v182sko]')){e.preventDefault();const v=low((document.getElementById('v182sk')||{}).value).trim();if(v!=='skip'){tst('Type skip to open the drafts without the check.');return}
     document.activeElement&&document.activeElement.blur();bf.checked_at=new Date().toISOString();bf.check_via='skip';u.skip=false;setTab(acc,'people');V1821.top=true;inject(true);tst(`${OK_SVG} Drafts open for ${E1(acc)}`);
@@ -9976,7 +10018,7 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.9','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.9','1');localStorage.setItem('ari-wn-v18.10','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();

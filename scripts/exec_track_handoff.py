@@ -14,13 +14,20 @@ Rules:
 - No email at all when nobody is ready.
 - Left out: personal, Hold/customer/closed accounts, people whose why starts "On hold", stage Hold, notes that fail the
   style gates (over 300 characters, em/en dashes).
+- Since v18.10 (Owner, Oct 17 13:14 IST: "the next report should have all the accounts ... all the backlog"): every email
+  also carries the WHOLE exec track backlog under a fenced "BACKLOG, NOT FOR SLACK" block: every exec-track person grouped
+  by account with a status (ready tonight / note drafting / on hold / requested <date>), then the accounts still finding
+  people and the mapped accounts with no exec pick yet. The Slack part (MESSAGE + THREAD REPLY) is unchanged and still
+  carries only the people whose note is ready; people already handed off are never re-requested.
+- Send rule since v18.10: send when someone is ready OR the backlog changed since the last email (fingerprint in the
+  ledger), still at most one email per IST day. A backlog-only email says "Nothing to post in Slack today".
 Subject "Exec track requests · YYYY-MM-DD" (IST date, middle dot), from owner@example.com.
 
 Usage: python3 scripts/exec_track_handoff.py            (dry run: prints the email, sends and writes nothing)
        python3 scripts/exec_track_handoff.py --send     (needs shell credentials google owner@example.com)
 Supabase is read/written as the restricted worker role (proxy-injected bearer, same as scripts/daily_report.py sb()).
 """
-import json, re, subprocess, sys, urllib.error, datetime as dt
+import json, re, subprocess, sys, urllib.error, hashlib, datetime as dt
 from zoneinfo import ZoneInfo
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -69,35 +76,115 @@ def note_ok(n):
     return ''
 
 
-def candidates():
+def exec_rows():
     rows = sb('people?select=id,name,title,company,owner,linkedin_url,stage,route,lane,dm,review,why_this_person'
               '&deleted_at=is.null&or=(stage.eq.Founder,lane.eq.founder,route.ilike.*founder*)&order=company,id') or []
-    done = {q.get('target') for q in (sb('queue?select=target&action=eq.' + DONE_ACTION.replace(' ', '%20')) or [])}
-    hold = {(a.get('company') or '').lower() for a in (sb('accounts?select=company,stage&deleted_at=is.null') or [])
-            if (a.get('stage') or '') in HOLD_ACCOUNT_STAGES}
-    keep = []
+    done = {}
+    for q in (sb('queue?select=target,created,created_at&action=eq.' + DONE_ACTION.replace(' ', '%20')) or []):
+        done.setdefault(q.get('target'), q)
+    accts = sb('accounts?select=company,stage,owner&deleted_at=is.null&order=company') or []
+    hold = {(a.get('company') or '').lower() for a in accts if (a.get('stage') or '') in HOLD_ACCOUNT_STAGES}
+    out = []
     for p in rows:
-        if p['id'] in done or (p.get('review') or '') == 'personal' or (p.get('stage') or '') == 'Hold':
-            continue
-        if (p.get('company') or '').lower() in hold or str(p.get('why_this_person') or '').lower().startswith('on hold'):
+        if (p.get('review') or '') == 'personal':
             continue
         if not re.search('founder', '%s %s' % (p.get('stage') or '', p.get('route') or ''), re.I):
             continue   # lane-only leftovers that were taken back to Owner's lane
-        keep.append(p)
-    ready, waiting = [], []
-    for p in keep:
-        why = note_ok(p.get('dm')) or ('' if p.get('linkedin_url') else 'no LinkedIn URL')
-        (waiting if why else ready).append((p, why))
-    return [p for p, _ in ready][:MAX_PER_DAY], waiting + [(p, 'over today\'s cap') for p, _ in ready[MAX_PER_DAY:]]
+        out.append(p)
+    return out, done, hold, accts
 
 
-def body_for(ready):
-    L = [INSTRUCTION, '', 'MESSAGE:', PARENT, '', 'THREAD REPLY:']
-    for i, p in enumerate(ready, 1):
-        L.append('%d. %s, %s, %s' % (i, p.get('name'), clean_title(p.get('title')), p.get('company') or '-'))
-        L.append(li_short(p.get('linkedin_url')))
-        L += ['> ' + ln for ln in str(p['dm']).strip().splitlines() if ln.strip()]
+def short_day(s):
+    m = re.search(r'(\d{4}-\d\d-\d\d)', str(s or ''))
+    if m:
+        return dt.date.fromisoformat(m.group(1)).strftime('%b %-d')
+    return str(s or '')[:10]
+
+
+def status_of(p, done, hold):
+    """One status per exec-track person. Same rule as the app's Exec track pane (work/v1810_exec/execpane.js)."""
+    if p['id'] in done:
+        q = done[p['id']]
+        return 'handed', 'requested %s' % short_day(q.get('created') or q.get('created_at'))
+    if (p.get('stage') or '') == 'Hold' or (p.get('company') or '').lower() in hold \
+            or str(p.get('why_this_person') or '').lower().startswith('on hold'):
+        return 'hold', 'on hold, account owner decides first'
+    why = note_ok(p.get('dm')) or ('' if p.get('linkedin_url') else 'no LinkedIn URL')
+    if why == 'no note yet':
+        return 'drafting', 'note drafting, goes the day it is ready'
+    if why:
+        return 'drafting', 'note being redrafted (%s)' % why
+    return 'ready', 'ready, in today\'s Slack thread'
+
+
+def candidates():
+    rows, done, hold, accts = exec_rows()
+    st = [(p,) + status_of(p, done, hold) for p in rows]
+    ready = [p for p, k, _ in st if k == 'ready']
+    waiting = [(p, t) for p, k, t in st if k in ('drafting', 'hold')]
+    return ready[:MAX_PER_DAY], waiting + [(p, 'over today\'s cap') for p in ready[MAX_PER_DAY:]]
+
+
+def backlog(ready_ids):
+    """The whole exec track picture across all accounts (Owner, Oct 17): returns (lines, fingerprint, counts)."""
+    rows, done, hold, accts = exec_rows()
+    by = {}
+    for p in rows:
+        k, t = status_of(p, done, hold)
+        if k == 'ready' and p['id'] not in ready_ids:
+            k, t = 'drafting', 'ready, over today\'s cap, goes next'
+        by.setdefault(p.get('company') or '-', []).append((p, k, t))
+    ppl = sb('people?select=company,account_id,review&deleted_at=is.null') or []
+    n_by = {}
+    for x in ppl:
+        if (x.get('review') or '') != 'personal':
+            n_by[(x.get('company') or '').lower()] = n_by.get((x.get('company') or '').lower(), 0) + 1
+    counts = {'people': len(rows), 'accounts': len(by), 'ready': 0, 'drafting': 0, 'hold': 0, 'handed': 0}
+    L = ['BACKLOG, NOT FOR SLACK. Claude: this part is for Owner and you only. Do not post it anywhere.', '']
+    order = {'ready': 0, 'drafting': 1, 'hold': 2, 'handed': 3}
+    for co in sorted(by, key=lambda c: (min(order[k] for _, k, _ in by[c]), c.lower())):
+        a = next((x for x in accts if (x.get('company') or '').lower() == co.lower()), {})
+        owner = (a.get('owner') or '').split(' ')[0]
+        L.append('%s%s' % (co, ' (%s)' % owner if owner else ''))
+        for p, k, t in sorted(by[co], key=lambda z: (order[z[1]], z[0]['id'])):
+            counts[k] += 1
+            L.append('  - %s, %s: %s' % (p.get('name'), clean_title(p.get('title')), t))
         L.append('')
+    with_exec = {c.lower() for c in by}
+    live = [a for a in accts if (a.get('stage') or '') not in HOLD_ACCOUNT_STAGES + ('Meeting set',)]
+    finding = [a['company'] for a in live if n_by.get(a['company'].lower(), 0) == 0 and a['company'].lower() not in with_exec]
+    mapped = [a['company'] for a in live if n_by.get(a['company'].lower(), 0) > 0 and a['company'].lower() not in with_exec]
+    if finding:
+        L += ['Still finding people (no one mapped yet, exec picks come when Ari maps them): ' + ', '.join(finding), '']
+    if mapped:
+        L += ['Mapped, no exec pick yet: ' + ', '.join(mapped), '']
+    L.append('Totals: %d people on the exec track across %d accounts. %d ready today, %d note drafting, %d on hold, %d already requested.'
+             % (counts['people'], counts['accounts'], counts['ready'], counts['drafting'], counts['hold'], counts['handed']))
+    counts['finding'], counts['mapped_no_exec'] = len(finding), len(mapped)
+    fp = json.dumps(sorted((p['id'], k) for c in by for p, k, _ in by[c]) + [sorted(finding), sorted(mapped)])
+    return L, hashlib.md5(fp.encode()).hexdigest()[:12], counts
+
+
+NOTHING_TODAY = ('Generated by Hark. Claude: nothing to post in Slack today. Nobody new is ready for the exec track. '
+                 'The backlog below is for Owner and you only.')
+FENCE = '=' * 40
+
+
+def body_for(ready, back=None):
+    if ready:
+        L = [INSTRUCTION + (' Stop at the line of = signs: everything below it is for Owner only.' if back else ''),
+             '', 'MESSAGE:', PARENT, '', 'THREAD REPLY:']
+        for i, p in enumerate(ready, 1):
+            L.append('%d. %s, %s, %s' % (i, p.get('name'), clean_title(p.get('title')), p.get('company') or '-'))
+            L.append(li_short(p.get('linkedin_url')))
+            L += ['> ' + ln for ln in str(p['dm']).strip().splitlines() if ln.strip()]
+            L.append('')
+    else:
+        L = [NOTHING_TODAY, '']
+    if back:
+        while L and not L[-1]:
+            L.pop()
+        L += ['', FENCE, ''] + back
     return '\n'.join(L).rstrip() + '\n'
 
 
@@ -152,13 +239,17 @@ def main():
     ready, waiting = candidates()
     for p, why in waiting:
         print('rolls to next day: %s %s (%s): %s' % (p['id'], p.get('name'), p.get('company'), why))
-    if not ready:
-        print('nothing to hand off (%d waiting)' % len(waiting))
+    back, fp, counts = backlog({p['id'] for p in ready})
+    changed = ledger().get('_backlog_fp') != fp
+    print('backlog: %s fingerprint %s (%s since the last email)' % (json.dumps(counts), fp, 'changed' if changed else 'unchanged'))
+    if not ready and not changed:
+        print('nothing to hand off (%d waiting) and the backlog is unchanged: no email' % len(waiting))
         return 0
-    body = body_for(ready)
+    body = body_for(ready, back)
     print('Subject: %s\nFrom: owner@example.com\nTo: %s\n\n%s' % (subject, TO, body))
     if not send:
-        print('[dry run] would hand off %d: %s' % (len(ready), ', '.join(p['id'] for p in ready)))
+        print('[dry run] would hand off %d: %s%s' % (len(ready), ', '.join(p['id'] for p in ready) or '-',
+                                                    '' if ready else ' (backlog-only email)'))
         return 0
     if sent_today(subject):
         left = [p for p in ready if p['id'] in set(ledger().get(day) or [])]
@@ -168,6 +259,7 @@ def main():
         return 0
     ledger(day, [p['id'] for p in ready])
     print(gws('gmail', '+send', '--to', TO, '--subject', subject, '--body', body))
+    ledger('_backlog_fp', fp)
     mark(ready, day)
     print('handed off %d: %s' % (len(ready), ', '.join(p['id'] for p in ready)))
     return 0
