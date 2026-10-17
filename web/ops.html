@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.7.1"><meta name="ari-rev" content="d7b42e7b9d">
+<meta name="ari-build" content="v18.8"><meta name="ari-rev" content="c6ce10e313">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -3671,6 +3671,13 @@ html.v184fxon{overflow:hidden}
 .v1871n{margin-top:6px}.v1871n b{display:block;font-size:26px;letter-spacing:-.02em}.v1871n span{font-size:13px;opacity:.75}
 .v1871s{margin-top:6px;font-size:12px;opacity:.6}.v1871s:empty{display:none}
 </style>
+<style>.v188hy em{background:var(--accent-weak,rgba(0,0,0,.06))}
+.hyr{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.hyr .qm i{font-style:normal;font-size:12px;opacity:.7}
+.hya{display:flex;flex-wrap:wrap;gap:8px}
+.hyb{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line,rgba(0,0,0,.12));background:transparent;font:inherit}
+.hyb:first-child{background:var(--ink,#111);color:var(--bg,#fff);border-color:transparent}
+</style>
 </head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -5900,7 +5907,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.7.1';
+const M=MOTION,APP=$('#app'),BUILD='v18.8';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -5965,7 +5972,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.7.1'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.8'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6044,6 +6051,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.8',d:'Oct 17',items:['Tidy up on Today: Ari spots loose ends, like accepts never marked as connected, people with no account, DM1s waiting, and the same company listed twice', 'Each one has its own buttons: link it, mark the connect, keep one of two companies, or hide it. Nothing changes until you tap', 'Keeping one of two companies asks first, then moves everyone onto the one you keep']},
  {v:'v18.7.1',d:'Oct 17',items:['Ari now keeps the exact time you mark a connect accepted or a DM sent, not just the day', 'The Report shows how long accepts wait for DM1, in hours, against the goal of under 4 hours', 'Earlier ones that only had a day are counted separately, so the hours stay honest']},
  {v:'v18.7',d:'Oct 17',items:['A calmer app: Pipeline and Founder tabs, the health score, the live feed, email tracks and the extra Report charts are tucked away for now', 'The Report filters by period and AE only', 'What\'s new no longer pops up after an update; it is listed here in About', 'Ari notes how long you spend in the app each day, so we can keep that number small']},
  {v:'v18.6',d:'Oct 17',items:['When you mark a meeting set, Ari asks where it came from: LinkedIn, email, inbound or other','Meeting booked from a reply opens the same quick form','The Report shows DMs sent, replies and meetings side by side, and where your meetings come from','Two-step sign-in: add a code from an authenticator app on top of Google, in Settings']},
@@ -9165,7 +9173,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.7.1',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.8',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9255,7 +9263,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.7.1';
+function aboutHTML(){const B='v18.8';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -9965,7 +9973,7 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();
@@ -10324,6 +10332,49 @@ async function paint(){const rep=document.getElementById('v18rep');if(!rep||busy
 V.paint=paint;
 setInterval(()=>{if(document.getElementById('v18rep'))paint()},4000);
 document.addEventListener('click',e=>{if(e.target.closest('#v18flt'))setTimeout(()=>{lastKey='';paint()},700)},true);
+})();
+</script>
+<script>/* v18.8 (Oct 17): "Tidy up" row on Today, fed by Ari's own hygiene checks.
+   Ari finds; Owner taps. Every change is one tap by the user: Link, Mark connect sent, Merge (pick which to keep), Dismiss. */
+(function(){
+const HY={rows:[],at:0,errs:[]};window.ariHygiene=HY;
+const L={dm1_past_due:'DM1 waiting',duplicate_account:'Looks like the same company',no_account_link:'Not linked to an account',accept_no_connect:'Accepted, no connect mark',stale_stage:'Stage looks behind'};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function call(fn,args){const c=await ariV17.ready();if(!c||!ariV17.signed())throw new Error('offline');const {data,error}=await c.rpc(fn,args||{});if(error)throw new Error(error.message);return data}
+function line(r){const d=r.detail||{};switch(r.check_key){
+  case 'dm1_past_due':return [d.name,`Accepted ${Math.round(d.hours_waiting)} h ago${d.has_draft?' · draft ready':''}`];
+  case 'duplicate_account':return [`${d.company} / ${d.dup_company}`,d.matched_on==='domain'?'Same website':'Same name, different spelling'];
+  case 'no_account_link':return [d.name,d.suggested_company?`Link to ${d.suggested_company}?`:`${d.company||'No company'}, no match yet`];
+  case 'accept_no_connect':return [d.name,'Accepted, but the connect was never marked sent'];
+  default:return [d.label,d.implied?`Says ${d.stage}, looks like ${d.implied}`:`${d.stage} for ${d.days_in_stage} days`]}}
+function acts(r){const d=r.detail||{},id=esc(r.id);const b=(a,t,x)=>`<button class="hyb press" data-hy="${id}" data-hya="${a}"${x?` data-hyk="${esc(x)}"`:''}>${t}</button>`;
+  switch(r.check_key){
+  case 'no_account_link':return (d.suggested_account_id?b('link','Link'):'')+b('dismiss','Not now');
+  case 'accept_no_connect':return b('tick_connect','Mark connect sent')+b('dismiss','Leave it');
+  case 'duplicate_account':return b('merge',`Keep ${esc(d.company)}`,r.entity_id)+b('merge',`Keep ${esc(d.dup_company)}`,d.dup_of)+b('dismiss','Different companies');
+  case 'dm1_past_due':return b('open','Open')+b('dismiss','Not now');
+  default:return b('dismiss','Got it')}}
+function render(){const tk=document.getElementById('v181cold')||document.getElementById('v175tk');if(!tk)return;let row=document.getElementById('v188hy');
+  if(!HY.rows.length){if(row)row.remove();return}
+  if(!row){tk.insertAdjacentHTML('afterend','<div class="v175tk v188hy press" id="v188hy" role="button" tabindex="0" aria-label="Tidy up"></div>');row=document.getElementById('v188hy')}
+  row.innerHTML=`<div><b>Tidy up</b><span>${HY.rows.length} thing${HY.rows.length>1?'s':''} Ari spotted. Nothing changes until you tap</span></div><em>${HY.rows.length}</em>`}
+function page(){let pg=document.getElementById('v188hyp');if(!pg){pg=document.createElement('div');pg.id='v188hyp';pg.className='v175pg v188pg';pg.setAttribute('role','dialog');pg.setAttribute('aria-label','Tidy up');(document.getElementById('app')||document.body).appendChild(pg)}
+  pg.innerHTML=`<div class="ph"><span class="bk press" data-hyback="1" aria-label="Back">‹</span><div class="tt"><b>Tidy up</b><span>Ari found these. You decide</span></div></div><div class="pb">${HY.rows.length?HY.rows.map(r=>{const [t,s]=line(r);return `<div class="v18r hyr"><div class="qm"><i>${esc(L[r.check_key]||'')}</i><b>${esc(t)}</b><span>${esc(s)}</span></div><div class="hya">${acts(r)}</div></div>`}).join(''):'<p class="v18emp">All tidy.</p>'}</div>`;
+  requestAnimationFrame(()=>pg.classList.add('on'))}
+async function load(){try{HY.rows=await call('hygiene_open')||[];HY.at=Date.now();render()}catch(e){HY.errs.push(String(e.message||e))}}
+HY.load=load;
+document.addEventListener('click',async e=>{let b;
+  if(e.target.closest('#v188hy')){e.preventDefault();page();return}
+  if(e.target.closest('[data-hyback]')){const pg=document.getElementById('v188hyp');if(pg)pg.classList.remove('on');return}
+  if((b=e.target.closest('[data-hy]'))){e.preventDefault();const id=b.dataset.hy,a=b.dataset.hya,r=HY.rows.find(x=>x.id===id);if(!r)return;
+    if(a==='open'){try{openFile(r.detail.name,b)}catch(x){}return}
+    if(a==='merge'&&!confirm('Move everyone onto the account you keep and hide the other one?'))return;
+    b.disabled=true;
+    try{await call('hygiene_resolve',{p_id:id,p_action:a,p_args:a==='merge'?{keep:b.dataset.hyk}:{}});HY.rows=HY.rows.filter(x=>x.id!==id);render();page();
+      try{toast(a==='dismiss'?'Hidden. Ari will not raise it again':'Done')}catch(x){}}
+    catch(x){b.disabled=false;HY.errs.push(String(x.message||x));try{toast('Could not save. Try again in a moment')}catch(y){}}}},true);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-HY.at>120e3)load()});
+setTimeout(load,1500);
 })();
 </script>
 </body>

@@ -25,7 +25,7 @@ jobs:
       - run: npm run build
 
   jobs:
-    name: jobs (typecheck, gmail-ingest unit)
+    name: jobs (typecheck, gmail fetch/parse/shadow unit)
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app2/jobs } }
     steps:
@@ -36,8 +36,19 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
+  drafts-eval:
+    name: drafts-eval (Quill style harness, synthetic personas)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: app2/jobs } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app2/jobs/package-lock.json }
+      - run: npm ci
+      - run: npm run eval:drafts
+
   sql:
-    name: sql (schema, RLS matrix, task commands, job queue)
+    name: sql (schema, RLS matrix, task commands, job queue, gmail ingest)
     runs-on: ubuntu-latest
     services:
       postgres:

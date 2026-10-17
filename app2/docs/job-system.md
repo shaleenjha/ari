@@ -10,7 +10,8 @@ Replaces the 10-minute polling LLM worker with a queue of typed jobs. Determinis
 | Worker runtime (registry, tick, retry via `job_finish`) | `jobs/src/runtime/worker.ts` | skeleton + unit tests |
 | `gmail-ingest` parser (LinkedIn accept / reply / invite-sent), profile-URL matching | `jobs/src/gmail/parse.ts`, `match.ts` | built, unit tests on synthetic emails |
 | `gmail-ingest` handler with shadow / live modes + nightly shadow diff | `jobs/src/gmail/handler.ts` | built, unit tests |
-| Gmail fetch (history.list poll every 2 min per user, later Pub/Sub watch) | — | design only (needs the user's Gmail connector in the app2 backend) |
+| Gmail fetch (history.list poll every 2 min per user, later Pub/Sub watch) | `jobs/src/gmail/fetch.ts`, `db/migrations/0004` | built on synthetic Gmail JSON (cursor CAS, idempotent, 404 resync); auth designed, not connected: `docs/gmail-fetch.md` |
+| Shadow comparison job `gmail-shadow-diff` (report `ari.shadow-diff/v1`) | `jobs/src/gmail/shadow.ts`, `app.shadow_report_put/shadow_promotion_ready` | built, unit + SQL tests |
 | pgmq | — | optional later; the plain table + SKIP LOCKED covers one worker |
 
 ## gmail-ingest, deterministic, no LLM
@@ -32,7 +33,7 @@ Replaces the 10-minute polling LLM worker with a queue of typed jobs. Determinis
 - Every LLM job (later) records model, tokens, cost and a prompt hash on its job row; per-workspace monthly budget stops enqueueing at the cap.
 
 ## Next
-1. Gmail fetch adapter + historyId store (needs the app2 backend; local tests use fixtures).
+1. Real `GmailApi` adapter + `gmail_connections` + token Edge Function (design in `gmail-fetch.md`; needs Owner's go-ahead on the OAuth client).
 2. `follow-up-due` cron job that only enqueues (DM2 +4 d, DM3 +7 d, withdraw 14 d).
 3. `fanout` / `deliver` for notifications (dedupe key, quiet hours in the recipient's zone).
 4. Port `hygiene_scan` (prod 0029) to a workspace-scoped job.

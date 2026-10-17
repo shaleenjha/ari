@@ -35,3 +35,13 @@ export interface Activity { id: number; actorKind: ActorKind; verb: string; subj
 export interface WeekReport { meetingsAri: number; meetingsGoal: number; replies: number; accepts: number; connects: number; acceptToDm1MedianHours: number | null }
 
 export interface CommandResult { ok: boolean; conflict?: boolean; version?: number; status?: TaskStatus }
+
+// Data hygiene (Ari's "Tidy up" checks; mirrors prod 0029 / app.hygiene_findings) and gmail-ingest "Who is this?".
+export type HygieneCheck = 'accept_no_connect' | 'duplicate_account' | 'no_account_link' | 'stale_stage' | 'dm1_past_due';
+export type HygieneAction = 'tick_connect' | 'link' | 'merge' | 'dismiss';
+export interface HygieneFinding {
+  id: Uuid; check: HygieneCheck; entityType: 'person' | 'account'; entityId: Uuid; title: string; detail?: string;
+  actions: HygieneAction[]; suggestion?: { id: Uuid; name: string };          // link target, or the duplicate to merge with
+}
+export interface WhoCandidate { personId: Uuid; fullName: string; title?: string; accountName?: string }
+export interface WhoIsThis { eventId: Uuid; kind: 'accept' | 'reply'; name: string; headline?: string; at: string; candidates: WhoCandidate[] }

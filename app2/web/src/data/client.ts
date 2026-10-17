@@ -1,6 +1,6 @@
 // The data layer every screen talks to. Two implementations: MockData (synthetic, used now and in e2e)
 // and, later, SupabaseData calling the app2 command RPCs (app.task_create, app.task_transition, app.person_mark ...).
-import type { Account, Activity, Brief, CommandResult, Draft, MarkField, Person, Reply, Task, TaskStatus, Uuid, WeekReport } from './types';
+import type { Account, Activity, Brief, CommandResult, Draft, HygieneAction, HygieneFinding, MarkField, Person, Reply, Task, TaskStatus, Uuid, WeekReport, WhoIsThis } from './types';
 
 export interface DataLayer {
   queue(): Promise<Task[]>;
@@ -13,6 +13,14 @@ export interface DataLayer {
   week(): Promise<WeekReport>;
   mark(personId: Uuid, field: MarkField, opId: string): Promise<CommandResult>;
   transition(taskId: Uuid, to: TaskStatus, expectedVersion: number, opId: string): Promise<CommandResult>;
+  /** Open "Tidy up" findings Ari's hygiene job wrote (app.hygiene_findings, status open). */
+  hygiene(): Promise<HygieneFinding[]>;
+  /** One-tap fix (app.hygiene_resolve): merge needs `keepId`, the account that stays. */
+  resolveHygiene(findingId: Uuid, action: HygieneAction, opId: string, keepId?: Uuid): Promise<CommandResult>;
+  /** Accepts / replies gmail-ingest could not match to one person. */
+  whoIsThis(): Promise<WhoIsThis[]>;
+  /** app.ingest_confirm_match: personId null = none of these. */
+  confirmWho(eventId: Uuid, personId: Uuid | null, opId: string): Promise<CommandResult>;
 }
 
 let current: DataLayer | null = null;

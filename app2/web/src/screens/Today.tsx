@@ -1,5 +1,6 @@
 import { data } from '../data/client';
 import { useAsync } from '../ui/useAsync';
+import { TidyUp, WhoIsThisCards } from './Cards';
 
 export function Today() {
   const q = useAsync(() => data().queue());
@@ -12,9 +13,11 @@ export function Today() {
           <b>{r.data!.length} new {r.data!.length === 1 ? 'reply' : 'replies'}</b><span>Answer first</span>
         </a>
       )}
+      <WhoIsThisCards />
       <a className="card" href="#/today15" data-testid="today15-link"><b>Today's 15</b><span>Who to connect with today</span></a>
+      <TidyUp />
       <h2 className="sub">Your queue</h2>
-      {q.loading && !q.data ? <p className="muted">Loading your queue…</p> : (
+      {q.error ? <p className="muted" role="alert">Could not load your queue.</p> : q.loading && !q.data ? <p className="muted">Loading your queue…</p> : (
         <ul className="rows" data-testid="queue">
           {q.data!.map((t) => (
             <li key={t.id} className="row">

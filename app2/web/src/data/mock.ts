@@ -69,6 +69,11 @@ export class MockData implements DataLayer {
     this.s.people[i] = applyMark(this.s.people[i]!, field, new Date(now).toISOString());
     const res = { ok: true }; this.ops.set(op, res); return res;
   }
+  // hygiene and "Who is this?" live in the PostgREST mock (pgmock.ts); this legacy in-memory layer has none
+  async hygiene() { return []; }
+  async resolveHygiene(): Promise<CommandResult> { return { ok: false }; }
+  async whoIsThis() { return []; }
+  async confirmWho(): Promise<CommandResult> { return { ok: false }; }
   async transition(taskId: string, to: Task['status'], expectedVersion: number, op: string): Promise<CommandResult> {
     if (this.ops.has(op)) return this.ops.get(op) as CommandResult;
     const t = this.s.tasks.find((x) => x.id === taskId);

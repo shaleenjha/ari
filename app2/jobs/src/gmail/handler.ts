@@ -8,6 +8,7 @@ import { matchPerson, type Candidate, type MatchMethod } from './match';
 export interface IngestRow {
   workspaceId: string; sourceMsgId: string; kind: ParsedEvent['kind']; parsed: ParsedEvent;
   matchedPersonId?: string; matchMethod: MatchMethod; mode: 'shadow' | 'live'; receivedAt: string;
+  candidates?: string[];            // when unmatched: people it could be (for the "Who is this?" card)
 }
 export interface IngestSideEffect { type: 'person_mark' | 'who_is_this'; personId?: string; field?: 'accepted' | 'replied'; at: string; candidates?: string[] }
 
@@ -20,7 +21,8 @@ export function ingest(workspaceId: string, msgs: RawEmail[], people: Candidate[
     const ev = parseLinkedInEmail(m);
     if (ev.kind === 'unknown' && ev.reason === 'not_from_linkedin') continue;
     const mt = ev.kind === 'accept' || ev.kind === 'reply' ? matchPerson(ev, people) : { method: 'none' as const, candidates: [] };
-    rows.push({ workspaceId, sourceMsgId: m.id, kind: ev.kind, parsed: ev, matchedPersonId: mt.personId, matchMethod: mt.method, mode, receivedAt: ev.at });
+    rows.push({ workspaceId, sourceMsgId: m.id, kind: ev.kind, parsed: ev, matchedPersonId: mt.personId, matchMethod: mt.method, mode, receivedAt: ev.at,
+      ...(mt.personId || !mt.candidates.length ? {} : { candidates: mt.candidates }) });
     if (mode === 'live' && (ev.kind === 'accept' || ev.kind === 'reply')) {
       effects.push(mt.personId
         ? { type: 'person_mark', personId: mt.personId, field: ev.kind === 'accept' ? 'accepted' : 'replied', at: ev.at }
