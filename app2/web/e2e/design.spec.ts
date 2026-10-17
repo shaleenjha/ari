@@ -1,33 +1,9 @@
-import { expect, test, type Page } from '@playwright/test';
-import { MIN_TAP, TODAY_MAX_VIEWPORTS, checkText, isSystemFamily, firstFamily, requiredRatio, contrast } from '../scripts/design-lint/rules.mjs';
+import { expect, test } from '@playwright/test';
+import { MIN_TAP, checkText, isSystemFamily, firstFamily, requiredRatio, contrast } from '../scripts/design-lint/rules.mjs';
+import { SCREENS, open } from './screens';
 
-// Design lint, rendered half (rules 1 to 5). Runs in every project (360 and 412 px, Chromium and WebKit), synthetic data only.
-// `npm run lint:design` runs these plus the static source lint; `npm run e2e` skips them (@design tag).
-
-type Scenario = { name: string; path: string; ready: (p: Page) => Promise<void> };
-const SCREENS: Scenario[] = [
-  { name: 'Today', path: '/', ready: async (p) => { await expect(p.getByTestId('queue').locator('li').first()).toBeVisible(); await expect(p.getByTestId('tidy-up')).toBeVisible(); } },
-  { name: 'Today, Tidy up open', path: '/', ready: async (p) => {
-    await expect(p.getByTestId('tidy-up')).toBeVisible();
-    await p.getByTestId('tidy-up').getByRole('button', { name: /Tidy up/ }).click();
-    await expect(p.getByTestId('finding-f-1')).toBeVisible();
-  } },
-  { name: 'Today, merge confirm', path: '/', ready: async (p) => {
-    await p.getByTestId('tidy-up').getByRole('button', { name: /Tidy up/ }).click();
-    await p.getByTestId('finding-f-2').getByRole('button', { name: 'Merge' }).click();
-    await expect(p.getByRole('group', { name: 'Which one stays?' })).toBeVisible();
-  } },
-  { name: "Today's 15", path: '/#/today15', ready: async (p) => { await expect(p.getByTestId('today15').locator('li').first()).toBeVisible(); } },
-  { name: 'Replies', path: '/#/replies', ready: async (p) => { await expect(p.getByTestId('replies').locator('li').first()).toBeVisible(); } },
-  { name: 'Report', path: '/#/report', ready: async (p) => { await expect(p.getByTestId('report')).toBeVisible(); } },
-  ...['acc-1', 'acc-2', 'acc-3'].map((id): Scenario => ({ name: `Account room ${id}`, path: `/#/account/${id}`, ready: async (p) => { await expect(p.locator('#h-acc')).toBeVisible(); } })),
-];
-
-async function open(page: Page, s: Scenario) {
-  await page.goto(s.path);
-  await s.ready(page);
-  await page.evaluate(() => document.fonts.ready);
-}
+// Design lint, rendered half (rules 1 to 5). Runs in every project (360, 390 and 412 px, Chromium and WebKit), synthetic data only.
+// Hit targets, dead taps and Today height are in e2e/mobile.spec.ts. `npm run lint:design` runs both; `npm run e2e` skips them (@design tag).
 
 for (const s of SCREENS) {
   test(`@design ${s.name}: tap targets ≥ ${MIN_TAP}px`, async ({ page }) => {
@@ -102,13 +78,6 @@ for (const s of SCREENS) {
     expect(bad, 'banned strings in rendered copy').toEqual([]);
   });
 }
-
-test('@design Today is at most 1.5 phone viewports at 412x915', async ({ page }) => {
-  await page.setViewportSize({ width: 412, height: 915 });
-  await open(page, SCREENS[0]!);
-  const h = await page.evaluate(() => document.documentElement.scrollHeight);
-  expect(h, `Today scrollHeight ${h}px`).toBeLessThanOrEqual(915 * TODAY_MAX_VIEWPORTS);
-});
 
 test('@design primary font is not a system stack, and it loaded', async ({ page }) => {
   await open(page, SCREENS[0]!);

@@ -6,6 +6,7 @@
 # ari_worker binding is injected by the proxy in the same command):
 #   python3 scripts/worker_precheck.py          -> "IDLE" or "WORK: reason; reason; ..."
 #   python3 scripts/worker_precheck.py --why    -> same, plus every matching row (for tuning)
+#   python3 scripts/worker_precheck.py --legacy-gmail  -> step 0 counts any LinkedIn email (pre spec-04 behaviour)
 import sys, os, json, re, csv, subprocess, datetime as dt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -15,6 +16,7 @@ IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 DEFAULT_GMAIL_TS = 1792131600  # 2026-10-16 11:50 IST, same default as the worker prompt
 CSUITE = re.compile(r"\b(ceo|cto|ciso|cdo|cio|caio|chief\b(?! of staff))", re.I)
 WHY = "--why" in sys.argv
+LEGACY_GMAIL = "--legacy-gmail" in sys.argv
 
 
 def gws(args):
@@ -64,16 +66,44 @@ def main():
         last = int(float(brief.get("gmail_last_scan") or DEFAULT_GMAIL_TS))
     except ValueError:
         last = DEFAULT_GMAIL_TS
-    lst = gws(["gmail", "users", "messages", "list", "--params", json.dumps(
-        {"userId": "me", "q": "from:linkedin.com in:anywhere after:%d" % last, "maxResults": 20})])
-    newer = 0
-    for m in lst.get("messages", []) or []:
-        md = gws(["gmail", "users", "messages", "get", "--params", json.dumps(
-            {"userId": "me", "id": m["id"], "format": "minimal"})])
-        if int(md.get("internalDate", "0")) // 1000 > last:
-            newer += 1
-    if newer:
-        reasons.append("gmail %d new LinkedIn email(s)" % newer)
+    # Spec 04 (Otto, Oct 17 2026): count only UNHANDLED accept emails (all pages, every observed subject variant, deduped
+    # against gmail_events when migration 0032 is live, else against People.accepted) plus LinkedIn message emails newer
+    # than the cursor (worker step 0 runs reply_ingest.py for those). Job alerts / newsletters / PYMK no longer wake it.
+    # Kill switch: ARI_PRECHECK_LEGACY_GMAIL=1 (or --legacy-gmail) restores the old count, with paging.
+    newer = None
+    if not (LEGACY_GMAIL or os.environ.get("ARI_PRECHECK_LEGACY_GMAIL") == "1"):
+        try:
+            import accept_ingest
+            r = accept_ingest.pending(last, [{k.strip().lower(): v for k, v in p.items()} for p in s["People"]])
+            if r["accepts"]:
+                reasons.append("gmail %d new accept email(s)" % r["accepts"])
+            if r["messages"]:
+                reasons.append("gmail %d new LinkedIn message email(s)" % r["messages"])
+            if r["gmail_failed"]:
+                reasons.append("gmail read error (fail-open)")
+            if WHY:
+                detail.append("gmail accept_ingest db_0032=%s" % r["db_0032"])
+            newer = 0
+        except BaseException as e:  # any problem in the new path (incl. SystemExit from ari_db): legacy count below
+            detail.append("gmail accept_ingest fallback: %s" % str(e)[:120])
+            newer = None
+    if newer is None:
+        newer, tok = 0, None
+        while True:  # legacy: any LinkedIn email newer than the cursor, now with paging (was maxResults 20, one page)
+            prm = {"userId": "me", "q": "from:linkedin.com in:anywhere after:%d" % last, "maxResults": 100}
+            if tok:
+                prm["pageToken"] = tok
+            lst = gws(["gmail", "users", "messages", "list", "--params", json.dumps(prm)])
+            for m in lst.get("messages", []) or []:
+                md = gws(["gmail", "users", "messages", "get", "--params", json.dumps(
+                    {"userId": "me", "id": m["id"], "format": "minimal"})])
+                if int(md.get("internalDate", "0")) // 1000 > last:
+                    newer += 1
+            tok = lst.get("nextPageToken")
+            if not tok:
+                break
+        if newer:
+            reasons.append("gmail %d new LinkedIn email(s)" % newer)
 
     # 1. Queue
     q = [r for r in s["Queue"] if g(r, "status").lower() == "queued"]

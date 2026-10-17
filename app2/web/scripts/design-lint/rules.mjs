@@ -1,23 +1,28 @@
 // Design lint rules: zero-token, deterministic checks that replace LLM review of mechanical things.
-// Shared by the static source lint (scripts/design-lint/static.mjs) and the Playwright checks (e2e/design.spec.ts).
+// Shared by the static source lint (scripts/design-lint/static.mjs), the query lint (scripts/query-lint) and the
+// Playwright checks (e2e/design.spec.ts, e2e/mobile.spec.ts).
 
 /** Smallest tap target, CSS px, both sides. */
 export const MIN_TAP = 48;
 /** Today at 412x915 may be at most this many phone viewports tall with the synthetic data. */
 export const TODAY_MAX_VIEWPORTS = 1.5;
-/** Widths every screen is checked at. */
-export const WIDTHS = [360, 412];
+/** Widths every screen is checked at (playwright.config.ts projects). */
+export const WIDTHS = [360, 390, 412];
 
 /** Only these CSS files may use gradients or glow shadows (none today). Paths relative to app2/web. */
 export const EFFECTS_ALLOW_LIST = ['src/ui/effects.allowed.css'];
 
-const BUZZ = /\b(seamless(?:ly)?|empower(?:s|ed|ing|ment)?|unlock(?:s|ed|ing)?|supercharg(?:e|es|ed|ing)|leverag(?:e|es|ed|ing)|elevat(?:e|es|ed|ing)|game[- ]?changer?s?|game[- ]?changing|revolutioni[sz](?:e|es|ed|ing)|effortless(?:ly)?|delight(?:s|ed|ful|fully|ing)?)\b/i;
-const DASH = /[\u2012\u2013\u2014\u2015]/;
+// All literals: dash, buzzword. UI copy only: exclamation, place-or-timezone (TZ, CITY), infra-word.
 const BANG = /!/;
-// Time zones are case-sensitive abbreviations; cities are not.
-const PLACE_CS = /\b(?:IST|PST|PDT|PT|ET|EST|EDT)\b/;
-const CITY = /\b(?:bengaluru|bangalore)\b/i;
-const INFRA = /\b(?:supabase|vercel|databases?|apis?|tokens?|workers?|cron(?:s|job|jobs)?)\b/i;
+const DASH = /[\u2012-\u2015]/; // U+2013, U+2014, figure dash, bar
+const BUZZ = /\b(seamless(?:ly)?|empower(?:s|ed|ing|ment)?|unlock(?:s|ed|ing)?|supercharg(?:e|es|ed|ing)|leverag(?:e|es|ed|ing)|elevat(?:e|es|ed|ing)|game[- ]?chang(?:er|ers|ing)|revolutioni[sz](?:e|es|ed|ing)|effortless(?:ly)?|delight(?:s|ed|ful|fully|ing)?|cutting[- ]edge|robust(?:ly|ness)?|world[- ]class)\b/i;
+// Time zones are case-sensitive abbreviations and offsets; cities are not.
+const TZ = /\b(?:IST|PST|PDT|PT|ET|EST|EDT|CET|GMT|UTC)\b|\b(?:UTC|GMT)\s?[+\u2212-]\d{1,2}(?::?\d{2})?|(?<![\d:])[+\u2212-](?:0\d|1[0-4]):[0-5]\d\b/;
+const CITY = /\b(?:bengaluru|bangalore|india|mumbai|delhi|kolkata|san francisco|new york|london|(?:asia|america|europe)\/[a-z_]+)\b/i;
+const INFRA = /\b(?:supabase|vercel|postgres(?:ql)?|postgrest|rls|databases?|apis?|tokens?|workers?|cron(?:s|job|jobs)?)\b/i;
+
+/** Every rule an allow may name. Static copy and CSS rules, the query rule, and the rendered dead-tap opt-out. */
+export const RULES = ['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow', 'query-unbounded', 'dead-tap'];
 
 /**
  * Check one piece of text.
@@ -27,13 +32,12 @@ const INFRA = /\b(?:supabase|vercel|databases?|apis?|tokens?|workers?|cron(?:s|j
  */
 export function checkText(text, { copy }) {
   const out = [];
-  const hit = (rule, re) => { const m = text.match(re); if (m) out.push({ rule, match: m[0] }); };
+  const hit = (rule, re) => { const m = text.match(re); if (m) out.push({ rule, match: m[0] }); return !!m; };
   hit('dash', DASH);
   hit('buzzword', BUZZ);
   if (copy) {
     hit('exclamation', BANG);
-    hit('place-or-timezone', PLACE_CS);
-    hit('place-or-timezone', CITY);
+    if (!hit('place-or-timezone', TZ)) hit('place-or-timezone', CITY);
     hit('infra-word', INFRA);
   }
   return out;

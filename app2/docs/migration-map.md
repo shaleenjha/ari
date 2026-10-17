@@ -45,6 +45,8 @@ Written Oct 17 2026 (Phase 1 groundwork). Source of truth for prod shape: schema
 6. **Switch reads** (app2 client at `/next`, behind a flag). ops.html stays on old columns.
 7. **C1 contract.** After app2 parity and 2 weeks without ops.html use: drop `lane`, `sheet_row`, `field_ts`, text stages, Sheet sync tables; drop `is_owner()` OR clause; composite FKs replace single-column FKs. Final full dump before each contract step. *Rollback:* restore from that dump (contract steps are the only non-trivial rollbacks, hence last).
 
+Steps 1 to 3 are written as `native/supabase/migrations/pending/0033_app2_e1_tenancy.sql`, `0034_app2_e2_backfill.sql`, `0035_app2_e3_dual_rls.sql` with rollbacks and a staging runbook (`pending/README.md`); renumbered Oct 17 2026 because `0032_accept_ingest.sql` lands first. Not applied. Differences from the outline above: E2 also adds an FK to `app.workspaces` and a `ws_guard` trigger (null on insert becomes Owner; a row cannot change workspace). All three are lock-safe: one short transaction per table per phase (`lock_timeout` 5s, `statement_timeout` 60s), FK and NOT NULL via NOT VALID + VALIDATE, batched backfill, re-runnable; each file is one Management API request. The 42 tenant tables exclude 0032's `gmail_events` and `scan_runs` (open decision for Owner, see `pending/README.md`).
+
 ## 3. Preconditions
 - 0029 hygiene findings reviewed in the app (people without account, duplicates) so `account_id` is trustworthy before `company` text is dropped.
 - Restore drill green the same day as any contract step.

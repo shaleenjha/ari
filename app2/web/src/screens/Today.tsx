@@ -1,16 +1,19 @@
 import { data } from '../data/client';
+import { useNotNow } from '../ui/notNow';
 import { useAsync } from '../ui/useAsync';
 import { TidyUp, WhoIsThisCards } from './Cards';
 
 export function Today() {
   const q = useAsync(() => data().queue());
   const r = useAsync(() => data().replies());
+  const aside = useNotNow();
+  const fresh = (r.data ?? []).filter((x) => !aside.has(x.id));
   return (
     <section aria-labelledby="h-today">
       <header className="hd"><h1 id="h-today">Today</h1></header>
-      {(r.data?.length ?? 0) > 0 && (
+      {fresh.length > 0 && (
         <a className="card pin" href="#/replies" data-testid="reply-pin">
-          <b>{r.data!.length} new {r.data!.length === 1 ? 'reply' : 'replies'}</b><span>Answer first</span>
+          <b>{fresh.length} new {fresh.length === 1 ? 'reply' : 'replies'}</b><span>Answer first</span>
         </a>
       )}
       <WhoIsThisCards />

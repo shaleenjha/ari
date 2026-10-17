@@ -38,6 +38,8 @@ INCLUDE = [
     'native/supabase/tests/*.sql', 'native/supabase/tests/*.ts',
     # Phase 1 (Oct 17 2026): app2 tree + CI, recursive ("dir/**"), build output and deps excluded
     'app2/**', '.github/**',
+    # Oct 17 2026: specs, app2 pending migrations, accept ingest
+    'docs/specs/*.md', 'native/supabase/migrations/pending/**', 'scripts/accept_ingest.py',
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient.pem',
     'repo/README.md:README.md', 'repo/gitignore:.gitignore',
 ]
@@ -59,7 +61,9 @@ SECRET = {
     'sheet_url': r'docs\.google\.com/spreadsheets/d/[A-Za-z0-9_-]{20,}',
     'phone_in': r'\+91[ -]?\d{10}\b',
 }
-EMAIL_OK = re.compile(r'@(example\.com|linkedin\.com|users\.noreply\.github\.com)$|^[a-z0-9.-]+@[0-9.]+$', re.I)
+EMAIL_OK = re.compile(r'@(example\.com|([a-z0-9-]+\.)*linkedin\.com|users\.noreply\.github\.com)$|^[a-z0-9.-]+@[0-9.]+$', re.I)
+# Deliberate lookalike-sender fixtures in the Gmail parser tests (Oct 18 2026); not real addresses.
+EMAIL_FIXTURES = {'a@notlinkedin.com', 'invitations@linkedin.com.evil.io'}
 
 
 def word_re(w):
@@ -156,7 +160,7 @@ def main():
             for m in set(re.findall(p, scan)):
                 problems.append((dst, k, m if isinstance(m, str) else m[0]))
         for m in set(re.findall(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', scan)):
-            if not EMAIL_OK.search(m) and not re.search(r'@\d|\.(png|js|css|woff2)$', m):
+            if m not in EMAIL_FIXTURES and not EMAIL_OK.search(m) and not re.search(r'@\d|\.(png|js|css|woff2)$', m):
                 problems.append((dst, 'email', m))
         if not src.endswith(('ari-supabase.js', 'package-lock.json')):  # vendored / generated, scanned for secrets only
             for rx in name_res:

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractProfile, parseLinkedInEmail } from './parse';
+import { ACCEPT_SUBJ, NOT_ACCEPT, extractProfile, parseLinkedInEmail, type RawEmail } from './parse';
 import { matchPerson } from './match';
 import { ingest, shadowDiff } from './handler';
 import * as F from './fixtures';
@@ -92,5 +92,48 @@ describe('runtime', () => {
     const r = await new Runtime(store).register('ok', async () => 1).register('boom', async () => { throw new Error('x'); }).tick();
     expect(r).toEqual({ ran: 2, failed: 1 });
     expect(done).toEqual([['j1', true], ['j2', false]]);
+  });
+});
+
+// Spec 04 (Oct 17 2026): every accept subject variant seen in Gmail (Oct 5 to 17), and the LinkedIn mail that must NOT
+// count as an accept. Synthetic names; the subject/snippet shapes are the real ones (metadata only, no bodies).
+const li = (id: string, subject: string, snippet?: string, from = 'LinkedIn <invitations@linkedin.com>'): RawEmail =>
+  ({ id, from, subject, snippet, date: 'Sat, 17 Oct 2026 08:44:00 +0000' });
+describe('accept variants (spec 04)', () => {
+  it('first name in subject, full name from the snippet preheader (entity-encoded apostrophe)', () => {
+    const e = parseLinkedInEmail(li('a1', 'Pat accepted your invitation, explore their network',
+      'See Pat Q Lee&#39;s connections, experience, and more \u034f \u034f'));
+    expect(e).toMatchObject({ kind: 'accept', name: 'Pat Q Lee', at: '2026-10-17T08:44:00.000Z' });
+  });
+  it('credentials after a comma are dropped from the name', () => {
+    const e = parseLinkedInEmail(li('a2', 'Pat Leesynth, PMP, ITIL Expert accepted your invitation, explore their network',
+      'See Pat Leesynth, PMP, ITIL Expert | Head of IT&#39;s connections, experience, and more'));
+    expect(e).toMatchObject({ kind: 'accept', name: 'Pat Leesynth' });
+  });
+  it('keeps the subject name when the snippet names someone else', () => {
+    expect(parseLinkedInEmail(li('a3', 'Pat accepted your invitation', 'See Chris Roe&#39;s connections, experience'))).toMatchObject({ kind: 'accept', name: 'Pat' });
+  });
+  it('older and localised forms', () => {
+    for (const s of ['Pat Leesynth has accepted your invitation', 'Pat Leesynth accepted your LinkedIn invitation', 'Pat Leesynth, accepted your connection invitation',
+      'You and Pat Leesynth are now connected', 'Pat Leesynth is now a connection', 'Pat Leesynth a accepté votre invitation', 'Pat Leesynth hat Ihre Einladung angenommen',
+      'Pat Leesynth aceptó tu invitación']) {
+      expect(parseLinkedInEmail(li('v', s))).toMatchObject({ kind: 'accept', name: 'Pat Leesynth' });
+    }
+  });
+  it('PYMK digests, inbound invites and job alerts are not accepts', () => {
+    for (const s of ['Pat Leesynth and other people\u2019s connections, experience, and more', 'Pat, I\'d like to connect',
+      'You may be a fit for Ixterlane\u2019s Founding SDR role - 1 connection']) {
+      expect(NOT_ACCEPT.test(s) || !ACCEPT_SUBJ.some((r) => r.test(s))).toBe(true);
+      expect(parseLinkedInEmail(li('n', s)).kind).not.toBe('accept');
+    }
+    expect(parseLinkedInEmail(li('j', 'Pat accepted your invitation', undefined, 'LinkedIn Job Alerts <jobalerts-noreply@linkedin.com>')).kind).toBe('accept');
+  });
+  it('From forms: bare address, angle brackets, subdomain; lookalike domains rejected', () => {
+    for (const f of ['invitations@linkedin.com', '<invitations@linkedin.com>', 'LinkedIn <x@e.linkedin.com >']) {
+      expect(parseLinkedInEmail(li('f', 'Pat accepted your invitation', undefined, f)).kind).toBe('accept');
+    }
+    for (const f of ['LinkedIn <invitations@linkedin.com.evil.io>', 'LinkedIn <a@notlinkedin.com>']) {
+      expect(parseLinkedInEmail(li('f', 'Pat accepted your invitation', undefined, f))).toMatchObject({ kind: 'unknown', reason: 'not_from_linkedin' });
+    }
   });
 });

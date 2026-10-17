@@ -18,6 +18,7 @@ if h:
     if h.get('scan_stale'): problems['scan'] = 'scans paused (%s min since last sync)' % h.get('scan_age_min')
     if not h.get('backup_ok'): problems['backup'] = 'nightly backup did not finish cleanly'
     if (h.get('push_failed_24h') or 0) > 0: problems['push'] = '%s push(es) failed in 24 h' % h['push_failed_24h']
+    if h.get('deadman'): problems['deadman'] = 'scan dead-man'   # 0032: a scheduled scan stopped or keeps coming back empty
 else:
     hb = (ari_db.get('scan_heartbeat?select=last_scan_at') or [{}])[0]
     t = iso(hb.get('last_scan_at'))

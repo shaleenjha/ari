@@ -42,3 +42,16 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
 .confirm { display: flex; flex-direction: column; gap: 8px; } .confirm > span { color: var(--mute); font-size: 14px; }
 .row.done span { color: var(--mute); }
 .who > span { color: var(--mute); font-size: 14px; }
+/* Replies: draft and Not now. Toasts sit on raised (spec 01). */
+:root { --raised: #242424; }
+.draftbox { display: flex; flex-direction: column; gap: 8px; }
+.draft { display: flex; flex-direction: column; gap: 8px; }
+.draft > span { color: var(--mute); font-size: 14px; }
+.draft textarea { min-height: 144px; padding: 8px 16px; border-radius: 12px; border: 1px solid var(--mute); background: var(--bg);
+  color: var(--ink); font: inherit; resize: vertical; }
+.draft textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.status { color: var(--mute); font-size: 14px; margin: 0; }
+.toast { position: fixed; left: 16px; right: 16px; bottom: calc(64px + env(safe-area-inset-bottom)); max-width: 528px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 8px 8px 16px; background: var(--raised);
+  color: var(--ink); border-radius: 16px; }
+.hd h1:focus:not(:focus-visible) { outline: none; }

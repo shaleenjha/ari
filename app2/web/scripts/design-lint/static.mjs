@@ -1,18 +1,24 @@
 #!/usr/bin/env node
-// Static half of the design lint (rules 3 and 5). No browser, no network, no tokens.
+// Static half of the design lint: UI copy rules (spec 02 §1) and CSS rules. No browser, no network, no tokens.
 //   node scripts/design-lint/static.mjs            lint app2/web
 //   node scripts/design-lint/static.mjs --json     machine-readable output
-// Rule 3: banned strings in source string literals (all .ts/.tsx under src, tests excluded) and UI copy (JSX text and
-//         copy literals in .tsx, index.html, manifest). Rule 5: system font as the primary family, gradients and glow
-//         shadows in CSS (src/**/*.css) and inline styles, outside EFFECTS_ALLOW_LIST.
-// Escape hatch, one line at a time and reviewed in the PR: `// design-lint-allow: <reason>` on the line above.
+// Copy: banned strings in source literals (all .ts/.tsx under src, tests and .d.ts excluded: dash, buzzword) and UI copy
+//       (JSX text and copy literals in .tsx, index.html text and title/alt/aria-label/placeholder/content, manifest
+//       name/short_name/description: also exclamation, place-or-timezone, infra-word).
+// CSS:  system font as the primary family, gradients and glow shadows (src/**/*.css and inline styles) outside
+//       EFFECTS_ALLOW_LIST.
+// Allows: see allow.mjs (allow.json per file, inline `lint-allow: <rule> <reason>`). Exit 1 on any error; CI=true adds
+// GitHub annotations.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, resolve, dirname } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { EFFECTS_ALLOW_LIST, checkText, lintCss } from './rules.mjs';
+import { WEB_ROOT, allowIndex, finding, loadAllowJson, printFindings, staleJsonEntries } from './allow.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const ROOT = WEB_ROOT;
+/** Rules this lint owns (stale allows for other rules are left to their own lint). */
+export const STATIC_RULES = new Set(['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow']);
 
 function walk(dir) {
   const out = [];
@@ -24,7 +30,7 @@ function walk(dir) {
 }
 
 // JSX attributes whose values are never shown to people.
-const NON_COPY_ATTRS = new Set(['className', 'data-testid', 'href', 'id', 'key', 'role', 'type', 'htmlFor', 'rel', 'target', 'src', 'lang', 'name', 'method', 'action', 'autoComplete', 'inputMode']);
+const NON_COPY_ATTRS = new Set(['className', 'data-testid', 'href', 'id', 'key', 'role', 'type', 'htmlFor', 'rel', 'target', 'src', 'lang', 'name', 'method', 'action', 'autoComplete', 'inputMode', 'data-lint-allow']);
 
 function isCodeLiteral(node) {
   const p = node.parent;
@@ -45,23 +51,44 @@ function isCodeLiteral(node) {
   return false;
 }
 
-function allowed(src, pos) {
-  const lines = src.text.split('\n');
-  const line = src.getLineAndCharacterOfPosition(pos).line;
-  return /design-lint-allow:/.test(lines[line - 1] ?? '') || /design-lint-allow:/.test(lines[line] ?? '');
+/** 1-based line and column of offset `pos` in `text`. */
+function lineCol(text, pos) {
+  const before = text.slice(0, pos);
+  const line = before.split('\n').length;
+  return { line, col: pos - before.lastIndexOf('\n') };
 }
 
-export function lintSource(file, text) {
+/** Offset of `match` inside the node's raw source, falling back to the first non-blank character of the node. */
+function matchPos(src, node, match) {
+  const start = node.getStart(src);
+  const raw = src.text.slice(start, node.getEnd());
+  const i = raw.indexOf(match);
+  if (i >= 0) return start + i;
+  const nb = raw.search(/\S/);
+  return start + Math.max(0, nb);
+}
+
+/**
+ * Lint one .ts/.tsx source for copy and inline-style rules. Returns findings with allows applied, plus allow problems.
+ * @param {string} file path relative to app2/web
+ * @param {string} text
+ * @param {{ jsonEntries?: Map<string, {rule: string, used: boolean}[]> }} [opts]
+ */
+export function lintSource(file, text, { jsonEntries } = {}) {
   const tsx = file.endsWith('.tsx');
   const src = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, tsx ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+  const allow = allowIndex(file, text, jsonEntries);
   const out = [];
+  const push = (pos, rule, match, value, kind) => {
+    const { line, col } = lineCol(text, pos);
+    if (allow.suppress(rule, line)) return;
+    out.push({ ...finding(file, line, col, rule, match, value.trim().replace(/\s+/g, ' ').slice(0, 80)), kind });
+  };
   const report = (node, value, copy) => {
-    if (allowed(src, node.getStart(src))) return;
-    for (const v of checkText(value, { copy })) {
-      out.push({ file, line: src.getLineAndCharacterOfPosition(node.getStart(src)).line + 1, ...v, text: value.trim().slice(0, 80) });
-    }
+    for (const v of checkText(value, { copy })) push(matchPos(src, node, v.match), v.rule, v.match, value, copy ? 'in UI copy' : 'in a source literal');
   };
   const visit = (node) => {
+    if (ts.isRegularExpressionLiteral(node)) return;
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
       report(node, node.text, tsx && !isCodeLiteral(node));
     } else if (ts.isTemplateExpression(node)) {
@@ -69,59 +96,83 @@ export function lintSource(file, text) {
       report(node, parts, tsx && !isCodeLiteral(node));
     } else if (ts.isJsxText(node)) {
       if (node.text.trim()) report(node, node.text, true);
-    } else if (ts.isRegularExpressionLiteral(node)) {
-      return;
     }
     // inline styles: style={{ background: 'linear-gradient(...)' }}
     if (ts.isJsxAttribute(node) && node.name.getText() === 'style' && node.initializer) {
       const t = node.initializer.getText(src);
-      if (/gradient\s*\(/i.test(t)) out.push({ file, line: src.getLineAndCharacterOfPosition(node.getStart(src)).line + 1, rule: 'gradient', match: 'inline style', text: t.slice(0, 80) });
-      if (/boxShadow|textShadow/.test(t)) out.push({ file, line: src.getLineAndCharacterOfPosition(node.getStart(src)).line + 1, rule: 'glow', match: 'inline style', text: t.slice(0, 80) });
+      const pos = node.getStart(src);
+      if (/gradient\s*\(/i.test(t)) push(pos, 'gradient', 'inline style', t, 'in an inline style');
+      if (/boxShadow|textShadow/.test(t)) push(pos, 'glow', 'inline style', t, 'in an inline style');
     }
     ts.forEachChild(node, visit);
   };
   visit(src);
-  return out;
+  return [...out, ...allow.problems(STATIC_RULES)];
 }
 
-export function lintHtmlCopy(file, html) {
+/** Lint one stylesheet (CSS rules) with allows applied. */
+export function lintCssFile(file, text, { jsonEntries } = {}) {
+  const allow = allowIndex(file, text, jsonEntries);
+  const out = lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file) })
+    .filter((x) => !allow.suppress(x.rule, x.line))
+    .map((x) => ({ ...finding(file, x.line, 1, x.rule, x.match, x.match), kind: 'in CSS' }));
+  return [...out, ...allow.problems(STATIC_RULES)];
+}
+
+export function lintHtmlCopy(file, html, { jsonEntries } = {}) {
+  const allow = allowIndex(file, html, jsonEntries);
   const out = [];
-  const body = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<!--[\s\S]*?-->/g, ' ');
-  const texts = [...body.matchAll(/>([^<>]+)</g)].map((m) => m[1]).filter((t) => t.trim() && !t.trim().startsWith('<!'));
-  const attrs = [...body.matchAll(/\b(?:title|alt|aria-label|placeholder|content)="([^"]*)"/g)].map((m) => m[1]).filter((v) => !/^[#\d]|width=|^text\//.test(v));
-  for (const t of [...texts, ...attrs]) for (const v of checkText(t, { copy: true })) out.push({ file, line: 0, ...v, text: t.trim().slice(0, 80) });
-  return out;
+  // Blank out script, style and comment bodies but keep offsets, so lines and columns stay true.
+  const blank = (m) => m.replace(/[^\n]/g, ' ');
+  const body = html.replace(/<script[\s\S]*?<\/script>/gi, blank).replace(/<style[\s\S]*?<\/style>/gi, blank).replace(/<!--[\s\S]*?-->/g, blank);
+  const pieces = [
+    ...[...body.matchAll(/>([^<>]+)</g)].map((m) => ({ t: m[1], at: (m.index ?? 0) + 1 })).filter((x) => x.t.trim()),
+    ...[...body.matchAll(/\b(?:title|alt|aria-label|placeholder|content)="([^"]*)"/g)]
+      .map((m) => ({ t: m[1], at: (m.index ?? 0) + m[0].indexOf('"') + 1 })).filter((x) => !/^[#\d]|width=|^text\//.test(x.t)),
+  ];
+  for (const { t, at } of pieces) for (const v of checkText(t, { copy: true })) {
+    const { line, col } = lineCol(html, at + Math.max(0, t.indexOf(v.match)));
+    if (allow.suppress(v.rule, line)) continue;
+    out.push({ ...finding(file, line, col, v.rule, v.match, t.trim().slice(0, 80)), kind: 'in UI copy' });
+  }
+  return [...out, ...allow.problems(STATIC_RULES)];
 }
 
-export function lintManifestCopy(file, json) {
+export function lintManifestCopy(file, json, { jsonEntries } = {}) {
   const m = JSON.parse(json);
+  const allow = allowIndex(file, '', jsonEntries);
   const out = [];
-  for (const k of ['name', 'short_name', 'description']) if (typeof m[k] === 'string') for (const v of checkText(m[k], { copy: true })) out.push({ file, line: 0, ...v, text: m[k] });
+  for (const k of ['name', 'short_name', 'description']) if (typeof m[k] === 'string') for (const v of checkText(m[k], { copy: true })) {
+    const pos = json.indexOf(`"${k}"`);
+    const { line, col } = lineCol(json, Math.max(0, pos));
+    if (allow.suppress(v.rule, line)) continue;
+    out.push({ ...finding(file, line, col, v.rule, v.match, m[k]), kind: 'in UI copy' });
+  }
   return out;
 }
 
-export function run(root = ROOT) {
-  const findings = [];
+export function run(root = ROOT, { allowJson = join(root, 'scripts/design-lint/allow.json') } = {}) {
+  const { entries: jsonEntries, problems } = loadAllowJson(allowJson, root);
+  const findings = [...problems];
   const files = walk(join(root, 'src'));
   for (const f of files) {
     const rel = relative(root, f);
     const text = readFileSync(f, 'utf8');
-    if (/\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f) && !f.endsWith('.d.ts')) findings.push(...lintSource(rel, text));
-    if (f.endsWith('.css')) {
-      findings.push(...lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(rel) }).map((x) => ({ file: rel, ...x, text: x.match })));
-    }
+    if (/\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f) && !f.endsWith('.d.ts')) findings.push(...lintSource(rel, text, { jsonEntries }));
+    if (f.endsWith('.css')) findings.push(...lintCssFile(rel, text, { jsonEntries }));
   }
-  findings.push(...lintHtmlCopy('index.html', readFileSync(join(root, 'index.html'), 'utf8')));
-  findings.push(...lintManifestCopy('public/manifest.webmanifest', readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8')));
+  findings.push(...lintHtmlCopy('index.html', readFileSync(join(root, 'index.html'), 'utf8'), { jsonEntries }));
+  findings.push(...lintManifestCopy('public/manifest.webmanifest', readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8'), { jsonEntries }));
+  findings.push(...staleJsonEntries(jsonEntries, STATIC_RULES));
   return { files: files.length + 2, findings };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { files, findings } = run();
-  if (process.argv.includes('--json')) console.log(JSON.stringify({ files, findings }, null, 2));
-  else {
-    for (const f of findings) console.log(`${f.file}:${f.line}  ${f.rule}  "${f.match}"  in: ${f.text}`);
-    console.log(findings.length ? `design-lint (static): ${findings.length} problem(s) in ${files} files` : `design-lint (static): OK, ${files} files, rules 3 (source copy) and 5 (fonts, gradients, glows)`);
+  if (process.argv.includes('--json')) {
+    console.log(JSON.stringify({ files, findings }, null, 2));
+    process.exit(findings.some((f) => f.severity !== 'warning') ? 1 : 0);
   }
-  process.exit(findings.length ? 1 : 0);
+  const errors = printFindings(findings, { label: 'design-lint (static)', okLine: `${files} files, copy rules and CSS rules`, kind: (f) => f.kind ?? '' });
+  process.exit(errors ? 1 : 0);
 }

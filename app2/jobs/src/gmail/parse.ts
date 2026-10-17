@@ -8,6 +8,7 @@ export interface RawEmail {
   text?: string;
   html?: string;
   authResults?: string;           // Authentication-Results header, when present
+  snippet?: string;               // Gmail snippet (preheader); accept emails carry the full name only here
 }
 export type IngestKind = 'accept' | 'reply' | 'invite_sent' | 'unknown';
 export interface ParsedEvent {
@@ -24,8 +25,18 @@ export interface ParsedEvent {
   reason?: string;                // why unknown
 }
 
-const LINKEDIN_FROM = /@([a-z0-9-]+\.)*linkedin\.com>?\s*$/i;
-const ACCEPT_SUBJ = [/^(.+?) accepted your invitation/i, /^(.+?) has accepted your invitation/i, /^You and (.+?) are now connected/i];
+// Spec 04 (Oct 17 2026). Mirrored in scripts/accept_ingest.py: keep the two in step.
+const LINKEDIN_FROM = /<?\s*[^<>\s@]+@(?:[a-z0-9-]+\.)*linkedin\.com\s*>?\s*$/i;  // DKIM checked below
+export const ACCEPT_SUBJ = [
+  /^(.+?),? (?:has )?accepted your (?:LinkedIn )?(?:connection )?invitation\b/i,
+  /^You and (.+?) are now connected\b/i, /^(.+?) is now a connection\b/i,
+  /^(.+?) (?:a accepté votre invitation|hat Ihre Einladung angenommen|aceptó tu invitación)/i,
+];
+// "<Name> and other people's connections" (PYMK digest), "<Name>, I'd like to connect" (inbound invite), job alerts "... role - 1 connection"
+export const NOT_ACCEPT = /other people.s connections|I.d like to connect|role - \d+ connection/i;
+const FULLNAME = /See (.+?)(?:'|’|&#39;)s connections, experience/i;
+/** Name as matched against People: credentials after the first comma dropped ("Pat Leesynth, PMP, ITIL" -> "Pat Leesynth"). */
+export const coreName = (n: string): string => n.split(',')[0]!.trim();
 const REPLY_SUBJ = [/^(.+?) sent you a (?:new )?message/i, /^New message from (.+?)$/i, /^(.+?) just messaged you/i, /^(.+?) replied to your message/i,
   /^Re: .*?\bfrom (.+?)$/i];
 const INVITE_SUBJ = [/^You invited (.+?) to connect/i];
@@ -88,8 +99,11 @@ export function parseLinkedInEmail(e: RawEmail): ParsedEvent {
   const prof = extractProfile(body);
   const subj = e.subject.trim();
 
-  let name = firstMatch(subj, ACCEPT_SUBJ);
+  let name = NOT_ACCEPT.test(subj) ? undefined : firstMatch(subj, ACCEPT_SUBJ);
   if (name) {
+    const full = decodeEntities(text + '\n' + (e.snippet ?? '')).match(FULLNAME)?.[1]?.trim();
+    if (full && coreName(full).toLowerCase().startsWith(coreName(name).toLowerCase())) name = full;
+    name = coreName(name);
     const headline = headlineAfterName(text, name);
     return { ...base, kind: 'accept', name, headline, company: companyFromHeadline(headline), profileUrl: prof?.url, vanity: prof?.vanity };
   }

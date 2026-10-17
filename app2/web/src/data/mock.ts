@@ -30,7 +30,10 @@ export function seed() {
     { id: 't-3', kind: 'reply', title: 'Answer Jamie Poe', status: 'todo', assigneeRole: 'sdr', accountId: 'acc-2', personId: 'p-3', dueAt: h(-2), version: 1, createdByKind: 'ari' },
     { id: 't-4', kind: 'ask', title: 'Warm path into Ostrevanthe Co?', status: 'todo', assigneeRole: 'ae', accountId: 'acc-1', version: 1, createdByKind: 'sdr' },
   ];
-  const drafts: Draft[] = [{ personId: 'p-1', kind: 'dm1', body: 'Hi Alex, thanks for connecting. Saw the data residency hire ...', authorKind: 'ari' }];
+  const drafts: Draft[] = [
+    { personId: 'p-1', kind: 'dm1', body: 'Hi Alex, thanks for connecting. Saw the data residency hire ...', authorKind: 'ari' },
+    { personId: 'p-3', kind: 'reply', body: 'Thanks Jamie. Short version: your apps keep working as they do, and the sensitive fields move out of them into a vault. Worth 20 minutes next week to walk through it on your stack?', authorKind: 'ari' },
+  ];
   const activity: Activity[] = [
     { id: 1, actorKind: 'ari', verb: 'brief_ready', subjectType: 'account', subjectId: 'acc-1', createdAt: h(5) },
     { id: 2, actorKind: 'sdr', verb: 'marked_dm1_sent', subjectType: 'person', subjectId: 'p-2', createdAt: h(148) },

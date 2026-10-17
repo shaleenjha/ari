@@ -10,8 +10,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "e2e": "playwright test --grep-invert @design",
-    "lint:design": "node scripts/design-lint/static.mjs && playwright test --grep @design",
-    "lint:design:static": "node scripts/design-lint/static.mjs"
+    "lint:design": "playwright test --grep @design",
+    "lint:design:static": "node scripts/design-lint/static.mjs",
+    "lint:query": "node scripts/query-lint/query-lint.mjs",
+    "lint:slop": "npm run lint:design:static && npm run lint:query"
   },
   "dependencies": {
     "react": "19.3.1",
