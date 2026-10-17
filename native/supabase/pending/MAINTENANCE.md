@@ -35,4 +35,5 @@ Tested Oct 17 on local Postgres 17 with the prod schema (schema-only restore, sy
 - 0029 on staging: applied, test file run inside one transaction (staging's own 2 synthetic people/accounts hidden in-transaction; the run ends in a deliberate raise so nothing persists) -> "ALL 0029 TESTS PASSED"; rollback, re-apply, tests pass again. Anon -> 401 on hygiene_open, hygiene_resolve, ari_hygiene_scan. Worker-executable public functions +2 (ari_hygiene_scan, ari_worker_hygiene; catalogue count 32 -> 34 including non-app helpers).
 - 0029 on prod: applied, ledger 0001..0029 on both, 46 hand-set no_connect_tick flags removed by the backfill, anon 401 x3, worker +2. Files: migrations/0029_data_hygiene.sql, rollbacks/0029_rollback.sql.
 - hygiene_scan.py added after the sync step in task 56e17ef1 (prompt only). First prod scan as ari_worker: 43 accept_no_connect, 42 no_account_link, 14 dm1_past_due, 0 duplicate_account, 0 stale_stage; rescan idempotent.
-- v18.8 "Tidy up" deployed (frozen base web/ops_v1871.html). Nothing pending here.
+- v18.8 "Tidy up" deployed (frozen base web/ops_v1871.html); live /build.json v18.8. Device check owed (remote browsers stop at the passkey gate by design).
+- After: worker 06:19 clean; scheduled sync 06:25 clean with the hygiene line, no ALERT; test ping delivered 3/3. Session helper using the token deleted. Nothing pending here.
