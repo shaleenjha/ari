@@ -71,6 +71,23 @@ jobs:
         with: { python-version: '3.12' }
       - run: python3 scripts/test_hygiene_scan.py
 
+  design-lint:
+    name: design-lint (tap 48px, contrast, banned copy, Today height, fonts/gradients/glows; 360/412 px, Chromium + WebKit)
+    needs: web
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: app2/web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app2/web/package-lock.json }
+      - run: npm ci
+      - run: npm run lint:design:static
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run lint:design
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: design-lint-report, path: app2/web/test-results, retention-days: 7 }
+
   e2e:
     name: e2e (Playwright 360/412 px, Chromium + WebKit)
     needs: web

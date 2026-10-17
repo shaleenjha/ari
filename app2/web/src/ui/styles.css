@@ -1,12 +1,16 @@
-:root { --bg: #fff; --ink: #111; --mute: #666; --line: #e6e6e6; --card: #f6f6f4; --accent: #1f6feb; color-scheme: light dark;
-  font: 16px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
-@media (prefers-color-scheme: dark) { :root { --bg: #0e0e0e; --ink: #f2f2f2; --mute: #9a9a9a; --line: #262626; --card: #181818; } }
+/* Inter (OFL, self-hosted in public/fonts). Graphite is the default theme: matte black with a champagne accent. */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2'); }
+:root { --graphite-bg: #050505; --graphite-accent: #E2B062;
+  --bg: var(--graphite-bg); --ink: #f2eee8; --mute: #a39e95; --line: #2a2824; --card: #141311; --accent: var(--graphite-accent);
+  --font-sans: 'Inter', system-ui, sans-serif; --tap: 48px; color-scheme: dark;
+  font: 16px/1.4 var(--font-sans); }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--ink); }
 .shell { min-height: 100dvh; display: flex; flex-direction: column; max-width: 560px; margin: 0 auto; }
 .screen { flex: 1; padding: 16px 16px calc(80px + env(safe-area-inset-bottom)); overflow-wrap: anywhere; }
 .hd { display: flex; align-items: center; gap: 8px; } .hd h1 { font-size: 24px; margin: 4px 0 12px; }
-.back { font-size: 28px; text-decoration: none; color: inherit; min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+.back { font-size: 28px; text-decoration: none; color: inherit; min-width: var(--tap); min-height: var(--tap); display: grid; place-items: center; }
 .sub { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--mute); margin: 20px 0 8px; }
 .muted { color: var(--mute); }
 .card { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; background: var(--card);
@@ -16,9 +20,9 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
 .card span, .row span { color: var(--mute); font-size: 14px; display: block; }
 .rows { list-style: none; padding: 0; margin: 0; }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); min-height: 56px; }
-.row a { color: inherit; text-decoration: none; flex: 1; }
+.row a { color: inherit; text-decoration: none; flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: var(--tap); }
 .row em { font-style: normal; font-size: 13px; color: var(--mute); white-space: nowrap; }
-.btn { min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--ink); color: var(--bg); font: inherit; }
+.btn { min-height: var(--tap); min-width: var(--tap); padding: 0 14px; border-radius: 12px; border: 0; background: var(--ink); color: var(--bg); font: inherit; }
 .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
 .btn:disabled { opacity: .5; }
 .acts { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -32,7 +36,7 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
   border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
 .tabs a { flex: 1; max-width: 186px; text-align: center; padding: 14px 0; min-height: 52px; color: var(--mute); text-decoration: none; }
 .tabs a.on { color: var(--ink); font-weight: 600; }
-.cardhead { all: unset; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; width: 100%; }
+.cardhead { all: unset; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: var(--tap); cursor: pointer; width: 100%; }
 .cardhead:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .acts.col { flex-direction: column; margin-top: 8px; } .btn.wide { width: 100%; text-align: left; min-height: 48px; }
 .confirm { display: flex; flex-direction: column; gap: 8px; } .confirm > span { color: var(--mute); font-size: 14px; }

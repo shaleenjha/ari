@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content"><script>/* v18.0.2: iPhone Home Screen app flag, set before first layout */(function(){try{var n=navigator,ios=/iP(hone|od|ad)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1),sa=n.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(ios&&sa)document.documentElement.classList.add('v1802sa')}catch(e){}})()</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.12"><meta name="ari-rev" content="b598bebd51">
+<meta name="ari-build" content="v18.12.1"><meta name="ari-rev" content="05ae22f947">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#1C2F9E">
@@ -3739,6 +3739,13 @@ html.v1812on #ready>#v175tk,html.v1812on #ready>#v181cold,html.v1812on #ready>[d
 .v1812use{display:inline-flex;align-items:center;min-height:var(--ds-hit);font-weight:600;color:var(--ds-ink);text-decoration:underline;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.v1812fx .fxsheet{transition:none}}
 #v1812pxs{margin-top:var(--ds-sp2)}
+</style><style>/* v18.12.1: the late-draft line and the scans-off status. --ds-* tokens only, no motion. */
+.v18121dg{display:flex;align-items:center;min-height:var(--ds-hit);margin-top:var(--ds-sp2);padding:0 var(--ds-sp3);border-radius:var(--ds-r2);background:var(--ds-surface2);color:var(--ds-ink);font:500 var(--ds-t2)/var(--ds-lh2) var(--ds-font);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.v18121dg u{margin-left:var(--ds-sp1);text-underline-offset:2px}
+.v18121sc{flex:none;display:inline-flex;align-items:center;gap:var(--ds-sp1);min-height:var(--ds-hit);margin:calc((var(--ds-lh1) - var(--ds-hit)) / 2) 0;padding:0 var(--ds-sp2);border:0;background:none;color:var(--ds-ink2);font:500 var(--ds-t1)/var(--ds-lh1) var(--ds-font);white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.v18121sc i{flex:none;width:var(--ds-dot);height:var(--ds-dot);border-radius:var(--ds-rpill);box-shadow:inset 0 0 0 1px var(--ds-ink2)}
+.v18121sh .v18121sb{color:var(--ds-ink2);font:400 var(--ds-t3)/var(--ds-lh3) var(--ds-font)}
+.v18121sh .b span{min-height:var(--ds-hit)}
 </style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -5968,7 +5975,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.12';
+const M=MOTION,APP=$('#app'),BUILD='v18.12.1';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -6033,7 +6040,7 @@ const TR=[
  {id:'ten',n:'Still a pebble',h:'Don’t stop at five',k:'Ten taps'},
  {id:'psst',n:'Psst',h:'Press and hold me',k:'Psst'},
  {id:'juggle',n:'Ring juggle',h:'Leave me be for ten seconds',k:'Caught me'},
- {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.12'},
+ {id:'build',n:'Build note',h:'Triple-tap “Ari” up top',k:'Build v18.12.1'},
  {id:'lick',n:'Fresh batch',h:'Pull Ready down for fresh accepts'},
  {id:'yawn',n:'Morning yawn',h:'Send me to sleep, then wake me'},
  {id:'shake',n:'Steady on',h:'Shake your phone while I’m open',k:'Shaken'}];
@@ -6112,6 +6119,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.12.1',d:'Oct 17',items:['If you edit a draft or switch to Ari’s version, a draft that arrives later never replaces your words. It waits under the draft: tap to swap, and Undo if you change your mind', 'The top line now says when signal scans are off. Tap it to see what is paused and what is still running']},
  {v:'v18.12',d:'Oct 17',items:['Today opens on who to message: one status line, then replies, then DMs grouped by send window, one line each', 'Start, or tap anyone, and you get one person at a time with the full draft, Ari’s pick and the switch, and one button to copy and open LinkedIn', 'When you come back, tap Sent, Edited or Not yet and the next person is already up. Long-press anyone to copy their draft', 'When the list is clear, Ari tells you what comes next and when', 'Ari’s notes, the big ready line and the activity line now sit in Report, and the rest of Today folds into More', 'Redraft asks once per person, and a redraft that arrives after you edited never replaces your words']},
  {v:'v18.11.2',d:'Oct 17',items:['If a redraft takes longer than usual, the draft tells you and Redraft comes back, so nothing stays stuck on Redrafting', 'Flagged and Missing asset are easier to read on every look, and so are the grey lines under each name on the exec track', 'Switch chips and the exec track buttons are bigger to tap', 'Ari now reads every pick, switch and approval you have, however many there are']},
  {v:'v18.11.1',d:'Oct 17',items:['The Exec track tab is gone, and so is the jump back to Today when you tapped it. The exec track is now one folded row on Today: tap it to see who is on it and where each one stands, with Open file and Reach out myself right there', 'Today is shorter and only shows what you can act on. Your history, what you did today and your pace live in Report', 'The email steps are off Today', 'Read before you send and While invites are pending now open what they count when you tap them, and the big ready line takes you to your list', 'After you tap Redraft, the draft says Ari is redrafting until the new one lands']},
@@ -7135,7 +7143,7 @@ function bookHTML(){const st=scanTimes(),q=(M.queue||[]),acc=buildAccts();
        ${a.hook_date||a.hook_url?`<div class="v162ago">${a.hook_date?'Hook '+E(shortDate(a.hook_date)):''}${a.hook_url?` · <a href="${E(a.hook_url)}" target="_blank" rel="noopener">source</a>`:''}</div>`:''}
        <div class="tx2">${E(r.result||r.details||'')}</div><div class="v162btns">${/heads-up/i.test(r.action)?'':`<div class="b pri press" data-map="${E(r.target)}">${mq?(/^done/i.test(mq.status)?'People found · find more':'Finding people · '+E(agoTxt(mq.created))):'Find 4 to 5 people here'}</div>`}${r.result?`<div class="b sec2 press" data-copy="${E(r.id)}">Copy</div>`:''}<div class="b sec2 press" data-acct="${E(r.target)}">Open account</div></div></div>`}).join('');
     return `<div class="v162bk"><div class="top"><b>${s}’s book</b><span class="cap">${rows.length+extra.length} signal${rows.length+extra.length===1?'':'s'}</span></div>
-     <div class="meta">Last scan ${E(st.last)} · next ${E(st.next)}${newest?' · newest find '+E(shortDate(newest)):''}</div>${items||'<div class="v162hint">No signals from this book yet. The next scan runs '+E(st.next)+'.</div>'}</div>`}).join('')}
+     <div class="meta">Last scan ${E(st.last)} · ${window.ariScansOff&&ariScansOff()?'signal scans paused':'next '+E(st.next)}${newest?' · newest find '+E(shortDate(newest)):''}</div>${items||'<div class="v162hint">No signals from this book yet. '+(window.ariScansOff&&ariScansOff()?'Signal scans are paused for now.':'The next scan runs '+E(st.next)+'.')+'</div>'}</div>`}).join('')}
 tasksIn=function(){if(tkShown)return;tkShown=true;const pane=$('#tasks');if(!pane)return;const sc=pane.scrollTop;
   const isScan=x=>/new signal|ae heads-up|claimable/i.test(x.action||'');
   const q=(M.queue||[]).slice().reverse(),open=q.filter(x=>x.status!=='done'&&!/^blocked/i.test(x.status||'')),blk=q.filter(x=>/^blocked/i.test(x.status||'')),dn=q.filter(x=>x.status==='done'&&!isScan(x)).slice(0,15);
@@ -7373,11 +7381,11 @@ window.ariRdState=rdState;
 function draftBlockHTML(p,o={}){if(!p)return '';const df=dmField(p),msg=df.field?String(p[df.field]||''):'',dq=draftQ(p,df.act),rs=V162S.rs(p);
   const researching=df.tag==='DM1'&&!msg&&RS_LIVE(rs);
   let body='';
-  if(msg){const R=rdState(p,df.field,msg,dq),rd=R.s==='queued';body=(rd?'<div class="v18111rd" role="status" data-v18112t0="'+R.t0+'"><span class="v18111sp" aria-hidden="true"></span><span><b>Ari is redrafting.</b> The new draft replaces this one when it lands.</span></div>':R.s==='stale'?'<div class="v18112nt" role="status"><span><b>Taking longer than usual.</b> Tap Redraft to try again, or edit this one yourself.</span></div>':R.s==='failed'?'<div class="v18112nt" role="status"><span><b>Ari finished without a new draft.</b> Tap Redraft to try again, or edit this one yourself.</span></div>':'')+`<div class="msg v163msg" data-msg>${E(msg)}</div><div class="v163row"><button type="button" class="v163btn sec press" data-dr="edit">Edit</button><button type="button" class="v163btn sec press" data-dr="copy">${ICO.copy}<span>Copy</span></button>${rd?'<button type="button" class="v163btn ghost v18111off" disabled aria-disabled="true">Redrafting…</button>':'<button type="button" class="v163btn ghost press" data-dr="draft">Redraft</button>'}</div>`}
+  if(msg){const R=rdState(p,df.field,msg,dq),rd=R.s==='queued';body=(rd?'<div class="v18111rd" role="status" data-v18112t0="'+R.t0+'"><span class="v18111sp" aria-hidden="true"></span><span><b>Ari is redrafting.</b> '+(window.ariDG&&ariDG.dirty(p.id,df.field)?'Your edit stays. The new draft waits under it.':'The new draft replaces this one when it lands.')+'</span></div>':R.s==='stale'?'<div class="v18112nt" role="status"><span><b>Taking longer than usual.</b> Tap Redraft to try again, or edit this one yourself.</span></div>':R.s==='failed'&&!(window.ariDG&&ariDG.has(p.id,df.field))?'<div class="v18112nt" role="status"><span><b>Ari finished without a new draft.</b> Tap Redraft to try again, or edit this one yourself.</span></div>':'')+`<div class="msg v163msg" data-msg>${E(msg)}</div><div class="v163row"><button type="button" class="v163btn sec press" data-dr="edit">Edit</button><button type="button" class="v163btn sec press" data-dr="copy">${ICO.copy}<span>Copy</span></button>${rd?'<button type="button" class="v163btn ghost v18111off" disabled aria-disabled="true">Redrafting…</button>':'<button type="button" class="v163btn ghost press" data-dr="draft">Redraft</button>'}</div>`}
   else if(dq&&dq.st==='queued'||researching)body=scanHTML(researching&&!(dq&&dq.st==='queued')?'Ari is researching…':'Ari is drafting…',dq&&dq.st==='queued'?`Hark picks it up within minutes. The ${df.label} lands here on its own.`:`${E(first(p.name))} is in the research queue.`);
   else{const why=dq&&dq.st==='done'&&dq.q.result?`<div class="v163last">Last try: ${E(String(dq.q.result).slice(0,220))}</div>`:/no signal|flagged|personal/i.test(rs)?`<div class="v163last">${E(rs)}. Ari drafts from the account hypothesis instead.</div>`:'';
     body=`${why}<button type="button" class="v163btn pri big press" data-dr="draft">${ICO.pen||''}<span>Draft message</span></button><button type="button" class="v163lnk press" data-dr="write">Write it myself</button>`}
-  return `<div class="v163draft" data-pid="${E(p.id)}" data-field="${df.field}"><div class="cap v163cap"><span>${o.title||'The message'} · ${df.label}</span>${ctxOf(p)?'<span class="v163ctxon">Context on</span>':''}</div>${body}</div>`}
+  return `<div class="v163draft" data-pid="${E(p.id)}" data-field="${df.field}"><div class="cap v163cap"><span>${o.title||'The message'} · ${df.label}</span>${ctxOf(p)?'<span class="v163ctxon">Context on</span>':''}</div>${body}${window.ariDG?ariDG.line(p.id,df.field):''}</div>`}
 V163.draftBlockHTML=draftBlockHTML;
 function inlineEdit(box,p){const f=box.dataset.field;if(!f)return;const cur=String(p[f]||'');const m=box.querySelector('[data-msg]');
   const ed=document.createElement('div');ed.className='v163ed';ed.innerHTML=`<textarea class="v163ta" maxlength="1200" rows="5">${E(cur)}</textarea><div class="v163cnt"><span></span><span>Reads best under 300</span></div><div class="v163row"><button type="button" class="v163btn sec press" data-ed="no">Cancel</button><button type="button" class="v163btn pri press" data-ed="yes">Save</button></div>`;
@@ -7637,11 +7645,12 @@ function tsParse(v){if(v==null||v==='')return NaN;let s=String(v).trim();if(/^\d
   s=s.replace(' ','T').replace(/(\.\d{3})\d+/,'$1').replace(/([+-]\d\d)$/,'$1:00').replace(/([+-]\d\d)(\d\d)$/,'$1:$2');if(!/(Z|[+-]\d\d:\d\d)$/.test(s))s+='Z';return Date.parse(s)}
 const istD=v=>{const t=tsParse(v);return isNaN(t)?'':new Date(t+IST_MS).toISOString().slice(0,10)};
 const istDT=v=>{const t=tsParse(v);if(isNaN(t))return '';const s=new Date(t+IST_MS).toISOString();return s.slice(11,19)==='12:00:00'&&s.slice(19,23)==='.000'?s.slice(0,10):s.slice(0,16).replace('T',' ')};
-V17.tsParse=tsParse;V17.istDT=istDT;
+V17.tsParse=tsParse;V17.istDT=istDT;V17.put=put;V17.onRow=(t,p)=>onRow17(t,p);
 const KEY17={people:'id',accounts:'id',queue:'id',brief:'key',log:'id'};
 const TBL17={people:'people',accounts:'accounts',queue:'queue',brief:'brief',log_entries:'log'};
 function bump(t,r){const v=tsParse(t==='log'?r.created_at||r.ts:r.updated_at);if(!isNaN(v)&&v>(S17.since[t]||0))S17.since[t]=v;if(t==='log'&&r.id>(S17.since.logId||0))S17.since.logId=r.id}
 function put(t,r){if(!r)return;const k=r[KEY17[t]];if(k==null)return;const cur=S17[t].get(k);
+  if(t==='people'&&window.ariDraftGuard){try{r=window.ariDraftGuard(r,cur)||r}catch(e){}}
   /* never let an older copy (a late fetch page) overwrite a newer realtime row */
   if(cur&&cur.updated_at&&r.updated_at&&tsParse(cur.updated_at)>tsParse(r.updated_at))return;
   if(r.deleted_at)S17[t].delete(k);else S17[t].set(k,Object.assign({},cur||{},r));bump(t,r)}
@@ -7815,7 +7824,7 @@ V17.line=function(){const el=$('#v163sync');if(!el)return;const ob=outbox().leng
   else if(RT17.state==='SUBSCRIBED'&&S17.loaded)t=(hAge!=null&&hAge<=45*60e3)?(innerWidth<380?'Live':'Synced live'):'Synced';
   else if(SYNC.lastOk){t=RT17.down?'Reconnecting…':(`Synced ${agoShort(SYNC.lastOk)}`).replace('Synced just now','Synced now');if(Date.now()-SYNC.lastOk>15*60e3)warn=true}
   else t='Connecting…';
-  if(on&&hAge!=null&&hAge>45*60e3){t+=` · Hark last ran ${agoShort(hl)}`;warn=true}else if(sc)t+=` · Hark updated ${sc}`;
+  if(on&&hAge!=null&&hAge>45*60e3){t+=` · Hark last ran ${agoShort(hl)}`;warn=true}else if(sc&&!(window.ariScansOff&&ariScansOff()))t+=` · Hark updated ${sc}`;
   el.textContent=t;el.classList.toggle('warn',warn);el.classList.toggle('live',on&&RT17.state==='SUBSCRIBED'&&!warn)};
 addEventListener('offline',()=>{try{syncLine()}catch(e){}});addEventListener('online',()=>{try{syncLine()}catch(e){}});
 setInterval(()=>{try{if(!document.hidden)syncLine()}catch(e){}},60e3);
@@ -8372,7 +8381,8 @@ function mount(){const s=$('#v163sync');if(!s)return null;let w=s.parentNode;
 function paint(el,m){if(!el)return;const top=m.st==='count'?m.frac:m.st==='running'?1:0,bot=m.st==='count'?1-m.frac:m.st==='running'?0:1;
   el.style.setProperty('--hgt',top.toFixed(3));el.style.setProperty('--hgo',bot.toFixed(3));
   el.dataset.st=m.st}
-function label(m){const lt=isNaN(m.last)?'':hm17(m.last);
+function label(m){return window.ariScanWord?ariScanWord(label0(m)):label0(m)}
+function label0(m){const lt=isNaN(m.last)?'':hm17(m.last);
   if(m.st==='count')return `Next scan in ${Math.max(1,Math.ceil(m.left/60e3))} min`+(lt?`, last scan ${lt}`:'');
   if(m.st==='running')return 'Hark is scanning now';
   if(m.st==='due')return 'Scan due now'+(lt?`, last scan ${lt}`:'');
@@ -8387,7 +8397,7 @@ function render(why){V1712.renders=(V1712.renders||0)+1;const b=mount();if(!b)re
   if(!flipping)paint(b,m);
   b.setAttribute('aria-label',label(m)+'. Tap for details');
   if(popOn)popPaint(m);
-  if(!coach&&m.st==='count'&&L171.g('ari-hg-coach','')!=='1'&&!locked17()&&!window.ARI_ONB){coach=true;L171.s('ari-hg-coach','1');setTimeout(()=>{try{toast('That little hourglass is Hark’s next scan. Tap it.')}catch(e){}},2500)}}
+  if(!coach&&m.st==='count'&&L171.g('ari-hg-coach','')!=='1'&&!locked17()&&!window.ARI_ONB){coach=true;L171.s('ari-hg-coach','1');setTimeout(()=>{try{toast(window.ariScansOff&&ariScansOff()?'That little hourglass is Hark’s next sync. Tap it.':'That little hourglass is Hark’s next scan. Tap it.')}catch(e){}},2500)}}
 
 /* flip: the drained glass turns over once, then sand runs while Hark works */
 function flip(b){V1712.flips++;flipLast=(HB||{}).last_scan_at||null;face('focus');if(still()){paint(b,model());return}
@@ -8422,6 +8432,7 @@ function popPaint(m){const a=$('#v1712pa'),bb=$('#v1712pb'),c=$('#v1712pc'),big=
   else{a.textContent='Waiting for the first scan';bb.textContent=''}
   const n1=+ch.to_app||0,n2=(+ch.to_sheet||0)+(+ch.log||0);
   c.textContent=m.st==='running'||m.st==='none'?'':ch.error?'The last scan stopped early. Hark retries on the next one.':(n1||n2)?`Last scan: ${n1?`${n1} update${n1>1?'s':''} from Hark`:'nothing new from Hark'}${n2?`, ${n2} of your changes saved to the Sheet`:''}.`:'Last scan: nothing new. All in step.';
+  if(window.ariScanWord)[a,bb,c].forEach(x=>{x.textContent=ariScanWord(x.textContent)});
   c.hidden=!c.textContent;paint(big,m)}
 /* a tap outside only closes the card; it never lands on whatever is underneath */
 function outside(e){const p=$('#v1712pop'),b=$('#v1712hg');if(p&&!p.contains(e.target)&&!(b&&b.contains(e.target))){closePop();swallow()}}
@@ -9277,7 +9288,7 @@ window.ARI_F3={"xs":{"idle":{"abw l":"M 16.9 16.4 Q 19.75 16.05 22.6 16.4","abw 
    - Account health (0 to 100) on Accounts, Pipeline, account pages and the Report.
    - Going cold: people and accounts slipping, each with a next step, on Today and the Report.
    ===================================================================== */
-const V181=window.ariV181={v:'v18.12',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
+const V181=window.ariV181={v:'v18.12.1',errs:[],health:null,stale:null,hAt:0,sAt:0,painted:0,gated:0};
 (function(){
 const HTML=document.documentElement,E1=s=>ariEsc(String(s==null?'':s));
 const bz=p=>{try{buzz(p)}catch(e){}};
@@ -9369,7 +9380,7 @@ function devFill(){if(!devOpen)return;try{devicesHTML1711().then(x=>{const b=$('
 setHTML171=setHTML;
 function renderSet(){try{renderSet171()}catch(e){V181.errs.push('set '+e.message)}try{const sec=$('#apPanes .app[data-s="1"]');const b=$('#v171set');if(sec&&b&&b.parentNode===sec&&sec.firstElementChild!==b)sec.insertBefore(b,sec.firstChild)}catch(e){}devFill()}
 V181.renderSet=renderSet;
-function aboutHTML(){const B='v18.12';
+function aboutHTML(){const B='v18.12.1';
   return `<div class="v181ab">
   <div class="apcap"><span class="cap">About Ari</span></div>
   <p class="v181lead">Ari is an outbound workspace for LinkedIn prospecting. It finds the right people at target accounts, researches each one, drafts every message and keeps follow-ups on time. You review and send each one yourself.</p>
@@ -10103,7 +10114,7 @@ setInterval(()=>{if(!document.hidden&&!locked()&&signed()){loadAct();if(Date.now
 setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById('ready');if(r&&!document.getElementById('v182today')&&(V182.act.length||V182.briefs.size))paintToday();gateQueue()}},4000);
 
 /* ---------- What's new v18.2: once, after the first unlock on this build ---------- */
-(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.9','1');localStorage.setItem('ari-wn-v18.10','1');localStorage.setItem('ari-wn-v18.10.1','1');localStorage.setItem('ari-wn-v18.11','1');localStorage.setItem('ari-wn-v18.11.1','1');localStorage.setItem('ari-wn-v18.11.2','1');localStorage.setItem('ari-wn-v18.12','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
+(function(){const k='ari-wn-v18.6';try{localStorage.setItem('ari-wn-v18.6','1');localStorage.setItem('ari-wn-v18.7','1');localStorage.setItem('ari-wn-v18.7.1','1');localStorage.setItem('ari-wn-v18.8','1');localStorage.setItem('ari-wn-v18.8.1','1');localStorage.setItem('ari-wn-v18.9','1');localStorage.setItem('ari-wn-v18.10','1');localStorage.setItem('ari-wn-v18.10.1','1');localStorage.setItem('ari-wn-v18.11','1');localStorage.setItem('ari-wn-v18.11.1','1');localStorage.setItem('ari-wn-v18.11.2','1');localStorage.setItem('ari-wn-v18.12','1');localStorage.setItem('ari-wn-v18.12.1','1');localStorage.setItem('ari-wn-v18.2','1');localStorage.setItem('ari-wn-v18.2.1','1');localStorage.setItem('ari-wn-v18.2.2','1');localStorage.setItem('ari-wn-v18.3','1');localStorage.setItem('ari-wn-v18.4','1')}catch(e){}let n=0;const t=setInterval(()=>{if(++n>120){clearInterval(t);return}
   if(localStorage.getItem(k)||window.ARI_ONB||locked()||!document.querySelector('#queue .q,#queue .v16empty'))return;clearInterval(t);localStorage.setItem(k,'1');
   try{localStorage.setItem('ari-wn-v18.1','1');localStorage.setItem('ari-wn-v18.2','1')}catch(e){}setTimeout(()=>{try{if(!window.__apOn&&!(typeof ovOn!=='undefined'&&ovOn))ariWhatsNew.open(0)}catch(e){}},1200)},1000)})();
 })();
@@ -11066,7 +11077,7 @@ const minutes=n=>Math.max(1,Math.round(n*1.2));
 function hbAge(){try{const hb=window.ariV1712&&ariV1712.hb;const t=hb&&hb.last_scan_at?Date.parse(hb.last_scan_at):NaN;return isNaN(t)?null:Date.now()-t}catch(e){return null}}
 function liveState(){const on=navigator.onLine!==false,V17=window.ariV17||{},loaded=!!(V17.store&&V17.store.loaded),rt=!!(V17.RT&&V17.RT.state==='SUBSCRIBED'),a=hbAge();
   if(!on)return ['off','Offline'];if(!loaded&&loading())return ['ld','Loading'];if(rt&&a!=null&&a<=45*60e3)return ['live','Live'];return ['ok','Synced']}
-function latestFind(){try{const A=(window.ariV182&&ariV182.act)||[];const f=A.find(a=>/^(signal|person_added|brief_ready|draft|rescan)/.test(String(a.kind||'')))||A[0];return f?ari(f.title||''):''}catch(e){return ''}}
+function latestFind(){try{const A=(window.ariV182&&ariV182.act)||[];const f=A.find(a=>/^(signal|person_added|brief_ready|draft|rescan)/.test(String(a.kind||''))&&!(/^signal/.test(String(a.kind||''))&&window.ariScansOff&&ariScansOff()))||A[0];return f?ari(f.title||''):''}catch(e){return ''}}
 function statusHTML(L){const [cls,lab]=liveState(),n=toSend(L),bits=[lab];
   if(loading()&&!L.length)bits.push('checking your list');else{bits.push(n+' to send');if(n)bits.push('about '+minutes(n)+' min')}
   const f=latestFind();
@@ -11300,6 +11311,181 @@ function boot(){render();const rd=$('#ready');if(rd)new MutationObserver(m=>{if(
   setInterval(()=>{if(!document.hidden)soon()},1500);
   try{const V162=window.ariV162,_p=V162&&V162.patch;if(_p)V162.patch=function(){const r=_p.apply(this,arguments);soon();return r}}catch(e){}
   addEventListener('online',soon);addEventListener('offline',soon)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script><script>/* ===== Ari v18.12.1 (Tony, Sat 17 Oct 2026): last change before the freeze =====
+   1. Late-draft guard (Council risk A). Once Owner has typed into a draft, saved a hand edit, or switched to Ari's alternative,
+      a draft that arrives later (realtime, the refetch on open, or the reply to an offline save) never replaces his text.
+      The incoming draft is kept as an unapplied new version and one quiet line under the draft offers it:
+      "New draft ready. Tap to swap." Swap comes with Undo. With no hand edit nothing changes.
+      Hook: ariDraftGuard(row,cur) runs inside the store's put() for every people row, so all three paths pass through it.
+      Per person and field (dm, dm2_text, dm3_text): {h: hash of his text, base: hash of the text he started from, seen: hash of the
+      last held draft}. His text is kept so the refetch on open can restore it (72 h; cleared when the DM is marked sent or a
+      Redraft is asked). Reply drafts: the relay screen holds its drafts while open; if he typed and new drafts land, the same line shows.
+   2. Signal scans off. ARI_SCANS_OFF = true, overridable without a deploy by a brief row signal_scans = on|off (brief is already read).
+      One calm status in the header line, a short sheet on tap; the hourglass and book lines stop talking about scans while off.
+   No new tables, no migration, no new write path (the guard re-saves his text through apply_op, as v18.12's restore did). */
+(function(){'use strict';
+const ARI_SCANS_OFF=true;
+const V=window.ariV18121={v:'v18.12.1',errs:[],held:0,silent:0,swaps:0,undos:0,reasserts:0,reassertFail:0,adopted:0,lost:0,rheld:0};
+const $=s=>document.querySelector(s);
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=t=>String(t==null?'':t).trim().replace(/\s+/g,' ');
+function h8(t){let h=0x811c9dc5;const s=norm(t);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16)}
+const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n||8)}catch(e){}};
+const mu=(...a)=>{const f=window.ariV16&&ariV16.mutate;if(!f)return Promise.reject(new Error('not ready'));return f(...a)};
+const S=()=>(window.ariV17&&ariV17.store)||null;
+
+/* ---------- scans off ---------- */
+function scansOff(){try{const st=S(),b=st&&st.brief&&st.brief.get('signal_scans'),v=b&&String(b.value==null?'':b.value).trim().toLowerCase();
+  if(v==='on')return false;if(v==='off')return true}catch(e){}return ARI_SCANS_OFF}
+window.ariScansOff=scansOff;
+/* the hourglass follows the 10-minute sync heartbeat; while signal scans are off it says sync, not scan */
+window.ariScanWord=t=>{t=String(t==null?'':t);if(!scansOff())return t;
+  return t.replace(/\b([Ss])canning\b/g,(m,c)=>c==='S'?'Syncing':'syncing').replace(/\b([Ss])can(s?)\b/g,(m,c,p)=>(c==='S'?'Sync':'sync')+p)};
+const SC_T='Signal scans off',SC_B='Overnight signal scans are paused while we make them reliable. Drafts and sync are running.';
+function scMount(){try{let b=$('#v18121sc');const off=scansOff()&&!!(window.ariV17&&ariV17.signed&&ariV17.signed());
+  if(!off){if(b)b.remove();return}
+  const sync=$('#v163sync');if(!sync)return;const host=sync.parentNode;const after=$('#v1712hg')&&$('#v1712hg').parentNode===host?$('#v1712hg'):sync;
+  if(!b){b=document.createElement('button');b.type='button';b.id='v18121sc';b.className='v18121sc press';b.setAttribute('aria-haspopup','dialog');
+    b.innerHTML='<i aria-hidden="true"></i><span>'+SC_T+'</span>';b.setAttribute('aria-label',SC_T+'. Tap for details')}
+  if(b.previousElementSibling!==after)after.after(b)}catch(e){V.errs.push('sc '+e)}}
+function scOpen(){scClose();const d=document.createElement('div');d.className='v184ask v18121sh';d.id='v18121sh';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-labelledby','v18121sht');
+  d.innerHTML=`<div class="in"><b id="v18121sht">${SC_T}</b><span class="v18121sb">${SC_B}</span><div class="b"><span class="press pri" role="button" tabindex="0" data-v18121x="1">Got it</span></div></div>`;
+  document.body.appendChild(d);const ok=d.querySelector('[data-v18121x]');setTimeout(()=>{try{ok.focus()}catch(e){}},30);V.scOpened=(V.scOpened||0)+1}
+function scClose(){const d=$('#v18121sh');if(d)d.remove();const b=$('#v18121sc');if(b&&document.activeElement===document.body)try{b.focus()}catch(e){}}
+V.scOpen=scOpen;V.scClose=scClose;V.scMount=scMount;
+document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
+  if(t.closest('#v18121sc')){e.preventDefault();e.stopPropagation();buzz(6);scOpen();return}
+  const sh=t.closest('#v18121sh');if(sh&&(t.closest('[data-v18121x]')||t===sh)){e.preventDefault();e.stopPropagation();scClose()}},true);
+document.addEventListener('keydown',e=>{if(!$('#v18121sh'))return;if(e.key==='Escape')scClose();else if((e.key==='Enter'||e.key===' ')&&e.target.closest&&e.target.closest('[data-v18121x]')){e.preventDefault();scClose()}});
+
+/* ---------- late-draft guard ---------- */
+const F=['dm','dm2_text','dm3_text'];
+const ACT={'draft dm1':'dm','draft dm2':'dm2_text','draft dm3':'dm3_text'};
+const SENT={dm1_sent:'dm',dm2_sent:'dm2_text',dm3_sent:'dm3_text'};
+const DK='ari-v18121-dg',TTL=72*3600e3;
+const D=new Map();/* pid|field -> {h, base, seen, text, src, t} */
+const PEND=new Map();/* pid|field -> {text, t}  the held new draft (memory only) */
+const UNDO=new Map();/* pid|field -> {text, alt, t} */
+const RE=new Map();/* pid|field -> text waiting to be re-saved */
+function dLoad(){try{const o=JSON.parse(localStorage.getItem(DK)||'{}')||{};Object.entries(o).forEach(([k,v])=>{if(v&&Date.now()-(v.t||0)<TTL&&!D.has(k))D.set(k,v)})}catch(e){}}
+function dSave(){try{const o={};D.forEach((v,k)=>{if(v.src!=='typing')o[k]=v});localStorage.setItem(DK,JSON.stringify(o))}catch(e){}}
+dLoad();
+function storeVal(pid,f){try{const st=S(),r=st&&st.people&&st.people.get(pid);if(r&&f in r)return String(r[f]==null?'':r[f])}catch(e){}
+  try{const p=((window.DATA||{}).people||[]).find(x=>String(x.id)===String(pid));if(p)return String(p[f]||'')}catch(e){}return ''}
+function viewVal(pid,f){try{const m=window.ariM||{},pf=m.PF||{};for(const k in pf){const p=pf[k]&&pf[k].p;if(p&&String(p.id)===String(pid))return String(p[f]||'')}}catch(e){}return storeVal(pid,f)}
+function mark(pid,f,text,src){const k=pid+'|'+f,o=D.get(k);const base=o&&o.src!=='typing'?o.base:h8(src==='typing'?text:storeVal(pid,f));
+  D.set(k,{h:h8(text),base,seen:o&&o.seen||'',text:String(text==null?'':text),src,t:Date.now()});dSave()}
+function clear(k){const had=D.delete(k)|PEND.delete(k)|UNDO.delete(k);RE.delete(k);if(had){dSave();paint(k)}}
+V.D=D;V.PEND=PEND;V.UNDO=UNDO;V.mark=mark;V.h8=h8;
+
+/* runs inside put() for each people row from realtime, the refetch, or a write's answer */
+window.ariDraftGuard=function(r,cur){try{if(!r||r.id==null||!D.size)return r;let out=r;
+  F.forEach(f=>{if(!(f in r))return;const k=r.id+'|'+f,d=D.get(k);if(!d)return;const inc=String(r[f]==null?'':r[f]),hi=h8(inc);
+    if(Date.now()-(d.t||0)>TTL){clear(k);return}
+    if(hi===d.h){if(PEND.has(k)&&h8(PEND.get(k).text)===hi){PEND.delete(k);paint(k)}return}/* his own text coming back */
+    /* his own edit from another device: adopt it as the new protected text */
+    if(/^app/i.test(String(r.updated_by||''))&&hi!==d.base&&hi!==d.seen&&d.src!=='typing'&&!RE.has(k)){mark(r.id,f,inc,'edit');V.adopted++;return}
+    const mine=d.src==='typing'?(cur&&f in cur?String(cur[f]==null?'':cur[f]):null):d.text;
+    if(mine==null){V.lost++;return}/* nothing safe to keep: behave as before */
+    if(out===r)out=Object.assign({},r);out[f]=mine;
+    if(hi===d.base||hi===d.seen){V.silent++;if(d.src!=='typing'&&hi!==d.base)reassert(k,mine);return}/* an older copy, or the draft already held */
+    PEND.set(k,{text:inc,t:Date.now()});d.seen=hi;dSave();V.held++;
+    if(d.src!=='typing')reassert(k,mine);
+    setTimeout(()=>paint(k),0)});
+  return out}catch(e){V.errs.push('guard '+e);return r}};
+/* put his text back where the late draft landed: fresh op id and time, so it wins over the draft that came after his save */
+let reT=0;
+function reassert(k,text){RE.set(k,text);clearTimeout(reT);reT=setTimeout(flushRe,250)}
+async function flushRe(){if(!RE.size)return;if(navigator.onLine===false)return;
+  let c=null;try{c=window.ariV17&&ariV17.ready?await ariV17.ready():null}catch(e){}if(!c||!(window.ariV17.signed&&ariV17.signed()))return;
+  for(const [k,text] of [...RE]){const [pid,f]=k.split('|');const d=D.get(k);if(!d||h8(text)!==d.h){RE.delete(k);continue}
+    try{const id=crypto.randomUUID?crypto.randomUUID():'op-'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+      const {error}=await c.rpc('apply_op',{p_op_id:id,p_kind:'set',p_table:'people',p_id:String(pid),p_patch:{[f]:text},p_client_ts:new Date().toISOString(),p_device:'web'});
+      if(error)throw new Error(error.message||String(error));RE.delete(k);V.reasserts++}
+    catch(e){V.reassertFail++;V.errs.push('reassert '+String(e).slice(0,80))}}
+  if(RE.size){clearTimeout(reT);reT=setTimeout(flushRe,30e3)}}
+addEventListener('online',()=>setTimeout(flushRe,1500));V.flushRe=flushRe;V.RE=RE;
+
+/* every hand edit, switch, swap or restore reaches the store through mutate; the pre-op hook marks it before it is written */
+function onSet(args){const pid=args&&args[0],P=args&&args[1];if(!pid||!P)return;F.forEach(f=>{if(f in P)mark(pid,f,String(P[f]==null?'':P[f]),'edit')})}
+function onRun(args){const its=Array.isArray(args[0])?args[0]:[args[0]];its.forEach(it=>{const f=ACT[String(it&&it.action||'').toLowerCase()];if(f&&it.target)clear(it.target+'|'+f)})}
+const _pre=window.ariPreOp;
+window.ariPreOp=function(fn,args){try{
+  if(fn==='setFields')onSet(args);
+  else if(fn==='mark'&&args&&SENT[args[1]])clear(args[0]+'|'+SENT[args[1]]);
+}catch(e){V.errs.push('pre '+e)}
+  const p=_pre?_pre(fn,args):null;
+  if(fn!=='queueRun')return p;
+  const after=r=>{if(!(r&&r.ariBlock))try{onRun(args)}catch(e){}return r};
+  if(p&&typeof p.then==='function')return p.then(after);return after(p)};
+/* typing counts as an edit too: while he types, a late draft waits */
+document.addEventListener('input',e=>{const ta=e.target;if(!ta||!ta.closest)return;const box=ta.closest('.v163draft[data-pid][data-field]');if(!box||!ta.closest('.v163ed'))return;
+  const k=box.dataset.pid+'|'+box.dataset.field;if(F.indexOf(box.dataset.field)<0)return;const d=D.get(k);
+  if(!d)mark(box.dataset.pid,box.dataset.field,storeVal(box.dataset.pid,box.dataset.field),'typing')},true);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.v163ed [data-ed=no]');if(!b)return;const box=b.closest('.v163draft[data-pid][data-field]');if(!box)return;
+  const k=box.dataset.pid+'|'+box.dataset.field,d=D.get(k);if(d&&d.src==='typing'&&!PEND.has(k))D.delete(k)},true);
+
+/* ---------- the quiet line ---------- */
+function lineHTML(pid,f){const k=pid+'|'+f,u=UNDO.get(k);
+  if(u&&Date.now()-u.t<30e3)return `<div class="v18121dg press" role="button" tabindex="0" data-v18121undo="${E(k)}">Swapped in the new draft. <u>Undo</u></div>`;
+  if(PEND.has(k))return `<div class="v18121dg press" role="button" tabindex="0" data-v18121swap="${E(k)}">New draft ready. Tap to swap.</div>`;return ''}
+window.ariDG={line:(pid,f)=>{try{return lineHTML(pid,f)}catch(e){return ''}},has:(pid,f)=>PEND.has(pid+'|'+f),dirty:(pid,f)=>D.has(pid+'|'+f)};
+function paint(k){try{const [pid,f]=k.split('|'),h=lineHTML(pid,f);
+  document.querySelectorAll('.v163draft[data-pid][data-field]').forEach(box=>{if(box.dataset.pid!==pid||box.dataset.field!==f)return;let n=box.querySelector(':scope>.v18121dg');
+    if(!h){if(n)n.remove();return}
+    if(!n){const w=document.createElement('div');w.innerHTML=h;n=w.firstElementChild;box.appendChild(n)}else if(n.outerHTML!==h){const w=document.createElement('div');w.innerHTML=h;const m=w.firstElementChild;n.replaceWith(m)}})}catch(e){V.errs.push('paint '+e)}}
+V.paint=paint;
+function quiet1812(k){/* v18.12's own restore must not undo his swap */
+  try{const v=window.ariV1812;if(v){v.HE&&v.HE.delete(k);v.ALT&&v.ALT.delete(k)}const o=JSON.parse(localStorage.getItem('ari-v1812-he')||'{}')||{};if(o[k]){delete o[k];localStorage.setItem('ari-v1812-he',JSON.stringify(o))}}catch(e){}}
+function editorOf(pid,f){let n=null;document.querySelectorAll('.v163draft[data-pid][data-field]').forEach(b=>{if(!n&&b.dataset.pid===pid&&b.dataset.field===f)n=b.querySelector('.v163ed textarea')});return n}
+async function swap(k){const x=PEND.get(k);if(!x)return;const [pid,f]=k.split('|'),d=D.get(k)||{},ed=editorOf(pid,f);
+  const prev=ed?ed.value:d.src==='typing'?viewVal(pid,f):(d.text!=null?d.text:viewVal(pid,f));
+  quiet1812(k);PEND.delete(k);UNDO.set(k,{text:prev,alt:x.text,t:Date.now()});V.swaps++;buzz(8);
+  if(ed)ed.value=x.text;
+  paint(k);try{await mu('setFields',[pid,{[f]:x.text}])}catch(e){V.errs.push('swap '+e)}
+  setTimeout(()=>{const u=UNDO.get(k);if(u&&Date.now()-u.t>=30e3){UNDO.delete(k);paint(k)}},30.5e3)}
+async function undo(k){const u=UNDO.get(k);if(!u)return;const [pid,f]=k.split('|');UNDO.delete(k);quiet1812(k);V.undos++;buzz(8);
+  const ed=editorOf(pid,f);if(ed)ed.value=u.text;
+  try{await mu('setFields',[pid,{[f]:u.text}])}catch(e){V.errs.push('undo '+e)}
+  const d=D.get(k);if(d)d.seen=h8(u.alt);PEND.set(k,{text:u.alt,t:Date.now()});dSave();paint(k)}
+V.swap=swap;V.undo=undo;
+function act(e){const t=e.target.closest&&e.target.closest('[data-v18121swap],[data-v18121undo]');if(!t)return false;e.preventDefault();e.stopPropagation();
+  if(t.dataset.v18121swap)swap(t.dataset.v18121swap);else undo(t.dataset.v18121undo);return true}
+document.addEventListener('click',act,true);
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest&&e.target.closest('[data-v18121swap],[data-v18121undo]'))act(e)},true);
+
+/* ---------- reply drafts in the relay screen: typed words never get replaced by drafts that land later ---------- */
+const RP={id:null,drafts:null,typed:null,prev:null,sel:0};
+const dh=a=>h8((a||[]).map(d=>d&&d.body||'').join('\u0001'));
+function replyTick(){try{const V184=window.ariV184,FX=V184&&V184.FX;const o=$('#v184fx');
+  const kill=()=>{const n=o&&o.querySelector('.v18121dg');if(n)n.remove()};
+  if(!FX||!FX.open||!o||o.hidden){RP.id=null;return}
+  const it=FX.items[FX.i];if(!it||it.k!=='reply'){kill();return}
+  const live=((V184.top||{}).replies||[]).find(r=>String(r.id)===String(it.id));const nd=live&&Array.isArray(live.drafts)?live.drafts:[];
+  if(RP.prev&&String(RP.id)===String(it.id)){/* undo window */
+    if(Date.now()-RP.prev.t<30e3){if(!o.querySelector('[data-v18121rundo]'))put(`<div class="v18121dg press" role="button" tabindex="0" data-v18121rundo="1">Swapped in the new draft. <u>Undo</u></div>`);return}RP.prev=null;kill()}
+  if(!nd.length||dh(nd)===dh(it.drafts)){if(!o.querySelector('[data-v18121rundo]'))kill();return}
+  const ta=o.querySelector('.fxdraft');const shown=((it.drafts||[])[FX.sel]||{}).body||'';
+  const typed=ta&&norm(ta.value)&&norm(ta.value)!==norm(shown);
+  if(!typed){kill();return}/* no hand edit: as before */
+  if(RP.id!==it.id||dh(RP.drafts)!==dh(nd))V.rheld++;
+  RP.id=it.id;RP.drafts=nd;if(!o.querySelector('[data-v18121rswap]'))put(`<div class="v18121dg press" role="button" tabindex="0" data-v18121rswap="1">New draft ready. Tap to swap.</div>`);
+  function put(h){kill();const ta2=o.querySelector('.fxdraft');if(!ta2)return;ta2.insertAdjacentHTML('afterend',h)}
+}catch(e){V.errs.push('reply '+e)}}
+document.addEventListener('click',e=>{const s=e.target.closest&&e.target.closest('[data-v18121rswap],[data-v18121rundo]');if(!s)return;e.preventDefault();e.stopPropagation();
+  const V184=window.ariV184,FX=V184&&V184.FX,it=FX&&FX.items[FX.i],ta=$('#v184fx .fxdraft');if(!it||!ta)return;buzz(8);
+  if(s.dataset.v18121rswap){const nd=RP.drafts||[];RP.prev={text:ta.value,drafts:it.drafts,sel:FX.sel,t:Date.now()};it.drafts=nd;FX.sel=Math.min(FX.sel,Math.max(0,nd.length-1));ta.value=(nd[FX.sel]||nd[0]||{}).body||'';V.swaps++}
+  else if(RP.prev){it.drafts=RP.prev.drafts;FX.sel=RP.prev.sel;ta.value=RP.prev.text;RP.prev=null;V.undos++}
+  s.remove();replyTick()},true);
+V.replyTick=replyTick;V.RP=RP;
+
+/* ---------- boot ---------- */
+let tT=0;function tick(){if(document.hidden)return;scMount();replyTick();
+  UNDO.forEach((u,k)=>{if(Date.now()-u.t>=30e3)UNDO.delete(k);paint(k)});PEND.forEach((x,k)=>paint(k))}
+V.tick=tick;
+function boot(){tick();tT=setInterval(tick,1500);addEventListener('online',tick);if(RE.size)flushRe()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
 </script></body>

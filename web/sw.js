@@ -1,5 +1,5 @@
 /* Ari service worker (v18.4). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
-const V='ari-v18.12',LOGOS='ari-logos-1',ACKS='ari-acks';
+const V='ari-v18.12.1',LOGOS='ari-logos-1',ACKS='ari-acks';
 const SHELL=['/ops','/ari-supabase.js?v17','/ari-fonts.css','/ari-geist.woff2','/ari-geistmono.woff2','/ari-192.png','/ari-512.png','/ari.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==LOGOS&&k!==ACKS).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

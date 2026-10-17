@@ -13,7 +13,7 @@ export function Report() {
           <div className="stat"><b>{d.replies}</b><span>Replies</span></div>
           <div className="stat"><b>{d.accepts}</b><span>Accepts</span></div>
           <div className="stat"><b>{d.connects}</b><span>Connects</span></div>
-          <div className="stat"><b>{d.acceptToDm1MedianHours == null ? '–' : `${d.acceptToDm1MedianHours.toFixed(1)} h`}</b><span>Accept to DM1 (goal under 4 h)</span></div>
+          <div className="stat"><b>{d.acceptToDm1MedianHours == null ? 'None yet' : `${d.acceptToDm1MedianHours.toFixed(1)} h`}</b><span>Accept to DM1 (goal under 4 h)</span></div>
         </div>
       )}
     </section>

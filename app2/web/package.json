@@ -9,7 +9,9 @@
     "preview": "vite preview --port 4173 --strictPort",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "e2e": "playwright test"
+    "e2e": "playwright test --grep-invert @design",
+    "lint:design": "node scripts/design-lint/static.mjs && playwright test --grep @design",
+    "lint:design:static": "node scripts/design-lint/static.mjs"
   },
   "dependencies": {
     "react": "19.3.1",

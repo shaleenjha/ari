@@ -9,7 +9,7 @@ const h = (n: number): string => new Date(now - n * 36e5).toISOString();
 export function seed() {
   const accounts: Account[] = [
     { id: 'acc-1', name: 'Ostrevanthe Co', domain: 'example.com', stage: 'engaged', stagePinned: false, oneLiner: 'Payments platform, 400 people', hook: 'New data residency hire', window: 'ET' },
-    { id: 'acc-2', name: 'Brennuvia Labs', stage: 'mapped', stagePinned: false, oneLiner: 'Health records API', window: 'PT' },
+    { id: 'acc-2', name: 'Brennuvia Labs', stage: 'mapped', stagePinned: false, oneLiner: 'Health records platform', window: 'PT' },
     { id: 'acc-3', name: 'Dravequin Systems', stage: 'researching', stagePinned: false, oneLiner: 'Insurance claims SaaS', window: 'CT' },
   ];
   const people: Person[] = [
@@ -22,7 +22,7 @@ export function seed() {
     })),
   ];
   const replies: Reply[] = [{ id: 'r-1', personId: 'p-3', snippet: 'Thanks for reaching out, can you share more on how this works with our stack?', receivedAt: h(2), status: 'open' }];
-  const briefs: Brief[] = [{ accountId: 'acc-1', status: 'ready', thesis: 'Moving card data out of app databases before a regional launch.',
+  const briefs: Brief[] = [{ accountId: 'acc-1', status: 'ready', thesis: 'Moving card data out of core apps before a regional launch.',
     whyNow: [{ text: 'Hiring a data residency lead', label: 'verified' }, { text: 'EU launch planned next quarter', label: 'inference' }], angle: 'Residency without re-architecture' }];
   const tasks: Task[] = [
     { id: 't-1', kind: 'dm', title: 'Send DM1 to Alex Doe', status: 'ready', assigneeRole: 'sdr', accountId: 'acc-1', personId: 'p-1', dueAt: h(-1), version: 1, createdByKind: 'ari' },
