@@ -39,7 +39,8 @@ INCLUDE = [
     # Phase 1 (Oct 17 2026): app2 tree + CI, recursive ("dir/**"), build output and deps excluded
     'app2/**', '.github/**',
     # Oct 17 2026: specs, app2 pending migrations, accept ingest
-    'docs/specs/*.md', 'native/supabase/migrations/pending/**', 'scripts/accept_ingest.py',
+    'docs/specs/*.md', 'native/supabase/migrations/pending/**', 'native/supabase/baseline/*.sql',  # schema-only prod baseline for the sql-prod-shape CI job (Oct 18)
+     'scripts/accept_ingest.py',
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient.pem',
     'repo/README.md:README.md', 'repo/gitignore:.gitignore',
 ]
