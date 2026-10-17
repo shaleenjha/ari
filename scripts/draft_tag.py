@@ -13,12 +13,20 @@
 #        exec_note for exec-track notes, nudge for d41/d71 nudges.
 #        Optional --body-file <file> tags that exact text instead (use it right after writing a draft to the Sheet, before the
 #        10-minute sync has copied it).
+#   python3 scripts/draft_tag.py alt <person_id> <kind> <pick_tags.json> --body-file <alt.txt> --structure "S6 who owns this"
+#        -> store Ari's switch alternative (since Ari v18.11) so the app can offer it and a switched send is attributed to the
+#           alternative's structure. Uses the pick's tags (angle, hook...) with the alternative's structure and variant
+#           "role=alt;of=<pick id>". Run it right after tagging the pick.
+#   python3 scripts/draft_tag.py asset <person_id> <kind> <pick_tags.json> --body-file <asset.txt> [--type three_line_read]
+#        -> store the exact asset an offer draft (S5 / F3) would send next; the app shows it beside the DM with Approve / Switch.
+#           Only approved asset types (today three_line_read). variant "role=asset;type=<type>;of=<pick id>".
 #   python3 scripts/draft_tag.py untagged [limit]   -> unsent drafts whose current text has no tag yet (JSON list)
 #   python3 scripts/draft_tag.py stats [from] [to]  -> the copy read for a window (YYYY-MM-DD; default last 14 days)
 import sys, os, json, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ari_db import rpc, request
 
+APPROVED_ASSETS = ('three_line_read',)  # craft-notes.md approved types; a new type needs Owner's OK
 COL = {'dm1': 'dm', 'dm2': 'dm2_text', 'dm3': 'dm3_text', 'note': 'dm'}
 
 def current_body(pid, kind):
@@ -41,6 +49,28 @@ def main(a):
             print(json.dumps(rpc('ari_worker_draft_tag', {'p_person_id': pid, 'p_kind': kind, 'p_body': body, 'p_tags': tags}), default=str))
         except Exception as e:
             print('NOT TAGGED:', str(e)[:300]); return 1
+        return 0
+    if cmd in ('alt', 'asset'):
+        if len(a) < 4 or '--body-file' not in a: print('usage: draft_tag.py %s <person_id> <kind> <pick_tags.json> --body-file <file> [...]' % cmd); return 2
+        pid, kind, tf = a[1], a[2], a[3]
+        tags = dict(json.load(open(tf)))
+        body = open(a[a.index('--body-file') + 1]).read().strip()
+        if not body: print('NOT STORED: empty text'); return 1
+        if any(w in body for w in ('\u2014', '\u2013')): print('NOT STORED: text contains a dash character'); return 1
+        of = (tags.get('structure') or '').split(' ')[0].upper()[:4]
+        if cmd == 'alt':
+            if '--structure' not in a: print('NOT STORED: --structure "<id> <name>" required for alt'); return 1
+            tags['structure'] = a[a.index('--structure') + 1]
+            tags['variant'] = 'role=alt;of=%s' % of
+        else:
+            typ = a[a.index('--type') + 1] if '--type' in a else 'three_line_read'
+            if typ not in APPROVED_ASSETS: print('NOT STORED: asset type %s is not approved by Owner (approved: %s)' % (typ, ', '.join(APPROVED_ASSETS))); return 1
+            tags['structure'] = 'asset ' + typ.replace('_', ' ')
+            tags['variant'] = 'role=asset;type=%s;of=%s' % (typ, of)
+        try:
+            print(json.dumps(rpc('ari_worker_draft_tag', {'p_person_id': pid, 'p_kind': kind, 'p_body': body, 'p_tags': tags}), default=str))
+        except BaseException as e:
+            print('NOT STORED:', str(e)[:300]); return 1
         return 0
     if cmd == 'untagged':
         print(json.dumps(rpc('ari_worker_untagged_drafts', {'p_limit': int(a[1]) if len(a) > 1 else 50}), indent=1, default=str)); return 0

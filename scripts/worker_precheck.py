@@ -134,6 +134,11 @@ def main():
     nn = script("exec_track_handoff.py", "--needs-notes")
     if nn and nn.strip() != "none":
         reasons.append("exec notes needed")
+    # Copy Lab v1 (Quill, 17 Oct 2026, Hark decision 5): queued DM2s written before Copy Lab get regenerated as
+    # F1 / F2 / F5. The list empties itself as the worker rewrites and tags them, so this stops waking the worker.
+    rg = script("copy_check.py", "regen", "--count")
+    if rg.strip().isdigit() and int(rg) > 0:
+        reasons.append("dm2 regen %s" % rg.strip())
 
     if reasons:
         print("WORK: " + "; ".join(reasons))
