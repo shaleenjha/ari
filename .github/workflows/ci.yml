@@ -63,6 +63,7 @@ jobs:
       - run: bash app2/db/run_tests.sh
 
   sql-prod-shape:
+    permissions: { issues: write, contents: read }
     name: sql-prod-shape (pending 0032-0034 on the prod schema shape, rollbacks, before/after probes)
     runs-on: ubuntu-latest
     services:
@@ -80,7 +81,12 @@ jobs:
           sudo apt-get install -y postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt-get install -y postgresql-client-17
-      - run: PATH=/usr/lib/postgresql/17/bin:$PATH bash native/supabase/migrations/pending/test/run_local.sh
+      - run: set -o pipefail; PATH=/usr/lib/postgresql/17/bin:$PATH bash native/supabase/migrations/pending/test/run_local.sh 2>&1 | tee prodshape.log
+      - if: failure()
+        env: { GH_TOKEN: "${{ github.token }}", GH_REPO: "${{ github.repository }}" }
+        run: |
+          { echo "sql-prod-shape log, run ${{ github.run_id }}"; echo '```'; tail -n 150 prodshape.log | head -c 60000; echo '```'; } > b.md
+          gh issue edit 1 --body-file b.md || gh issue comment 1 --body-file b.md
 
   scripts:
     name: scripts (python unit)
@@ -148,4 +154,4 @@ jobs:
           : > failed.log; for id in $(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.conclusion=="failure") | .databaseId'); do gh api "repos/$GH_REPO/actions/jobs/$id/logs" | sed 's/^/x\tx\t/' >> failed.log || true; done
           { echo "Run ${{ github.run_id }} on ${{ github.sha }}"; echo '```'; cat summary.txt; echo '```'; echo '```'; cut -f3- failed.log | sed -E 's/^[0-9T:.-]+Z //' | grep -v '^\s*$' | tail -n 220 | head -c 60000; echo '```'; } > body.md
           n=$(gh issue list --state all --search 'in:title "CI failure log"' --json number --jq '.[0].number')
-          if [ -z "$n" ]; then gh issue create --title "CI failure log" --body-file body.md; else gh issue comment "$n" --body-file body.md; gh issue edit "$n" --body-file body.md; fi
+          if [ -z "$n" ]; then gh issue create --title "CI failure log" --body-file body.md; else gh issue comment "$n" --body-file body.md; fi
