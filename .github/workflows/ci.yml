@@ -148,4 +148,4 @@ jobs:
           gh run view ${{ github.run_id }} --log-failed > failed.log || true
           { echo "Run ${{ github.run_id }} on ${{ github.sha }}"; echo '```'; cat summary.txt; echo '```'; echo '```'; cut -f3- failed.log | sed -E 's/^[0-9T:.-]+Z //' | grep -v '^\s*$' | tail -n 220 | head -c 60000; echo '```'; } > body.md
           n=$(gh issue list --state all --search 'in:title "CI failure log"' --json number --jq '.[0].number')
-          if [ -z "$n" ]; then gh issue create --title "CI failure log" --body-file body.md; else gh issue comment "$n" --body-file body.md; fi
+          if [ -z "$n" ]; then gh issue create --title "CI failure log" --body-file body.md; else gh issue comment "$n" --body-file body.md; gh issue edit "$n" --body-file body.md; fi
