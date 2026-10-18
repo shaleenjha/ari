@@ -55,4 +55,6 @@ boot().catch((e: unknown) => {
   console.error('Ari could not start', e);
   mount().render(<Fallback />);
 });
+// iOS Safari only fires :active (the press state, Citrine spec §1 motion) when the page has a touchstart listener.
+document.addEventListener('touchstart', () => undefined, { passive: true });
 if ('serviceWorker' in navigator && import.meta.env.PROD) navigator.serviceWorker.register('/sw.js').catch(() => undefined);

@@ -29,7 +29,7 @@ const INFRA = /\b(?:supabase|vercel|postgres(?:ql)?|postgrest|rls|databases?|api
 
 /** Every rule an allow may name. Static copy and CSS rules, the query rule, and the rendered dead-tap opt-out. */
 export const RULES = ['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow', 'query-unbounded', 'dead-tap',
-  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status'];
+  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status', 'px-font-size', 'raw-motion'];
 
 /**
  * Check one piece of text.
@@ -108,6 +108,10 @@ export function lintCss(css, { allowEffects, tokens = false, vars: extVars }) {
   for (const d of decls) {
     if (!tokens) { const m = d.value.match(RAW_COLOR); if (m) out.push({ rule: 'raw-color', line: d.line, match: `${d.prop}: ${d.value}` }); }
     if (isBackdropProp(d.prop) && d.value.trim().toLowerCase() !== 'none') out.push({ rule: 'backdrop-filter', line: d.line, match: `${d.prop}: ${d.value}` });
+    if (!tokens && (d.prop === 'font-size' || d.prop === 'font') && /(?<![\w.-])[\d.]+px\b/.test(d.value)) out.push({ rule: 'px-font-size', line: d.line, match: `${d.prop}: ${d.value}` });
+    if (!tokens && (/cubic-bezier\(|linear\(/i.test(d.value) || /^(?:transition|animation)(?:-duration|-delay)?$/.test(d.prop) && /(?<![\w.-])[\d.]+m?s\b/.test(d.value.replace(/var\([^)]*\)/g, '')))) {
+      out.push({ rule: 'raw-motion', line: d.line, match: `${d.prop}: ${d.value}` });
+    }
     let fam = null;
     if (d.prop === 'font-family') fam = d.value;
     else if (d.prop === 'font') {
@@ -185,14 +189,20 @@ export function parseColor(v) {
   return null;
 }
 const overOpaque = (top, under) => [0, 1, 2].map((i) => top[i] * top[3] + under[i] * (1 - top[3]));
-export const isSurfaceToken = (n) => n.startsWith('--surface-');
-export const isTextToken = (n) => n.startsWith('--text-') || n === '--accent' || n === '--alert';
-/** Text-on-surface pairs outside the naming rule: the primary button (canvas text on a text-primary fill). */
-export const INVERSE_PAIRS = [['--surface-canvas', '--text-primary']];
+export const isSurfaceToken = (n) => /^--s-[\w-]+$/.test(n);
+export const isTextToken = (n) => /^--t-\d+$/.test(n) || n === '--accent' || n === '--alert';
+/** Ink-on-fill pairs, checked only against their own fill. The t-1 fill is today's primary button until slot 3 moves the
+ *  one primary fill to champagne. */
+export const INVERSE_PAIRS = [['--on-accent', '--accent'], ['--on-alert', '--alert'], ['--on-accent', '--t-1']];
+/** Text tokens that must never sit on a surface (spec: --t-3 is 4.50:1 on --s-high, no margin). Dropped from the matrix
+ *  and enforced by forbiddenPairs() on every stylesheet rule. */
+export const FORBIDDEN_PAIRS = [['--t-3', '--s-high']];
+/** Core tokens every token file must define. */
+export const CORE_TOKENS = ['--s-canvas', '--t-1'];
 
 /**
- * Contrast matrix of a token file. Every text token on every surface token, plus INVERSE_PAIRS. A translucent surface
- * (the overlay) is composited over every opaque surface and over --text-primary (the brightest thing that can sit under
+ * Contrast matrix of a token file. Every text token on every surface token (minus FORBIDDEN_PAIRS), plus INVERSE_PAIRS.
+ * A translucent surface (the tab bar) is composited over every opaque surface and over --t-1 (the brightest thing that can sit under
  * it), and the worst backdrop counts. Missing core tokens and unparseable colours are findings too.
  * @param {string} css the token file
  * @returns {{ pairs: { text: string, surface: string, ratio: number, need: number, pass: boolean }[], findings: { rule: string, line: number, match: string }[] }}
@@ -207,17 +217,17 @@ export function tokenContrast(css) {
     if (!c) findings.push({ rule: 'token-contrast', line: line.get(n) ?? 1, match: `${n}: ${val.get(n) ?? '(missing)'} is not a hex or rgb() colour` });
     return c;
   };
-  for (const need of ['--surface-canvas', '--text-primary']) if (!val.has(need)) findings.push({ rule: 'token-contrast', line: 1, match: `${need} missing` });
+  for (const need of CORE_TOKENS) if (!val.has(need)) findings.push({ rule: 'token-contrast', line: 1, match: `${need} missing` });
   const surfaces = [...val.keys()].filter(isSurfaceToken);
   const texts = [...val.keys()].filter(isTextToken);
   const opaque = surfaces.map((n) => [n, col(n)]).filter(([, c]) => c && c[3] === 1);
-  const primary = parseColor(val.get('--text-primary') ?? '');
+  const primary = parseColor(val.get('--t-1') ?? '');
   /** Every backdrop a surface can show: itself when opaque, else composited over each opaque surface and text-primary. */
   const backdrops = (n) => {
     const c = parseColor(val.get(n) ?? '');
     if (!c) return [];
     if (c[3] === 1) return [{ label: n, rgb: c.slice(0, 3) }];
-    const unders = [...opaque.map(([u, uc]) => [u, uc]), ...(primary ? [['--text-primary', primary]] : [])];
+    const unders = [...opaque.map(([u, uc]) => [u, uc]), ...(primary ? [['--t-1', primary]] : [])];
     return unders.map(([u, uc]) => ({ label: `${n} over ${u}`, rgb: overOpaque(c, uc) }));
   };
   const pairs = [];
@@ -232,7 +242,8 @@ export function tokenContrast(css) {
     pairs.push({ text: t, surface: worst.label, ratio: Math.round(worst.ratio * 100) / 100, need: TOKEN_MIN_RATIO, pass });
     if (!pass) findings.push({ rule: 'token-contrast', line: line.get(t) ?? 1, match: `${t} on ${worst.label} is ${worst.ratio.toFixed(2)}:1 < ${TOKEN_MIN_RATIO}:1` });
   };
-  for (const s of surfaces) for (const t of texts) check(t, s);
+  const forbidden = (t, s) => FORBIDDEN_PAIRS.some(([a, b]) => a === t && b === s);
+  for (const s of surfaces) for (const t of texts) if (!forbidden(t, s)) check(t, s);
   for (const [t, s] of INVERSE_PAIRS) if (val.has(t) && val.has(s)) check(t, s);
   return { pairs, findings };
 }
@@ -257,4 +268,22 @@ export const STATUS_SEL = '[role=status], [role=alert], [data-status], .tag, .ba
 /** @param {{ label: string, text: string, w: number, h: number }[]} items @returns {string[]} */
 export function colorOnlyStatus(items) {
   return items.filter((x) => x.w > 0 && x.h > 0 && !x.text.trim()).map((x) => `${x.label} ${x.w | 0}x${x.h | 0} has no text or glyph`);
+}
+
+/**
+ * Stylesheet rules that put a forbidden text token on a forbidden surface in the same block (color and background).
+ * @param {string} css @returns {{ line: number, match: string }[]}
+ */
+export function forbiddenPairs(css) {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
+  const out = [];
+  for (const m of clean.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const body = m[2];
+    const color = body.match(/(?:^|;|\s)color\s*:\s*var\((--[\w-]+)\)/)?.[1];
+    const bg = body.match(/background(?:-color)?\s*:\s*var\((--[\w-]+)\)/)?.[1];
+    if (color && bg && FORBIDDEN_PAIRS.some(([t, s]) => t === color && s === bg)) {
+      out.push({ line: clean.slice(0, m.index).split('\n').length + (m[1].match(/^\s*/)?.[0].split('\n').length ?? 1) - 1, match: `${m[1].trim()} { color: var(${color}); background: var(${bg}) }` });
+    }
+  }
+  return out;
 }

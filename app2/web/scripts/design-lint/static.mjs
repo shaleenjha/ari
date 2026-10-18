@@ -8,7 +8,8 @@
 // CSS:  system font as the primary family, gradients and glow shadows (src/**/*.css and inline styles) outside
 //       EFFECTS_ALLOW_LIST. Citrine (v18.16.0): raw colours outside TOKENS_FILE (CSS and inline styles), backdrop-filter
 //       anywhere, every text token on every surface token >= 4.5:1 (computed from tokens.css), hex colours in index.html
-//       and the manifest must equal a token value (they cannot read variables), status elements with no content.
+//       and the manifest must equal a token value (they cannot read variables), status elements with no content,
+//       --t-3 on --s-high, px font sizes and raw motion (cubic-bezier, linear(), ms) outside TOKENS_FILE.
 //   node scripts/design-lint/static.mjs --tokens   also print the token contrast matrix
 // Allows: see allow.mjs (allow.json per file, inline `lint-allow: <rule> <reason>`). Exit 1 on any error; CI=true adds
 // GitHub annotations.
@@ -16,13 +17,13 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { EFFECTS_ALLOW_LIST, TOKENS_FILE, checkText, colorDrift, declarations, lintCss, tokenContrast } from './rules.mjs';
+import { EFFECTS_ALLOW_LIST, TOKENS_FILE, checkText, colorDrift, declarations, forbiddenPairs, lintCss, tokenContrast } from './rules.mjs';
 import { WEB_ROOT, allowIndex, finding, loadAllowJson, printFindings, staleJsonEntries } from './allow.mjs';
 
 const ROOT = WEB_ROOT;
 /** Rules this lint owns (stale allows for other rules are left to their own lint). */
 export const STATIC_RULES = new Set(['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow',
-  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status']);
+  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status', 'px-font-size', 'raw-motion']);
 
 function walk(dir) {
   const out = [];
@@ -127,7 +128,8 @@ export function lintSource(file, text, { jsonEntries } = {}) {
 /** Lint one stylesheet (CSS rules) with allows applied. */
 export function lintCssFile(file, text, { jsonEntries, vars } = {}) {
   const allow = allowIndex(file, text, jsonEntries);
-  const out = lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file), tokens: file === TOKENS_FILE, vars })
+  const out = [...lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file), tokens: file === TOKENS_FILE, vars }),
+    ...forbiddenPairs(text).map((x) => ({ rule: 'token-contrast', line: x.line, match: `forbidden pair: ${x.match}` }))]
     .filter((x) => !allow.suppress(x.rule, x.line))
     .map((x) => ({ ...finding(file, x.line, 1, x.rule, x.match, x.match), kind: 'in CSS' }));
   return [...out, ...allow.problems(STATIC_RULES)];

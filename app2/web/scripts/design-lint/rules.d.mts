@@ -19,6 +19,9 @@ export declare function parseColor(v: string): [number, number, number, number] 
 export declare function isSurfaceToken(name: string): boolean;
 export declare function isTextToken(name: string): boolean;
 export declare const INVERSE_PAIRS: [string, string][];
+export declare const FORBIDDEN_PAIRS: [string, string][];
+export declare const CORE_TOKENS: string[];
+export declare function forbiddenPairs(css: string): { line: number; match: string }[];
 export type TokenPair = { text: string; surface: string; ratio: number; need: number; pass: boolean };
 export declare function tokenContrast(css: string): { pairs: TokenPair[]; findings: { rule: string; line: number; match: string }[] };
 export declare function colorDrift(text: string, tokensCss: string): { match: string; index: number }[];

@@ -119,7 +119,7 @@ test('@design no gradients, glow shadows or backdrop blur rendered', async ({ pa
 });
 
 // Citrine s2/tokens (v18.16.0): type is rem-based, so it follows the root size the phone sets (meta text-scale on
-// Android Chrome, the browser text size elsewhere). Raising the root by 25% must raise every piece of text by 25%.
+// Android Chrome and Brave, Dynamic Type on iOS). Raising the root by 25% must raise every piece of text by 25%.
 test('@design text follows the phone text size (rem type)', async ({ page }) => {
   for (const s of [SCREENS[0]!, SCREENS.find((x) => x.name === 'Report')!]) {
     await open(page, s);
@@ -135,7 +135,7 @@ test('@design text follows the phone text size (rem type)', async ({ page }) => 
       return out;
     });
     const before = await sizes();
-    await page.evaluate(() => { document.documentElement.style.fontSize = '125%'; });
+    await page.evaluate(() => { const r = document.documentElement; r.style.fontSize = `${parseFloat(getComputedStyle(r).fontSize) * 1.25}px`; });
     const after = await sizes();
     const fixed = Object.keys(before).filter((k) => after[k] !== undefined && Math.abs(after[k]! / before[k]! - 1.25) > 0.01)
       .map((k) => `"${k}" ${before[k]}px -> ${after[k]}px`);
@@ -143,16 +143,21 @@ test('@design text follows the phone text size (rem type)', async ({ page }) => 
   }
 });
 
-test('@design reduced motion zeroes every motion token; the tab bar is solid with no blur', async ({ page }) => {
+test('@design reduced motion: every move is a 120 ms fade with no travel; the tab bar is solid with no blur', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await open(page, SCREENS[0]!);
   const r = await page.evaluate(() => {
     const root = getComputedStyle(document.documentElement);
     const tabs = getComputedStyle(document.querySelector('.tabs')!);
-    return { durs: ['--dur-fast', '--dur-tab', '--dur-sheet', '--dur-settle'].map((k) => root.getPropertyValue(k).trim()),
-      bg: tabs.backgroundColor, blur: tabs.backdropFilter || 'none' };
+    const probe = document.createElement('i'); document.body.append(probe);
+    const durs = ['--dur-release', '--dur-tab', '--dur-sheet-open', '--dur-exit', '--dur-toast-in', '--dur-card-in', '--dur-check'].map((k) => {
+      probe.style.transitionDuration = `var(${k})`; return getComputedStyle(probe).transitionDuration;
+    });
+    probe.remove();
+    return { durs, move: root.getPropertyValue('--move').trim(), bg: tabs.backgroundColor, blur: tabs.backdropFilter || 'none' };
   });
-  expect(r.durs).toEqual(['0ms', '0ms', '0ms', '0ms']);
+  expect(r.durs).toEqual(Array(7).fill('0.12s'));
+  expect(r.move).toBe('0');
   expect(r.blur).toBe('none');
   expect(r.bg).toMatch(/^rgba?\(18, 18, 18/);
 });
