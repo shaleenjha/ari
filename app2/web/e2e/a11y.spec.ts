@@ -76,10 +76,17 @@ test('Replies: the draft label holds two lines and the box 144px while the draft
 test('font: Inter first, metric-matched fallbacks next, and the fallback faces carry the overrides', async ({ page }) => {
   await page.goto('/#/');
   const fam = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-  expect(fam.replace(/"/g, "'")).toMatch(/^'?Inter'?, 'Inter Fallback', 'Inter Fallback Roboto'/);
-  const faces = await page.evaluate(() => [...document.styleSheets].flatMap((s) => [...s.cssRules]).filter((r) => r instanceof CSSFontFaceRule)
-    .map((r) => (r as CSSFontFaceRule).cssText));
-  const fb = faces.find((t) => t.includes("'Inter Fallback'") || t.includes('"Inter Fallback"'))!;
+  // Chromium quotes family names with spaces, WebKit does not: compare without quotes.
+  expect(fam.replace(/["']/g, '')).toMatch(/^Inter, Inter Fallback, Inter Fallback Roboto, /);
+  // Read the shipped stylesheet itself: the CSSOM drops descriptors an engine does not support (WebKit lacks the overrides,
+  // so there it falls back to size-adjust alone or to the next family).
+  const css = await page.evaluate(async () => {
+    const hrefs = [...document.querySelectorAll<HTMLLinkElement>('link[rel=stylesheet]')].map((l) => l.href);
+    const inline = [...document.querySelectorAll('style')].map((s) => s.textContent ?? '');
+    return [...inline, ...(await Promise.all(hrefs.map(async (h) => (await fetch(h)).text())))].join('\n');
+  });
+  const fb = css.match(/@font-face\s*\{[^}]*font-family:\s*["']?Inter Fallback["']?\s*;[^}]*\}/)?.[0] ?? '';
+  expect(fb, 'Inter Fallback face').not.toBe('');
   for (const k of ['size-adjust', 'ascent-override', 'descent-override', 'line-gap-override']) expect(fb).toContain(k);
   expect(await page.locator('link[rel=preload][href="/fonts/inter-latin-wght-normal.woff2"]').count()).toBe(1);
 });
