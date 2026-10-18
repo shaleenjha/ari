@@ -1,8 +1,8 @@
 // app2 shell service worker. Pages: network first with a 3 s cap, then the cached shell (a cache-first page outlived each
 // deploy and pointed at script files that no longer exist, which left a blank white page). Hashed /assets/ files never
 // change, so they are cache first. The Inter woff2 is precached so the first paint offline or on a slow link uses it.
-// Data is never cached here.
-const V = 'ari-app2-shell-v4';
+// Data is never cached here. v18.15.2 (shell v5): new app bundle; old shells are deleted on activate.
+const V = 'ari-app2-shell-v5';
 const PRECACHE = ['/manifest.webmanifest', '/icon.svg', '/fonts/inter-latin-wght-normal.woff2'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(V).then((c) => c.addAll(PRECACHE))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== V).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

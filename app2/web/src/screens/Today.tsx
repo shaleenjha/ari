@@ -2,39 +2,39 @@ import { useEffect, useRef } from 'react';
 import { data } from '../data/client';
 import type { HygieneFinding, Reply, Task, WhoIsThis } from '../data/types';
 import { useNotNow } from '../ui/notNow';
-import { useAsync } from '../ui/useAsync';
+import { oldestStale, useAsync } from '../ui/useAsync';
 import { Stale } from '../ui/Stale';
 import { readHints, saveHints } from '../ui/layoutHints';
 import { Busy, SkelPin, SkelRow, SkelTidy, SkelWho } from '../ui/Skeleton';
 import { TidyUp, WhoIsThisCards } from './Cards';
 
-type Got<T> = { ok: true; v: T } | { ok: false };
-const settle = <T,>(p: Promise<T>): Promise<Got<T>> => p.then((v) => ({ ok: true as const, v }), () => ({ ok: false as const }));
-
 /**
  * Today loads everything it shows in one step and swaps the placeholders for the real screen at once, so nothing that is
  * already on screen moves while parts arrive (layout shift check: e2e/cls.spec.ts). The placeholders take the shape of
- * the last loaded Today on this device (ui/layoutHints.ts).
+ * the last loaded Today on this device (ui/layoutHints.ts). Each part (queue, replies, Tidy up, Who is this?) is its own
+ * read with its own last good copy: a part that fails keeps what it showed, and only a part that never loaded is empty.
  */
 export function Today() {
-  const t = useAsync(async () => {
-    const [q, r, h, w] = await Promise.all([settle(data().queue()), settle(data().replies()), settle(data().hygiene()), settle(data().whoIsThis())]);
-    return { q, replies: r.ok ? r.v : ([] as Reply[]), findings: h.ok ? h.v : ([] as HygieneFinding[]), who: w.ok ? w.v : ([] as WhoIsThis[]) };
-  }, [], { key: 'today', good: (v) => v.q.ok });
+  const q = useAsync(() => data().queue(), [], { key: 'queue' });
+  const r = useAsync(() => data().replies(), [], { key: 'replies' });
+  const h = useAsync(() => data().hygiene(), [], { key: 'hygiene' });
+  const w = useAsync(() => data().whoIsThis(), [], { key: 'who' });
+  const settled = [q, r, h, w].every((x) => x.data !== undefined || x.error !== undefined);
+  const d = settled ? { replies: r.data ?? ([] as Reply[]), findings: h.data ?? ([] as HygieneFinding[]), who: w.data ?? ([] as WhoIsThis[]) } : undefined;
+  const stale = oldestStale(q.stale, r.stale, h.stale, w.stale);
   const aside = useNotNow();
-  const d = t.data;
   const fresh = (d?.replies ?? []).filter((x) => !aside.has(x.id));
-  const queue: Task[] | null = d?.q.ok ? d.q.v : null;
+  const queue: Task[] | null = q.data ?? null;
   const body = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!d) return;
     const who = [...(body.current?.querySelectorAll<HTMLElement>('[data-testid^="who-"]') ?? [])].map((e) => Math.round(e.getBoundingClientRect().height));
     saveHints('today', { pin: fresh.length > 0, who, tidy: d.findings.length > 0, queue: queue?.length ?? 0 });
-  }, [d, fresh.length, queue]);
+  }, [settled, d?.findings.length, d?.who.length, fresh.length, queue]);
   return (
     <section aria-labelledby="h-today" aria-busy={!d}>
       <header className="hd"><h1 id="h-today">Today</h1></header>
-      <Stale at={t.stale} />
+      <Stale at={stale} />
       {d ? (
         <div key="data" ref={body}>
           {fresh.length > 0 && (

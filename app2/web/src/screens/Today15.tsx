@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { data, opId } from '../data/client';
 import { useAsync } from '../ui/useAsync';
+import { Stale } from '../ui/Stale';
 import { useReadOnly, writeProps } from '../ui/readOnly';
 
 export function Today15() {
@@ -15,6 +16,8 @@ export function Today15() {
     <section aria-labelledby="h-15">
       <header className="hd"><a href="#/" className="back" aria-label="Back">‹</a><h1 id="h-15">Today's 15</h1></header>
       <p className="muted">At most 3 per account. Mark each one once you have sent the invite on LinkedIn.</p>
+      <Stale at={l.stale} />
+      {l.error && <p className="muted" role="alert">Could not load Today's 15.</p>}
       <ol className="rows" data-testid="today15">
         {(l.data ?? []).map((p) => (
           <li key={p.id} className="row">
