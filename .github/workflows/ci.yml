@@ -112,7 +112,8 @@ jobs:
     name: design-lint (hit targets, dead taps, contrast, rendered copy, Today height, fonts/gradients/glows; 360/390/412 px, Chromium + WebKit; blocking)
     needs: [web, anti-slop-static]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 10 was hit on v18.13.7 (9 min on v18.13.6) before the read-only scenarios; the time budget only, no rule changes.
+    timeout-minutes: 20
     defaults: { run: { working-directory: app2/web } }
     steps:
       - uses: actions/checkout@v4
