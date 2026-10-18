@@ -31,7 +31,7 @@ INCLUDE = [
     'native/supabase/migrations/*.sql', 'native/supabase/rollbacks/*.sql',
     'native/supabase/pending/*.sql', 'native/supabase/functions/*/index.ts',
     'scripts/brief_upsert.py', 'scripts/daily_report.py', 'scripts/db_backup.py',
-    'scripts/deploy_web.py', 'scripts/reply_ingest.py', 'scripts/retro_stats.py',
+    'scripts/deploy_web.py', 'scripts/deploy_app2_preview.py', 'scripts/reply_ingest.py', 'scripts/retro_stats.py',
     'scripts/sync_sheet_supabase.py', 'scripts/git_export.py', 'scripts/git_sync.sh', 'scripts/git_push_api.py',
     'scripts/ari_db.py', 'scripts/backup_check.py', 'scripts/restore_drill.py', 'scripts/offsite_drive.py',
     'scripts/health_check.py', 'scripts/phase0_metrics.py', 'scripts/exec_track_handoff.py', 'scripts/worker_precheck.py', 'scripts/draft_tag.py', 'scripts/copy_switch.py', 'scripts/hygiene_scan.py', 'scripts/test_hygiene_scan.py',
