@@ -5,20 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="text-scale" content="scale" />
     <meta name="theme-color" content="#121212" />
-    <meta name="ari-version" content="18.16.0" />
-    <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <meta name="ari-version" content="18.17.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="preload" href="/fonts/instrument-sans-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/brand/ari-mark-32.svg" type="image/svg+xml" />
+    <link rel="icon" href="/brand/ari-mark-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/brand/ari-mark-180.png" />
+    <link rel="apple-touch-startup-image" href="/brand/ari-splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
     <title>Ari</title>
-    <!-- Boot screen and theme-color mirror src/ui/tokens.css (--s-canvas, --t-1, --t-2); the design lint fails on drift. -->
+    <!-- Boot screen and theme-color mirror src/ui/tokens.css (--canvas, --text-1, --text-2); the design lint fails on drift. -->
     <style>
       html, body { margin: 0; background: #121212; color: #ECE6DC; }
-      .boot { font: 100%/1.4 'Inter', system-ui, sans-serif; }
+      .boot { font: 100%/1.4 'Instrument Sans', system-ui, sans-serif; }
       .boot { max-width: 560px; margin: 0 auto; padding: 24px 16px; }
-      .boot h1 { font-size: 1.5rem; margin: 4px 0 12px; } .boot p { color: #B5AFA4; margin: 0 0 8px; }
+      .boot h1 { font-size: 1.375rem; margin: 4px 0 12px; } .boot p { color: #B5AFA4; margin: 0 0 8px; }
     </style>
   </head>
   <body>
+    <!-- ari:sprite -->
     <div id="root">
       <div class="boot" data-testid="boot">
         <h1>Ari</h1>

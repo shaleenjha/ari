@@ -29,7 +29,7 @@ test('Tidy up: link, tick, merge with a keep choice, dismiss', async ({ page }) 
   await page.getByTestId('finding-f-2').getByRole('button', { name: 'Merge' }).click();
   await page.getByRole('group', { name: 'Which one stays?' }).getByRole('button', { name: 'Keep Ostrevanthe Co', exact: true }).click();
   await expect(page.getByTestId('finding-f-2')).toContainText('Merged into Ostrevanthe Co');
-  await expect(page.getByTestId('tidy-count')).toHaveText('All tidy');
+  await expect(page.getByTestId('tidy-count')).toHaveText('0 to check');
   await noHorizontalScroll(page);
   expect(errors).toEqual([]);
 });

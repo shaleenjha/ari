@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 // Fixed-geometry placeholders. Each one uses the same classes, paddings and line boxes as the element it stands in for, so
 // the loaded screen lands in the same space. Bars only: no text, no gradients; a soft pulse only when motion is allowed.
 
@@ -32,10 +33,10 @@ export const Busy = ({ label }: { label: string }) => <p className="sr-only" rol
 
 /** The collapsed "Tidy up" card: one 48px header line inside the card padding. */
 export const SkelTidy = () => (
-  <div className="card col skel" aria-hidden="true"><div className="cardhead"><Line as="b" w="30%" /><Line w="20%" /></div></div>
+  <div className="card col skel" aria-hidden="true"><div className="cardhead"><Icon name="tidy-up" /><Line as="b" w="30%" /><Line w="20%" /><Icon name="chevron-right" className="chev" /></div></div>
 );
 
 /** The reply pin: a single line card with the pin border width. */
 export const SkelPin = () => (
-  <div className="card pin skel" aria-hidden="true"><Line as="b" w="40%" /><Line w="22%" /></div>
+  <div className="card pin skel" aria-hidden="true"><Icon name="nav-replies" /><Line as="b" w="40%" /><Icon name="chevron-right" className="chev" /></div>
 );

@@ -9,6 +9,7 @@ import { Stale } from '../ui/Stale';
 import { useReadOnly, writeProps } from '../ui/readOnly';
 import { readHints, saveHints } from '../ui/layoutHints';
 import { Busy, SkelReply } from '../ui/Skeleton';
+import { Icon } from '../ui/Icon';
 
 // Ari prepares the answer, Owner sends it. "Copy and open LinkedIn" copies the text and opens the LinkedIn inbox;
 // nothing is ever sent from here.
@@ -34,13 +35,14 @@ function ReplyDraft({ reply, onHide }: { reply: Reply; onHide: () => void }) {
   return (
     <div className="draftbox" data-testid={`draft-${reply.id}`}>
       <label className="draft">
-        <span>{loading ? "Loading Ari's draft." : d.data ? "Ari's draft. Edit it if you like, then send it yourself on LinkedIn."
-          : 'Ari has no draft for this yet. Write your answer, then send it yourself on LinkedIn.'}</span>
+        <span className="sr-only">{loading ? 'Loading draft' : d.data ? 'Draft' : 'No draft'}</span>
         <textarea ref={box} value={text} rows={6} onChange={(e) => { typed.current = true; setText(e.target.value); }} />
       </label>
       <div className="acts">
-        <button className="btn" disabled={loading || !text.trim()} onClick={() => void copyOpen()}>Copy and open LinkedIn</button>
-        <button className="btn ghost" onClick={onHide}>Hide draft</button>
+        <button className="btn fill key" disabled={loading || !text.trim()} onClick={() => void copyOpen()}>
+          <span>Copy and open LinkedIn</span><Icon name="copy" />
+        </button>
+        <button className="btn text" onClick={onHide}>Hide draft</button>
       </div>
       {msg && <p className="status" role="status">{msg}</p>}
     </div>
@@ -66,20 +68,20 @@ export function Replies() {
   const back = (id: string) => { notNow.remove(id); setUndo(null); tick(8); };
   return (
     <section aria-labelledby="h-rep" aria-busy={!r.data && !r.error}>
-      <header className="hd"><h1 id="h-rep">Replies</h1></header>
+      <header className="hd"><h1 id="h-rep">Replies</h1>{r.data && <p className="count" data-testid="replies-count"><b>{open.length}</b> to sort</p>}</header>
       <Stale at={r.stale} />
       {!r.data && !r.error && (
         <><Busy label="Loading replies." /><ul className="rows" data-testid="skeleton">{Array.from({ length: readHints().replies.open }, (_, i) => <SkelReply key={i} />)}</ul></>
       )}
       {r.error && <p className="muted" role="alert">Could not load replies.</p>}
-      {r.data && open.length === 0 && <p className="muted">No new replies.</p>}
+      {r.data && open.length === 0 && <p className="muted">Nothing to sort.</p>}
       {r.data && <ul className="rows" data-testid="replies">
-        {open.map((x) => (
+        {open.map((x, i) => (
           <li key={x.id} className="row col">
             <p className="quote">{x.snippet}</p>
             {openId === x.id ? <ReplyDraft reply={x} onHide={() => setOpenId(null)} /> : (
               <div className="acts">
-                <button className="btn" {...writeProps(ro, () => setOpenId(x.id))}>Draft an answer</button>
+                <button className={i === 0 && !openId ? 'btn fill' : 'btn'} {...writeProps(ro, () => setOpenId(x.id))}>Draft an answer</button>
                 <button className="btn ghost" {...writeProps(ro, () => later(x.id))}>Not now</button>
               </div>
             )}
@@ -88,7 +90,7 @@ export function Replies() {
       </ul>}
       {setAside.length > 0 && (
         <>
-          <h2 className="sub">Not now</h2>
+          <h2 className="sub">Not now · {setAside.length}</h2>
           <ul className="rows" data-testid="not-now">
             {setAside.map((x) => (
               <li key={x.id} className="row col">

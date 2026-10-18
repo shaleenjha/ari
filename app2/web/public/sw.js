@@ -1,9 +1,10 @@
 // app2 shell service worker. Pages: network first with a 3 s cap, then the cached shell (a cache-first page outlived each
 // deploy and pointed at script files that no longer exist, which left a blank white page). Hashed /assets/ files never
-// change, so they are cache first. The Inter woff2 is precached so the first paint offline or on a slow link uses it.
-// Data is never cached here. v18.16.0 (shell v7): Citrine tokens bundle; old shells are deleted on activate.
-const V = 'ari-app2-shell-v7';
-const PRECACHE = ['/manifest.webmanifest', '/icon.svg', '/fonts/inter-latin-wght-normal.woff2'];
+// change, so they are cache first. The Instrument Sans woff2 is precached so the first paint offline or on a slow link
+// uses it; the icon sprite is inlined in the cached shell (index.html), so it needs no entry. Data is never cached here.
+// v18.17.0 (shell v8): S2 Lamp & Dawn tokens, Instrument Sans, S2 icons and brand; old shells are deleted on activate.
+const V = 'ari-app2-shell-v8';
+const PRECACHE = ['/', '/manifest.webmanifest', '/brand/ari-mark-32.svg', '/brand/ari-mark-180.png', '/fonts/instrument-sans-latin-wght.woff2'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(V).then((c) => c.addAll(PRECACHE))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== V).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 const put = (req, r) => { if (r.ok) { const c = r.clone(); caches.open(V).then((k) => k.put(req, c)); } return r; };
@@ -19,7 +20,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(Promise.race([net, slow]).catch(() => caches.match('/').then((r) => r || Response.error())));
     return;
   }
-  if (u.pathname.startsWith('/assets/') || u.pathname.startsWith('/fonts/')) {
+  if (u.pathname.startsWith('/assets/') || u.pathname.startsWith('/fonts/') || u.pathname.startsWith('/brand/')) {
     e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request).then((r) => put(e.request, r))));
   }
 });

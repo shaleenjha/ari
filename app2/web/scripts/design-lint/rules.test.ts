@@ -108,24 +108,24 @@ describe('design lint rules', () => {
     expect(parseColor('rgba(18, 18, 18, 0.96)')).toEqual([18, 18, 18, 0.96]);
     expect(parseColor('var(--x)')).toBeNull();
   });
-  it('citrine: token contrast matrix', () => {
-    const ok = tokenContrast(`:root { --s-canvas: #121212; --s-high: #2E2C29; --s-bar: rgba(18,18,18,.96); --t-1: #ECE6DC; --t-3: #979289; --accent: #E5D0AC; --on-accent: #121212; --line: #34322E; --sp-8: 8px; }`);
+  it('S2: token contrast matrix', () => {
+    const ok = tokenContrast(`:root { --canvas: #121212; --surface-3: #2E2C29; --text-1: #ECE6DC; --text-3: #979289; --accent: #F0AA3C; --on-accent: #121212; --hairline: #34322E; --s-2: 8px; }`);
     expect(ok.findings).toEqual([]);
-    // 3 text tokens x 3 surfaces, minus t-3 on high, plus on-accent on accent and on t-1; lines and spacing are not pairs
-    expect(ok.pairs).toHaveLength(3 * 3 - 1 + 2);
-    expect(ok.pairs.some((p) => p.text === '--t-3' && p.surface === '--s-high')).toBe(false);
-    // the briefing's tertiary (#8A857C) fails on overlay; the old one (#66645E) fails on canvas too
-    const bad = tokenContrast(`:root { --s-canvas: #121212; --s-overlay: #252421; --t-1: #ECE6DC; --t-3: #8A857C; }`);
-    expect(bad.findings.map((f) => f.match)).toEqual(['--t-3 on --s-overlay is 4.23:1 < 4.5:1']);
-    expect(tokenContrast(`:root { --s-canvas: #121212; --t-1: #ECE6DC; --t-3: #66645E; }`).findings).toHaveLength(1);
-    expect(tokenContrast(`:root { --s-canvas: #121212; }`).findings.map((f) => f.match)).toEqual(['--t-1 missing']);
-    // a translucent surface is judged on its worst backdrop
-    const ov = tokenContrast(`:root { --s-canvas: #121212; --s-bar: rgba(18,18,18,.5); --t-1: #ECE6DC; --t-2: #B5AFA4; }`);
-    expect(ov.findings.some((f) => f.match.startsWith('--t-2 on --s-bar over --t-1'))).toBe(true);
+    // 3 text tokens x 2 surfaces, minus text-3 on surface-3, plus ink on the key and on text-1; hairline and spacing are not pairs
+    expect(ok.pairs).toHaveLength(3 * 2 - 1 + 2);
+    expect(ok.pairs.some((p) => p.text === '--text-3' && p.surface === '--surface-3')).toBe(false);
+    // --s-N is spacing now, never a surface
+    expect(ok.pairs.some((p) => p.surface === '--s-2')).toBe(false);
+    const bad = tokenContrast(`:root { --canvas: #121212; --surface-2: #252421; --text-1: #ECE6DC; --text-3: #8A857C; }`);
+    expect(bad.findings.map((f) => f.match)).toEqual(['--text-3 on --surface-2 is 4.23:1 < 4.5:1']);
+    expect(tokenContrast(`:root { --canvas: #121212; }`).findings.map((f) => f.match)).toEqual(['--text-1 missing']);
+    // boundaries need 3:1 (WCAG 1.4.11)
+    const line = tokenContrast(`:root { --canvas: #121212; --text-1: #ECE6DC; --border: #34322E; }`);
+    expect(line.findings.some((f) => f.match.startsWith('--border on --canvas') && f.match.endsWith('< 3:1'))).toBe(true);
   });
-  it('citrine: t-3 on high is banned in stylesheets; px font sizes and raw motion only in the token file', () => {
-    expect(forbiddenPairs(`.a { color: var(--t-3); background: var(--s-high); }\n.b { color: var(--t-3); background: var(--s-raised); }`).map((x) => x.line)).toEqual([1]);
-    expect(lintCssFile('src/ui/x.css', `.a {\n  background: var(--s-high); color: var(--t-3);\n}`).map((x) => `${x.rule}@${x.line}`)).toEqual(['token-contrast@1']);
+  it('S2: text-3 on surface-3 is banned in stylesheets; px font sizes and raw motion only in the token file', () => {
+    expect(forbiddenPairs(`.a { color: var(--text-3); background: var(--surface-3); }\n.b { color: var(--text-3); background: var(--surface-1); }`).map((x) => x.line)).toEqual([1]);
+    expect(lintCssFile('src/ui/x.css', `.a {\n  background: var(--surface-3); color: var(--text-3);\n}`).map((x) => `${x.rule}@${x.line}`)).toEqual(['token-contrast@1']);
     const css = `.a { font-size: 14px; }\n.b { font: 600 17px/24px var(--font-sans); }\n.c { font-size: var(--fs-meta); line-height: 20px; }\n.d { transition: opacity 200ms ease; }\n.e { transition: color var(--dur-tab) var(--ease-ui); }\n.f { transition-timing-function: cubic-bezier(.2,.8,.3,1); }\n.g { animation: p var(--dur-pulse) ease-in-out infinite; }`;
     expect(lintCss(css, { allowEffects: false }).map((x) => `${x.rule}@${x.line}`)).toEqual(['px-font-size@1', 'px-font-size@2', 'raw-motion@4', 'raw-motion@6']);
     expect(lintCss(css, { allowEffects: false, tokens: true })).toEqual([]);
@@ -135,7 +135,11 @@ describe('design lint rules', () => {
     const tokens = readFileSync(join(root, TOKENS_FILE), 'utf8');
     const r = lintTokens(tokens, [['index.html', readFileSync(join(root, 'index.html'), 'utf8')], ['public/manifest.webmanifest', readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8')]]);
     expect(r.findings).toEqual([]);
-    expect(r.pairs.every((p) => p.ratio >= 4.5)).toBe(true);
+    expect(r.pairs.every((p) => p.ratio >= p.need)).toBe(true);
+    // S2: raw hex is banned in every literal and in src/ SVG, template literals and fill/stroke attributes included
+    expect(lintSource('x.tsx', 'export const A = () => <svg><path fill="#F0AA3C" stroke={`#fff`} /></svg>;').map((h) => h.rule)).toEqual(['raw-color', 'raw-color']);
+    expect(lintSource('x.ts', 'export const c = `color: ${1 > 0 ? "#121212" : "rgb(1,2,3)"}`;').map((h) => h.rule)).toEqual(['raw-color', 'raw-color']);
+    expect(lintSource('x.tsx', 'export const A = () => <a href="#/replies"><use href="#ari-copy" /></a>;')).toEqual([]);
     expect(colorDrift('<meta name="theme-color" content="#050505" /><i style="color:#E2B062">', tokens).map((d) => d.match)).toEqual(['#050505', '#E2B062']);
   });
   it('citrine: status needs text or a glyph', () => {

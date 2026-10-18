@@ -14,10 +14,18 @@ const TILES: Tile[] = [
   { key: 'replies', label: 'Replies', value: (d) => d.replies },
   { key: 'accepts', label: 'Accepts', value: (d) => d.accepts },
   { key: 'connects', label: 'Connects', value: (d) => d.connects },
-  { key: 'dm1', label: 'Accept to DM1 (goal under 4 h)', value: (d) => (d.acceptToDm1MedianHours == null ? 'None yet' : `${d.acceptToDm1MedianHours.toFixed(1)} h`) },
+  { key: 'dm1', label: 'Accept to DM1 · goal 4 h', value: (d) => (d.acceptToDm1MedianHours == null ? 'None' : `${d.acceptToDm1MedianHours.toFixed(1)} h`) },
 ];
 
-const meetingsLabel = (d?: WeekReport) => (d?.meetingsFromAri ? 'Meetings from Ari this week' : 'Meetings this week');
+const meetingsLabel = (d?: WeekReport) => (d?.meetingsFromAri ? 'Meetings from Ari' : 'Meetings');
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "This week · 13 to 17 Oct" (Monday to Friday of the current week, on the phone's clock). */
+export function weekLabel(now: Date): string {
+  const mon = new Date(now); mon.setHours(12, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+  const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+  const m = (x: Date) => MONTHS[x.getMonth()];
+  return `This week · ${mon.getDate()}${m(mon) === m(fri) ? '' : ` ${m(mon)}`} to ${fri.getDate()} ${m(fri)}`;
+}
 
 /**
  * The week as a description list: each tile is a <dt> label and a <dd> number (the number shows first, as before, via
@@ -31,21 +39,21 @@ export function Report() {
   return (
     <section aria-labelledby="h-rep2" aria-busy={!d && !w.error}>
       <header className="hd"><h1 id="h-rep2">Report</h1></header>
-      <p className="muted" data-testid="report-window">This week, from Monday.</p>
+      <p className="muted" data-testid="report-window">{weekLabel(new Date())}</p>
       <Stale at={w.stale} />
       {w.error && <p className="muted" role="alert">Could not load this week.</p>}
       {!d && !w.error && <Busy label="Loading this week." />}
       {!w.error && (
         <dl className="grid" data-testid={d ? 'report' : 'skeleton'}>
-          {TILES.map((t) => (
+          {TILES.map((t, i) => (
             <div key={t.key} className={t.lead ? 'stat lead' : 'stat'}>
-              <dt>{t.key === 'meetings' ? meetingsLabel(d) : t.label}</dt>
+              <dt><span className="n">{String(i + 1).padStart(2, '0')}</span>{t.key === 'meetings' ? meetingsLabel(d) : t.label}</dt>
               <dd>{d && t.value ? t.value(d) : <i className="bar" style={{ width: '3ch' }}>{NBSP}</i>}</dd>
             </div>
           ))}
         </dl>
       )}
-      {live && <button type="button" className="btn ghost signout" data-testid="sign-out" onClick={() => { void signOut(); }}>Sign out</button>}
+      {live && <button type="button" className="btn text signout" data-testid="sign-out" onClick={() => { void signOut(); }}>Sign out</button>}
     </section>
   );
 }

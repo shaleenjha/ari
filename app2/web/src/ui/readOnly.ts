@@ -2,10 +2,10 @@
 // focusable and announce why); a tap only shows one quiet toast. In mock mode they work as before.
 import { useSyncExternalStore, type MouseEvent } from 'react';
 
-export const READ_ONLY_TOAST = 'Read-only preview. Actions arrive in Phase 2.';
+export const READ_ONLY_TOAST = 'Read-only preview';
 export const TOAST_MS = 2400;
 /** The one quiet line under the Read-only pill. */
-export const READ_ONLY_LINE = 'Read-only. Nothing you tap here changes data or sends anything.';
+export const READ_ONLY_LINE = 'Preview · actions off';
 
 let readOnly = false;
 let toastAt = 0;

@@ -27,7 +27,7 @@ export function OpenInBrowser() {
       <header className="hd"><h1 id="h-wv">Sign-in needs your browser.</h1></header>
       <p className="muted">Google sign-in does not open inside this app&rsquo;s link viewer. Open Ari in Chrome or Safari to sign in.</p>
       <div className="acts col">
-        <a className="btn wide center" href={href} rel="noopener" data-testid="open-external">Open in browser</a>
+        <a className="btn fill wide center" href={href} rel="noopener" data-testid="open-external">Open in browser</a>
         <button className="btn ghost wide center" onClick={() => void copy()} data-testid="copy-link">Copy link</button>
       </div>
       <p className="status" role="status" data-testid="copy-status">

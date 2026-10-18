@@ -143,21 +143,23 @@ test('@design text follows the phone text size (rem type)', async ({ page }) => 
   }
 });
 
-test('@design reduced motion: every move is a 120 ms fade with no travel; the tab bar is solid with no blur', async ({ page }) => {
+// S2 (v18.17.0): under reduced motion every spatial and expressive spring runs in 0 ms (lands in its end state) and the
+// effects (fades, colour) run 100 ms; the tab bar is solid surface-1 with no blur.
+test('@design reduced motion: springs land in their end state, effects fade 100 ms; the tab bar is solid with no blur', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await open(page, SCREENS[0]!);
   const r = await page.evaluate(() => {
     const root = getComputedStyle(document.documentElement);
     const tabs = getComputedStyle(document.querySelector('.tabs')!);
     const probe = document.createElement('i'); document.body.append(probe);
-    const durs = ['--dur-release', '--dur-tab', '--dur-sheet-open', '--dur-exit', '--dur-toast-in', '--dur-card-in', '--dur-check'].map((k) => {
+    const durs = ['--dur-spatial-fast', '--dur-spatial-default', '--dur-spatial-slow', '--dur-expressive-fast', '--dur-effects-fast', '--dur-effects-default', '--dur-effects-slow'].map((k) => {
       probe.style.transitionDuration = `var(${k})`; return getComputedStyle(probe).transitionDuration;
     });
     probe.remove();
-    return { durs, move: root.getPropertyValue('--move').trim(), bg: tabs.backgroundColor, blur: tabs.backdropFilter || 'none' };
+    void root;
+    return { durs, bg: tabs.backgroundColor, blur: tabs.backdropFilter || 'none' };
   });
-  expect(r.durs).toEqual(Array(7).fill('0.12s'));
-  expect(r.move).toBe('0');
+  expect(r.durs).toEqual([...Array(4).fill('0s'), ...Array(3).fill('0.1s')]);
   expect(r.blur).toBe('none');
-  expect(r.bg).toMatch(/^rgba?\(18, 18, 18/);
+  expect(r.bg).toMatch(/^rgba?\(28, 27, 25/);
 });

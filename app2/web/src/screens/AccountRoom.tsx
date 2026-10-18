@@ -1,6 +1,7 @@
 import { data } from '../data/client';
 import { useAsync } from '../ui/useAsync';
 import { Stale } from '../ui/Stale';
+import { Icon } from '../ui/Icon';
 
 const LABEL = { verified: 'Verified', inference: 'Inference', hypothesis: 'Hypothesis' } as const;
 
@@ -11,7 +12,7 @@ export function AccountRoom({ id }: { id: string }) {
   const { account, people, brief, tasks, activity } = a.data;
   return (
     <section aria-labelledby="h-acc">
-      <header className="hd"><a href="#/" className="back" aria-label="Back">‹</a><h1 id="h-acc">{account.name}</h1></header>
+      <header className="hd"><a href="#/" className="back" aria-label="Back"><Icon name="chevron-right" /></a><h1 id="h-acc">{account.name}</h1></header>
       <Stale at={a.stale} />
       <p className="muted">{account.oneLiner}</p>
       {brief && (

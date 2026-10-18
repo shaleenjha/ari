@@ -48,7 +48,7 @@ test('offline keeps what loaded across tab switches, then refetches on reconnect
   await expect(page.locator('main[data-screen="today"]')).toBeVisible();
 
   // Everything that loaded is still there, with one quiet line and no error.
-  await expect(page.getByTestId('stale')).toHaveText(/^Offline\. Showing what loaded at \d{1,2}:\d{2} (AM|PM)\.$/, { timeout: 10_000 });
+  await expect(page.getByTestId('stale')).toHaveText(/^Offline · loaded \d{1,2}:\d{2} (AM|PM)$/, { timeout: 10_000 });
   await expect(page.getByTestId('stale')).toHaveCount(1);
   await expect(page.getByTestId('queue')).toBeVisible();
   await expect(page.getByTestId('queue')).toContainText('Test Person A');

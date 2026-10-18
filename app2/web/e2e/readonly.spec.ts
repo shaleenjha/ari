@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // Phase 1 read-only UI, over synthetic rows (?ro=1). Live mode renders the same way once signed in.
-const TOAST = 'Read-only preview. Actions arrive in Phase 2.';
+const TOAST = 'Read-only preview';
 
 test('one quiet Read-only pill; write controls are aria-disabled (not native disabled) and a tap only shows the toast', async ({ page }) => {
   await page.goto('/?ro=1#/replies');

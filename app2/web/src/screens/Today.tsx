@@ -7,6 +7,7 @@ import { Stale } from '../ui/Stale';
 import { readHints, saveHints } from '../ui/layoutHints';
 import { Busy, SkelPin, SkelRow, SkelTidy, SkelWho } from '../ui/Skeleton';
 import { TidyUp, WhoIsThisCards } from './Cards';
+import { Icon } from '../ui/Icon';
 
 /**
  * Today loads everything it shows in one step and swaps the placeholders for the real screen at once, so nothing that is
@@ -33,24 +34,27 @@ export function Today() {
   }, [settled, d?.findings.length, d?.who.length, fresh.length, queue]);
   return (
     <section aria-labelledby="h-today" aria-busy={!d}>
-      <header className="hd"><h1 id="h-today">Today</h1></header>
+      <header className="hd"><h1 id="h-today">Today</h1><Counts queue={d ? queue : undefined} /></header>
       <Stale at={stale} />
       {d ? (
         <div key="data" ref={body}>
           {fresh.length > 0 && (
             <a className="card pin" href="#/replies" data-testid="reply-pin">
-              <b>{fresh.length} new {fresh.length === 1 ? 'reply' : 'replies'}</b><span>Answer first</span>
+              <Icon name="nav-replies" /><b>{fresh.length} new {fresh.length === 1 ? 'reply' : 'replies'}</b><Icon name="chevron-right" className="chev" />
             </a>
           )}
           <WhoIsThisCards items={d.who} />
           <Today15Link />
           <TidyUp findings={d.findings} />
-          <h2 className="sub">Your queue</h2>
+          <h2 className="sub">Up next · {queue?.length ?? 0}</h2>
           {!queue ? <p className="muted" role="alert">Could not load your queue.</p> : (
             <ul className="rows" data-testid="queue">
               {queue.map((x) => (
                 <li key={x.id} className="row">
-                  <a href={x.accountId ? `#/account/${x.accountId}` : '#/'}><b>{x.title}</b><span>{x.status === 'ready' ? 'Ready now' : 'Up next'}</span></a>
+                  <a href={x.accountId ? `#/account/${x.accountId}` : '#/'}>
+                    <span className="txt"><b>{x.title}</b><span>{x.status === 'ready' ? 'Ready now' : 'Up next'}</span></span>
+                    <span className={x.status === 'ready' ? 'side ready' : 'side'}><Icon name={x.status === 'ready' ? 'ready' : 'waiting'} size={16} /></span>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -61,7 +65,16 @@ export function Today() {
   );
 }
 
-const Today15Link = () => <a className="card" href="#/today15" data-testid="today15-link"><b>Today's 15</b><span>Who to connect with today</span></a>;
+const Today15Link = () => (
+  <a className="card" href="#/today15" data-testid="today15-link"><Icon name="send" /><b>Today's 15</b><Icon name="chevron-right" className="chev" /></a>
+);
+
+/** Header counts: "9 in queue · 4 ready". While loading the same line box holds a bar, so the header never moves. */
+function Counts({ queue }: { queue?: Task[] | null }) {
+  if (!queue) return <p className="count" aria-hidden="true"><i className="bar" style={{ width: '9ch' }} /></p>;
+  const ready = queue.filter((x) => x.status === 'ready').length;
+  return <p className="count" data-testid="today-counts"><b>{queue.length} in queue</b> <i>·</i> {ready} ready</p>;
+}
 
 function TodaySkeleton() {
   const h = readHints().today;
@@ -72,7 +85,7 @@ function TodaySkeleton() {
       {h.who.map((px, i) => <SkelWho key={i} px={px} />)}
       <Today15Link />
       {h.tidy && <SkelTidy />}
-      <h2 className="sub">Your queue</h2>
+      <h2 className="sub">Up next · {h.queue}</h2>
       <ul className="rows">{Array.from({ length: h.queue }, (_, i) => <SkelRow key={i} w={['62%', '48%', '56%', '70%', '52%'][i % 5]} />)}</ul>
     </div>
   );

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { data, opId } from '../data/client';
 import type { HygieneAction, HygieneFinding, WhoIsThis } from '../data/types';
 import { useReadOnly, writeProps } from '../ui/readOnly';
+import { Icon } from '../ui/Icon';
 
 const ACTION_LABEL: Record<HygieneAction, string> = { tick_connect: 'Tick invite sent', link: 'Link', merge: 'Merge', dismiss: 'Not an issue' };
 
@@ -53,7 +54,8 @@ export function TidyUp({ findings }: { findings: HygieneFinding[] }) {
   return (
     <div className="card col" data-testid="tidy-up">
       <button className="cardhead" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        <b>Tidy up</b><span data-testid="tidy-count">{left.length === 0 ? 'All tidy' : `${left.length} to check`}</span>
+        <Icon name="tidy-up" /><b>Tidy up</b><span data-testid="tidy-count">{left.length === 0 ? '0 to check' : `${left.length} to check`}</span>
+        <Icon name="chevron-right" className={open ? 'chev open' : 'chev'} />
       </button>
       {open && (
         <ul className="rows">

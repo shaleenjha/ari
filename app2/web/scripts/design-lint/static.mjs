@@ -6,10 +6,14 @@
 //       (JSX text and copy literals in .tsx, index.html text and title/alt/aria-label/placeholder/content, manifest
 //       name/short_name/description: also exclamation, place-or-timezone, infra-word).
 // CSS:  system font as the primary family, gradients and glow shadows (src/**/*.css and inline styles) outside
-//       EFFECTS_ALLOW_LIST. Citrine (v18.16.0): raw colours outside TOKENS_FILE (CSS and inline styles), backdrop-filter
+//       EFFECTS_ALLOW_LIST. Tokens: raw colours outside TOKENS_FILE (CSS and inline styles), backdrop-filter
 //       anywhere, every text token on every surface token >= 4.5:1 (computed from tokens.css), hex colours in index.html
 //       and the manifest must equal a token value (they cannot read variables), status elements with no content,
 //       --t-3 on --s-high, px font sizes and raw motion (cubic-bezier, linear(), ms) outside TOKENS_FILE.
+//       S2 (v18.17.0): no raw hex or rgb() in any literal or src/ SVG (raw-color; public/brand/ is exempt), no typed
+//       status glyphs (status-glyph-char: they come from the sprite ari-* symbols), no
+//       <img> in JSX (ui-icon-img: icons are sprite <use>, art is inline SVG), no PNG under src/ui/art (art-png), and
+//       stroke width only from the sprite (icon-stroke: no strokeWidth in JSX, no stroke-width in CSS).
 //   node scripts/design-lint/static.mjs --tokens   also print the token contrast matrix
 // Allows: see allow.mjs (allow.json per file, inline `lint-allow: <rule> <reason>`). Exit 1 on any error; CI=true adds
 // GitHub annotations.
@@ -17,13 +21,13 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { EFFECTS_ALLOW_LIST, TOKENS_FILE, checkText, colorDrift, declarations, forbiddenPairs, lintCss, tokenContrast } from './rules.mjs';
+import { EFFECTS_ALLOW_LIST, TOKENS_FILE, RAW_COLOR, RAW_HEX, checkText, colorDrift, declarations, forbiddenPairs, lintCss, statusGlyphChar, tokenContrast } from './rules.mjs';
 import { WEB_ROOT, allowIndex, finding, loadAllowJson, printFindings, staleJsonEntries } from './allow.mjs';
 
 const ROOT = WEB_ROOT;
 /** Rules this lint owns (stale allows for other rules are left to their own lint). */
 export const STATIC_RULES = new Set(['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow',
-  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status', 'px-font-size', 'raw-motion']);
+  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status', 'px-font-size', 'raw-motion', 'status-glyph-char', 'ui-icon-img', 'art-png', 'icon-stroke']);
 
 function walk(dir) {
   const out = [];
@@ -91,6 +95,11 @@ export function lintSource(file, text, { jsonEntries } = {}) {
   };
   const report = (node, value, copy) => {
     for (const v of checkText(value, { copy })) push(matchPos(src, node, v.match), v.rule, v.match, value, copy ? 'in UI copy' : 'in a source literal');
+    // S2: no raw colour in any literal (template literals and SVG fill/stroke attributes included); colours are var(--…).
+    const rc = value.match(RAW_COLOR);
+    if (rc) push(matchPos(src, node, rc[0]), 'raw-color', rc[0], value, 'in a source literal (use a token: var(--…))');
+    const g = copy ? statusGlyphChar(value) : null;
+    if (g) push(matchPos(src, node, g), 'status-glyph-char', g, value, 'in UI copy (use <Icon> from ui/Icon.tsx)');
   };
   const visit = (node) => {
     if (ts.isRegularExpressionLiteral(node)) return;
@@ -111,6 +120,11 @@ export function lintSource(file, text, { jsonEntries } = {}) {
       if (/#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i.test(t)) push(pos, 'raw-color', 'inline style', t, 'in an inline style');
       if (/backdropFilter|WebkitBackdropFilter/.test(t)) push(pos, 'backdrop-filter', 'inline style', t, 'in an inline style');
     }
+    // Identity v1: icons come from the sprite and art is inline SVG, so no <img> in JSX; stroke width lives in the sprite.
+    if ((ts.isJsxSelfClosingElement(node) || ts.isJsxOpeningElement(node)) && node.tagName.getText(src) === 'img') {
+      push(node.getStart(src), 'ui-icon-img', '<img', node.getText(src), 'in JSX (use <Icon> from ui/Icon.tsx)');
+    }
+    if (ts.isJsxAttribute(node) && node.name.getText() === 'strokeWidth') push(node.getStart(src), 'icon-stroke', 'strokeWidth', node.getText(src), 'in JSX (stroke comes from the sprite)');
     // <span role="status" /> or <i data-status="ok" />: a status with no children can only be colour.
     if (ts.isJsxSelfClosingElement(node)) {
       const attrs = node.attributes.properties.filter(ts.isJsxAttribute);
@@ -128,7 +142,8 @@ export function lintSource(file, text, { jsonEntries } = {}) {
 /** Lint one stylesheet (CSS rules) with allows applied. */
 export function lintCssFile(file, text, { jsonEntries, vars } = {}) {
   const allow = allowIndex(file, text, jsonEntries);
-  const out = [...lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file), tokens: file === TOKENS_FILE, vars }),
+  const strokes = declarations(text).filter((d) => d.prop === 'stroke-width').map((d) => ({ rule: 'icon-stroke', line: d.line, match: `${d.prop}: ${d.value}` }));
+  const out = [...lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file), tokens: file === TOKENS_FILE, vars }), ...strokes,
     ...forbiddenPairs(text).map((x) => ({ rule: 'token-contrast', line: x.line, match: `forbidden pair: ${x.match}` }))]
     .filter((x) => !allow.suppress(x.rule, x.line))
     .map((x) => ({ ...finding(file, x.line, 1, x.rule, x.match, x.match), kind: 'in CSS' }));
@@ -194,6 +209,11 @@ export function run(root = ROOT, { allowJson = join(root, 'scripts/design-lint/a
     const text = readFileSync(f, 'utf8');
     if (/\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f) && !f.endsWith('.d.ts')) findings.push(...lintSource(rel, text, { jsonEntries }));
     if (f.endsWith('.css')) findings.push(...lintCssFile(rel, text, { jsonEntries, vars }));
+    if (f.endsWith('.svg')) {
+      const lines = text.split('\n');
+      lines.forEach((l, i) => { const m = l.match(RAW_HEX); if (m) findings.push({ ...finding(rel, i + 1, (m.index ?? 0) + 1, 'raw-color', m[0], `${m[0]} in an SVG under src/ (use currentColor or var(--…); brand art lives in public/brand/)`), kind: 'in SVG' }); });
+    }
+    if (/\.png$/i.test(f) && rel.startsWith('src/ui/art/')) findings.push({ ...finding(rel, 1, 1, 'art-png', rel, 'art ships as SVG only'), kind: 'in src/ui/art' });
   }
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const manifest = readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8');

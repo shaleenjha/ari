@@ -98,7 +98,7 @@ jobs:
       - run: python3 scripts/test_hygiene_scan.py
 
   anti-slop-static:
-    name: anti-slop-static (copy rules, CSS rules, query-unbounded; blocking)
+    name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)
     runs-on: ubuntu-latest
     timeout-minutes: 3
     defaults: { run: { working-directory: app2/web } }
@@ -106,6 +106,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm, cache-dependency-path: app2/web/package-lock.json }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      # S2 (v18.17.0): the design package checks (_build/verify.py) ported to scripts/tokens/verify.py: contrast from the
+      # final tokens.css, tokens.css == gen(tokens.json), 4 px grid and radius set, no raw hex anywhere in src/.
       - run: npm ci && npm run lint:slop
 
   design-lint:

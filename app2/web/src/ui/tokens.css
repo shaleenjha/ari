@@ -1,121 +1,117 @@
-/* Citrine design tokens v1 (s2/tokens, v18.16.0). Values: plans/design-system/citrine-spec.md and tokens-citrine.json (Craft).
-   The ONLY file in src/ that may hold a raw colour, a px font size, a cubic-bezier() or a raw duration (design lint rules
-   raw-color, px-font-size, raw-motion). Change the look by editing this file and nothing else.
-   The lint reads this file and fails CI when any text token on any surface token is below 4.5:1 (token-contrast). Names
-   carry meaning for that check:
-     --s-*        a surface people read text on (a translucent one is composited over every opaque surface and --t-1)
-     --t-<n>      a text tier; --accent and --alert may also colour text
-     --on-*       ink on a fill: checked against its fill only (see INVERSE_PAIRS in scripts/design-lint/rules.mjs)
-   --t-3 never sits on --s-high (4.50:1 there, no margin): the lint drops that pair and fails a rule that puts them together.
-   index.html (theme-color, boot screen) and public/manifest.webmanifest cannot read variables: they mirror --s-canvas,
-   --t-1 and --t-2, and the lint fails when they drift from this file. */
+/* GENERATED from tokens.json by gen_css.py. Do not edit by hand. */
 :root {
-  /* Surfaces: warm luminance steps with hairlines; no shadows, no blur (rule backdrop-filter). */
-  --s-canvas: #121212;              /* page, theme-color */
-  --s-raised: #1C1B19;              /* cards, hero, report tiles */
-  --s-overlay: #252421;             /* sheets, toasts */
-  --s-high: #2E2C29;                /* pressed, progress track, input fill */
-  --s-bar: rgba(18, 18, 18, 0.96);  /* tab bar: canvas at 0.96, solid look, plus a hairline */
-
-  /* Text tiers (all >= 4.5:1 on every surface; --t-3 only for skippable meta of 14 px and up, never on --s-high). */
-  --t-1: #ECE6DC;
-  --t-2: #B5AFA4;
-  --t-3: #979289;
-
-  /* One accent (primary fill, focus ring, progress, glyphs; never meaning on a word alone). Coral marks friction only. */
-  --accent: #E5D0AC;
-  --alert: #EB735A;
+  color-scheme: dark;
+  --u: 1rem;
+  --canvas: #121212;
+  --surface-1: #1C1B19;
+  --surface-2: #252421;
+  --surface-3: #2E2C29;
+  --hairline: #34322E;
+  --border: #716D65;
+  --text-1: #ECE6DC;
+  --text-2: #B5AFA4;
+  --text-3: #979289;
+  --accent: #F0AA3C;
+  --accent-pressed: #D9962F;
   --on-accent: #121212;
-  --on-alert: #121212;
-
-  /* Lines. --line-control is a real boundary (>= 3:1, WCAG 1.4.11); --line is decorative and never the only boundary. */
-  --line-control: #716D65;
-  --line: #34322E;
-
-  /* Spacing. */
-  --sp-4: 4px;
-  --sp-8: 8px;
-  --sp-16: 16px;
-  --sp-24: 24px;
-  --sp-32: 32px;
-  --sp-48: 48px;
-  --sp-64: 64px;
-
-  /* Radii. A nested radius is the outer radius minus the padding. */
+  --friction: #F0758F;
+  --done: #7CCBB8;
+  --focus: #F0AA3C;
+  --scrim: #121212;
+  --font: "Instrument Sans", "IS Fallback A", "IS Fallback R", sans-serif;
+  --fs-title: calc(var(--u) * 1.375); --lh-title: calc(var(--u) * 1.75); --fw-title: 600; --ls-title: -0.012em;
+  --fs-name: calc(var(--u) * 1.25); --lh-name: calc(var(--u) * 1.625); --fw-name: 600; --ls-name: -0.008em;
+  --fs-body: calc(var(--u) * 0.9375); --lh-body: calc(var(--u) * 1.375); --fw-body: 400; --ls-body: 0em;
+  --fs-body-strong: calc(var(--u) * 0.9375); --lh-body-strong: calc(var(--u) * 1.375); --fw-body-strong: 560; --ls-body-strong: 0em;
+  --fs-meta: calc(var(--u) * 0.8125); --lh-meta: calc(var(--u) * 1.125); --fw-meta: 460; --ls-meta: 0.005em;
+  --fs-caps: calc(var(--u) * 0.6875); --lh-caps: calc(var(--u) * 1); --fw-caps: 600; --ls-caps: 0.08em;
+  --fs-button: calc(var(--u) * 1); --lh-button: calc(var(--u) * 1.25); --fw-button: 560; --ls-button: 0.005em;
+  --fs-metric: calc(var(--u) * 1.75); --lh-metric: calc(var(--u) * 2); --fw-metric: 520; --ls-metric: -0.01em;
+  --fs-status: calc(var(--u) * 0.75); --lh-status: calc(var(--u) * 1); --fw-status: 500; --ls-status: 0.01em;
+  --fs-label: calc(var(--u) * 0.75); --lh-label: calc(var(--u) * 1); --fw-label: 500; --ls-label: 0.01em;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-12: 48px;
+  --margin: 16px;
+  --target: 48px;
+  --btn-m: 56px;
+  --btn-s: 40px;
+  --btn-m-pad: 24px;
+  --btn-s-pad: 16px;
+  --btn-gap: 8px;
+  --chip-h: 32px;
+  --row-1: 56px;
+  --row-2: 64px;
+  --row-3: 88px;
+  --nav-h: 64px;
+  --status-h: 24px;
+  --header-h: 48px;
+  --snackbar-h: 48px;
+  --sheet-top: 72px;
+  --sheet-max: 640px;
+  --handle-w: 32px;
+  --handle-h: 4px;
+  --icon-s: 16px;
+  --icon-m: 20px;
+  --icon-l: 24px;
+  --dial: 28px;
+  --stroke: 1.5px;
+  --draft-lines: 6;
   --r-chip: 8px;
-  --r-btn: 12px;
-  --r-card: 16px;
-  --r-hero: 20px;
-  --r-sheet: 24px;
-  --r-pill: 999px;
-
-  /* Type: Inter variable, 5 steps. Sizes are rem times --k, so text follows the phone's text size on both platforms:
-     Android root 16 px (meta text-scale in index.html), iOS root 17 px (-apple-system-body, Dynamic Type, see styles.css)
-     with --k 0.9412, so both render the same pixels at the default size. Tracking follows Inter's dynamic metrics. */
-  --k: 1;
-  --font-sans: 'Inter', 'Inter Fallback', 'Inter Fallback Roboto', system-ui, sans-serif;
-  --fs-display: calc(2.125rem * var(--k));   /* 34 */
-  --lh-display: calc(2.5rem * var(--k));     /* 40 */
-  --fw-display: 600;
-  --tr-display: -0.022em;
-  --fs-title: calc(1.625rem * var(--k));     /* 26 */
-  --lh-title: calc(2rem * var(--k));         /* 32 */
-  --fw-title: 650;
-  --tr-title: -0.020em;
-  --fs-headline: calc(1.25rem * var(--k));   /* 20 */
-  --lh-headline: calc(1.75rem * var(--k));   /* 28 */
-  --fw-headline: 600;
-  --tr-headline: -0.017em;
-  --fs-body: calc(1.0625rem * var(--k));     /* 17 */
-  --lh-body: calc(1.5rem * var(--k));        /* 24 */
-  --fw-body: 400;
-  --fw-strong: 600;
-  --tr-body: -0.013em;
-  --fs-meta: calc(0.875rem * var(--k));      /* 14 */
-  --lh-meta: calc(1.25rem * var(--k));       /* 20 */
-  --fw-meta: 500;
-  --tr-meta: -0.006em;
-
-  /* Targets: 48 px both sides, always min-height, never a fixed height. */
-  --tap: 48px;
-
-  /* Motion: springs as CSS linear() (zero JS; Safari 17.2+, Chrome 113+), cubic-bezier fallbacks for older engines.
-     ui: zeta 1 (tabs, sheets, list moves, press release). settle: zeta 0.85, 0.63% overshoot (arrivals, toasts, the
-     check). exit: accelerating (things leaving). Animate transform and opacity only. */
-  --ease-ui: cubic-bezier(0.25, 0.8, 0.3, 1);
-  --ease-settle: cubic-bezier(0.25, 0.85, 0.3, 1.01);
-  --ease-exit: cubic-bezier(0.5, 0, 0.75, 0.4);
-  --dur-press: 0ms;
-  --dur-release: 200ms;
-  --dur-tab: 240ms;
-  --dur-sheet-open: 360ms;
-  --dur-exit: 200ms;
-  --dur-toast-in: 300ms;
-  --dur-card-in: 360ms;
-  --dur-check: 240ms;
-  --dur-reduced: 120ms;
-  --dur-pulse: 1.6s;    /* skeleton pulse (only runs with prefers-reduced-motion: no-preference) */
-  --move: 1;            /* multiply every travel distance by this: translate(calc(12px * var(--move))) */
+  --r-well: 8px;
+  --r-btn-s: 12px;
+  --r-btn-s-pressed: 8px;
+  --r-btn-m: 16px;
+  --r-btn-m-pressed: 12px;
+  --r-tile: 16px;
+  --r-card: 20px;
+  --r-sheet: 28px;
+  --r-snackbar: 12px;
+  --r-full: 9999px;
+  --spring-spatial-fast: linear(0, 0.049, 0.161, 0.295, 0.43, 0.552, 0.658, 0.745, 0.814, 0.868, 0.908, 0.938, 0.959, 0.974, 0.985, 0.992, 0.996, 0.999, 1, 1.001, 1.001, 1.002, 1.001, 1.001, 1);
+  --dur-spatial-fast: 220ms;
+  --spring-spatial-default: linear(0, 0.049, 0.161, 0.295, 0.43, 0.553, 0.659, 0.746, 0.815, 0.868, 0.909, 0.938, 0.96, 0.975, 0.985, 0.992, 0.996, 0.999, 1, 1.001, 1.001, 1.002, 1.001, 1.001, 1);
+  --dur-spatial-default: 320ms;
+  --spring-spatial-slow: linear(0, 0.049, 0.161, 0.295, 0.43, 0.553, 0.659, 0.746, 0.815, 0.868, 0.909, 0.938, 0.96, 0.975, 0.985, 0.992, 0.996, 0.999, 1, 1.001, 1.001, 1.002, 1.001, 1.001, 1);
+  --dur-spatial-slow: 480ms;
+  --spring-effects-fast: linear(0, 0.057, 0.18, 0.32, 0.454, 0.572, 0.67, 0.749, 0.811, 0.859, 0.896, 0.924, 0.944, 0.959, 0.97, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
+  --dur-effects-fast: 150ms;
+  --spring-effects-default: linear(0, 0.057, 0.18, 0.32, 0.454, 0.572, 0.67, 0.749, 0.812, 0.86, 0.896, 0.924, 0.944, 0.959, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
+  --dur-effects-default: 230ms;
+  --spring-effects-slow: linear(0, 0.057, 0.18, 0.32, 0.454, 0.572, 0.67, 0.749, 0.812, 0.86, 0.896, 0.924, 0.944, 0.959, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
+  --dur-effects-slow: 330ms;
+  --spring-expressive-fast: linear(0, 0.075, 0.248, 0.456, 0.657, 0.825, 0.95, 1.033, 1.078, 1.094, 1.091, 1.076, 1.057, 1.038, 1.021, 1.008, 0.999, 0.994, 0.991, 0.991, 0.992, 0.994, 0.996, 0.998, 1);
+  --dur-expressive-fast: 360ms;
+  --dur-short1: 50ms;
+  --dur-short2: 100ms;
+  --dur-short3: 150ms;
+  --dur-short4: 200ms;
+  --dur-medium1: 250ms;
+  --dur-medium2: 300ms;
+  --dur-medium3: 350ms;
+  --dur-medium4: 400ms;
+  --dur-long1: 450ms;
+  --dur-long2: 500ms;
+  --dur-long3: 550ms;
+  --dur-long4: 600ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+  --ease-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
 }
-@supports (transition-timing-function: linear(0, 1)) {
-  :root {
-    --ease-ui: linear(0, 0.006 1.5%, 0.021 3.0%, 0.049 4.8%, 0.085 6.5%, 0.164 9.8%, 0.360 17.0%, 0.450 20.5%, 0.538 24.2%, 0.615 28.0%, 0.678 31.5%, 0.733 35.0%, 0.782 38.8%, 0.823 42.5%, 0.865 47.2%, 0.899 52.2%, 0.928 57.8%, 0.950 63.7%, 0.966 70.0%, 0.978 77.0%, 0.988 87.0%, 0.995 99.8%, 1);
-    --ease-settle: linear(0, 0.007 1.8%, 0.025 3.5%, 0.056 5.5%, 0.097 7.5%, 0.188 11.2%, 0.406 19.2%, 0.504 23.0%, 0.593 26.8%, 0.672 30.5%, 0.732 33.8%, 0.788 37.2%, 0.835 40.8%, 0.876 44.5%, 0.916 49.0%, 0.948 54.0%, 0.971 59.2%, 0.988 65.0%, 0.999 72.0%, 1.005 80.5%, 1.005 99.8%, 1);
-    --ease-exit: linear(0, 0.004 3.5%, 0.017 7.5%, 0.038 12.0%, 0.065 16.5%, 0.145 27.0%, 0.262 39.5%, 0.411 53.5%, 0.587 68.5%, 0.790 84.5%, 1);
-  }
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root { --spring-spatial-fast: var(--ease-emphasized-decelerate); --spring-spatial-default: var(--ease-emphasized-decelerate); --spring-spatial-slow: var(--ease-emphasized-decelerate); --spring-effects-fast: var(--ease-standard); --spring-effects-default: var(--ease-standard); --spring-effects-slow: var(--ease-standard); --spring-expressive-fast: var(--ease-emphasized-decelerate); }
 }
-/* iOS Safari and the installed iOS PWA (touch-callout is iOS only): the root follows Dynamic Type at 17 px, so --k
-   brings every step back to the same pixels as Android at the default size. */
-@supports (font: -apple-system-body) and (-webkit-touch-callout: default) {
-  :root { --k: 0.9412; }
+@supports (font: -apple-system-body) {
+  html { font: -apple-system-body; }
+  :root { --u: calc(1rem * 16 / 17); }
 }
-/* Reduced motion (matched live): every move becomes a 120 ms opacity change. Durations collapse to --dur-reduced and
-   travel goes to zero; press-in stays instant. */
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    --dur-release: var(--dur-reduced); --dur-tab: var(--dur-reduced); --dur-sheet-open: var(--dur-reduced);
-    --dur-exit: var(--dur-reduced); --dur-toast-in: var(--dur-reduced); --dur-card-in: var(--dur-reduced);
-    --dur-check: var(--dur-reduced); --move: 0;
-    --ease-ui: linear(0, 1); --ease-settle: linear(0, 1); --ease-exit: linear(0, 1);
-  }
+  :root { --dur-spatial-fast: 0ms; --dur-spatial-default: 0ms; --dur-spatial-slow: 0ms; --dur-effects-fast: 100ms; --dur-effects-default: 100ms; --dur-effects-slow: 100ms; --dur-expressive-fast: 0ms; }
 }

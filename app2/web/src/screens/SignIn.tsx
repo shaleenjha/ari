@@ -7,7 +7,7 @@ export function SignIn({ error, misconfigured }: { error: string | null; misconf
       {misconfigured ? <p className="muted" role="alert">This preview is not set up for sign-in yet.</p> : (
         <>
           <p className="muted">Sign in with the Google account Ari knows.</p>
-          <button className="btn" onClick={signIn}>Sign in with Google</button>
+          <button className="btn fill" onClick={signIn}>Sign in with Google</button>
           {error && <p className="status" role="alert">{error}</p>}
         </>
       )}

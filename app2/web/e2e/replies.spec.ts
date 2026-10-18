@@ -17,7 +17,7 @@ test('Draft an answer opens Ari\'s draft; Copy and open LinkedIn copies it and o
   await page.getByRole('button', { name: 'Draft an answer' }).click();
   const box = page.getByTestId('draft-r-1').locator('textarea');
   await expect(box).toHaveValue(/^Thanks Jamie\./);
-  await expect(page.getByTestId('draft-r-1')).toContainText("Ari's draft");
+  await expect(page.getByTestId('draft-r-1')).toContainText('Draft');
   await box.fill('Thanks Jamie. Short answer: yes, it fits your stack.');
   await page.getByRole('button', { name: 'Copy and open LinkedIn' }).click();
   await expect(page.getByRole('status')).toHaveText('Copied. Opening LinkedIn.');
@@ -47,7 +47,7 @@ test('Not now moves the reply out of Replies and the Today pin; Undo and Move ba
   const rows = page.getByTestId('replies').locator('li');
   await page.getByRole('button', { name: 'Not now' }).click();
   await expect(rows).toHaveCount(0);
-  await expect(page.getByText('No new replies.')).toBeVisible();
+  await expect(page.getByText('Nothing to sort.')).toBeVisible();
   await expect(page.getByTestId('toast')).toContainText('Moved to Not now.');
   await page.getByTestId('toast').getByRole('button', { name: 'Undo' }).click();
   await expect(rows).toHaveCount(1);

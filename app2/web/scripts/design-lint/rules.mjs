@@ -13,7 +13,7 @@ export const WIDTHS = [360, 390, 412];
 
 /** Only these CSS files may use gradients or glow shadows (none today). Paths relative to app2/web. */
 export const EFFECTS_ALLOW_LIST = ['src/ui/effects.allowed.css'];
-/** The one file that may hold raw colours (Citrine s2/tokens). Every other stylesheet and inline style uses its variables. */
+/** The one file that may hold raw colours (S2 tokens, generated from design/tokens.json by scripts/tokens/gen_css.py). Every other stylesheet and inline style uses its variables. */
 export const TOKENS_FILE = 'src/ui/tokens.css';
 /** Every text token on every surface token must reach this (WCAG AA body text), whatever size it ends up used at. */
 export const TOKEN_MIN_RATIO = 4.5;
@@ -29,7 +29,16 @@ const INFRA = /\b(?:supabase|vercel|postgres(?:ql)?|postgrest|rls|databases?|api
 
 /** Every rule an allow may name. Static copy and CSS rules, the query rule, and the rendered dead-tap opt-out. */
 export const RULES = ['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow', 'query-unbounded', 'dead-tap',
-  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status', 'px-font-size', 'raw-motion'];
+  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status', 'px-font-size', 'raw-motion', 'status-glyph-char', 'one-fill', 'ui-icon-img', 'art-png',
+  'icon-stroke'];
+
+// ---------- S2 identity (v18.17.0) ----------
+/** At most this many filled amber buttons (.btn.fill) show in one view (spec: only the first row is filled). */
+export const MAX_FILLED = 1;
+/** Ari's status glyphs. They come from the icon sprite (ari-*), never typed. */
+export const STATUS_GLYPH_CHARS = /[\u25CF\u25CB\u2713\u2714\u25B2\u25C6\u2016]/;
+/** Typed status glyphs in a piece of UI copy (JSX text or a copy literal). */
+export const statusGlyphChar = (text) => text.match(STATUS_GLYPH_CHARS)?.[0] ?? null;
 
 /**
  * Check one piece of text.
@@ -91,6 +100,8 @@ export function familyFromShorthand(v) {
 }
 
 /** A literal colour in a CSS value: hex, or a colour function (var() and color-mix() over variables are fine). */
+/** A hex colour anywhere in src/ outside TOKENS_FILE (literals, template literals, SVG fill/stroke): public/brand/ only. */
+export const RAW_HEX = /#[0-9a-f]{3,8}\b/i;
 export const RAW_COLOR = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i;
 /** Glass: blur behind an element. A GPU cost on every scroll frame in WebKit, and the look the lint keeps out. */
 export const isBackdropProp = (prop) => /^(?:-webkit-)?backdrop-filter$/.test(prop);
@@ -168,7 +179,7 @@ export const CONTRAST_EXEMPT = '[aria-disabled="true"]';
 /** True when an element with these attributes (its own or an ancestor's) is exempt from the contrast check. */
 export const contrastExempt = (attrs) => attrs['aria-disabled'] === 'true';
 
-// ---------- tokens (Citrine) ----------
+// ---------- tokens (S2 Lamp & Dawn) ----------
 /** `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()` / `rgba()` to [r, g, b, a]; null for anything else. */
 export function parseColor(v) {
   const s = String(v).trim().toLowerCase();
@@ -189,16 +200,21 @@ export function parseColor(v) {
   return null;
 }
 const overOpaque = (top, under) => [0, 1, 2].map((i) => top[i] * top[3] + under[i] * (1 - top[3]));
-export const isSurfaceToken = (n) => /^--s-[\w-]+$/.test(n);
-export const isTextToken = (n) => /^--t-\d+$/.test(n) || n === '--accent' || n === '--alert';
-/** Ink-on-fill pairs, checked only against their own fill. The t-1 fill is today's primary button until slot 3 moves the
- *  one primary fill to champagne. */
-export const INVERSE_PAIRS = [['--on-accent', '--accent'], ['--on-alert', '--alert'], ['--on-accent', '--t-1']];
+/** S2 (v18.17.0) token names: surfaces are --canvas and --surface-N; text tiers are --text-N, and the amber key, dawn-teal
+ *  done and rose friction may colour text too. (--s-N is now the spacing scale, so it is not a surface.) */
+export const isSurfaceToken = (n) => n === '--canvas' || /^--surface-\d+$/.test(n);
+export const isTextToken = (n) => /^--text-\d+$/.test(n) || n === '--accent' || n === '--friction' || n === '--done';
+/** Non-text boundaries (WCAG 1.4.11): need 3:1 on every surface (border not on surface-3, per the S2 package verify). */
+export const BOUNDARY_TOKENS = ['--border', '--focus'];
+export const BOUNDARY_MIN_RATIO = 3;
+/** Ink-on-fill pairs, checked only against their own fill: the amber key, its pressed fill, the teal sent fill, and the
+ *  skip link (ink on text-1, keyboard focus only). */
+export const INVERSE_PAIRS = [['--on-accent', '--accent'], ['--on-accent', '--accent-pressed'], ['--on-accent', '--done'], ['--on-accent', '--text-1']];
 /** Text tokens that must never sit on a surface (spec: --t-3 is 4.50:1 on --s-high, no margin). Dropped from the matrix
  *  and enforced by forbiddenPairs() on every stylesheet rule. */
-export const FORBIDDEN_PAIRS = [['--t-3', '--s-high']];
+export const FORBIDDEN_PAIRS = [['--text-3', '--surface-3'], ['--border', '--surface-3']];
 /** Core tokens every token file must define. */
-export const CORE_TOKENS = ['--s-canvas', '--t-1'];
+export const CORE_TOKENS = ['--canvas', '--text-1'];
 
 /**
  * Contrast matrix of a token file. Every text token on every surface token (minus FORBIDDEN_PAIRS), plus INVERSE_PAIRS.
@@ -211,6 +227,8 @@ export function tokenContrast(css) {
   const decls = declarations(css).filter((d) => d.prop.startsWith('--'));
   const val = new Map(); const line = new Map();
   for (const d of decls) { if (!val.has(d.prop)) { val.set(d.prop, d.value); line.set(d.prop, d.line); } }
+  // An alias (`--focus: var(--accent)`) is checked as the colour it resolves to.
+  for (const [k, v] of val) if (/var\(/.test(v)) val.set(k, resolveVars(v, val).trim());
   const findings = [];
   const col = (n) => {
     const c = parseColor(val.get(n) ?? '');
@@ -221,30 +239,31 @@ export function tokenContrast(css) {
   const surfaces = [...val.keys()].filter(isSurfaceToken);
   const texts = [...val.keys()].filter(isTextToken);
   const opaque = surfaces.map((n) => [n, col(n)]).filter(([, c]) => c && c[3] === 1);
-  const primary = parseColor(val.get('--t-1') ?? '');
+  const primary = parseColor(val.get('--text-1') ?? '');
   /** Every backdrop a surface can show: itself when opaque, else composited over each opaque surface and text-primary. */
   const backdrops = (n) => {
     const c = parseColor(val.get(n) ?? '');
     if (!c) return [];
     if (c[3] === 1) return [{ label: n, rgb: c.slice(0, 3) }];
-    const unders = [...opaque.map(([u, uc]) => [u, uc]), ...(primary ? [['--t-1', primary]] : [])];
+    const unders = [...opaque.map(([u, uc]) => [u, uc]), ...(primary ? [['--text-1', primary]] : [])];
     return unders.map(([u, uc]) => ({ label: `${n} over ${u}`, rgb: overOpaque(c, uc) }));
   };
   const pairs = [];
-  const check = (t, s) => {
+  const check = (t, s, need = TOKEN_MIN_RATIO) => {
     const tc = col(t); if (!tc) return;
     const bds = backdrops(s); if (!bds.length) return;
     const worst = bds.map((b) => {
       const fg = tc[3] === 1 ? tc.slice(0, 3) : overOpaque(tc, b.rgb);
       return { label: b.label, ratio: contrast(fg, b.rgb) };
     }).sort((a, b) => a.ratio - b.ratio)[0];
-    const pass = worst.ratio + 1e-9 >= TOKEN_MIN_RATIO;
-    pairs.push({ text: t, surface: worst.label, ratio: Math.round(worst.ratio * 100) / 100, need: TOKEN_MIN_RATIO, pass });
-    if (!pass) findings.push({ rule: 'token-contrast', line: line.get(t) ?? 1, match: `${t} on ${worst.label} is ${worst.ratio.toFixed(2)}:1 < ${TOKEN_MIN_RATIO}:1` });
+    const pass = worst.ratio + 1e-9 >= need;
+    pairs.push({ text: t, surface: worst.label, ratio: Math.round(worst.ratio * 100) / 100, need, pass });
+    if (!pass) findings.push({ rule: 'token-contrast', line: line.get(t) ?? 1, match: `${t} on ${worst.label} is ${worst.ratio.toFixed(2)}:1 < ${need}:1` });
   };
   const forbidden = (t, s) => FORBIDDEN_PAIRS.some(([a, b]) => a === t && b === s);
   for (const s of surfaces) for (const t of texts) if (!forbidden(t, s)) check(t, s);
   for (const [t, s] of INVERSE_PAIRS) if (val.has(t) && val.has(s)) check(t, s);
+  for (const b of BOUNDARY_TOKENS) if (val.has(b)) for (const s of surfaces) if (!forbidden(b, s)) check(b, s, BOUNDARY_MIN_RATIO);
   return { pairs, findings };
 }
 

@@ -10,12 +10,13 @@ import { SignIn } from './screens/SignIn';
 import { OpenInBrowser } from './screens/OpenInBrowser';
 import { READ_ONLY_LINE, READ_ONLY_TOAST, TOAST_MS, hideReadOnlyToast, useReadOnly, useReadOnlyToast } from './ui/readOnly';
 import { useSession } from './ui/session';
+import { Icon, type IconName } from './ui/Icon';
 
 const TABS = [
-  { href: '#/', label: 'Today', key: 'today' },
-  { href: '#/replies', label: 'Replies', key: 'replies' },
-  { href: '#/report', label: 'Report', key: 'report' },
-] as const;
+  { href: '#/', label: 'Today', key: 'today', icon: 'nav-today' },
+  { href: '#/replies', label: 'Replies', key: 'replies', icon: 'nav-replies' },
+  { href: '#/report', label: 'Report', key: 'report', icon: 'nav-report' },
+] as const satisfies readonly { href: string; label: string; key: string; icon: IconName }[];
 
 /** The one quiet toast a write control shows in read-only mode. */
 function ReadOnlyToast() {
@@ -67,7 +68,7 @@ function Shell({ ro }: { ro: boolean }) {
       <nav className="tabs" aria-label="Main">
         {TABS.map((t) => (
           <a key={t.key} href={t.href} className={active === t.key ? 'on' : ''} aria-current={active === t.key ? 'page' : undefined}
-            onClick={(e) => onTab(e, t.key)}>{t.label}</a>
+            onClick={(e) => onTab(e, t.key)}><Icon name={t.icon} size={24} /><span>{t.label}</span></a>
         ))}
       </nav>
       {ro && <ReadOnlyToast />}

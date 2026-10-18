@@ -16,7 +16,7 @@ const ROWS: Record<string, unknown[]> = {
   hygiene_findings: [{ id: 'f900', check_key: 'stale_stage', entity_type: 'person', entity_id: 'P900', status: 'open', first_seen: now(), detail: { label: 'Test' } }],
   replies: [], log_entries: [], accounts: [], account_briefs: [],
 };
-const LINE = /^Offline\. Showing what loaded at \d{1,2}:\d{2} (AM|PM)\.$/;
+const LINE = /^Offline · loaded \d{1,2}:\d{2} (AM|PM)$/;
 
 async function mock(ctx: BrowserContext) {
   const net = { down: false, rest: 0 };
