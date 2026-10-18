@@ -8,6 +8,8 @@ export const MIN_TAP = 48;
 export const TODAY_MAX_VIEWPORTS = 1.5;
 /** Largest layout shift allowed from placeholders to loaded data on Today, Replies and Report (e2e/cls.spec.ts). */
 export const MAX_CLS = 0.02;
+/** Today allows no layout shift at all, cold or warm (v18.17.2): placeholders and data share every slot. */
+export const TODAY_MAX_CLS = 0;
 /** Widths every screen is checked at (playwright.config.ts projects). */
 export const WIDTHS = [360, 390, 412];
 

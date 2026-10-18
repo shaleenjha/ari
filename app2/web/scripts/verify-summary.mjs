@@ -10,11 +10,11 @@ const expected = Number(process.env.VERIFY_EXPECTED ?? 6);
 const ok = rows.length >= expected && rows.every((r) => r.pass);
 const fmtLcp = (r) => (r.lcpMs == null ? 'n/a' : `${(r.lcpMs / 1000).toFixed(2)} s${r.lcpGated ? '' : ' (report-only)'}`);
 const md = [
-  `### verify-mobile: ${ok ? 'pass' : 'FAIL'} (${rows.length}/${expected} rows; CLS <= ${rows[0]?.clsBudget ?? 0.02}, Chromium LCP < 1.2 s throttled, 0 errors)`,
+  `### verify-mobile: ${ok ? 'pass' : 'FAIL'} (${rows.length}/${expected} rows; CLS cold and warm <= 0.02, Today 0, no slot moves; Chromium LCP < 1.2 s throttled, 0 errors)`,
   '',
-  '| Screen | Engine | CLS | LCP | Console errors | Result |',
+  '| Screen | Engine | CLS (cold / warm) | LCP | Console errors | Result |',
   '|---|---|---|---|---|---|',
-  ...rows.map((r) => `| ${r.screen} | ${r.engine} | ${r.cls.toFixed(4)} | ${fmtLcp(r)} | ${r.consoleErrors} | ${r.pass ? 'pass' : 'FAIL'} |`),
+  ...rows.map((r) => `| ${r.screen} | ${r.engine} | ${r.cls.toFixed(4)}${r.clsCold != null ? ` (${r.clsCold.toFixed(4)} / ${r.clsWarm.toFixed(4)})` : ''} | ${fmtLcp(r)} | ${r.consoleErrors} | ${r.pass ? 'pass' : 'FAIL'} |`),
   '',
   `Screenshots (artifact verify-mobile): ${rows.flatMap((r) => r.screenshots).join(', ')}`,
   '',

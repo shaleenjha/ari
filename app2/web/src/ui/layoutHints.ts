@@ -2,13 +2,15 @@
 // takes the same space as the data that replaces it. Falls back to memory when the viewer blocks storage.
 import { safeStorage } from '../data/auth';
 
-/** who: the rendered height (px) of each "Who is this?" card, since its text wraps by name and headline length. */
-export interface TodayHints { pin: boolean; who: number[]; tidy: boolean; queue: number }
+/** who: the rendered height (px) of each "Who is this?" card, since its text wraps by name and headline length.
+ *  seen: Today has loaded on this device before, so the shape is known. Until then the skeleton draws no card, heading or
+ *  slot that the data could land somewhere else (v18.17.2). */
+export interface TodayHints { seen: boolean; pin: boolean; who: number[]; tidy: boolean; queue: number }
 export interface RepliesHints { open: number }
 export interface Hints { today: TodayHints; replies: RepliesHints }
 
 const KEY = 'ari2-layout';
-export const DEFAULT_HINTS: Hints = { today: { pin: false, who: [], tidy: false, queue: 5 }, replies: { open: 3 } };
+export const DEFAULT_HINTS: Hints = { today: { seen: false, pin: false, who: [], tidy: false, queue: 5 }, replies: { open: 3 } };
 let store: Storage | null = null;
 const st = () => (store ??= safeStorage('localStorage'));
 

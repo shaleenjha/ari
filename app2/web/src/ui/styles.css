@@ -25,9 +25,11 @@ b, strong { font-weight: var(--fw-body-strong); }
 
 /* Header (48) and title (22/28). */
 .hd { display: flex; align-items: center; gap: var(--s-2); min-height: var(--header-h); margin-top: var(--s-1); }
-.hd h1 { flex: 1; min-width: 0; margin: 0; font-size: var(--fs-title); line-height: var(--lh-title); font-weight: var(--fw-title); letter-spacing: var(--ls-title); }
+/* The title keeps its own width and the count line takes the rest, right-aligned, so the count's box starts at the same x
+   whether it holds the loading bar or the numbers (Today CLS 0, v18.17.2). */
+.hd h1 { flex: 0 1 auto; min-width: 0; margin: 0; font-size: var(--fs-title); line-height: var(--lh-title); font-weight: var(--fw-title); letter-spacing: var(--ls-title); }
 .hd h1:focus:not(:focus-visible) { outline: none; }
-.hd .count { margin: 0; color: var(--text-2); white-space: nowrap; }
+.hd .count { flex: 1 0 auto; margin: 0; color: var(--text-2); white-space: nowrap; text-align: right; }
 .hd .count b { color: var(--text-1); }
 .hd .count i { font-style: normal; color: var(--text-3); }
 .back { min-width: var(--target); min-height: var(--target); margin-left: calc(var(--s-4) * -1); display: grid; place-items: center; color: var(--text-1); text-decoration: none; }
@@ -100,6 +102,13 @@ p.muted, p.meta { margin: 0 0 var(--s-2); font-size: var(--fs-meta); line-height
 .btn span, .row .btn span, .card .btn span { display: inline; color: inherit; font: inherit; letter-spacing: inherit; }
 .btn.wide { width: 100%; justify-content: flex-start; text-align: left; }
 .btn.center { display: flex; width: 100%; }
+/* An option button ("Who is this?"): full width, min-height 56 (never a fixed height), the name on line one and
+   company · role as meta on line two. 12 block padding keeps both lines 8 clear of the 4-inset outline at any text size. */
+.btn.opt { width: 100%; min-height: var(--row-1); flex-direction: column; align-items: flex-start; justify-content: center; gap: 0;
+  padding: var(--s-3) var(--btn-s-pad); text-align: left; }
+.btn.opt > b, .btn.opt > .m { display: block; max-width: 100%; }
+.btn.opt > b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn.opt > .m { color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); letter-spacing: var(--ls-meta); }
 .acts { display: flex; gap: var(--s-2); flex-wrap: wrap; }
 .acts.col { flex-direction: column; margin-top: var(--s-2); }
 .confirm { display: flex; flex-direction: column; gap: var(--s-2); }

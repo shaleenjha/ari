@@ -32,3 +32,15 @@ export function meter() {
   };
   requestAnimationFrame(tick);
 }
+
+/** Fixed slots (data-slot) and their page y. The placeholders and the loaded screen must put each shared slot at the same
+ *  y: a swap that remounts a node is not a browser layout shift, but the eye still sees the card jump (v18.17.2). */
+export function slots() {
+  const out: Record<string, number> = {};
+  for (const e of document.querySelectorAll<HTMLElement>('[data-slot]')) out[e.dataset.slot!] = e.getBoundingClientRect().top + scrollY;
+  return out;
+}
+/** Slots present in both readings whose y differs by more than tol px. */
+export function slotDrift(a: Record<string, number>, b: Record<string, number>, tol = 0.5) {
+  return Object.keys(a).filter((k) => k in b && Math.abs(a[k]! - b[k]!) > tol).map((k) => `${k} ${a[k]!.toFixed(1)} -> ${b[k]!.toFixed(1)}`);
+}

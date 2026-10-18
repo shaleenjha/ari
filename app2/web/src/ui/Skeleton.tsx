@@ -6,8 +6,8 @@ import { Icon } from './Icon';
 const Line = ({ w, as: T = 'span' }: { w: string; as?: 'span' | 'b' }) => <T className="skelline"><i className="bar" style={{ width: w }} /></T>;
 
 /** A Today queue row: same .row box and the two lines of its link (title, status). */
-export const SkelRow = ({ w = '62%' }: { w?: string }) => (
-  <li className="row skel" aria-hidden="true"><div className="rowbox"><Line as="b" w={w} /><Line w="24%" /></div></li>
+export const SkelRow = ({ w = '62%', slot = false }: { w?: string; slot?: boolean }) => (
+  <li className="row skel" aria-hidden="true" data-slot={slot ? 'row0' : undefined}><div className="rowbox"><Line as="b" w={w} /><Line w="24%" /></div></li>
 );
 
 /** A single line card, like the reply pin. */

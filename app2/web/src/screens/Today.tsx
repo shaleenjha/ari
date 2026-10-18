@@ -14,6 +14,8 @@ import { Icon } from '../ui/Icon';
  * already on screen moves while parts arrive (layout shift check: e2e/cls.spec.ts). The placeholders take the shape of
  * the last loaded Today on this device (ui/layoutHints.ts). Each part (queue, replies, Tidy up, Who is this?) is its own
  * read with its own last good copy: a part that fails keeps what it showed, and only a part that never loaded is empty.
+ * Fixed slots (data-slot: today15, upnext, row0) sit at the same y in the placeholders and the loaded screen; the first
+ * visit on a device draws only generic rows, since the shape is not known yet (v18.17.2, e2e/cls.spec.ts checks both).
  */
 export function Today() {
   const q = useAsync(() => data().queue(), [], { key: 'queue' });
@@ -29,8 +31,11 @@ export function Today() {
   const body = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!d) return;
-    const who = [...(body.current?.querySelectorAll<HTMLElement>('[data-testid^="who-"]') ?? [])].map((e) => Math.round(e.getBoundingClientRect().height));
-    saveHints('today', { pin: fresh.length > 0, who, tidy: d.findings.length > 0, queue: queue?.length ?? 0 });
+    const who = () => [...(body.current?.querySelectorAll<HTMLElement>('[data-testid^="who-"]') ?? [])].map((e) => Math.round(e.getBoundingClientRect().height * 100) / 100);
+    const hints = { pin: fresh.length > 0, tidy: d.findings.length > 0, queue: queue?.length ?? 0 };
+    // Measure after the web font is in, so a placeholder takes the height the card has once the font has swapped.
+    const save = () => saveHints('today', { seen: true, ...hints, who: who() });
+    void (document.fonts?.ready ?? Promise.resolve()).then(save, save);
   }, [settled, d?.findings.length, d?.who.length, fresh.length, queue]);
   return (
     <section aria-labelledby="h-today" aria-busy={!d}>
@@ -46,11 +51,11 @@ export function Today() {
           <WhoIsThisCards items={d.who} />
           <Today15Link />
           <TidyUp findings={d.findings} />
-          <h2 className="sub">Up next · {queue?.length ?? 0}</h2>
+          <h2 className="sub" data-slot="upnext">Up next · {queue?.length ?? 0}</h2>
           {!queue ? <p className="muted" role="alert">Could not load your queue.</p> : (
             <ul className="rows" data-testid="queue">
-              {queue.map((x) => (
-                <li key={x.id} className="row">
+              {queue.map((x, i) => (
+                <li key={x.id} className="row" data-slot={i === 0 ? 'row0' : undefined}>
                   <a href={x.accountId ? `#/account/${x.accountId}` : '#/'}>
                     <span className="txt"><b>{x.title}</b><span>{x.status === 'ready' ? 'Ready now' : 'Up next'}</span></span>
                     <span className={x.status === 'ready' ? 'side ready' : 'side'}><Icon name={x.status === 'ready' ? 'ready' : 'waiting'} size={16} /></span>
@@ -66,7 +71,7 @@ export function Today() {
 }
 
 const Today15Link = () => (
-  <a className="card" href="#/today15" data-testid="today15-link"><Icon name="send" /><b>Today's 15</b><Icon name="chevron-right" className="chev" /></a>
+  <a className="card" href="#/today15" data-testid="today15-link" data-slot="today15"><Icon name="send" /><b>Today's 15</b><Icon name="chevron-right" className="chev" /></a>
 );
 
 /** Header counts: "9 in queue · 4 ready". While loading the same line box holds a bar, so the header never moves. */
@@ -78,6 +83,10 @@ function Counts({ queue }: { queue?: Task[] | null }) {
 
 function TodaySkeleton() {
   const h = readHints().today;
+  const rows = (n: number, slot: boolean) => Array.from({ length: n }, (_, i) => <SkelRow key={i} slot={slot && i === 0} w={['62%', '48%', '56%', '70%', '52%'][i % 5]} />);
+  // First visit: replies, "Who is this?" and Tidy up may or may not land above Up next, so no card or heading is drawn
+  // where it could move. Generic rows only; the loaded screen replaces them.
+  if (!h.seen) return <div data-testid="skeleton"><Busy label="Loading your queue." /><ul className="rows">{rows(h.queue, false)}</ul></div>;
   return (
     <div data-testid="skeleton">
       <Busy label="Loading your queue." />
@@ -85,8 +94,8 @@ function TodaySkeleton() {
       {h.who.map((px, i) => <SkelWho key={i} px={px} />)}
       <Today15Link />
       {h.tidy && <SkelTidy />}
-      <h2 className="sub">Up next · {h.queue}</h2>
-      <ul className="rows">{Array.from({ length: h.queue }, (_, i) => <SkelRow key={i} w={['62%', '48%', '56%', '70%', '52%'][i % 5]} />)}</ul>
+      <h2 className="sub" data-slot="upnext">Up next · {h.queue}</h2>
+      <ul className="rows">{rows(h.queue, true)}</ul>
     </div>
   );
 }

@@ -84,12 +84,17 @@ function Who({ w }: { w: WhoIsThis }) {
       <span>{w.name} {w.kind === 'accept' ? 'accepted your invite' : 'replied'}{w.headline ? ` · ${w.headline}` : ''}</span>
       {res ? <p className="muted" role="status">{res}</p> : (
         <div className="acts col">
-          {w.candidates.map((c) => (
-            <button key={c.personId} className="btn ghost wide" disabled={busy} {...writeProps(ro, () => void pick(c.personId, `Linked to ${c.fullName}${c.accountName ? ` at ${c.accountName}` : ''}`))}>
-              {c.fullName}{c.accountName ? ` · ${c.accountName}` : ''}{c.title ? ` · ${c.title}` : ''}
-            </button>
-          ))}
-          <button className="btn ghost wide" disabled={busy} {...writeProps(ro, () => void pick(null, 'Marked as none of these'))}>None of these</button>
+          {w.candidates.map((c) => {
+            const meta = [c.accountName, c.title].filter(Boolean).join(' · ');
+            // Two lines: the name, then company · role. The spoken name keeps the separators the visual lines drop.
+            return (
+              <button key={c.personId} className="btn ghost opt" disabled={busy} aria-label={[c.fullName, meta].filter(Boolean).join(' · ')}
+                {...writeProps(ro, () => void pick(c.personId, `Linked to ${c.fullName}${c.accountName ? ` at ${c.accountName}` : ''}`))}>
+                <b>{c.fullName}</b>{meta && <span className="m">{meta}</span>}
+              </button>
+            );
+          })}
+          <button className="btn ghost opt" disabled={busy} {...writeProps(ro, () => void pick(null, 'Marked as none of these'))}>None of these</button>
         </div>
       )}
     </div>

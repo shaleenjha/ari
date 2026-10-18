@@ -2,6 +2,7 @@
 export declare const MIN_TAP: number;
 export declare const TODAY_MAX_VIEWPORTS: number;
 export declare const MAX_CLS: number;
+export declare const TODAY_MAX_CLS: number;
 export declare const WIDTHS: number[];
 export declare const EFFECTS_ALLOW_LIST: string[];
 export type Hit = { rule: string; match: string };
