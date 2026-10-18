@@ -4,6 +4,8 @@ import { useSyncExternalStore, type MouseEvent } from 'react';
 
 export const READ_ONLY_TOAST = 'Read-only preview. Actions arrive in Phase 2.';
 export const TOAST_MS = 2400;
+/** The one quiet line under the Read-only pill. */
+export const READ_ONLY_LINE = 'Read-only. Nothing you tap here changes data or sends anything.';
 
 let readOnly = false;
 let toastAt = 0;

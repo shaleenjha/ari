@@ -6,6 +6,8 @@ import { copyText, inboxLink, openLink, platformOf } from '../ui/linkedin';
 import { UNDO_MS, notNow, useNotNow } from '../ui/notNow';
 import { useAsync } from '../ui/useAsync';
 import { useReadOnly, writeProps } from '../ui/readOnly';
+import { readHints, saveHints } from '../ui/layoutHints';
+import { Busy, SkelReply } from '../ui/Skeleton';
 
 // Ari prepares the answer, Owner sends it. "Copy and open LinkedIn" copies the text and opens the LinkedIn inbox;
 // nothing is ever sent from here.
@@ -58,13 +60,18 @@ export function Replies() {
   const all = r.data ?? [];
   const open = all.filter((x) => !aside.has(x.id));
   const setAside = all.filter((x) => aside.has(x.id));
+  useEffect(() => { if (r.data) saveHints('replies', { open: open.length }); }, [r.data, open.length]);
   const later = (id: string) => { notNow.add(id); if (openId === id) setOpenId(null); setUndo(id); tick(8); };
   const back = (id: string) => { notNow.remove(id); setUndo(null); tick(8); };
   return (
-    <section aria-labelledby="h-rep">
+    <section aria-labelledby="h-rep" aria-busy={!r.data && !r.error}>
       <header className="hd"><h1 id="h-rep">Replies</h1></header>
+      {!r.data && !r.error && (
+        <><Busy label="Loading replies." /><ul className="rows" data-testid="skeleton">{Array.from({ length: readHints().replies.open }, (_, i) => <SkelReply key={i} />)}</ul></>
+      )}
+      {r.error && <p className="muted" role="alert">Could not load replies.</p>}
       {r.data && open.length === 0 && <p className="muted">No new replies.</p>}
-      <ul className="rows" data-testid="replies">
+      {r.data && <ul className="rows" data-testid="replies">
         {open.map((x) => (
           <li key={x.id} className="row col">
             <p className="quote">{x.snippet}</p>
@@ -76,7 +83,7 @@ export function Replies() {
             )}
           </li>
         ))}
-      </ul>
+      </ul>}
       {setAside.length > 0 && (
         <>
           <h2 className="sub">Not now</h2>

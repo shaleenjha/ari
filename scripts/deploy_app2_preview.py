@@ -43,7 +43,15 @@ if pid:
     curl('-X', 'PATCH', f'https://api.vercel.com/v9/projects/{pid}', '-H', 'Content-Type: application/json',
          '--data', json.dumps({"ssoProtection": None, "passwordProtection": None}))
 # Point the stable phone-test URL at this deployment (Vercel leaves later deploys of this project un-aliased).
-if d.get('id'):
+# Wait for READY first: an alias set while the deployment is still building can be dropped (seen v18.14.3).
+import time
+for _ in range(45):
+    if not d.get('id'): break
+    st = json.loads(curl(f"https://api.vercel.com/v13/deployments/{d['id']}") or '{}').get('readyState')
+    if st in ('READY', 'ERROR', 'CANCELED'):
+        d['readyState'] = st; break
+    time.sleep(2)
+if d.get('id') and d.get('readyState') == 'READY':
     curl('-X', 'POST', f"https://api.vercel.com/v2/deployments/{d['id']}/aliases", '-H', 'Content-Type: application/json',
          '--data', json.dumps({"alias": PROJECT + ".vercel.app"}))
 print(json.dumps({"id": d.get('id'), "url": d.get('url'), "state": d.get('readyState'), "target": d.get('target'),

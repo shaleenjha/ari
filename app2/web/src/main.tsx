@@ -21,6 +21,13 @@ const standalone = () => {
   try { return matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true; } catch { return false; }
 };
 
+/** Synthetic data only: ?delay=<ms> holds every mock response that long, so tests see the placeholders (e2e/cls.spec.ts). */
+function slowed(m: MockPostgrest): MockPostgrest {
+  const ms = Math.min(Number(new URLSearchParams(location.search).get('delay')) || 0, 5000);
+  if (ms > 0) { const f = m.fetch; m.fetch = async (...a) => { await new Promise((r) => setTimeout(r, ms)); return f(...a); }; }
+  return m;
+}
+
 // live: production, read-only, Google sign-in. mock (default): synthetic rows through the PostgREST fixture. See data/mode.ts.
 // Embedded: an app's link viewer, where Google refuses sign-in; live mode shows "open in your browser" instead (?embed=1 forces it).
 async function boot() {
@@ -38,7 +45,7 @@ async function boot() {
       setData(new LiveData(fetch.bind(globalThis), { url: cfg.url, apikey: cfg.apikey, token: () => auth.token(), workspaceId: cfg.workspaceId }));
       setAuth(auth, err);
     }
-  } else setData(mode.data === 'legacy' ? new MockData() : new SyntheticRestData(new MockPostgrest(), WS_A, JWT_A));
+  } else setData(mode.data === 'legacy' ? new MockData() : new SyntheticRestData(slowed(new MockPostgrest()), WS_A, JWT_A));
   mount().render(<StrictMode><ErrorBoundary><App /></ErrorBoundary></StrictMode>);
 }
 boot().catch((e: unknown) => {

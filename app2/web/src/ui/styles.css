@@ -1,9 +1,17 @@
 /* Inter (OFL, self-hosted in public/fonts). Graphite is the default theme: matte black with a champagne accent. */
 @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap;
   src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2'); }
+/* Metric-matched fallbacks, so the swap to Inter changes the glyphs and not the layout. Values computed from the Inter
+   woff2 (typo metrics, 2048 upm: ascent 1984, descent 494, gap 0) against each local face's average letter width:
+   Arial / Liberation Sans (metric twins) and Roboto (Android). size-adjust = Inter width / local width;
+   overrides = Inter metric / size-adjust. */
+@font-face { font-family: 'Inter Fallback'; src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('LiberationSans');
+  size-adjust: 107.34%; ascent-override: 90.25%; descent-override: 22.47%; line-gap-override: 0%; }
+@font-face { font-family: 'Inter Fallback Roboto'; src: local('Roboto'), local('Roboto-Regular');
+  size-adjust: 107.11%; ascent-override: 90.45%; descent-override: 22.52%; line-gap-override: 0%; }
 :root { --graphite-bg: #050505; --graphite-accent: #E2B062;
   --bg: var(--graphite-bg); --ink: #f2eee8; --mute: #a39e95; --line: #2a2824; --card: #141311; --accent: var(--graphite-accent);
-  --font-sans: 'Inter', system-ui, sans-serif; --tap: 48px; color-scheme: dark;
+  --font-sans: 'Inter', 'Inter Fallback', 'Inter Fallback Roboto', system-ui, sans-serif; --tap: 48px; color-scheme: dark;
   font: 16px/1.4 var(--font-sans); }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--ink); }
@@ -30,8 +38,11 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
 .claims { padding-left: 0; list-style: none; } .claims li { margin: 6px 0; }
 .tag { font-style: normal; font-size: 12px; padding: 2px 6px; border-radius: 6px; margin-right: 6px; background: var(--line); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.stat { background: var(--card); border-radius: 14px; padding: 14px; } .stat.lead { grid-column: 1 / -1; }
-.stat b { font-size: 28px; display: block; } .stat small { font-size: 16px; color: var(--mute); } .stat span { color: var(--mute); font-size: 14px; }
+.grid { margin: 0; }
+.stat { background: var(--card); border-radius: 14px; padding: 14px; display: flex; flex-direction: column-reverse; justify-content: flex-end; }
+.stat.lead { grid-column: 1 / -1; }
+.stat dd { font-size: 28px; font-weight: 700; line-height: 1.4; margin: 0; } .stat small { font-size: 16px; color: var(--mute); }
+.stat dt { color: var(--mute); font-size: 14px; }
 .tabs { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; background: var(--bg);
   border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
 .tabs a { flex: 1; max-width: 186px; text-align: center; padding: 14px 0; min-height: 52px; color: var(--mute); text-decoration: none; }
@@ -58,9 +69,26 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
 /* Phase 1 read-only: one quiet pill, and write controls dimmed with aria-disabled (exempt from the text contrast rule as
    inactive components, WCAG 1.4.3; still 48px targets). */
 .shell { position: relative; }
-.ropill { position: absolute; top: 16px; right: 16px; height: 24px; padding: 0 8px; border-radius: 12px; border: 1px solid var(--line);
+.robar { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; }
+.ropill { flex: none; height: 24px; padding: 0 8px; border-radius: 12px; border: 1px solid var(--line);
   color: var(--mute); font-size: 12px; line-height: 22px; pointer-events: none; }
-.shell.ro .hd { padding-right: 96px; }
+.roline { margin: 0; color: var(--mute); font-size: 13px; line-height: 1.4; }
 .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
 .signin .btn { margin-top: 8px; }
 .btn.center { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; }
+/* Fixed-geometry placeholders (ui/Skeleton.tsx): same boxes as the real rows, bars instead of text. */
+.rowbox { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: var(--tap); }
+.skelline { display: block; } .card .skelline { display: block; }
+.bar { display: inline-block; height: .8em; vertical-align: middle; border-radius: 6px; background: var(--line); font-style: normal; }
+.skel.pin { border-color: var(--line); }
+.skelbtn { display: block; background: var(--line); border-color: var(--line); }
+@media (prefers-reduced-motion: no-preference) { .skel .bar, .skel .skelbtn, [aria-busy="true"] dd .bar { animation: skelpulse 1.6s ease-in-out infinite; } }
+@keyframes skelpulse { 50% { opacity: .55; } }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* Skip link: no size until focused (so it is not a tap target), then a 48px pill at the top left. */
+.skip { position: absolute; left: 8px; top: 8px; z-index: 10; width: 0; height: 0; overflow: hidden; padding: 0; border-radius: 12px;
+  background: var(--ink); color: var(--bg); text-decoration: none; }
+.skip:focus, .skip:focus-visible { width: auto; height: auto; min-height: var(--tap); padding: 0 16px; display: flex; align-items: center;
+  outline: 2px solid var(--accent); outline-offset: 2px; }
+.draft > span { min-height: 2.8em; }
+.screen:focus { outline: none; }

@@ -6,6 +6,8 @@
 export const MIN_TAP = 48;
 /** Today at 412x915 may be at most this many phone viewports tall with the synthetic data. */
 export const TODAY_MAX_VIEWPORTS = 1.5;
+/** Largest layout shift allowed from placeholders to loaded data on Today, Replies and Report (e2e/cls.spec.ts). */
+export const MAX_CLS = 0.02;
 /** Widths every screen is checked at (playwright.config.ts projects). */
 export const WIDTHS = [360, 390, 412];
 

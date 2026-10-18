@@ -8,7 +8,7 @@ import { AccountRoom } from './screens/AccountRoom';
 import { Report } from './screens/Report';
 import { SignIn } from './screens/SignIn';
 import { OpenInBrowser } from './screens/OpenInBrowser';
-import { READ_ONLY_TOAST, TOAST_MS, hideReadOnlyToast, useReadOnly, useReadOnlyToast } from './ui/readOnly';
+import { READ_ONLY_LINE, READ_ONLY_TOAST, TOAST_MS, hideReadOnlyToast, useReadOnly, useReadOnlyToast } from './ui/readOnly';
 import { useSession } from './ui/session';
 
 const TABS = [
@@ -50,8 +50,14 @@ function Shell({ ro }: { ro: boolean }) {
   };
   return (
     <div className={ro ? 'shell ro' : 'shell'}>
-      {ro && <span className="ropill" data-testid="ro-pill">Read-only</span>}
-      <main className="screen" data-screen={r.name} ref={screen}>
+      <a className="skip" href="#main" data-testid="skip-link" onClick={(e) => { e.preventDefault(); screen.current?.focus(); }}>Skip to content</a>
+      {ro && (
+        <div className="robar">
+          <span className="ropill" data-testid="ro-pill">Read-only</span>
+          <p className="roline" data-testid="ro-line">{READ_ONLY_LINE}</p>
+        </div>
+      )}
+      <main className="screen" id="main" tabIndex={-1} data-screen={r.name} ref={screen}>
         {r.name === 'today' && <Today />}
         {r.name === 'today15' && <Today15 />}
         {r.name === 'replies' && <Replies />}

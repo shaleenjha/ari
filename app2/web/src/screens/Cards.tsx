@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { data, opId } from '../data/client';
 import type { HygieneAction, HygieneFinding, WhoIsThis } from '../data/types';
-import { useAsync } from '../ui/useAsync';
 import { useReadOnly, writeProps } from '../ui/readOnly';
 
 const ACTION_LABEL: Record<HygieneAction, string> = { tick_connect: 'Tick invite sent', link: 'Link', merge: 'Merge', dismiss: 'Not an issue' };
@@ -44,12 +43,13 @@ function Finding({ f, onDone }: { f: HygieneFinding; onDone: (msg: string) => vo
   );
 }
 
-export function TidyUp() {
-  const h = useAsync(() => data().hygiene());
+/** Ari's "Tidy up" checks. Today loads the findings (one step with the rest of the screen) and passes them in. */
+export function TidyUp({ findings }: { findings: HygieneFinding[] }) {
+  const h = { data: findings };
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<Record<string, string>>({});
-  const left = (h.data ?? []).filter((f) => !done[f.id]);
-  if (!h.data || h.data.length === 0) return null;
+  const left = findings.filter((f) => !done[f.id]);
+  if (findings.length === 0) return null;
   return (
     <div className="card col" data-testid="tidy-up">
       <button className="cardhead" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
@@ -94,7 +94,6 @@ function Who({ w }: { w: WhoIsThis }) {
   );
 }
 
-export function WhoIsThisCards() {
-  const w = useAsync(() => data().whoIsThis());
-  return <>{(w.data ?? []).map((x) => <Who key={x.eventId} w={x} />)}</>;
+export function WhoIsThisCards({ items }: { items: WhoIsThis[] }) {
+  return <>{items.map((x) => <Who key={x.eventId} w={x} />)}</>;
 }
