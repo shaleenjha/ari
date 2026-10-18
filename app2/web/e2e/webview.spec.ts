@@ -36,7 +36,7 @@ test('script fails to load: static text on the dark background, never a blank wh
   await page.goto('/');
   await expect(page.getByTestId('boot')).toContainText('If this stays, open this link in Chrome or Safari.');
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(bg).toBe('rgb(5, 5, 5)');
+  expect(bg).toBe('rgb(18, 18, 18)'); // --surface-canvas (tokens.css), mirrored in index.html
 });
 
 test('normal browser: no link viewer screen', async ({ page }) => {

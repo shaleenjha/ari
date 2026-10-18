@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { CONTRAST_EXEMPT, MIN_TAP, checkText, isSystemFamily, firstFamily, requiredRatio, contrast } from '../scripts/design-lint/rules.mjs';
+import { CONTRAST_EXEMPT, MIN_TAP, STATUS_SEL, checkText, colorOnlyStatus, isSystemFamily, firstFamily, requiredRatio, contrast } from '../scripts/design-lint/rules.mjs';
 import { SCREENS, open } from './screens';
 
 // Design lint, rendered half (rules 1 to 5). Runs in every project (360, 390 and 412 px, Chromium and WebKit), synthetic data only.
@@ -67,6 +67,16 @@ for (const s of SCREENS) {
     expect(fails, 'text below WCAG AA contrast').toEqual([]);
   });
 
+  test(`@design ${s.name}: status never rests on colour alone`, async ({ page }) => {
+    await open(page, s);
+    const items = await page.evaluate((sel) => [...document.querySelectorAll<HTMLElement>(sel)].flatMap((el) => {
+      const cs = getComputedStyle(el); const r = el.getBoundingClientRect();
+      if (cs.display === 'none' || cs.visibility === 'hidden') return [];
+      return [{ label: `${el.tagName.toLowerCase()}${el.className ? '.' + String(el.className).split(' ').join('.') : ''}`, text: el.textContent ?? '', w: r.width, h: r.height }];
+    }), STATUS_SEL);
+    expect(colorOnlyStatus(items), 'status elements with no text or glyph').toEqual([]);
+  });
+
   test(`@design ${s.name}: copy has no banned strings`, async ({ page }) => {
     await open(page, s);
     const texts = await page.evaluate(() => [
@@ -90,13 +100,15 @@ test('@design primary font is not a system stack, and it loaded', async ({ page 
   expect(r.loaded, `${r.first} loaded`).toBe(true);
 });
 
-test('@design no gradients or glow shadows rendered', async ({ page }) => {
+test('@design no gradients, glow shadows or backdrop blur rendered', async ({ page }) => {
   for (const s of SCREENS.filter((x) => !x.name.includes(','))) {
     await open(page, s);
     const bad = await page.evaluate(() => [...document.querySelectorAll('*')].flatMap((e) => {
       const cs = getComputedStyle(e);
       const out: string[] = [];
       if (/gradient\(/.test(cs.backgroundImage)) out.push(`${e.tagName} gradient`);
+      const bf = cs.backdropFilter || (cs as unknown as { webkitBackdropFilter?: string }).webkitBackdropFilter || 'none';
+      if (bf !== 'none') out.push(`${e.tagName} backdrop-filter ${bf}`);
       for (const sh of [cs.boxShadow, cs.textShadow]) {
         if (sh && sh !== 'none' && sh.split(/,(?![^(]*\))/).some((p) => Number((p.replace(/rgba?\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? [])[2]?.replace('px', '') ?? 0) > 0)) out.push(`${e.tagName} glow ${sh}`);
       }
@@ -104,4 +116,43 @@ test('@design no gradients or glow shadows rendered', async ({ page }) => {
     }));
     expect(bad, `${s.name}: gradients or glows`).toEqual([]);
   }
+});
+
+// Citrine s2/tokens (v18.16.0): type is rem-based, so it follows the root size the phone sets (meta text-scale on
+// Android Chrome, the browser text size elsewhere). Raising the root by 25% must raise every piece of text by 25%.
+test('@design text follows the phone text size (rem type)', async ({ page }) => {
+  for (const s of [SCREENS[0]!, SCREENS.find((x) => x.name === 'Report')!]) {
+    await open(page, s);
+    const sizes = () => page.evaluate(() => {
+      const out: Record<string, number> = {};
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let i = 0;
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        const el = n.parentElement;
+        if (!el || !n.textContent?.trim() || el.closest('script, style, noscript, .sr-only')) continue;
+        out[`${i++}:${n.textContent.trim().slice(0, 24)}`] = parseFloat(getComputedStyle(el).fontSize);
+      }
+      return out;
+    });
+    const before = await sizes();
+    await page.evaluate(() => { document.documentElement.style.fontSize = '125%'; });
+    const after = await sizes();
+    const fixed = Object.keys(before).filter((k) => after[k] !== undefined && Math.abs(after[k]! / before[k]! - 1.25) > 0.01)
+      .map((k) => `"${k}" ${before[k]}px -> ${after[k]}px`);
+    expect(fixed, `${s.name}: text that ignores the phone text size`).toEqual([]);
+  }
+});
+
+test('@design reduced motion zeroes every motion token; the tab bar is solid with no blur', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await open(page, SCREENS[0]!);
+  const r = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    const tabs = getComputedStyle(document.querySelector('.tabs')!);
+    return { durs: ['--dur-fast', '--dur-tab', '--dur-sheet', '--dur-settle'].map((k) => root.getPropertyValue(k).trim()),
+      bg: tabs.backgroundColor, blur: tabs.backdropFilter || 'none' };
+  });
+  expect(r.durs).toEqual(['0ms', '0ms', '0ms', '0ms']);
+  expect(r.blur).toBe('none');
+  expect(r.bg).toMatch(/^rgba?\(18, 18, 18/);
 });

@@ -13,6 +13,10 @@ export const WIDTHS = [360, 390, 412];
 
 /** Only these CSS files may use gradients or glow shadows (none today). Paths relative to app2/web. */
 export const EFFECTS_ALLOW_LIST = ['src/ui/effects.allowed.css'];
+/** The one file that may hold raw colours (Citrine s2/tokens). Every other stylesheet and inline style uses its variables. */
+export const TOKENS_FILE = 'src/ui/tokens.css';
+/** Every text token on every surface token must reach this (WCAG AA body text), whatever size it ends up used at. */
+export const TOKEN_MIN_RATIO = 4.5;
 
 // All literals: dash, buzzword. UI copy only: exclamation, place-or-timezone (TZ, CITY), infra-word.
 const BANG = /!/;
@@ -24,7 +28,8 @@ const CITY = /\b(?:bengaluru|bangalore|india|mumbai|delhi|kolkata|san francisco|
 const INFRA = /\b(?:supabase|vercel|postgres(?:ql)?|postgrest|rls|databases?|apis?|tokens?|workers?|cron(?:s|job|jobs)?)\b/i;
 
 /** Every rule an allow may name. Static copy and CSS rules, the query rule, and the rendered dead-tap opt-out. */
-export const RULES = ['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow', 'query-unbounded', 'dead-tap'];
+export const RULES = ['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow', 'query-unbounded', 'dead-tap',
+  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status'];
 
 /**
  * Check one piece of text.
@@ -85,16 +90,24 @@ export function familyFromShorthand(v) {
   return m ? m[1] : null;
 }
 
+/** A literal colour in a CSS value: hex, or a colour function (var() and color-mix() over variables are fine). */
+export const RAW_COLOR = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i;
+/** Glass: blur behind an element. A GPU cost on every scroll frame in WebKit, and the look the lint keeps out. */
+export const isBackdropProp = (prop) => /^(?:-webkit-)?backdrop-filter$/.test(prop);
+
 /**
- * Lint one stylesheet for rule 5.
+ * Lint one stylesheet for rule 5 plus the Citrine rules.
  * @param {string} css
- * @param {{ allowEffects: boolean }} opts
+ * @param {{ allowEffects: boolean, tokens?: boolean, vars?: Map<string, string> }} opts tokens=true for TOKENS_FILE (raw
+ *   colours allowed); vars: custom properties defined elsewhere (tokens.css), used to resolve font stacks.
  */
-export function lintCss(css, { allowEffects }) {
+export function lintCss(css, { allowEffects, tokens = false, vars: extVars }) {
   const decls = declarations(css);
-  const vars = new Map(decls.filter((d) => d.prop.startsWith('--')).map((d) => [d.prop, d.value]));
+  const vars = new Map([...(extVars ?? []), ...decls.filter((d) => d.prop.startsWith('--')).map((d) => [d.prop, d.value])]);
   const out = [];
   for (const d of decls) {
+    if (!tokens) { const m = d.value.match(RAW_COLOR); if (m) out.push({ rule: 'raw-color', line: d.line, match: `${d.prop}: ${d.value}` }); }
+    if (isBackdropProp(d.prop) && d.value.trim().toLowerCase() !== 'none') out.push({ rule: 'backdrop-filter', line: d.line, match: `${d.prop}: ${d.value}` });
     let fam = null;
     if (d.prop === 'font-family') fam = d.value;
     else if (d.prop === 'font') {
@@ -150,3 +163,98 @@ export const requiredRatio = (px, weight) => (isLargeText(px, weight) ? 3 : 4.5)
 export const CONTRAST_EXEMPT = '[aria-disabled="true"]';
 /** True when an element with these attributes (its own or an ancestor's) is exempt from the contrast check. */
 export const contrastExempt = (attrs) => attrs['aria-disabled'] === 'true';
+
+// ---------- tokens (Citrine) ----------
+/** `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()` / `rgba()` to [r, g, b, a]; null for anything else. */
+export function parseColor(v) {
+  const s = String(v).trim().toLowerCase();
+  let m = s.match(/^#([0-9a-f]{3,8})$/);
+  if (m) {
+    let h = m[1];
+    if (h.length === 3 || h.length === 4) h = [...h].map((c) => c + c).join('');
+    if (h.length !== 6 && h.length !== 8) return null;
+    const n = [0, 2, 4, 6].map((i) => (i < h.length ? parseInt(h.slice(i, i + 2), 16) : 255));
+    return [n[0], n[1], n[2], n[3] / 255];
+  }
+  m = s.match(/^rgba?\(([^)]+)\)$/);
+  if (m) {
+    const p = m[1].split(/[\s,/]+/).filter(Boolean).map((x) => (x.endsWith('%') ? parseFloat(x) / 100 : Number(x)));
+    if (p.length < 3 || p.some((x) => Number.isNaN(x))) return null;
+    return [p[0], p[1], p[2], p[3] ?? 1];
+  }
+  return null;
+}
+const overOpaque = (top, under) => [0, 1, 2].map((i) => top[i] * top[3] + under[i] * (1 - top[3]));
+export const isSurfaceToken = (n) => n.startsWith('--surface-');
+export const isTextToken = (n) => n.startsWith('--text-') || n === '--accent' || n === '--alert';
+/** Text-on-surface pairs outside the naming rule: the primary button (canvas text on a text-primary fill). */
+export const INVERSE_PAIRS = [['--surface-canvas', '--text-primary']];
+
+/**
+ * Contrast matrix of a token file. Every text token on every surface token, plus INVERSE_PAIRS. A translucent surface
+ * (the overlay) is composited over every opaque surface and over --text-primary (the brightest thing that can sit under
+ * it), and the worst backdrop counts. Missing core tokens and unparseable colours are findings too.
+ * @param {string} css the token file
+ * @returns {{ pairs: { text: string, surface: string, ratio: number, need: number, pass: boolean }[], findings: { rule: string, line: number, match: string }[] }}
+ */
+export function tokenContrast(css) {
+  const decls = declarations(css).filter((d) => d.prop.startsWith('--'));
+  const val = new Map(); const line = new Map();
+  for (const d of decls) { if (!val.has(d.prop)) { val.set(d.prop, d.value); line.set(d.prop, d.line); } }
+  const findings = [];
+  const col = (n) => {
+    const c = parseColor(val.get(n) ?? '');
+    if (!c) findings.push({ rule: 'token-contrast', line: line.get(n) ?? 1, match: `${n}: ${val.get(n) ?? '(missing)'} is not a hex or rgb() colour` });
+    return c;
+  };
+  for (const need of ['--surface-canvas', '--text-primary']) if (!val.has(need)) findings.push({ rule: 'token-contrast', line: 1, match: `${need} missing` });
+  const surfaces = [...val.keys()].filter(isSurfaceToken);
+  const texts = [...val.keys()].filter(isTextToken);
+  const opaque = surfaces.map((n) => [n, col(n)]).filter(([, c]) => c && c[3] === 1);
+  const primary = parseColor(val.get('--text-primary') ?? '');
+  /** Every backdrop a surface can show: itself when opaque, else composited over each opaque surface and text-primary. */
+  const backdrops = (n) => {
+    const c = parseColor(val.get(n) ?? '');
+    if (!c) return [];
+    if (c[3] === 1) return [{ label: n, rgb: c.slice(0, 3) }];
+    const unders = [...opaque.map(([u, uc]) => [u, uc]), ...(primary ? [['--text-primary', primary]] : [])];
+    return unders.map(([u, uc]) => ({ label: `${n} over ${u}`, rgb: overOpaque(c, uc) }));
+  };
+  const pairs = [];
+  const check = (t, s) => {
+    const tc = col(t); if (!tc) return;
+    const bds = backdrops(s); if (!bds.length) return;
+    const worst = bds.map((b) => {
+      const fg = tc[3] === 1 ? tc.slice(0, 3) : overOpaque(tc, b.rgb);
+      return { label: b.label, ratio: contrast(fg, b.rgb) };
+    }).sort((a, b) => a.ratio - b.ratio)[0];
+    const pass = worst.ratio + 1e-9 >= TOKEN_MIN_RATIO;
+    pairs.push({ text: t, surface: worst.label, ratio: Math.round(worst.ratio * 100) / 100, need: TOKEN_MIN_RATIO, pass });
+    if (!pass) findings.push({ rule: 'token-contrast', line: line.get(t) ?? 1, match: `${t} on ${worst.label} is ${worst.ratio.toFixed(2)}:1 < ${TOKEN_MIN_RATIO}:1` });
+  };
+  for (const s of surfaces) for (const t of texts) check(t, s);
+  for (const [t, s] of INVERSE_PAIRS) if (val.has(t) && val.has(s)) check(t, s);
+  return { pairs, findings };
+}
+
+/** Hex colours in a file that cannot read CSS variables (index.html, the manifest) that match no token value. */
+export function colorDrift(text, tokensCss) {
+  const known = new Set(declarations(tokensCss).filter((d) => d.prop.startsWith('--')).map((d) => parseColor(d.value)).filter(Boolean).map((c) => c.join(',')));
+  const out = [];
+  for (const m of text.matchAll(/#[0-9a-f]{3,8}\b/gi)) {
+    const c = parseColor(m[0]);
+    if (!c || !known.has(c.join(','))) out.push({ match: m[0], index: m.index ?? 0 });
+  }
+  return out;
+}
+
+// ---------- status ----------
+/**
+ * Status elements: a live region, an alert, anything tagged data-status, and the pill/tag/badge/dot shapes. Each one that
+ * is drawn (non-zero box) must carry text or a glyph (its own text content), so the status never rests on colour alone.
+ */
+export const STATUS_SEL = '[role=status], [role=alert], [data-status], .tag, .badge, .dot, .pill, .ropill';
+/** @param {{ label: string, text: string, w: number, h: number }[]} items @returns {string[]} */
+export function colorOnlyStatus(items) {
+  return items.filter((x) => x.w > 0 && x.h > 0 && !x.text.trim()).map((x) => `${x.label} ${x.w | 0}x${x.h | 0} has no text or glyph`);
+}

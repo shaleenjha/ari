@@ -1,0 +1,80 @@
+/* Citrine design tokens (s2/tokens, v18.16.0). The ONLY file in src/ that may hold a raw colour (design lint rule
+   raw-color). Craft's final values from plans/design-system/citrine-spec.md drop in here and nowhere else.
+   The design lint (scripts/design-lint) reads this file and fails CI when any text token on any surface token is below
+   4.5:1 (rule token-contrast). Naming carries meaning for that check:
+     --surface-*   a background people read text on (overlay is composited over every other surface and over text-primary)
+     --text-*      a text colour, plus --accent and --alert, which may also colour text
+   index.html (theme-color, boot screen) and public/manifest.webmanifest cannot read CSS variables: they mirror
+   --surface-canvas, --text-primary and --text-secondary, and the lint fails when they drift from this file. */
+:root {
+  /* Surfaces: luminance elevation, hairlines instead of shadows. Overlay is SOLID (no backdrop blur, rule backdrop-filter). */
+  --surface-canvas: #121212;
+  --surface-card: #181818;
+  --surface-raised: #222222;
+  --surface-overlay: rgba(18, 18, 18, 0.96);
+
+  /* Text tiers. Muted white (no pure #fff) against halation. Tertiary lifted from #66645E (3.2:1) so it passes 4.5:1 on
+     raised as well (#8A857C was 4.34:1 there); #8E8981 is 4.58:1 on raised, 5.39:1 on canvas. */
+  --text-primary: #F5F5F0;
+  --text-secondary: #A89F91;
+  --text-tertiary: #8E8981;
+
+  /* One accent. Coral only for real alerts. A second meaning is carried by shape or word, never by a second accent. */
+  --accent: #E5D0AC;
+  --alert: #EB735A;
+
+  /* Hairlines (borders, dividers, placeholder bars). Not text, so not in the contrast pairs. */
+  --hairline: rgba(255, 255, 255, 0.08);
+  --hairline-strong: rgba(255, 255, 255, 0.16);
+
+  /* Radii. */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+
+  /* Spacing: 8 pt rhythm with 4 px half steps. */
+  --space-0-5: 4px;
+  --space-1: 8px;
+  --space-1-5: 12px;
+  --space-2: 16px;
+  --space-2-5: 20px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-8: 64px;
+  --space-10: 80px;
+
+  /* Type: 5 steps in rem, so text follows the phone's text size (index.html opts in with meta text-scale; the root
+     font-size is never set in px). */
+  --type-xs: 0.8125rem;  /* 13 px at default size: meta lines, tags */
+  --type-sm: 0.875rem;   /* 14 px: secondary lines, labels */
+  --type-md: 1rem;       /* 16 px: body */
+  --type-lg: 1.5rem;     /* 24 px: screen titles */
+  --type-xl: 1.75rem;    /* 28 px: hero numbers, back glyph */
+  --leading: 1.4;
+  --font-sans: 'Inter', 'Inter Fallback', 'Inter Fallback Roboto', system-ui, sans-serif;
+
+  /* Targets: 48 px both sides (Material 48 dp, Apple 44 pt). */
+  --tap: 48px;
+
+  /* Motion. Springs as CSS linear() (zero JS; Safari 17.2+, Chrome 113+), with cubic-bezier fallbacks below.
+     critical: critically damped (zeta 1), reaches 99.9% at the end, no overshoot. Tabs and sheets.
+     settle: zeta 0.85 (SwiftUI default is 0.825), 0.6% overshoot, within 0.2% from 80% of the duration. Done/sent moments. */
+  --ease-critical: cubic-bezier(0.2, 0.8, 0.3, 1);
+  --ease-settle: cubic-bezier(0.2, 0.9, 0.3, 1.02);
+  --dur-fast: 120ms;
+  --dur-tab: 240ms;
+  --dur-sheet: 320ms;
+  --dur-settle: 420ms;
+  --dur-pulse: 1.6s;
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-critical: linear(0, 0.114, 0.321, 0.516, 0.671, 0.783, 0.86, 0.911, 0.944, 0.966, 0.979, 0.987, 0.992, 0.995, 0.997, 0.998, 1);
+    --ease-settle: linear(0, 0.095, 0.287, 0.487, 0.658, 0.788, 0.878, 0.937, 0.972, 0.992, 1.002, 1.006, 1.006, 1.006, 1.004, 1.003, 1.002, 1.001, 1.001, 1, 1);
+  }
+}
+/* Reduced motion: every token duration goes to zero, so nothing that uses the tokens moves. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-tab: 0ms; --dur-sheet: 0ms; --dur-settle: 0ms; }
+}

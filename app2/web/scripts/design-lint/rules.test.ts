@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { CONTRAST_EXEMPT, checkText, contrast, contrastExempt, isGlow, lintCss, requiredRatio } from './rules.mjs';
-import { lintCssFile, lintSource } from './static.mjs';
+import { CONTRAST_EXEMPT, TOKENS_FILE, checkText, colorDrift, colorOnlyStatus, contrast, contrastExempt, isGlow, lintCss, parseColor, requiredRatio, tokenContrast } from './rules.mjs';
+import { lintCssFile, lintSource, lintTokens } from './static.mjs';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parseInlineAllows } from './allow.mjs';
 
 const rules = (t: string, copy = true) => checkText(t, { copy }).map((h) => h.rule);
@@ -62,9 +64,10 @@ describe('design lint rules', () => {
     const css = `:root { --font: 'Inter', system-ui, sans-serif; font: 16px/1.4 var(--font); }
       .a { font-family: system-ui, sans-serif; } .b { font: inherit; } .c { background: linear-gradient(red, blue); }
       .d { box-shadow: 0 0 12px #E2B062; } .e { box-shadow: 0 0 0 1px #333; } a:hover { color: red; }`;
-    expect(lintCss(css, { allowEffects: false }).map((x) => `${x.rule}@${x.line}`)).toEqual(['system-font-primary@2', 'gradient@2', 'glow@3']);
+    // tokens: true keeps raw-color out of this rule-5 case (its hex literals are covered in the citrine case below)
+    expect(lintCss(css, { allowEffects: false, tokens: true }).map((x) => `${x.rule}@${x.line}`)).toEqual(['system-font-primary@2', 'gradient@2', 'glow@3']);
     expect(lintCss(`:root { font: 16px/1.4 -apple-system, 'Inter'; }`, { allowEffects: true }).map((x) => x.rule)).toEqual(['system-font-primary']);
-    expect(lintCss(`.c { background: radial-gradient(red, blue); box-shadow: 0 4px 20px rgba(0,0,0,.4) }`, { allowEffects: true })).toEqual([]);
+    expect(lintCss(`.c { background: radial-gradient(red, blue); box-shadow: 0 4px 20px rgba(0,0,0,.4) }`, { allowEffects: true, tokens: true })).toEqual([]);
     expect(isGlow('none')).toBe(false);
     expect(isGlow('inset 0 -1px 0 rgba(255, 255, 255, 0.1)')).toBe(false);
   });
@@ -83,5 +86,52 @@ describe('design lint rules', () => {
     expect(contrastExempt({ 'aria-disabled': 'false' })).toBe(false);
     expect(requiredRatio(16, 400)).toBe(4.5);
     expect(requiredRatio(24, 400)).toBe(3);
+  });
+  it('citrine: raw colours only in the token file, backdrop-filter nowhere', () => {
+    const css = `.a { color: #fff; }\n.b { background: rgba(0, 0, 0, .5); }\n.c { color: var(--text-primary); border-color: color-mix(in srgb, var(--accent), transparent); }\n.d { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }\n.e { backdrop-filter: none; }`;
+    expect(lintCss(css, { allowEffects: false }).map((x) => `${x.rule}@${x.line}`)).toEqual(['raw-color@1', 'raw-color@2', 'backdrop-filter@4', 'backdrop-filter@4']);
+    expect(lintCss(css, { allowEffects: true, tokens: true }).map((x) => x.rule)).toEqual(['backdrop-filter', 'backdrop-filter']);
+    expect(lintCssFile(TOKENS_FILE, `:root { --surface-canvas: #121212; }`)).toEqual([]);
+    expect(lintCssFile('src/ui/styles.css', `:root { --bg: #121212; }`).map((x) => x.rule)).toEqual(['raw-color']);
+    const inline = lintSource('x.tsx', `export const A = () => <div style={{ color: '#E5D0AC', backdropFilter: 'blur(4px)' }} />;`).map((h) => h.rule);
+    expect(inline).toEqual(expect.arrayContaining(['raw-color', 'backdrop-filter']));
+    // a hash route is not a colour
+    expect(lintSource('x.tsx', `export const A = () => <a href="#/add" style={{ width: '3ch' }}>Add</a>;`)).toEqual([]);
+  });
+  it('citrine: font stacks resolve through token variables', () => {
+    const vars = new Map([['--font-sans', 'system-ui, sans-serif']]);
+    expect(lintCss(`:root { font: 100%/1.4 var(--font-sans); }`, { allowEffects: false, vars }).map((x) => x.rule)).toEqual(['system-font-primary']);
+  });
+  it('citrine: colour parsing', () => {
+    expect(parseColor('#121212')).toEqual([18, 18, 18, 1]);
+    expect(parseColor('#fff')).toEqual([255, 255, 255, 1]);
+    expect(parseColor('rgba(18, 18, 18, 0.96)')).toEqual([18, 18, 18, 0.96]);
+    expect(parseColor('var(--x)')).toBeNull();
+  });
+  it('citrine: token contrast matrix', () => {
+    const ok = tokenContrast(`:root { --surface-canvas: #121212; --surface-raised: #222222; --surface-overlay: rgba(18,18,18,.96); --text-primary: #F5F5F0; --text-tertiary: #8E8981; --accent: #E5D0AC; --hairline: rgba(255,255,255,.08); --space-1: 8px; }`);
+    expect(ok.findings).toEqual([]);
+    // 3 text tokens x 3 surfaces + the inverse button pair; hairlines and spacing are not pairs
+    expect(ok.pairs).toHaveLength(3 * 3 + 1);
+    // the briefing's tertiary (#8A857C) fails on raised; the old one (#66645E) fails everywhere
+    const bad = tokenContrast(`:root { --surface-canvas: #121212; --surface-raised: #222222; --text-primary: #F5F5F0; --text-tertiary: #8A857C; }`);
+    expect(bad.findings.map((f) => f.match)).toEqual(['--text-tertiary on --surface-raised is 4.34:1 < 4.5:1']);
+    expect(tokenContrast(`:root { --surface-canvas: #121212; --text-primary: #F5F5F0; --text-tertiary: #66645E; }`).findings).toHaveLength(1);
+    expect(tokenContrast(`:root { --surface-canvas: #121212; }`).findings.map((f) => f.match)).toEqual(['--text-primary missing']);
+    // a translucent surface is judged on its worst backdrop
+    const ov = tokenContrast(`:root { --surface-canvas: #121212; --surface-overlay: rgba(18,18,18,.5); --text-primary: #F5F5F0; --text-secondary: #A89F91; }`);
+    expect(ov.findings.some((f) => f.match.startsWith('--text-secondary on --surface-overlay over --text-primary'))).toBe(true);
+  });
+  it('citrine: the real token file passes, and the mirrors match it', () => {
+    const root = join(__dirname, '../..');
+    const tokens = readFileSync(join(root, TOKENS_FILE), 'utf8');
+    const r = lintTokens(tokens, [['index.html', readFileSync(join(root, 'index.html'), 'utf8')], ['public/manifest.webmanifest', readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8')]]);
+    expect(r.findings).toEqual([]);
+    expect(r.pairs.every((p) => p.ratio >= 4.5)).toBe(true);
+    expect(colorDrift('<meta name="theme-color" content="#050505" />', tokens).map((d) => d.match)).toEqual(['#050505']);
+  });
+  it('citrine: status needs text or a glyph', () => {
+    expect(colorOnlyStatus([{ label: 'span.dot', text: '', w: 8, h: 8 }, { label: 'p.status', text: '', w: 300, h: 0 }, { label: 'em.tag', text: '✓', w: 20, h: 18 }])).toEqual(['span.dot 8x8 has no text or glyph']);
+    expect(lintSource('x.tsx', `export const A = () => <><i role="status" /><span data-status="ok" /><p role="status">Saved</p></>;`).map((h) => h.rule)).toEqual(['color-only-status', 'color-only-status']);
   });
 });

@@ -2,6 +2,7 @@
 # Prints ONE line starting "ALERT:" when a problem is new or was last raised more than 12 h ago:
 #   scan heartbeat stale (> 40 min since the last completed sync), newest nightly backup failed / older than 26 h,
 #   or (once migration 0026 is applied) pushes failing. State in work/v187/health_state.json.
+#   v18.15.4: plus signal scans that missed their slot, found 0 accounts or got stuck (scripts/scan_heartbeat.py).
 # After 0026 the database also sends its own push (pg_cron ari-health-alert); this line is the fallback in Hark chat.
 import os, sys, json, datetime
 sys.path.insert(0, os.path.dirname(__file__))
@@ -37,4 +38,8 @@ for k in list(state):
 for k in fire: state[k] = now.isoformat()
 os.makedirs(os.path.dirname(STATE), exist_ok=True)
 json.dump(state, open(STATE, 'w'))
-if fire: print('ALERT: Ari ' + '; '.join(problems[k] for k in fire))
+try:                                           # v18.15.4: signal-scan dead-man, deduped per book per slot inside
+    import scan_heartbeat; dm = scan_heartbeat.check_live(now)
+except BaseException as e: dm = []; print('scan dead-man check skipped: %s' % str(e)[:120], file=sys.stderr)
+parts = [problems[k] for k in fire] + dm
+if parts: print('ALERT: Ari ' + '; '.join(parts))

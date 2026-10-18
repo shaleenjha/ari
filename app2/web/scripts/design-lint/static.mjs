@@ -6,19 +6,23 @@
 //       (JSX text and copy literals in .tsx, index.html text and title/alt/aria-label/placeholder/content, manifest
 //       name/short_name/description: also exclamation, place-or-timezone, infra-word).
 // CSS:  system font as the primary family, gradients and glow shadows (src/**/*.css and inline styles) outside
-//       EFFECTS_ALLOW_LIST.
+//       EFFECTS_ALLOW_LIST. Citrine (v18.16.0): raw colours outside TOKENS_FILE (CSS and inline styles), backdrop-filter
+//       anywhere, every text token on every surface token >= 4.5:1 (computed from tokens.css), hex colours in index.html
+//       and the manifest must equal a token value (they cannot read variables), status elements with no content.
+//   node scripts/design-lint/static.mjs --tokens   also print the token contrast matrix
 // Allows: see allow.mjs (allow.json per file, inline `lint-allow: <rule> <reason>`). Exit 1 on any error; CI=true adds
 // GitHub annotations.
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { EFFECTS_ALLOW_LIST, checkText, lintCss } from './rules.mjs';
+import { EFFECTS_ALLOW_LIST, TOKENS_FILE, checkText, colorDrift, declarations, lintCss, tokenContrast } from './rules.mjs';
 import { WEB_ROOT, allowIndex, finding, loadAllowJson, printFindings, staleJsonEntries } from './allow.mjs';
 
 const ROOT = WEB_ROOT;
 /** Rules this lint owns (stale allows for other rules are left to their own lint). */
-export const STATIC_RULES = new Set(['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow']);
+export const STATIC_RULES = new Set(['dash', 'buzzword', 'exclamation', 'place-or-timezone', 'infra-word', 'system-font-primary', 'gradient', 'glow',
+  'raw-color', 'backdrop-filter', 'token-contrast', 'color-only-status']);
 
 function walk(dir) {
   const out = [];
@@ -103,6 +107,16 @@ export function lintSource(file, text, { jsonEntries } = {}) {
       const pos = node.getStart(src);
       if (/gradient\s*\(/i.test(t)) push(pos, 'gradient', 'inline style', t, 'in an inline style');
       if (/boxShadow|textShadow/.test(t)) push(pos, 'glow', 'inline style', t, 'in an inline style');
+      if (/#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i.test(t)) push(pos, 'raw-color', 'inline style', t, 'in an inline style');
+      if (/backdropFilter|WebkitBackdropFilter/.test(t)) push(pos, 'backdrop-filter', 'inline style', t, 'in an inline style');
+    }
+    // <span role="status" /> or <i data-status="ok" />: a status with no children can only be colour.
+    if (ts.isJsxSelfClosingElement(node)) {
+      const attrs = node.attributes.properties.filter(ts.isJsxAttribute);
+      const role = attrs.find((a) => a.name.getText() === 'role')?.initializer?.getText(src).replace(/['"{}]/g, '');
+      if (role === 'status' || role === 'alert' || attrs.some((a) => a.name.getText() === 'data-status')) {
+        push(node.getStart(src), 'color-only-status', node.tagName.getText(src), node.getText(src), 'in JSX');
+      }
     }
     ts.forEachChild(node, visit);
   };
@@ -111,9 +125,9 @@ export function lintSource(file, text, { jsonEntries } = {}) {
 }
 
 /** Lint one stylesheet (CSS rules) with allows applied. */
-export function lintCssFile(file, text, { jsonEntries } = {}) {
+export function lintCssFile(file, text, { jsonEntries, vars } = {}) {
   const allow = allowIndex(file, text, jsonEntries);
-  const out = lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file) })
+  const out = lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file), tokens: file === TOKENS_FILE, vars })
     .filter((x) => !allow.suppress(x.rule, x.line))
     .map((x) => ({ ...finding(file, x.line, 1, x.rule, x.match, x.match), kind: 'in CSS' }));
   return [...out, ...allow.problems(STATIC_RULES)];
@@ -151,28 +165,52 @@ export function lintManifestCopy(file, json, { jsonEntries } = {}) {
   return out;
 }
 
+/**
+ * Token file checks: the contrast matrix (rule token-contrast) and hex colours in files that cannot read variables
+ * (index.html, the manifest) that match no token (rule raw-color).
+ */
+export function lintTokens(tokensCss, mirrors) {
+  const { pairs, findings: tf } = tokenContrast(tokensCss);
+  const out = tf.map((x) => ({ ...finding(TOKENS_FILE, x.line, 1, x.rule, x.match, x.match), kind: 'in the token file' }));
+  for (const [file, text] of mirrors) for (const d of colorDrift(text, tokensCss)) {
+    const { line, col } = lineCol(text, d.index);
+    out.push({ ...finding(file, line, col, 'raw-color', d.match, `${d.match} is not a value in ${TOKENS_FILE}; mirror the token`), kind: 'mirroring the tokens' });
+  }
+  return { pairs, findings: out };
+}
+
 export function run(root = ROOT, { allowJson = join(root, 'scripts/design-lint/allow.json') } = {}) {
   const { entries: jsonEntries, problems } = loadAllowJson(allowJson, root);
   const findings = [...problems];
   const files = walk(join(root, 'src'));
+  const tokensPath = join(root, TOKENS_FILE);
+  const tokensCss = existsSync(tokensPath) ? readFileSync(tokensPath, 'utf8') : '';
+  if (!tokensCss) findings.push({ ...finding(TOKENS_FILE, 1, 1, 'token-contrast', TOKENS_FILE, `${TOKENS_FILE} is missing`), kind: '' });
+  const vars = new Map(declarations(tokensCss).filter((d) => d.prop.startsWith('--')).map((d) => [d.prop, d.value]));
   for (const f of files) {
     const rel = relative(root, f);
     const text = readFileSync(f, 'utf8');
     if (/\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f) && !f.endsWith('.d.ts')) findings.push(...lintSource(rel, text, { jsonEntries }));
-    if (f.endsWith('.css')) findings.push(...lintCssFile(rel, text, { jsonEntries }));
+    if (f.endsWith('.css')) findings.push(...lintCssFile(rel, text, { jsonEntries, vars }));
   }
-  findings.push(...lintHtmlCopy('index.html', readFileSync(join(root, 'index.html'), 'utf8'), { jsonEntries }));
-  findings.push(...lintManifestCopy('public/manifest.webmanifest', readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8'), { jsonEntries }));
+  const html = readFileSync(join(root, 'index.html'), 'utf8');
+  const manifest = readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8');
+  findings.push(...lintHtmlCopy('index.html', html, { jsonEntries }));
+  findings.push(...lintManifestCopy('public/manifest.webmanifest', manifest, { jsonEntries }));
+  const tk = lintTokens(tokensCss, [['index.html', html], ['public/manifest.webmanifest', manifest]]);
+  findings.push(...tk.findings);
   findings.push(...staleJsonEntries(jsonEntries, STATIC_RULES));
-  return { files: files.length + 2, findings };
+  return { files: files.length + 2, findings, pairs: tk.pairs };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { files, findings } = run();
+  const { files, findings, pairs } = run();
   if (process.argv.includes('--json')) {
-    console.log(JSON.stringify({ files, findings }, null, 2));
+    console.log(JSON.stringify({ files, findings, pairs }, null, 2));
     process.exit(findings.some((f) => f.severity !== 'warning') ? 1 : 0);
   }
-  const errors = printFindings(findings, { label: 'design-lint (static)', okLine: `${files} files, copy rules and CSS rules`, kind: (f) => f.kind ?? '' });
+  if (process.argv.includes('--tokens')) for (const p of pairs) console.log(`${p.pass ? 'ok  ' : 'FAIL'} ${p.ratio.toFixed(2).padStart(5)}:1  ${p.text} on ${p.surface}`);
+  const low = pairs.reduce((m, p) => Math.min(m, p.ratio), Infinity);
+  const errors = printFindings(findings, { label: 'design-lint (static)', okLine: `${files} files, copy rules, CSS rules, ${pairs.length} token pairs (lowest ${low.toFixed(2)}:1)`, kind: (f) => f.kind ?? '' });
   process.exit(errors ? 1 : 0);
 }
