@@ -92,6 +92,8 @@ export class Auth {
   private refreshing: Promise<Session> | null = null;
   private subs = new Set<() => void>();
   private st: AuthStatus = 'ok';
+  /** Called when a refresh ends the session for good (invalid_grant family), never on 429, 408, 5xx or network. */
+  onTerminal: (() => void) | null = null;
   constructor(private cfg: AuthConfig, private f: FetchFn = fetch.bind(globalThis), private store: Storage = safeStorage('localStorage'),
     private loc: Pick<Location, 'origin' | 'hash' | 'pathname' | 'search' | 'assign'> = location, private now: () => number = Date.now,
     private tab: Storage = safeStorage('sessionStorage'), private opts: { locks?: LockMgr; sleep?: (ms: number) => Promise<void>; tries?: number } = {}) {
@@ -204,7 +206,7 @@ export class Auth {
       this.save({ ...s, email: s.email ?? this.session()?.email });
       return s;
     }
-    if (isTerminal(r.status, body)) { this.save(null); throw new SignedOutError(); }
+    if (isTerminal(r.status, body)) { this.save(null); this.onTerminal?.(); throw new SignedOutError(); }
     throw new TransientAuthError(r.status);
   }
 

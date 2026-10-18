@@ -1,5 +1,6 @@
 import { data } from '../data/client';
 import { useAsync } from '../ui/useAsync';
+import { Stale } from '../ui/Stale';
 
 const LABEL = { verified: 'Verified', inference: 'Inference', hypothesis: 'Hypothesis' } as const;
 
@@ -11,6 +12,7 @@ export function AccountRoom({ id }: { id: string }) {
   return (
     <section aria-labelledby="h-acc">
       <header className="hd"><a href="#/" className="back" aria-label="Back">‹</a><h1 id="h-acc">{account.name}</h1></header>
+      <Stale at={a.stale} />
       <p className="muted">{account.oneLiner}</p>
       {brief && (
         <div className="card col" data-testid="brief">

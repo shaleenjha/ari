@@ -11,7 +11,7 @@ import { SyntheticRestData } from './data/fixtures/syntheticRest';
 import { isEmbedded } from './ui/embedded';
 import { ErrorBoundary, Fallback } from './ui/ErrorBoundary';
 import { setReadOnly } from './ui/readOnly';
-import { setAuth, setEmbedded, setMisconfigured } from './ui/session';
+import { seedFromDevice, setAuth, setEmbedded, setMisconfigured } from './ui/session';
 import './ui/styles.css';
 
 let root: Root | null = null;
@@ -46,6 +46,7 @@ async function boot() {
       const err = auth.isReturn() ? await auth.complete().catch(() => 'Sign-in failed. Try again.') : null;
       setData(new LiveData(fetch.bind(globalThis), { url: cfg.url, apikey: cfg.apikey, token: () => auth.token(), workspaceId: cfg.workspaceId }));
       setAuth(auth, err);
+      await seedFromDevice();
     }
   } else setData(mode.data === 'legacy' ? new MockData() : new SyntheticRestData(slowed(new MockPostgrest()), WS_A, JWT_A));
   mount().render(<StrictMode><ErrorBoundary><App /></ErrorBoundary></StrictMode>);

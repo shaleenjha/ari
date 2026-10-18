@@ -4,6 +4,7 @@ import type { WeekReport } from '../data/types';
 import { useAsync } from '../ui/useAsync';
 import { Busy } from '../ui/Skeleton';
 import { Stale } from '../ui/Stale';
+import { signOut, useSession } from '../ui/session';
 
 type Tile = { key: string; label: string; value?: (d: WeekReport) => ReactNode; lead?: boolean };
 const NBSP = '\u00a0';
@@ -26,6 +27,7 @@ const meetingsLabel = (d?: WeekReport) => (d?.meetingsFromAri ? 'Meetings from A
 export function Report() {
   const w = useAsync(() => data().week(), [], { key: 'report' });
   const d = w.data;
+  const live = useSession().live;
   return (
     <section aria-labelledby="h-rep2" aria-busy={!d && !w.error}>
       <header className="hd"><h1 id="h-rep2">Report</h1></header>
@@ -43,6 +45,7 @@ export function Report() {
           ))}
         </dl>
       )}
+      {live && <button type="button" className="btn ghost signout" data-testid="sign-out" onClick={() => { void signOut(); }}>Sign out</button>}
     </section>
   );
 }

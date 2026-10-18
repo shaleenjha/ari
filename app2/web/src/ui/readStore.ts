@@ -1,4 +1,5 @@
-// Last good read per key (v18.15.2). Memory only, this tab, never written to storage; cleared on sign-out.
+// Last good read per key (v18.15.3). Memory, this tab; cleared on sign-out. Today's queue and Tidy up also keep a
+// last-good copy on this device (ui/todayCache.ts), seeded here on cold boot through seed().
 // Rules:
 // - A failed read (a reject, or a result the caller's `good` check refuses because parts failed) never replaces data that
 //   already loaded for that key. The screen keeps it and, when the failure looks like no network, shows one quiet line.
@@ -72,6 +73,7 @@ const EMPTY: ReadSnap = { data: undefined, loading: true, offline: false };
 
 export function createReadStore(env: ReadEnv) {
   const m = new Map<string, Entry>();
+  const goods = new Set<(key: string, v: unknown, at: number) => void>();
   let wired = false;
 
   const entry = (key: string): Entry => {
@@ -101,7 +103,9 @@ export function createReadStore(env: ReadEnv) {
         const v = await fn();
         if (e.good && !e.good(v)) throw new PartialReadError(v);
         e.fails = 0;
-        set(e, { data: v, at: env.now(), loading: false, error: undefined, offline: false });
+        const at = env.now();
+        set(e, { data: v, at, loading: false, error: undefined, offline: false });
+        goods.forEach((f) => f(key, v, at));
       } catch (err) {
         e.fails += 1;
         const online = env.online();
@@ -138,6 +142,13 @@ export function createReadStore(env: ReadEnv) {
       e.fn = fn; e.good = good; e.temp = temp;
     },
     load,
+    /** A last-good copy from this device, shown until a read lands. Never replaces data already in memory. */
+    seed(key: string, data: unknown, at: number) {
+      const e = entry(key);
+      if (e.snap.data === undefined) set(e, { data, at, error: undefined, offline: false });
+    },
+    /** Called after every good read (the `good` check passed). */
+    onGood(f: (key: string, v: unknown, at: number) => void) { goods.add(f); return () => { goods.delete(f); }; },
     subscribe(key: string, f: () => void) {
       wire();
       const e = entry(key);

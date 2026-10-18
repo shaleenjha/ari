@@ -34,10 +34,10 @@ export function App() {
   // Google refuses sign-in inside an app's link viewer, so send people to their browser first (forced in any mode by ?embed=1).
   if (s.embedded && (!s.live || !s.signedIn)) return <div className="shell"><main className="screen"><OpenInBrowser /></main></div>;
   if (s.live && !s.signedIn) return <div className="shell"><main className="screen"><SignIn error={s.error} misconfigured={s.misconfigured} /></main></div>;
-  return <Shell ro={ro} retrying={s.live && s.retrying} />;
+  return <Shell ro={ro} />;
 }
 
-function Shell({ ro, retrying }: { ro: boolean; retrying: boolean }) {
+function Shell({ ro }: { ro: boolean }) {
   const r = useRoute();
   const screen = useRef<HTMLElement>(null);
   const active = r.name === 'today15' || r.name === 'account' ? 'today' : r.name;
@@ -57,7 +57,6 @@ function Shell({ ro, retrying }: { ro: boolean; retrying: boolean }) {
           <p className="roline" data-testid="ro-line">{READ_ONLY_LINE}</p>
         </div>
       )}
-      {retrying && <p className="muted offline" role="status" data-testid="retrying">Offline. Retrying.</p>}
       <main className="screen" id="main" tabIndex={-1} data-screen={r.name} ref={screen}>
         {r.name === 'today' && <Today />}
         {r.name === 'today15' && <Today15 />}
