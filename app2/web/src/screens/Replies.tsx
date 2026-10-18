@@ -35,7 +35,7 @@ function ReplyDraft({ reply, onHide }: { reply: Reply; onHide: () => void }) {
   return (
     <div className="draftbox" data-testid={`draft-${reply.id}`}>
       <label className="draft">
-        <span className="sr-only">{loading ? 'Loading draft' : d.data ? 'Draft' : 'No draft'}</span>
+        <span className="sr-only">{loading ? 'Loading draft…' : d.data ? 'Draft' : 'No draft'}</span>
         <textarea ref={box} value={text} rows={6} onChange={(e) => { typed.current = true; setText(e.target.value); }} />
       </label>
       <div className="acts">

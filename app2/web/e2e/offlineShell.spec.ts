@@ -19,7 +19,7 @@ test('airplane mode cold load: Instrument Sans and the icon sprite render from t
   const cached = await page.evaluate(async () => {
     const keys = await caches.keys();
     const c = await caches.open(keys.find((k) => k.startsWith('ari-app2-shell-'))!);
-    return { keys, font: !!(await c.match('/fonts/instrument-sans-latin-wght.woff2')), shell: !!(await c.match('/')) };
+    return { keys, font: !!(await c.match('/fonts/instrument-sans-latin-wght.woff2', { ignoreVary: true })), shell: !!(await c.match('/')) };
   });
   expect(cached.keys).toContain('ari-app2-shell-v8');
   expect(cached.font, 'font precached').toBe(true);

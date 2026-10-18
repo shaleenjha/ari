@@ -18,12 +18,12 @@ const TILES: Tile[] = [
 ];
 
 const meetingsLabel = (d?: WeekReport) => (d?.meetingsFromAri ? 'Meetings from Ari' : 'Meetings');
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH = new Intl.DateTimeFormat('en-US', { month: 'short' });
 /** "This week · 13 to 17 Oct" (Monday to Friday of the current week, on the phone's clock). */
 export function weekLabel(now: Date): string {
   const mon = new Date(now); mon.setHours(12, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
   const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
-  const m = (x: Date) => MONTHS[x.getMonth()];
+  const m = (x: Date) => MONTH.format(x);
   return `This week · ${mon.getDate()}${m(mon) === m(fri) ? '' : ` ${m(mon)}`} to ${fri.getDate()} ${m(fri)}`;
 }
 

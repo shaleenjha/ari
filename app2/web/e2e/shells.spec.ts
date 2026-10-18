@@ -25,7 +25,9 @@ test("Today's 15 caps per account and marks sent", async ({ page }) => {
   const rows = page.getByTestId('today15').locator('li');
   await expect(rows).toHaveCount(9);
   await rows.first().getByRole('button', { name: 'Mark sent' }).click();
-  await expect(rows.first().getByRole('button')).toHaveText('Sent');
+  // S2: a sent row shows the teal check and the word, no button.
+  await expect(rows.first().getByRole('status')).toHaveText('Sent');
+  await expect(rows.first().getByRole('button')).toHaveCount(0);
   await noHorizontalScroll(page);
 });
 

@@ -12,6 +12,7 @@
   size-adjust: 102.70%; ascent-override: 94.45%; descent-override: 24.34%; line-gap-override: 0%; }
 :root { font-size: 100%; }
 * { box-sizing: border-box; }
+a, button, textarea { touch-action: manipulation; }
 html, body { margin: 0; background: var(--canvas); color: var(--text-1); }
 body { font-family: var(--font); font-size: var(--fs-body); line-height: var(--lh-body); font-weight: var(--fw-body); letter-spacing: var(--ls-body);
   font-variant-numeric: tabular-nums; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
@@ -92,6 +93,8 @@ p.muted, p.meta { margin: 0 0 var(--s-2); font-size: var(--fs-meta); line-height
 .btn:disabled { opacity: .5; cursor: default; }
 .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
 .btn:focus-visible, .cardhead:focus-visible, .tabs a:focus-visible, .row a:focus-visible, .card:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* A label span inside a button keeps the button's type and ink (not the row/card meta style). */
+.btn span, .row .btn span, .card .btn span { display: inline; color: inherit; font: inherit; letter-spacing: inherit; }
 .btn.wide { width: 100%; justify-content: flex-start; text-align: left; }
 .btn.center { display: flex; width: 100%; }
 .acts { display: flex; gap: var(--s-2); flex-wrap: wrap; }
@@ -155,7 +158,8 @@ p.muted, p.meta { margin: 0 0 var(--s-2); font-size: var(--fs-meta); line-height
 /* Skeleton: identical geometry (CLS 0). Every line keeps its full line box and draws a surface-3 bar inside it (8 px in a
    body line, 16 in a name line). The pulse runs only while loading and only with motion allowed: opacity .5 to .8,
    alternating, 5 cycles max, then holds at .65. */
-.skelline { display: block; }
+.skelline, .card .skelline, .row .skelline { display: flex; align-items: center; }
+.skelline::before { content: '\200b'; width: 0; } /* keeps the full text line box, so the bar never changes the row height */
 .bar { display: inline-block; height: var(--s-2); vertical-align: middle; border-radius: var(--r-chip); background: var(--surface-3); font-style: normal; opacity: .65; }
 .stat dd .bar { height: var(--s-4); }
 .skel.pin { border-color: var(--hairline); }

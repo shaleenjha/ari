@@ -21,6 +21,8 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   if (u.pathname.startsWith('/assets/') || u.pathname.startsWith('/fonts/') || u.pathname.startsWith('/brand/')) {
-    e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request).then((r) => put(e.request, r))));
+    // ignoreVary: vite and most hosts send Vary: Origin on the font, and the crossorigin preload carries an Origin header
+    // that the precache request did not, so a strict match would miss the precached woff2 offline.
+    e.respondWith(caches.match(e.request, { ignoreVary: true }).then((hit) => hit || fetch(e.request).then((r) => put(e.request, r))));
   }
 });
