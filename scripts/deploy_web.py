@@ -2,9 +2,11 @@
 import os,re,json,base64,subprocess
 W=os.path.join(os.path.dirname(__file__),'..','web')
 import hashlib,sys
-# Guard (Oct 17 2026): this script deploys to PRODUCTION on run. Any argument stops it.
-if len(sys.argv) > 1:
-    print("deploy_web.py takes no arguments and deploys web/ to production when run bare. Nothing deployed.")
+# Guard (Oct 18 2026, audit sign-off): deploys to PRODUCTION only with exactly
+#   python3 scripts/deploy_web.py --target=production --confirm
+# Bare, --help, partial, extra or unknown arguments abort with exit 2 and deploy nothing.
+if sorted(sys.argv[1:]) != ['--confirm', '--target=production']:
+    sys.stderr.write("Nothing deployed. deploy_web.py deploys web/ to PRODUCTION and requires exactly: --target=production --confirm\n")
     sys.exit(2)
 _L=json.load(open(os.path.join(os.path.dirname(__file__),'..','plans','base-lock.json')))
 _m=hashlib.md5(open(os.path.join(W,'ops.html'),'rb').read()).hexdigest()
