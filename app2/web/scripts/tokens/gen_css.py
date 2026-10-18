@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""S2 tokens (v18.17.0): generate src/ui/tokens.css from design/tokens.json. Same generator as the S2 design package
+"""S2 tokens (v18.17.0): generate src/ui/tokens.css from tokens/tokens.json. Same generator as the S2 design package
 (_build/gen_css.py), so the output is byte-identical to the package tokens.css.
 
   python3 scripts/tokens/gen_css.py            write src/ui/tokens.css
@@ -8,7 +8,7 @@
 import json, os, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SRC = os.path.join(ROOT, 'design', 'tokens.json')
+SRC = os.path.join(ROOT, 'tokens', 'tokens.json')
 OUT = os.path.join(ROOT, 'src', 'ui', 'tokens.css')
 
 

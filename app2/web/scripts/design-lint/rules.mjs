@@ -13,7 +13,7 @@ export const WIDTHS = [360, 390, 412];
 
 /** Only these CSS files may use gradients or glow shadows (none today). Paths relative to app2/web. */
 export const EFFECTS_ALLOW_LIST = ['src/ui/effects.allowed.css'];
-/** The one file that may hold raw colours (S2 tokens, generated from design/tokens.json by scripts/tokens/gen_css.py). Every other stylesheet and inline style uses its variables. */
+/** The one file that may hold raw colours (S2 tokens, generated from tokens/tokens.json by scripts/tokens/gen_css.py). Every other stylesheet and inline style uses its variables. */
 export const TOKENS_FILE = 'src/ui/tokens.css';
 /** Every text token on every surface token must reach this (WCAG AA body text), whatever size it ends up used at. */
 export const TOKEN_MIN_RATIO = 4.5;

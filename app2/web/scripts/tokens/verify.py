@@ -3,7 +3,7 @@
 npm run lint:design and the anti-slop-static CI job run first. Exit 1 on any FAIL.
   1 contrast from src/ui/tokens.css: text-1/2/3, accent, friction, done >= 4.5:1 on canvas and surface-1..3 (text-3 on
     surface-3 is banned, not checked); border and focus >= 3:1 (border not on surface-3); ink on key, pressed, done >= 4.5
-  2 src/ui/tokens.css is exactly what design/tokens.json generates (scripts/tokens/gen_css.py)
+  2 src/ui/tokens.css is exactly what tokens/tokens.json generates (scripts/tokens/gen_css.py)
   3 4 px grid on every space and size dimension (stroke excepted); radii only 8, 12, 16, 20, 28, 9999
   4 no raw hex anywhere in src/ (CSS, TS/TSX incl. template literals, SVG fill/stroke) except src/ui/tokens.css and tests;
     public/brand/ is the only exempt asset folder (it is outside src/)
