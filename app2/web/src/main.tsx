@@ -55,6 +55,13 @@ boot().catch((e: unknown) => {
   console.error('Ari could not start', e);
   mount().render(<Fallback />);
 });
+// Keyboard resizes the layout viewport (Android): interactive-widget=resizes-content. Added from script on Chromium
+// engines only (Chrome, Brave, Samsung Internet; they expose navigator.userAgentData), because WebKit logs a console error
+// for the unknown key on every load. The keyboard opens after boot, so the late edit still applies.
+if ('userAgentData' in navigator) {
+  const vp = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+  if (vp && !vp.content.includes('interactive-widget')) vp.content += ', interactive-widget=resizes-content';
+}
 // iOS Safari only fires :active (the press state, Citrine spec §1 motion) when the page has a touchstart listener.
 document.addEventListener('touchstart', () => undefined, { passive: true });
 if ('serviceWorker' in navigator && import.meta.env.PROD) navigator.serviceWorker.register('/sw.js').catch(() => undefined);
