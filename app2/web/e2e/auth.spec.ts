@@ -2,9 +2,11 @@ import { expect, test, type BrowserContext, type Page, type Route } from '@playw
 
 // v18.15.0 auth hygiene, against the live-mode build (playwright.config.ts, second web server) with every auth and REST
 // call mocked by route(): nothing reaches Supabase or Google. One size per engine is enough for auth behaviour.
-const LIVE = `http://localhost:${Number(process.env.PW_PORT ?? 4173) + 1}`;
+const LIVE = process.env.PW_LIVE_URL ?? `http://localhost:${Number(process.env.PW_PORT ?? 4173) + 1}`;
 const AUTH = 'https://auth-mock.test';
-test.use({ baseURL: LIVE });
+// Service workers blocked: once sw.js controls the page, WebKit stops routing its later fetches through route() (seen
+// on v18.15.0 CI: retries hit the real network). sw.js itself never touches cross-origin or non-GET requests.
+test.use({ baseURL: LIVE, serviceWorkers: 'block' });
 test.beforeEach(({}, info) => { test.skip(!info.project.name.endsWith('-390'), 'auth: one size per engine'); });
 
 type Reply = (route: Route) => Promise<void>;
