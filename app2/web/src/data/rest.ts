@@ -1,6 +1,6 @@
-// RestData: the DataLayer over PostgREST (Supabase) against the app2 `app` schema. Reads are table/view selects that RLS
-// scopes to the caller's workspaces (we also filter by workspace_id explicitly); writes are command RPCs only.
-// Locally and in e2e it talks to MockPostgrest (in-memory, synthetic); later the same code points at an app2 project.
+// RestData: the DataLayer's reads over PostgREST against the app2 `app` schema. Reads are table/view selects that RLS
+// scopes to the caller's workspaces (we also filter by workspace_id explicitly). Phase 1 is read-only: the command methods
+// refuse here, and the synthetic command path lives in fixtures/syntheticRest.ts (MockPostgrest only). Lint: no-client-writes.
 import type { DataLayer } from './client';
 import type { CommandResult, Draft, HygieneAction, MarkField, Task, WeekReport } from './types';
 import { acceptToDm1Median, today15 } from './domain';
@@ -9,11 +9,13 @@ import { toAccount, toActivity, toBrief, toDraft, toFinding, toPerson, toReply, 
 
 export type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
 export class RestError extends Error { constructor(public status: number, msg: string) { super(msg); } }
+/** Thrown by every command in Phase 1 (read-only). */
+export class ReadOnlyError extends Error { constructor() { super('read-only'); } }
 
 export class RestData implements DataLayer {
-  constructor(private f: FetchFn, private base: string, private ws: string, private jwt: string) {}
+  constructor(protected f: FetchFn, protected base: string, protected ws: string, private jwt: string) {}
 
-  private headers(extra: Record<string, string> = {}): Record<string, string> {
+  protected headers(extra: Record<string, string> = {}): Record<string, string> {
     return { 'Accept-Profile': 'app', 'Content-Profile': 'app', Authorization: `Bearer ${this.jwt}`, apikey: 'anon', 'Content-Type': 'application/json', ...extra };
   }
   async get<T>(table: string, q: Record<string, string> = {}): Promise<T[]> {
@@ -21,11 +23,6 @@ export class RestData implements DataLayer {
     const r = await this.f(`${this.base}/rest/v1/${table}?${qs.toString()}`, { headers: this.headers() });
     if (!r.ok) throw new RestError(r.status, `${table}: ${r.status}`);
     return (await r.json()) as T[];
-  }
-  async rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
-    const r = await this.f(`${this.base}/rest/v1/rpc/${fn}`, { method: 'POST', headers: this.headers(), body: JSON.stringify({ p_ws: this.ws, ...args }) });
-    if (!r.ok) throw new RestError(r.status, `${fn}: ${r.status}`);
-    return (await r.json()) as T;
   }
 
   async queue(): Promise<Task[]> {
@@ -57,16 +54,10 @@ export class RestData implements DataLayer {
     return { meetingsAri: 1, meetingsGoal: 3, replies: p.filter((x) => x.repliedAt).length, accepts: p.filter((x) => x.acceptedAt).length,
       connects: p.filter((x) => x.connectSentAt).length, acceptToDm1MedianHours: acceptToDm1Median(p) };
   }
-  async mark(personId: string, field: MarkField, opId: string): Promise<CommandResult> {
-    return this.rpc<CommandResult>('person_mark', { p_person: personId, p_field: field, p_op: opId });
-  }
-  async transition(taskId: string, to: Task['status'], expectedVersion: number, opId: string): Promise<CommandResult> {
-    return this.rpc<CommandResult>('task_transition', { p_task: taskId, p_to: to, p_expected_version: expectedVersion, p_op: opId });
-  }
+  async mark(_personId: string, _field: MarkField, _opId: string): Promise<CommandResult> { throw new ReadOnlyError(); }
+  async transition(_taskId: string, _to: Task['status'], _expectedVersion: number, _opId: string): Promise<CommandResult> { throw new ReadOnlyError(); }
   async hygiene() { return (await this.get<HygieneRow>('hygiene_findings', { status: 'eq.open', order: 'first_seen.asc' })).map(toFinding); }
-  async resolveHygiene(findingId: string, action: HygieneAction, opId: string, keepId?: string): Promise<CommandResult> {
-    return this.rpc<CommandResult>('hygiene_resolve', { p_finding: findingId, p_action: action, p_keep: keepId ?? null, p_op: opId });
-  }
+  async resolveHygiene(_findingId: string, _action: HygieneAction, _opId: string, _keepId?: string): Promise<CommandResult> { throw new ReadOnlyError(); }
   async whoIsThis() {
     const ev = await this.get<IngestRowDb>('ingest_events', { match_method: 'eq.none', kind: 'in.(accept,reply)', order: 'received_at.desc' });
     const ids = [...new Set(ev.flatMap((e) => e.parsed.candidates ?? []))];
@@ -75,7 +66,5 @@ export class RestData implements DataLayer {
     const accounts = accIds.length ? await this.get<AccountRow>('accounts', { id: `in.(${accIds.join(',')})` }) : [];
     return ev.map((e) => toWho(e, people, accounts));
   }
-  async confirmWho(eventId: string, personId: string | null, opId: string): Promise<CommandResult> {
-    return this.rpc<CommandResult>('ingest_confirm_match', { p_event: eventId, p_person: personId, p_op: opId });
-  }
+  async confirmWho(_eventId: string, _personId: string | null, _opId: string): Promise<CommandResult> { throw new ReadOnlyError(); }
 }

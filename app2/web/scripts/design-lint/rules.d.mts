@@ -16,3 +16,5 @@ export declare function contrast(a: [number, number, number], b: [number, number
 export declare function isLargeText(px: number, weight: number): boolean;
 export declare function requiredRatio(px: number, weight: number): number;
 export declare const RULES: string[];
+export declare const CONTRAST_EXEMPT: string;
+export declare function contrastExempt(attrs: Record<string, string | undefined>): boolean;

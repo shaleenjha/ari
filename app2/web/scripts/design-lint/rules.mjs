@@ -139,3 +139,12 @@ export function contrast(a, b) {
 /** Large text: 24px and up, or 18.66px and up when bold (700+). */
 export const isLargeText = (px, weight) => px >= 24 || (px >= 18.66 && weight >= 700);
 export const requiredRatio = (px, weight) => (isLargeText(px, weight) ? 3 : 4.5);
+
+/**
+ * Text the contrast check skips (besides script/style): inactive controls only, marked aria-disabled="true" (WCAG 1.4.3
+ * exempts text in inactive user interface components). Native `disabled` is NOT exempt, and the 4.5:1 / 3:1 thresholds
+ * are unchanged for everything else. Inactive controls still get the 48px target check.
+ */
+export const CONTRAST_EXEMPT = '[aria-disabled="true"]';
+/** True when an element with these attributes (its own or an ancestor's) is exempt from the contrast check. */
+export const contrastExempt = (attrs) => attrs['aria-disabled'] === 'true';

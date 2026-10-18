@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkText, contrast, isGlow, lintCss, requiredRatio } from './rules.mjs';
+import { CONTRAST_EXEMPT, checkText, contrast, contrastExempt, isGlow, lintCss, requiredRatio } from './rules.mjs';
 import { lintCssFile, lintSource } from './static.mjs';
 import { parseInlineAllows } from './allow.mjs';
 
@@ -74,6 +74,14 @@ describe('design lint rules', () => {
     expect(requiredRatio(16, 400)).toBe(4.5);
     expect(requiredRatio(18.66, 700)).toBe(3);
     expect(requiredRatio(18.66, 400)).toBe(4.5);
+    expect(requiredRatio(24, 400)).toBe(3);
+  });
+  it('contrast: only aria-disabled controls are exempt, the thresholds do not move', () => {
+    expect(CONTRAST_EXEMPT).toBe('[aria-disabled="true"]');
+    expect(contrastExempt({ 'aria-disabled': 'true' })).toBe(true);
+    expect(contrastExempt({ disabled: '' })).toBe(false);
+    expect(contrastExempt({ 'aria-disabled': 'false' })).toBe(false);
+    expect(requiredRatio(16, 400)).toBe(4.5);
     expect(requiredRatio(24, 400)).toBe(3);
   });
 });

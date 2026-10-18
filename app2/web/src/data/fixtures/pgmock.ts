@@ -1,9 +1,9 @@
-// MockPostgrest: an in-memory, PostgREST-like server over synthetic app2 rows (two workspaces, the second a canary that must
+// Fixture. MockPostgrest: an in-memory, PostgREST-like server over synthetic app2 rows (two workspaces, the second a canary that must
 // never show). Supports the subset RestData uses: select=*, eq/neq/in/not.in filters, order, limit, and the command RPCs with
 // op-id replay. RLS is simulated from the bearer token "synthetic:<workspace>:<role>". Fake names and companies only.
 import { seed } from './mock';
-import type { AccountRow, ActivityRow, BriefRow, DraftRow, HygieneRow, IngestRowDb, PersonRow, ReplyRow, TaskRow } from './rows';
-import type { FetchFn } from './rest';
+import type { AccountRow, ActivityRow, BriefRow, DraftRow, HygieneRow, IngestRowDb, PersonRow, ReplyRow, TaskRow } from '../rows';
+import type { FetchFn } from '../rest';
 
 export const WS_A = 'aaaaaaaa-0000-0000-0000-000000000001';
 export const WS_B = 'bbbbbbbb-0000-0000-0000-000000000001';

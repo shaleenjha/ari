@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Query safety lint (spec 02 §3). Rule `query-unbounded`: a `.from(..)` chain that `.select(..)`s needs
+// Query safety lint (spec 02 §3). Rule `no-client-writes` (no-client-writes.mjs): app2/web/src makes no writes at all.
+// Rule `query-unbounded`: a `.from(..)` chain that `.select(..)`s needs
 // `.limit|.range|.single|.maybeSingle` on the same chain, or on the variable it is assigned to (unconditionally: a
 // terminator inside if / ?: / a loop / a closure does not count). Exempt: `{ head: true }` counts, and selects that follow
 // insert/upsert/update/delete.
@@ -10,6 +11,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { lintWrites } from './no-client-writes.mjs';
 import { WEB_ROOT, allowIndex, finding as mkFinding, loadAllowJson, printFindings, staleJsonEntries } from '../design-lint/allow.mjs';
 
 const TERM = new Set(['limit', 'range', 'single', 'maybeSingle']);
@@ -97,6 +99,8 @@ export function run({ root = WEB_ROOT, allowJson = join(root, 'scripts/design-li
   for (const c of configs) {
     const program = programFor(c);
     findings.push(...lintQueries(program, { root, jsonEntries, indexes, exclude: (f) => f.startsWith(FIXTURES) || seen.has(f) }));
+    // no-client-writes: app2/web/src only (jobs write by design), no allow escape, tests and fixtures exempt.
+    findings.push(...lintWrites(program, { root, include: (f) => f.startsWith(join(root, 'src') + '/') && !seen.has(f) }));
     for (const sf of program.getSourceFiles()) seen.add(sf.fileName);
   }
   for (const { sf, idx } of indexes.values()) {
@@ -108,6 +112,6 @@ export function run({ root = WEB_ROOT, allowJson = join(root, 'scripts/design-li
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { programs, files, findings } = run();
-  const errors = printFindings(findings, { label: 'query-lint', okLine: `${files} files in ${programs} programs, no unbounded selects`, kind: (f) => f.text });
+  const errors = printFindings(findings, { label: 'query-lint', okLine: `${files} files in ${programs} programs, no unbounded selects, no client writes`, kind: (f) => f.text });
   process.exit(errors ? 1 : 0);
 }

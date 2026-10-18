@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { data, opId } from '../data/client';
 import { useAsync } from '../ui/useAsync';
+import { useReadOnly, writeProps } from '../ui/readOnly';
 
 export function Today15() {
   const l = useAsync(() => data().today15());
+  const ro = useReadOnly();
   const [sent, setSent] = useState<Set<string>>(new Set());
   const mark = async (id: string) => {
     const r = await data().mark(id, 'connect_sent', opId());
@@ -17,7 +19,7 @@ export function Today15() {
         {(l.data ?? []).map((p) => (
           <li key={p.id} className="row">
             <div><b>{p.fullName}</b><span>{p.title}</span></div>
-            <button className="btn" disabled={sent.has(p.id)} onClick={() => void mark(p.id)}>{sent.has(p.id) ? 'Sent' : 'Mark sent'}</button>
+            <button className="btn" disabled={sent.has(p.id)} {...writeProps(ro, () => void mark(p.id))}>{sent.has(p.id) ? 'Sent' : 'Mark sent'}</button>
           </li>
         ))}
       </ol>

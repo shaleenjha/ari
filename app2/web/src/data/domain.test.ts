@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { acceptToDm1Median, applyMark, canTransition, stageFromFacts, today15 } from './domain';
-import { MockData } from './mock';
+import { MockData } from './fixtures/mock';
 import type { Person } from './types';
 
 const base: Person = { id: 'x', fullName: 'Test', stage: 'connect_queued' };

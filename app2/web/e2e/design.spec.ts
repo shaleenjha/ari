@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { MIN_TAP, checkText, isSystemFamily, firstFamily, requiredRatio, contrast } from '../scripts/design-lint/rules.mjs';
+import { CONTRAST_EXEMPT, MIN_TAP, checkText, isSystemFamily, firstFamily, requiredRatio, contrast } from '../scripts/design-lint/rules.mjs';
 import { SCREENS, open } from './screens';
 
 // Design lint, rendered half (rules 1 to 5). Runs in every project (360, 390 and 412 px, Chromium and WebKit), synthetic data only.
@@ -22,7 +22,7 @@ for (const s of SCREENS) {
 
   test(`@design ${s.name}: text contrast`, async ({ page }) => {
     await open(page, s);
-    const samples = await page.evaluate(() => {
+    const samples = await page.evaluate((exempt) => {
       const parse = (c: string): [number, number, number, number] => {
         const m = c.match(/rgba?\(([^)]+)\)/);
         if (!m) return [0, 0, 0, 0];
@@ -49,7 +49,7 @@ for (const s of SCREENS) {
         const el = n.parentElement;
         if (!el || seen.has(el) || !n.textContent?.trim()) continue;
         seen.add(el);
-        if (el.closest('button:disabled, [aria-disabled=true], script, style, noscript')) continue;
+        if (el.closest(`${exempt}, script, style, noscript`)) continue;   // inactive controls only (rules.mjs CONTRAST_EXEMPT)
         const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
         if (r.width === 0 || r.height === 0 || cs.visibility === 'hidden') continue;
         let op = 1; for (let e: Element | null = el; e; e = e.parentElement) op *= Number(getComputedStyle(e).opacity);
@@ -58,7 +58,7 @@ for (const s of SCREENS) {
         out.push({ text: n.textContent.trim().slice(0, 40), fg: over(fg, bg), bg, px: parseFloat(cs.fontSize), weight: Number(cs.fontWeight) || 400 });
       }
       return out;
-    });
+    }, CONTRAST_EXEMPT);
     expect(samples.length).toBeGreaterThan(0);
     const fails = samples
       .map((x) => ({ ...x, ratio: contrast(x.fg as [number, number, number], x.bg as [number, number, number]), need: requiredRatio(x.px, x.weight) }))

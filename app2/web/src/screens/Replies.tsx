@@ -5,6 +5,7 @@ import { tick } from '../ui/haptics';
 import { copyText, inboxLink, openLink, platformOf } from '../ui/linkedin';
 import { UNDO_MS, notNow, useNotNow } from '../ui/notNow';
 import { useAsync } from '../ui/useAsync';
+import { useReadOnly, writeProps } from '../ui/readOnly';
 
 // Ari prepares the answer, Owner sends it. "Copy and open LinkedIn" copies the text and opens the LinkedIn inbox;
 // nothing is ever sent from here.
@@ -45,6 +46,7 @@ function ReplyDraft({ reply, onHide }: { reply: Reply; onHide: () => void }) {
 
 export function Replies() {
   const r = useAsync(() => data().replies());
+  const ro = useReadOnly();
   const aside = useNotNow();
   const [openId, setOpenId] = useState<string | null>(null);
   const [undo, setUndo] = useState<string | null>(null);
@@ -68,8 +70,8 @@ export function Replies() {
             <p className="quote">{x.snippet}</p>
             {openId === x.id ? <ReplyDraft reply={x} onHide={() => setOpenId(null)} /> : (
               <div className="acts">
-                <button className="btn" onClick={() => setOpenId(x.id)}>Draft an answer</button>
-                <button className="btn ghost" onClick={() => later(x.id)}>Not now</button>
+                <button className="btn" {...writeProps(ro, () => setOpenId(x.id))}>Draft an answer</button>
+                <button className="btn ghost" {...writeProps(ro, () => later(x.id))}>Not now</button>
               </div>
             )}
           </li>
@@ -82,7 +84,7 @@ export function Replies() {
             {setAside.map((x) => (
               <li key={x.id} className="row col">
                 <p className="quote muted">{x.snippet}</p>
-                <div className="acts"><button className="btn ghost" onClick={() => back(x.id)}>Move back to replies</button></div>
+                <div className="acts"><button className="btn ghost" {...writeProps(ro, () => back(x.id))}>Move back to replies</button></div>
               </li>
             ))}
           </ul>
@@ -91,7 +93,7 @@ export function Replies() {
       {undo && aside.has(undo) && (
         <div className="toast" role="status" data-testid="toast">
           <span>Moved to Not now.</span>
-          <button className="btn ghost" onClick={() => back(undo)}>Undo</button>
+          <button className="btn ghost" {...writeProps(ro, () => back(undo))}>Undo</button>
         </div>
       )}
     </section>

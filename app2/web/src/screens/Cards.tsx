@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { data, opId } from '../data/client';
 import type { HygieneAction, HygieneFinding, WhoIsThis } from '../data/types';
 import { useAsync } from '../ui/useAsync';
+import { useReadOnly, writeProps } from '../ui/readOnly';
 
 const ACTION_LABEL: Record<HygieneAction, string> = { tick_connect: 'Tick invite sent', link: 'Link', merge: 'Merge', dismiss: 'Not an issue' };
 
 function Finding({ f, onDone }: { f: HygieneFinding; onDone: (msg: string) => void }) {
+  const ro = useReadOnly();
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const run = async (a: HygieneAction, keep?: string) => {
@@ -23,7 +25,7 @@ function Finding({ f, onDone }: { f: HygieneFinding; onDone: (msg: string) => vo
         <div className="acts">
           {f.actions.map((a) => (
             <button key={a} className={a === 'dismiss' ? 'btn ghost' : 'btn'} disabled={busy}
-              onClick={() => (a === 'merge' ? setConfirm(true) : void run(a))}>
+              {...writeProps(ro, () => (a === 'merge' ? setConfirm(true) : void run(a)))}>
               {a === 'link' && f.suggestion ? `Link to ${f.suggestion.name}` : ACTION_LABEL[a]}
             </button>
           ))}
@@ -65,6 +67,7 @@ export function TidyUp() {
 }
 
 function Who({ w }: { w: WhoIsThis }) {
+  const ro = useReadOnly();
   const [res, setRes] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const pick = async (personId: string | null, label: string) => {
@@ -80,11 +83,11 @@ function Who({ w }: { w: WhoIsThis }) {
       {res ? <p className="muted" role="status">{res}</p> : (
         <div className="acts col">
           {w.candidates.map((c) => (
-            <button key={c.personId} className="btn ghost wide" disabled={busy} onClick={() => void pick(c.personId, `Linked to ${c.fullName}${c.accountName ? ` at ${c.accountName}` : ''}`)}>
+            <button key={c.personId} className="btn ghost wide" disabled={busy} {...writeProps(ro, () => void pick(c.personId, `Linked to ${c.fullName}${c.accountName ? ` at ${c.accountName}` : ''}`))}>
               {c.fullName}{c.accountName ? ` · ${c.accountName}` : ''}{c.title ? ` · ${c.title}` : ''}
             </button>
           ))}
-          <button className="btn ghost wide" disabled={busy} onClick={() => void pick(null, 'Marked as none of these')}>None of these</button>
+          <button className="btn ghost wide" disabled={busy} {...writeProps(ro, () => void pick(null, 'Marked as none of these'))}>None of these</button>
         </div>
       )}
     </div>

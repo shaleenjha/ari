@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { RestData } from './rest';
-import { JWT_A, MockPostgrest, WS_A, WS_B } from './pgmock';
+import { ReadOnlyError, RestData } from './rest';
+import { JWT_A, MockPostgrest, WS_A, WS_B } from './fixtures/pgmock';
+import { SyntheticRestData } from './fixtures/syntheticRest';
 
-const setup = () => { const m = new MockPostgrest(); return { m, d: new RestData(m.fetch, '', WS_A, JWT_A) }; };
+const setup = () => { const m = new MockPostgrest(); return { m, d: new SyntheticRestData(m, WS_A, JWT_A) }; };
 
 describe('RestData over MockPostgrest (synthetic workspace)', () => {
   it('Today, Today\'s 15, Replies read through PostgREST with the app schema and never show workspace B', async () => {
@@ -25,7 +26,7 @@ describe('RestData over MockPostgrest (synthetic workspace)', () => {
   });
   it('a token for workspace A cannot call commands for workspace B', async () => {
     const { m } = setup();
-    const evil = new RestData(m.fetch, '', WS_B, JWT_A);
+    const evil = new SyntheticRestData(m, WS_B, JWT_A);
     await expect(evil.mark('p-b', 'connect_sent', 'op-x')).rejects.toThrow('403');
     expect(await evil.hygiene()).toEqual([]);   // RLS: A's token sees no B rows even when asking for B
   });
@@ -49,7 +50,7 @@ describe('RestData over MockPostgrest (synthetic workspace)', () => {
     const [w] = await d.whoIsThis();
     expect(w).toMatchObject({ eventId: 'ev-1', kind: 'accept', name: 'Jordan Leesynth' });
     expect(w!.candidates.map((c) => c.accountName)).toEqual(['Ostrevanthe Co', 'Dravequin Systems']);
-    const agent = new RestData(m.fetch, '', WS_A, `synthetic:${WS_A}:agent`);
+    const agent = new SyntheticRestData(m, WS_A, `synthetic:${WS_A}:agent`);
     await expect(agent.confirmWho('ev-1', 'p-6', 'op-a')).rejects.toThrow('403');
     expect(await d.confirmWho('ev-1', 'p-6', 'op-c')).toEqual({ ok: true });
     expect(await d.confirmWho('ev-1', null, 'op-c2')).toMatchObject({ ok: false, conflict: true });
@@ -62,5 +63,14 @@ describe('RestData over MockPostgrest (synthetic workspace)', () => {
     expect(a!.tasks.some((t) => t.assigneeRole === 'ae')).toBe(true);
     expect((await d.week()).replies).toBe(1);
     expect(await d.account('acc-b')).toBeNull();
+  });
+  it('the read-only RestData refuses every command and sends nothing', async () => {
+    const m = new MockPostgrest();
+    const ro = new RestData(m.fetch, '', WS_A, JWT_A);
+    await expect(ro.mark('q-1', 'connect_sent', 'op')).rejects.toBeInstanceOf(ReadOnlyError);
+    await expect(ro.transition('t-1', 'done', 1, 'op')).rejects.toBeInstanceOf(ReadOnlyError);
+    await expect(ro.resolveHygiene('f-1', 'dismiss', 'op')).rejects.toBeInstanceOf(ReadOnlyError);
+    await expect(ro.confirmWho('ev-1', null, 'op')).rejects.toBeInstanceOf(ReadOnlyError);
+    expect(m.requests).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import { useRef, type MouseEvent } from 'react';
+import { useEffect, useRef, type MouseEvent } from 'react';
 import { useRoute } from './ui/route';
 import { scrollScreenToTop } from './ui/scrollTop';
 import { Today } from './screens/Today';
@@ -6,6 +6,9 @@ import { Today15 } from './screens/Today15';
 import { Replies } from './screens/Replies';
 import { AccountRoom } from './screens/AccountRoom';
 import { Report } from './screens/Report';
+import { SignIn } from './screens/SignIn';
+import { READ_ONLY_TOAST, TOAST_MS, hideReadOnlyToast, useReadOnly, useReadOnlyToast } from './ui/readOnly';
+import { useSession } from './ui/session';
 
 const TABS = [
   { href: '#/', label: 'Today', key: 'today' },
@@ -13,7 +16,25 @@ const TABS = [
   { href: '#/report', label: 'Report', key: 'report' },
 ] as const;
 
+/** The one quiet toast a write control shows in read-only mode. */
+function ReadOnlyToast() {
+  const at = useReadOnlyToast();
+  useEffect(() => {
+    if (!at) return;
+    const t = setTimeout(hideReadOnlyToast, TOAST_MS);
+    return () => clearTimeout(t);
+  }, [at]);
+  return at ? <div className="toast" role="status" data-testid="ro-toast"><span>{READ_ONLY_TOAST}</span></div> : null;
+}
+
 export function App() {
+  const s = useSession();
+  const ro = useReadOnly();
+  if (s.live && !s.signedIn) return <div className="shell"><main className="screen"><SignIn error={s.error} misconfigured={s.misconfigured} /></main></div>;
+  return <Shell ro={ro} />;
+}
+
+function Shell({ ro }: { ro: boolean }) {
   const r = useRoute();
   const screen = useRef<HTMLElement>(null);
   const active = r.name === 'today15' || r.name === 'account' ? 'today' : r.name;
@@ -25,7 +46,8 @@ export function App() {
     scrollScreenToTop(screen.current, e.currentTarget);
   };
   return (
-    <div className="shell">
+    <div className={ro ? 'shell ro' : 'shell'}>
+      {ro && <span className="ropill" data-testid="ro-pill">Read-only</span>}
       <main className="screen" data-screen={r.name} ref={screen}>
         {r.name === 'today' && <Today />}
         {r.name === 'today15' && <Today15 />}
@@ -39,6 +61,7 @@ export function App() {
             onClick={(e) => onTab(e, t.key)}>{t.label}</a>
         ))}
       </nav>
+      {ro && <ReadOnlyToast />}
     </div>
   );
 }

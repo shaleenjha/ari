@@ -27,6 +27,15 @@ export const SCREENS: Scenario[] = [
     await expect(p.getByTestId('toast')).toBeVisible();
     await expect(p.getByTestId('not-now').locator('li').first()).toBeVisible();
   } },
+  // Phase 1 read-only UI over synthetic rows (?ro=1): write controls aria-disabled, one pill, toast on tap.
+  { name: 'Today, read-only', path: '/?ro=1#/', ready: async (p) => {
+    await expect(p.getByTestId('ro-pill')).toBeVisible();
+    await p.getByTestId('tidy-up').getByRole('button', { name: /Tidy up/ }).click();
+    await expect(p.getByTestId('finding-f-1').getByRole('button').first()).toHaveAttribute('aria-disabled', 'true');
+  } },
+  { name: 'Replies, read-only', path: '/?ro=1#/replies', ready: async (p) => {
+    await expect(p.getByTestId('replies').getByRole('button', { name: 'Draft an answer' }).first()).toHaveAttribute('aria-disabled', 'true');
+  } },
   { name: 'Report', path: '/#/report', ready: async (p) => { await expect(p.getByTestId('report')).toBeVisible(); } },
   ...['acc-1', 'acc-2', 'acc-3'].map((id): Scenario => ({ name: `Account room ${id}`, path: `/#/account/${id}`, ready: async (p) => { await expect(p.locator('#h-acc')).toBeVisible(); } })),
 ];

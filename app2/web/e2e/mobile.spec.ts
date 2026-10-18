@@ -14,7 +14,7 @@ const SEL = 'button, a[href], [role=button], [role=link], [role=tab], [role=swit
 const targets = (page: Page) => page.evaluate((sel) => {
   const out = [...document.querySelectorAll<HTMLElement>(sel)].flatMap((el, i) => {
     let r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
-    if (!r.width || !r.height || cs.visibility === 'hidden' || el.matches(':disabled,[aria-disabled=true]')) return [];
+    if (!r.width || !r.height || cs.visibility === 'hidden' || el.matches(':disabled')) return [];   // aria-disabled stays in: 48px and live tap still apply
     el.dataset.tapIdx = String(i);
     // elementFromPoint only sees the viewport: bring the target to the middle of the screen first, as a person would
     // scroll to it. Anything still on top of it there (a fixed bar, an overlay) is a real cover.
@@ -22,7 +22,7 @@ const targets = (page: Page) => page.evaluate((sel) => {
     r = el.getBoundingClientRect();
     const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
     return [{ i, label: (el.innerText || el.getAttribute('aria-label') || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 30), w: r.width, h: r.height,
-      pe: cs.pointerEvents, covered: !(hit && el.contains(hit)), allow: el.closest('[data-lint-allow^="dead-tap "]') !== null }];
+      pe: cs.pointerEvents, covered: !(hit && el.contains(hit)), ariaDisabled: el.getAttribute('aria-disabled') === 'true', allow: el.closest('[data-lint-allow^="dead-tap "]') !== null }];
   });
   scrollTo({ top: 0, left: 0, behavior: 'instant' });
   return out;
@@ -54,7 +54,9 @@ for (const s of SCREENS) {
           }
         }
       });
-      await loc.tap();
+      // Playwright refuses to tap aria-disabled controls; a person can, and the tap must still answer (the read-only toast).
+      if (t.ariaDisabled) await loc.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'instant' }));   // clear of the tab bar
+      await loc.tap(t.ariaDisabled ? { force: true } : undefined);
       await page.waitForTimeout(400);
       const live = await page.evaluate(() => { const w = window as any; const a = document.activeElement; const el: Element | undefined = w.__el;
         // Chromium focuses any button it taps, so a button taking focus from its own tap is not a change. Focus moving

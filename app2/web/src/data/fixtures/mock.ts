@@ -1,7 +1,7 @@
-// Synthetic, in-memory data layer. Fake people and companies only; never real prospect data.
-import type { DataLayer } from './client';
-import type { Account, Activity, Brief, CommandResult, Draft, Person, Reply, Task, WeekReport } from './types';
-import { acceptToDm1Median, applyMark, canTransition, today15 } from './domain';
+// Fixture. Synthetic, in-memory data layer. Fake people and companies only; never real prospect data.
+import type { DataLayer } from '../client';
+import type { Account, Activity, Brief, CommandResult, Draft, Person, Reply, Task, WeekReport } from '../types';
+import { acceptToDm1Median, applyMark, canTransition, today15 } from '../domain';
 
 const now = Date.parse('2026-10-24T09:00:00+05:30');
 const h = (n: number): string => new Date(now - n * 36e5).toISOString();
