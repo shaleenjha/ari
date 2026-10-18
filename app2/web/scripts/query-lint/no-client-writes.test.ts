@@ -31,5 +31,5 @@ describe('no-client-writes', () => {
   it('app2/web/src is clean (the real run)', () => {
     const { findings } = run();
     expect(findings.filter((f) => f.severity === 'error')).toEqual([]);
-  });
+  }, 30_000); // a full TS program over src: ~6 s on a CI runner, over vitest's 5 s default (v18.16.0)
 });
