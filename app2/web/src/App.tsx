@@ -7,6 +7,7 @@ import { Replies } from './screens/Replies';
 import { AccountRoom } from './screens/AccountRoom';
 import { Report } from './screens/Report';
 import { SignIn } from './screens/SignIn';
+import { OpenInBrowser } from './screens/OpenInBrowser';
 import { READ_ONLY_TOAST, TOAST_MS, hideReadOnlyToast, useReadOnly, useReadOnlyToast } from './ui/readOnly';
 import { useSession } from './ui/session';
 
@@ -30,6 +31,8 @@ function ReadOnlyToast() {
 export function App() {
   const s = useSession();
   const ro = useReadOnly();
+  // Google refuses sign-in inside an app's link viewer, so send people to their browser first (forced in any mode by ?embed=1).
+  if (s.embedded && (!s.live || !s.signedIn)) return <div className="shell"><main className="screen"><OpenInBrowser /></main></div>;
   if (s.live && !s.signedIn) return <div className="shell"><main className="screen"><SignIn error={s.error} misconfigured={s.misconfigured} /></main></div>;
   return <Shell ro={ro} />;
 }

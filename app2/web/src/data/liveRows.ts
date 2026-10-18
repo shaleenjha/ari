@@ -13,6 +13,8 @@ export interface ProdPerson {
   dm1_sent?: string | null; dm2_due?: string | null; dm2_sent?: string | null; dm3_due?: string | null; dm3_sent?: string | null;
   replied?: string | null; meeting?: string | null; withdrawn?: string | null; review?: string | null; lane?: string | null;
   route?: string | null; deleted_at?: string | null; dm?: string | null; dm2_text?: string | null; dm3_text?: string | null;
+  /** Columns whose time is a backfill placeholder (the day is known, the time is not). */
+  ts_approx?: string[] | null;
 }
 export interface ProdAccount {
   id: string; workspace_id?: string; company: string; one_liner?: string | null; hook?: string | null; stage?: string | null;
@@ -143,10 +145,32 @@ export function deriveQueue(people: ProdPerson[], replies: ProdReply[], now: Dat
   return out.sort((a, b) => rank(a) - rank(b) || (a.dueAt ?? '').localeCompare(b.dueAt ?? '')).slice(0, 30);
 }
 
-/** This week's numbers from the log (same events weekly_metrics counts) plus the accept to DM1 median from people. */
-export function weekFromLog(log: Pick<ProdLog, 'event'>[], accepted: Pick<ProdPerson, 'accepted' | 'dm1_sent'>[], meetingsGoal: number): WeekReport {
-  const n = (...ev: string[]) => log.filter((l) => ev.includes(l.event)).length;
-  const median = acceptToDm1Median(accepted.map((p) => ({ id: '', fullName: '', stage: 'accepted', acceptedAt: u(p.accepted), dm1SentAt: u(p.dm1_sent) })));
-  return { meetingsAri: n('Meeting', 'Meeting set'), meetingsGoal, replies: n('Replied'), accepts: n('Accepted'), connects: n('Connect sent'),
-    acceptToDm1MedianHours: median };
+/**
+ * This week's Report, from people's own dates (one per person). log_entries is not used for counts: the Oct 15 backfill
+ * wrote a "Connect sent" / "Accepted" row for every historical event at import time, so the log counts all time.
+ * Window: [from, now] in the workspace clock (Asia/Kolkata, hard coded until the workspace timezone is readable).
+ * Accept to DM1: median hours over this week's accepts that have a DM1, skipping people whose accepted or dm1_sent time
+ * is a backfill placeholder (`ts_approx`: day known, time set to noon), since those hours are not real. Null when none.
+ * Meetings: production has no Ari attribution for meetings, so this counts every meeting this week (people.meeting plus
+ * "Meeting" / "Meeting set" log events, one per person) and says so (meetingsFromAri false, no goal stored).
+ */
+export function weekFromPeople(people: WeekPerson[], meetingLog: Pick<ProdLog, 'id' | 'ts' | 'person_id' | 'event'>[], from: string, now: Date): WeekReport {
+  const lo = Date.parse(from); const hi = now.getTime();
+  const inWeek = (v?: string | null) => { if (!v) return false; const t = Date.parse(v); return t >= lo && t <= hi; };
+  const byId = new Map<string, WeekPerson>();
+  for (const p of people) if (isLead(p)) byId.set(p.id, p);
+  const leads = [...byId.values()];
+  const count = (col: 'connect_sent' | 'accepted' | 'replied') => leads.filter((p) => inWeek(p[col])).length;
+  const exact = leads.filter((p) => inWeek(p.accepted) && p.dm1_sent && !(p.ts_approx ?? []).some((c) => c === 'accepted' || c === 'dm1_sent'));
+  const median = acceptToDm1Median(exact.map((p) => ({ id: p.id, fullName: '', stage: 'accepted', acceptedAt: u(p.accepted), dm1SentAt: u(p.dm1_sent) })));
+  const met = new Set<string>(leads.filter((p) => inWeek(p.meeting)).map((p) => `p:${p.id}`));
+  for (const l of meetingLog) {
+    if (!inWeek(l.ts) || !['Meeting', 'Meeting set'].includes(l.event)) continue;
+    if (l.person_id && !byId.has(l.person_id) && people.some((p) => p.id === l.person_id)) continue;   // personal or deleted
+    met.add(l.person_id ? `p:${l.person_id}` : `l:${l.id}`);
+  }
+  return { meetings: met.size, meetingsFromAri: false, meetingsGoal: null, replies: count('replied'), accepts: count('accepted'),
+    connects: count('connect_sent'), acceptToDm1MedianHours: median };
 }
+
+export type WeekPerson = Pick<ProdPerson, 'id' | 'connect_sent' | 'accepted' | 'dm1_sent' | 'replied' | 'meeting' | 'review' | 'deleted_at' | 'ts_approx'>;

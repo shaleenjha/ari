@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LiveData } from './live';
 import { ReadOnlyError } from './rest';
-import { dayIn, personStage, weekStart } from './liveRows';
+import { dayIn, personStage, weekFromPeople, weekStart } from './liveRows';
 import { resolveMode, liveEnv } from './mode';
 import { LIVE_JWT_A, LIVE_NOW, LWS_A, LWS_B, LivePostgrest } from './fixtures/livePg';
 
@@ -61,9 +61,23 @@ describe('LiveData over production-shaped rows (synthetic)', () => {
     expect(await d.draft('P003', 'reply')).toBeNull();
   });
 
-  it('Report: this week from the log (Monday in the workspace clock), accept to DM1 median from people', async () => {
-    const { d } = setup();
-    expect(await d.week()).toEqual({ meetingsAri: 0, meetingsGoal: 3, replies: 1, accepts: 2, connects: 1, acceptToDm1MedianHours: 6 });
+  it('Report: Monday 00:00 (workspace clock) to now, from people dates; median skips placeholder times; meetings not claimed for Ari', async () => {
+    const { m, d } = setup();
+    // connects: P001 (P002 was Sunday). accepts: P001, P003, P006 (P004 personal, P21 deleted, P002 last week).
+    // replies: P005 (P007 is dated after now). meetings: P005 (people + its log row, once) + one unattributed log meeting.
+    // median: P003 only (6 h); P006 has a placeholder accepted time.
+    expect(await d.week()).toEqual({ meetings: 2, meetingsFromAri: false, meetingsGoal: null, replies: 1, accepts: 3, connects: 1, acceptToDm1MedianHours: 6 });
+    const reads = m.requests.filter((r) => r.path.endsWith('/people') || r.path.endsWith('/log_entries'));
+    expect(reads.every((r) => r.method === 'GET' && Number(r.params.get('limit')) > 0)).toBe(true);
+    expect(reads.every((r) => [...r.params.values()].some((v) => v === 'gte.2026-10-18T18:30:00.000Z'))).toBe(true);
+  });
+
+  it('Report: accept to DM1 is null when no accept this week has an exact DM1 time', () => {
+    const now = new Date('2026-10-21T04:30:00Z'); const from = '2026-10-18T18:30:00.000Z';
+    const w = weekFromPeople([{ id: 'X1', accepted: '2026-10-20T06:30:00Z', dm1_sent: '2026-10-21T02:00:00Z', ts_approx: ['dm1_sent'] },
+      { id: 'X2', accepted: '2026-10-20T06:30:00Z' }], [], from, now);
+    expect(w.acceptToDm1MedianHours).toBeNull();
+    expect(w.accepts).toBe(2);
   });
 
   it("Today's 15: queued leads with a profile link, at most 3 per account; account room maps stages and the brief", async () => {

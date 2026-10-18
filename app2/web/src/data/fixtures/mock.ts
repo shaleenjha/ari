@@ -62,7 +62,7 @@ export class MockData implements DataLayer {
   }
   async week(): Promise<WeekReport> {
     const p = this.s.people;
-    return { meetingsAri: 1, meetingsGoal: 3, replies: p.filter((x) => x.repliedAt).length, accepts: p.filter((x) => x.acceptedAt).length,
+    return { meetings: 1, meetingsFromAri: true, meetingsGoal: 3, replies: p.filter((x) => x.repliedAt).length, accepts: p.filter((x) => x.acceptedAt).length,
       connects: p.filter((x) => x.connectSentAt).length, acceptToDm1MedianHours: acceptToDm1Median(p) };
   }
   async mark(personId: string, field: Parameters<DataLayer['mark']>[1], op: string): Promise<CommandResult> {

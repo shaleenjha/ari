@@ -25,11 +25,15 @@ export function seedLive(): LiveDb {
       { workspace_id: B, id: 'b0000000-0000-4000-8000-000000000001', company: 'CANARY-B-ACCOUNT', stage: 'Target' },
     ],
     people: [
-      { workspace_id: A, id: 'P001', account_id: acc, name: 'Alex Doe', title: 'VP Engineering', stage: 'Accepted', accepted: '2026-10-20T03:00:00Z', linkedin_url: 'https://www.linkedin.com/in/x', dm: 'Hi Alex, thanks for connecting.' },
-      { workspace_id: A, id: 'P002', account_id: acc, name: 'Sam Roe', title: 'Head of Security', stage: 'DM1 sent', accepted: '2026-10-15T03:00:00Z', dm1_sent: '2026-10-15T05:00:00Z', dm2_due: '2026-10-19' },
+      { workspace_id: A, id: 'P001', account_id: acc, name: 'Alex Doe', title: 'VP Engineering', stage: 'Accepted', connect_sent: '2026-10-19T02:00:00Z', accepted: '2026-10-20T03:00:00Z', linkedin_url: 'https://www.linkedin.com/in/x', dm: 'Hi Alex, thanks for connecting.' },
+      { workspace_id: A, id: 'P002', account_id: acc, name: 'Sam Roe', title: 'Head of Security', stage: 'DM1 sent', connect_sent: '2026-10-18T10:00:00Z', accepted: '2026-10-15T03:00:00Z', dm1_sent: '2026-10-15T05:00:00Z', dm2_due: '2026-10-19' },
       { workspace_id: A, id: 'P003', account_id: acc, name: 'Jamie Poe', title: 'CTO', stage: 'DM1 sent', accepted: '2026-10-19T03:00:00Z', dm1_sent: '2026-10-19T09:00:00Z', dm2_due: '2026-10-22' },
       { workspace_id: A, id: 'P004', account_id: acc, name: 'Riley Coe', title: 'Head of Data', stage: 'Accepted', accepted: '2026-10-20T03:00:00Z', review: 'personal' },
-      { workspace_id: A, id: 'P005', account_id: acc, name: 'Casey Loe', title: 'Architect', stage: 'Replied', accepted: '2026-10-10T03:00:00Z', dm1_sent: '2026-10-10T04:00:00Z', replied: '2026-10-20T08:00:00Z' },
+      { workspace_id: A, id: 'P005', account_id: acc, name: 'Casey Loe', title: 'Architect', stage: 'Replied', accepted: '2026-10-10T03:00:00Z', dm1_sent: '2026-10-10T04:00:00Z', replied: '2026-10-20T08:00:00Z', meeting: '2026-10-20T09:00:00Z' },
+      // Backfill placeholder times (ts_approx): counted, but kept out of the accept to DM1 median.
+      { workspace_id: A, id: 'P006', name: 'Noon Placeholder', stage: 'DM1 sent', accepted: '2026-10-20T06:30:00Z', dm1_sent: '2026-10-21T02:00:00Z', ts_approx: ['accepted'] },
+      // Dated after "now": outside the window.
+      { workspace_id: A, id: 'P007', name: 'Future Date', stage: 'Replied', replied: '2026-10-22T06:30:00Z' },
       ...Array.from({ length: 8 }, (_, i): W<ProdPerson> => ({ workspace_id: A, id: `P1${i}`, account_id: i < 5 ? acc : null, company: i < 5 ? 'Ostrevanthe Co' : `Solo ${i}`,
         name: `Test Person ${i}`, title: 'Staff Engineer', stage: 'Connect queued', linkedin_url: `https://www.linkedin.com/in/t${i}`, connect_day: `2026-10-${10 + i}` })),
       { workspace_id: A, id: 'P20', name: 'No Link', stage: 'Connect queued' },
@@ -52,6 +56,9 @@ export function seedLive(): LiveDb {
       { workspace_id: A, id: 4, ts: '2026-10-20T08:00:00Z', person_id: 'P005', event: 'Replied', source: 'hark' },
       { workspace_id: A, id: 5, ts: '2026-10-19T02:00:00Z', person_id: 'P10', event: 'Connect sent', source: 'app' },
       { workspace_id: A, id: 6, ts: '2026-10-18T10:00:00Z', person_id: 'P11', event: 'Connect sent', source: 'app' },   // Sunday: last week
+      { workspace_id: A, id: 8, ts: '2026-10-20T10:00:00Z', person_id: null, event: 'Meeting set', source: 'backfill' },
+      { workspace_id: A, id: 9, ts: '2026-10-18T10:00:00Z', person_id: null, event: 'Meeting set', source: 'backfill' },   // Sunday: last week
+      { workspace_id: A, id: 10, ts: '2026-10-20T09:00:00Z', person_id: 'P005', event: 'Meeting', source: 'app' },        // same meeting as people.meeting
       { workspace_id: B, id: 7, ts: '2026-10-20T03:00:00Z', person_id: 'PB1', event: 'Accepted', source: 'app' },
     ],
     hygiene_findings: [

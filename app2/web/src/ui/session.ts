@@ -5,16 +5,22 @@ import type { Auth } from '../data/auth';
 let auth: Auth | null = null;
 let error: string | null = null;
 let misconfigured = false;
+let embedded = false;
 const subs = new Set<() => void>();
 const emit = () => subs.forEach((f) => f());
-let snap = { live: false, signedIn: false, error: null as string | null, misconfigured: false };
+let snap = { live: false, signedIn: false, error: null as string | null, misconfigured: false, embedded: false };
 const take = () => {
-  const next = { live: !!auth || misconfigured, signedIn: !!auth?.session(), error, misconfigured };
-  if (next.live !== snap.live || next.signedIn !== snap.signedIn || next.error !== snap.error || next.misconfigured !== snap.misconfigured) snap = next;
+  let signedIn = false;
+  try { signedIn = !!auth?.session(); } catch { signedIn = false; }
+  const next = { live: !!auth || misconfigured, signedIn, error, misconfigured, embedded };
+  if (next.live !== snap.live || next.signedIn !== snap.signedIn || next.error !== snap.error || next.misconfigured !== snap.misconfigured
+    || next.embedded !== snap.embedded) snap = next;
   return snap;
 };
 
 export function setAuth(a: Auth, err: string | null) { auth = a; error = err; a.subscribe(emit); emit(); }
+/** Inside an app's link viewer (ui/embedded.ts), or forced with ?embed=1 for tests. */
+export function setEmbedded(v: boolean) { embedded = v; emit(); }
 export function setMisconfigured() { misconfigured = true; emit(); }
 export const signIn = () => { error = null; void auth?.start(); };
 export const signOut = () => auth?.signOut();

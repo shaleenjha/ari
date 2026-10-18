@@ -7,9 +7,11 @@ export function Report() {
   return (
     <section aria-labelledby="h-rep2">
       <header className="hd"><h1 id="h-rep2">Report</h1></header>
+      <p className="muted" data-testid="report-window">This week, from Monday.</p>
       {d && (
         <div className="grid" data-testid="report">
-          <div className="stat lead"><b>{d.meetingsAri}<small>/{d.meetingsGoal}</small></b><span>Meetings from Ari this week</span></div>
+          <div className="stat lead"><b>{d.meetings}{d.meetingsGoal != null && <small>/{d.meetingsGoal}</small>}</b>
+            <span>{d.meetingsFromAri ? 'Meetings from Ari this week' : 'Meetings this week'}</span></div>
           <div className="stat"><b>{d.replies}</b><span>Replies</span></div>
           <div className="stat"><b>{d.accepts}</b><span>Accepts</span></div>
           <div className="stat"><b>{d.connects}</b><span>Connects</span></div>

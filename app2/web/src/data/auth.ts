@@ -15,6 +15,29 @@ const STATE = 'ari2-signin';
 const hex = (b: ArrayBuffer | Uint8Array) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
 export const sha256Hex = async (s: string) => hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)));
 
+/** In-memory Storage for viewers that block or throw on web storage (some in-app WebViews). */
+export class MemoryStorage implements Storage {
+  private m = new Map<string, string>();
+  get length() { return this.m.size; }
+  clear() { this.m.clear(); }
+  getItem(k: string) { return this.m.get(k) ?? null; }
+  key(i: number) { return [...this.m.keys()][i] ?? null; }
+  removeItem(k: string) { this.m.delete(k); }
+  setItem(k: string, v: string) { this.m.set(String(k), String(v)); }
+}
+
+/**
+ * window.localStorage / sessionStorage, or memory when touching them throws (SecurityError with storage blocked) or they
+ * are null (Android WebView without DOM storage). Reading them bare crashed boot to a blank page in such viewers.
+ */
+export function safeStorage(kind: 'localStorage' | 'sessionStorage', w: unknown = globalThis): Storage {
+  try {
+    const s = (w as Record<string, Storage | null | undefined>)[kind];
+    if (s) { const k = '__ari2_probe'; s.setItem(k, '1'); s.removeItem(k); return s; }
+  } catch { /* blocked: fall through */ }
+  return new MemoryStorage();
+}
+
 function readSession(store: Storage): Session | null {
   try { const s = JSON.parse(store.getItem(KEY) ?? 'null') as Session | null; return s?.accessToken ? s : null; } catch { return null; }
 }
@@ -27,8 +50,9 @@ const toSession = (j: TokenReply, now: number): Session | null => (j.access_toke
 export class Auth {
   private refreshing: Promise<Session | null> | null = null;
   private subs = new Set<() => void>();
-  constructor(private cfg: AuthConfig, private f: FetchFn = fetch.bind(globalThis), private store: Storage = localStorage,
-    private loc: Pick<Location, 'origin' | 'hash' | 'pathname' | 'search' | 'assign'> = location, private now: () => number = Date.now) {}
+  constructor(private cfg: AuthConfig, private f: FetchFn = fetch.bind(globalThis), private store: Storage = safeStorage('localStorage'),
+    private loc: Pick<Location, 'origin' | 'hash' | 'pathname' | 'search' | 'assign'> = location, private now: () => number = Date.now,
+    private tab: Storage = safeStorage('sessionStorage')) {}
 
   session(): Session | null { return readSession(this.store); }
   subscribe(fn: () => void) { this.subs.add(fn); return () => { this.subs.delete(fn); }; }
@@ -40,7 +64,7 @@ export class Auth {
   /** Go to Google. The raw nonce stays in this tab; Google signs its hash into the ID token. */
   async start(): Promise<void> {
     const raw = hex(crypto.getRandomValues(new Uint8Array(32)));
-    sessionStorage.setItem(NONCE, raw);
+    this.tab.setItem(NONCE, raw);
     const p = new URLSearchParams({ client_id: this.cfg.googleClientId, redirect_uri: `${this.loc.origin}/`, response_type: 'id_token',
       scope: 'openid email', nonce: await sha256Hex(raw), state: STATE, prompt: 'select_account' });
     this.loc.assign(`https://accounts.google.com/o/oauth2/v2/auth?${p.toString()}`);
@@ -54,7 +78,7 @@ export class Auth {
     const h = new URLSearchParams(this.loc.hash.replace(/^#/, ''));
     if (h.get('state') !== STATE) return null;
     history.replaceState(null, '', `${this.loc.pathname}${this.loc.search}#/`);
-    const raw = sessionStorage.getItem(NONCE); sessionStorage.removeItem(NONCE);
+    const raw = this.tab.getItem(NONCE); this.tab.removeItem(NONCE);
     if (h.get('error')) return 'Google sign-in was cancelled.';
     const idToken = h.get('id_token');
     if (!idToken || !raw) return 'Sign-in did not finish. Try again.';

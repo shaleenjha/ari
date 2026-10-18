@@ -63,3 +63,4 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
 .shell.ro .hd { padding-right: 96px; }
 .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
 .signin .btn { margin-top: 8px; }
+.btn.center { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; }

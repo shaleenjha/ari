@@ -51,7 +51,7 @@ export class RestData implements DataLayer {
   }
   async week(): Promise<WeekReport> {
     const p = (await this.get<PersonRow>('people', { stage: 'neq.connect_queued' })).map(toPerson);
-    return { meetingsAri: 1, meetingsGoal: 3, replies: p.filter((x) => x.repliedAt).length, accepts: p.filter((x) => x.acceptedAt).length,
+    return { meetings: 1, meetingsFromAri: true, meetingsGoal: 3, replies: p.filter((x) => x.repliedAt).length, accepts: p.filter((x) => x.acceptedAt).length,
       connects: p.filter((x) => x.connectSentAt).length, acceptToDm1MedianHours: acceptToDm1Median(p) };
   }
   async mark(_personId: string, _field: MarkField, _opId: string): Promise<CommandResult> { throw new ReadOnlyError(); }

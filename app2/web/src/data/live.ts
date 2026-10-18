@@ -6,8 +6,8 @@ import type { CommandResult, Draft, HygieneAction, MarkField, Person, Task, Week
 import type { FetchFn } from './rest';
 import { ReadOnlyError, RestError } from './rest';
 import { today15 } from './domain';
-import { deriveQueue, isLead, prodAccount, prodActivity, prodBrief, prodFinding, prodPerson, prodReply, replyDraftBody, weekFromLog, weekStart,
-  type ProdAccount, type ProdBrief, type ProdFinding, type ProdLog, type ProdPerson, type ProdReply } from './liveRows';
+import { deriveQueue, isLead, prodAccount, prodActivity, prodBrief, prodFinding, prodPerson, prodReply, replyDraftBody, weekFromPeople, weekStart,
+  type WeekPerson, type ProdAccount, type ProdBrief, type ProdFinding, type ProdLog, type ProdPerson, type ProdReply } from './liveRows';
 
 export interface LiveConfig { url: string; apikey: string; token: () => Promise<string>; workspaceId?: string; now?: () => Date }
 
@@ -16,7 +16,7 @@ const REPLY_COLS = 'id,person_id,account_id,received_at,snippet,headline,status,
 const ACCOUNT_COLS = 'id,company,one_liner,hook,stage,stage_override,meeting_status,deleted_at';
 /** Max rows per read. Bigger than today's data (about 230 people, 41 accounts), small enough to stay cheap. */
 export const LIMITS = { people: 400, replies: 50, accounts: 200, log: 2000, findings: 20, brief: 1, one: 1, activity: 50 } as const;
-const MEETINGS_GOAL = 3;
+const WEEK_COLS = 'id,connect_sent,accepted,dm1_sent,replied,meeting,review,deleted_at,ts_approx';
 const q = (v: string) => `"${v}"`;   // PostgREST in.() needs quotes around values with spaces
 
 export class LiveData implements DataLayer {
@@ -115,13 +115,15 @@ export class LiveData implements DataLayer {
       tasks: deriveQueue(leads, replies.filter((r) => ids.includes(r.person_id)), this.now()), activity: activity.map(prodActivity) };
   }
 
+  /** This week (Monday 00:00 in the workspace clock to now): one bounded read per date column, plus meeting log events. */
   async week(): Promise<WeekReport> {
-    const from = weekStart(this.now());
-    const [log, accepted] = await Promise.all([
-      this.read<ProdLog>('log_entries', { select: 'id,ts,event', ts: `gte.${from}`, event: `in.(${['Connect sent', 'Accepted', 'Replied', 'Meeting', 'Meeting set'].map(q).join(',')})`, order: 'ts.asc' }, LIMITS.log),
-      this.read<ProdPerson>('people', { select: 'id,name,stage,accepted,dm1_sent', accepted: `gte.${from}`, deleted_at: 'is.null', order: 'accepted.asc' }, LIMITS.people),
+    const now = this.now(); const from = weekStart(now);
+    const since = (col: string) => this.read<WeekPerson>('people', { select: WEEK_COLS, [col]: `gte.${from}`, order: `${col}.asc` }, LIMITS.people);
+    const [connects, accepts, replies, meetings, log] = await Promise.all([
+      since('connect_sent'), since('accepted'), since('replied'), since('meeting'),
+      this.read<ProdLog>('log_entries', { select: 'id,ts,person_id,event', ts: `gte.${from}`, event: `in.(Meeting,${q('Meeting set')})`, order: 'ts.asc' }, LIMITS.log),
     ]);
-    return weekFromLog(log, accepted, MEETINGS_GOAL);
+    return weekFromPeople([...connects, ...accepts, ...replies, ...meetings], log, from, now);
   }
 
   async hygiene() {

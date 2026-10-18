@@ -32,7 +32,13 @@ export interface Task {
   accountId?: Uuid; personId?: Uuid; dueAt?: string; version: number; createdByKind: ActorKind;
 }
 export interface Activity { id: number; actorKind: ActorKind; verb: string; subjectType: string; subjectId?: Uuid; createdAt: string }
-export interface WeekReport { meetingsAri: number; meetingsGoal: number; replies: number; accepts: number; connects: number; acceptToDm1MedianHours: number | null }
+/**
+ * This week's numbers (Monday 00:00 in the workspace clock to now). `meetingsFromAri` says whether `meetings` counts only
+ * meetings Ari's outreach produced; when the data cannot tell, it is false and the tile says "Meetings this week".
+ * `meetingsGoal` is null when no goal is stored.
+ */
+export interface WeekReport { meetings: number; meetingsFromAri: boolean; meetingsGoal: number | null; replies: number; accepts: number; connects: number;
+  acceptToDm1MedianHours: number | null }
 
 export interface CommandResult { ok: boolean; conflict?: boolean; version?: number; status?: TaskStatus }
 
