@@ -5,6 +5,7 @@ import { tick } from '../ui/haptics';
 import { copyText, inboxLink, openLink, platformOf } from '../ui/linkedin';
 import { UNDO_MS, notNow, useNotNow } from '../ui/notNow';
 import { useAsync } from '../ui/useAsync';
+import { Stale } from '../ui/Stale';
 import { useReadOnly, writeProps } from '../ui/readOnly';
 import { readHints, saveHints } from '../ui/layoutHints';
 import { Busy, SkelReply } from '../ui/Skeleton';
@@ -47,7 +48,7 @@ function ReplyDraft({ reply, onHide }: { reply: Reply; onHide: () => void }) {
 }
 
 export function Replies() {
-  const r = useAsync(() => data().replies());
+  const r = useAsync(() => data().replies(), [], { key: 'replies' });
   const ro = useReadOnly();
   const aside = useNotNow();
   const [openId, setOpenId] = useState<string | null>(null);
@@ -66,6 +67,7 @@ export function Replies() {
   return (
     <section aria-labelledby="h-rep" aria-busy={!r.data && !r.error}>
       <header className="hd"><h1 id="h-rep">Replies</h1></header>
+      <Stale at={r.stale} />
       {!r.data && !r.error && (
         <><Busy label="Loading replies." /><ul className="rows" data-testid="skeleton">{Array.from({ length: readHints().replies.open }, (_, i) => <SkelReply key={i} />)}</ul></>
       )}

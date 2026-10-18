@@ -92,3 +92,4 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
   outline: 2px solid var(--accent); outline-offset: 2px; }
 .draft > span { min-height: 2.8em; }
 .screen:focus { outline: none; }
+.offline { margin: 0; padding: 8px 16px 0; font-size: 13px; line-height: 1.4; }

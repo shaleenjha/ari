@@ -4,7 +4,7 @@ import { useAsync } from '../ui/useAsync';
 const LABEL = { verified: 'Verified', inference: 'Inference', hypothesis: 'Hypothesis' } as const;
 
 export function AccountRoom({ id }: { id: string }) {
-  const a = useAsync(() => data().account(id), [id]);
+  const a = useAsync(() => data().account(id), [id], { key: 'account' });
   if (a.loading && !a.data) return <p className="muted">Loading…</p>;
   if (!a.data) return <p className="muted">Account not found.</p>;
   const { account, people, brief, tasks, activity } = a.data;

@@ -41,7 +41,9 @@ async function boot() {
     if (Array.isArray(cfg)) setMisconfigured();
     else {
       const auth = new Auth(cfg);
-      const err = await auth.complete().catch(() => 'Sign-in failed. Try again.');
+      // Warm boot: the stored session is read synchronously (auth.session()), so a signed-in device renders the app on the
+      // first paint with no sign-in screen and no redirect. Only a return from Google awaits the token exchange.
+      const err = auth.isReturn() ? await auth.complete().catch(() => 'Sign-in failed. Try again.') : null;
       setData(new LiveData(fetch.bind(globalThis), { url: cfg.url, apikey: cfg.apikey, token: () => auth.token(), workspaceId: cfg.workspaceId }));
       setAuth(auth, err);
     }

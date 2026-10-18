@@ -4,7 +4,7 @@ import { useAsync } from '../ui/useAsync';
 import { useReadOnly, writeProps } from '../ui/readOnly';
 
 export function Today15() {
-  const l = useAsync(() => data().today15());
+  const l = useAsync(() => data().today15(), [], { key: 'today15' });
   const ro = useReadOnly();
   const [sent, setSent] = useState<Set<string>>(new Set());
   const mark = async (id: string) => {

@@ -1,7 +1,7 @@
 {
   "name": "ari-app2-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "18.15.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,9 @@
     "preview": "vite preview --port 4173 --strictPort",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "e2e": "playwright test --grep-invert @design",
+    "e2e": "playwright test --grep-invert \"@design|@verify\"",
+    "verify:mobile": "PW_NO_LIVE=1 playwright test --grep @verify --project=webkit-390 --project=chromium-412 --workers=2 --retries=0",
+    "verify:summary": "node scripts/verify-summary.mjs",
     "lint:design": "playwright test --grep @design",
     "lint:design:static": "node scripts/design-lint/static.mjs",
     "lint:query": "node scripts/query-lint/query-lint.mjs",

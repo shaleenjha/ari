@@ -3,6 +3,7 @@ import { data } from '../data/client';
 import type { HygieneFinding, Reply, Task, WhoIsThis } from '../data/types';
 import { useNotNow } from '../ui/notNow';
 import { useAsync } from '../ui/useAsync';
+import { Stale } from '../ui/Stale';
 import { readHints, saveHints } from '../ui/layoutHints';
 import { Busy, SkelPin, SkelRow, SkelTidy, SkelWho } from '../ui/Skeleton';
 import { TidyUp, WhoIsThisCards } from './Cards';
@@ -19,7 +20,7 @@ export function Today() {
   const t = useAsync(async () => {
     const [q, r, h, w] = await Promise.all([settle(data().queue()), settle(data().replies()), settle(data().hygiene()), settle(data().whoIsThis())]);
     return { q, replies: r.ok ? r.v : ([] as Reply[]), findings: h.ok ? h.v : ([] as HygieneFinding[]), who: w.ok ? w.v : ([] as WhoIsThis[]) };
-  });
+  }, [], { key: 'today', good: (v) => v.q.ok });
   const aside = useNotNow();
   const d = t.data;
   const fresh = (d?.replies ?? []).filter((x) => !aside.has(x.id));
@@ -33,6 +34,7 @@ export function Today() {
   return (
     <section aria-labelledby="h-today" aria-busy={!d}>
       <header className="hd"><h1 id="h-today">Today</h1></header>
+      <Stale at={t.stale} />
       {d ? (
         <div key="data" ref={body}>
           {fresh.length > 0 && (

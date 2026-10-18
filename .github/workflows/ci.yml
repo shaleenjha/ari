@@ -127,7 +127,7 @@ jobs:
         with: { name: design-lint-report, path: app2/web/test-results, retention-days: 7 }
 
   e2e:
-    name: e2e (Playwright 360/390/412 px, Chromium + WebKit)
+    name: e2e (Playwright 360/390/412 px, Chromium + WebKit; auth hygiene; verify-mobile artifact)
     needs: web
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app2/web } }
@@ -141,6 +141,19 @@ jobs:
       - if: failure()
         uses: actions/upload-artifact@v4
         with: { name: playwright-report, path: app2/web/test-results, retention-days: 7 }
+      # verify-mobile (v18.15.0): skeleton + populated screenshots, CLS, LCP (Chromium throttled), console errors for Today,
+      # Replies, Report on WebKit iPhone 14 + Chromium Pixel 7. Fixture data only. Reuses dist/ and the installed browsers.
+      - id: verify
+        name: verify-mobile (screenshots + CLS/LCP/errors, fixture data)
+        timeout-minutes: 3
+        env: { PW_PREBUILT: '1' }
+        run: npm run verify:mobile
+      - if: always() && steps.verify.outcome != 'skipped'
+        name: verify-mobile summary (table to step summary + verify-mobile.json)
+        run: npm run verify:summary
+      - if: always() && steps.verify.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with: { name: verify-mobile, path: app2/web/test-results/verify-mobile, retention-days: 14, if-no-files-found: warn }
 
   failure-report:
     name: failure-report (posts failed-step logs to issue "CI failure log" so Hark can read them)

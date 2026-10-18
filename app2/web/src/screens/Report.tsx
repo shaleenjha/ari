@@ -3,6 +3,7 @@ import { data } from '../data/client';
 import type { WeekReport } from '../data/types';
 import { useAsync } from '../ui/useAsync';
 import { Busy } from '../ui/Skeleton';
+import { Stale } from '../ui/Stale';
 
 type Tile = { key: string; label: string; value?: (d: WeekReport) => ReactNode; lead?: boolean };
 const NBSP = '\u00a0';
@@ -23,12 +24,13 @@ const meetingsLabel = (d?: WeekReport) => (d?.meetingsFromAri ? 'Meetings from A
  * so no tile moves or grows when the numbers arrive.
  */
 export function Report() {
-  const w = useAsync(() => data().week());
+  const w = useAsync(() => data().week(), [], { key: 'report' });
   const d = w.data;
   return (
     <section aria-labelledby="h-rep2" aria-busy={!d && !w.error}>
       <header className="hd"><h1 id="h-rep2">Report</h1></header>
       <p className="muted" data-testid="report-window">This week, from Monday.</p>
+      <Stale at={w.stale} />
       {w.error && <p className="muted" role="alert">Could not load this week.</p>}
       {!d && !w.error && <Busy label="Loading this week." />}
       {!w.error && (
