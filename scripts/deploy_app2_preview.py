@@ -29,6 +29,8 @@ DIST = os.path.join(WEB, 'dist')
 files = []
 for dp, _, fs in os.walk(DIST):
     for f in fs:
+        if f.endswith('.map'):  # never upload source maps (Vercel audit, v18.17.8); vite.config.ts also stops making them
+            continue
         p = os.path.join(dp, f)
         files.append({"file": os.path.relpath(p, DIST), "data": base64.b64encode(open(p, 'rb').read()).decode(), "encoding": "base64"})
 # target production INSIDE the throwaway ari-app2-preview project only (Vercel audit diff 1): its production domain

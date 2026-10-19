@@ -15,6 +15,7 @@ function inlineSprite(): Plugin {
 
 export default defineConfig({
   plugins: [react(), inlineSprite()],
-  build: { target: 'es2022', sourcemap: true },
+  // No source maps in any build (Vercel audit, Release 1 leftover, v18.17.8): the preview must not publish the source.
+  build: { target: 'es2022', sourcemap: false },
   test: { include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'], environment: 'node' },
 });
