@@ -99,6 +99,7 @@ jobs:
       - run: python3 scripts/test_offsite_certs.py   # S1 R3: multi-recipient CMS, nightly recipient check, .cms restore (throwaway certs)
       - run: python3 scripts/test_book_prune.py   # S1 R4: Book prune refuses mass deletes (>20 rows or >5%)
       - run: python3 scripts/test_log_repair.py   # S1 R6: accept_ingest repair-log retired (0038 drops its RPC)
+      - run: python3 scripts/test_git_sync_pull.py   # v18.17.10: pull-first git sync (mocked GitHub API)
 
   anti-slop-static:
     name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)

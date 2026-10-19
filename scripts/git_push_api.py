@@ -6,6 +6,10 @@ requests to api.github.com when the shell call carries credentials
 [{"provider":"github"}]. This mirrors the local HEAD tree onto remote `main`
 as one commit carrying the local commit message (only changed blobs upload).
 
+Pull-first (v18.17.10): scripts/git_pull_remote.py runs first and records the remote HEAD it synced to in the
+state file. This script refuses to push unless remote main is still exactly that commit, pushes as its child
+(never force), then records the new commit as last_pushed for the next pull.
+
 Usage: python3 scripts/git_push_api.py <export_dir> [owner/repo]
 Repo defaults to $KEEL_REPO or shaleenjha/crm.os. Refuses to push to a public repo.
 """
@@ -37,6 +41,13 @@ def git(*a, cwd):
 def main():
     src = os.path.abspath(sys.argv[1])
     repo = sys.argv[2] if len(sys.argv) > 2 else os.environ.get('KEEL_REPO', 'shaleenjha/crm.os')
+    push(gh, repo, src)
+
+
+def push(gh, repo, src, state_path=None):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from git_pull_remote import load_state, save_state
+    st = load_state(state_path)
     info = gh('GET', '/repos/' + repo)
     if not info.get('private'):
         raise SystemExit('REFUSING: %s is not private' % repo)
@@ -48,11 +59,16 @@ def main():
         local[path] = (mode, sha)
 
     ref = gh('GET', '/repos/%s/git/ref/heads/main' % repo, ok404=True)
-    if ref is None:  # empty repo: the git data API needs one commit first
+    if ref is None:  # empty repo: nothing to pull, so the pull-first check below does not apply
+        # the git data API needs one commit first
         gh('PUT', '/repos/%s/contents/.keel-init' % repo,
            {'message': 'init', 'content': base64.b64encode(b'init\n').decode(), 'branch': 'main'})
         ref = gh('GET', '/repos/%s/git/ref/heads/main' % repo)
+        st['pulled_head'] = ref['object']['sha']
     parent = ref['object']['sha']
+    if st.get('pulled_head') != parent:
+        raise SystemExit('REFUSING: remote main is %s but the last pull synced to %s; run git_sync.sh again '
+                         '(pull first, never force)' % (parent[:10], str(st.get('pulled_head'))[:10]))
     ptree = gh('GET', '/repos/%s/git/commits/%s' % (repo, parent))['tree']['sha']
     remote = {e['path']: e['sha'] for e in gh('GET', '/repos/%s/git/trees/%s?recursive=1' % (repo, ptree))['tree']
               if e['type'] == 'blob'}
@@ -68,11 +84,14 @@ def main():
     new_tree = gh('POST', '/repos/%s/git/trees' % repo, {'tree': tree})['sha']  # full tree: deletions propagate
     if new_tree == ptree:
         print('remote already up to date', parent[:10])
-        return
+        st.update(last_pushed=parent, pulled_head=None); save_state(st, state_path)
+        return parent
     c = gh('POST', '/repos/%s/git/commits' % repo, {'message': msg, 'tree': new_tree, 'parents': [parent],
                                                    'author': {'name': 'Owner', 'email': '36487118+shaleenjha@users.noreply.github.com'}})
     gh('PATCH', '/repos/%s/git/refs/heads/main' % repo, {'sha': c['sha'], 'force': False})
+    st.update(last_pushed=c['sha'], pulled_head=None); save_state(st, state_path)
     print('pushed %s -> %s main (%d files, %d blobs uploaded): %s' % (c['sha'][:10], repo, len(tree), uploaded, msg))
+    return c['sha']
 
 
 if __name__ == '__main__':

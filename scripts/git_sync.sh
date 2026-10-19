@@ -6,10 +6,15 @@
 #    replaces real names with placeholders (private scrub map, never committed),
 #    and scans for secrets / real names. Any finding aborts: fix the source or
 #    add a rule to the scrub map, never commit around the scan.
+# 1b. Pull first (v18.17.10): scripts/git_pull_remote.py brings commits made on GitHub since our last push
+#    (web edits, merged @claude PRs) into the project source, applies remote deletions, and stops with
+#    "conflict: <paths>, resolve first" (exit 1, nothing pushed) when a path changed on both sides.
+#    Then the export is rebuilt so the pulled files are in the commit.
 # 2. Commits locally in the export tree (message must be "vX.Y: summary").
 # 3. Pushes to the private repo through the GitHub connector (scripts/git_push_api.py,
 #    git data API), because the sandbox holds no git credentials.
-#    Agents run step 3 in a shell call with credentials [{"provider":"github"}].
+#    It refuses unless remote main is still the commit step 1b synced to; it never forces.
+#    Agents run steps 1b-3 in a shell call with credentials [{"provider":"github"}].
 # Never make the repo public. Never add data, CSVs, drafts, plans or screenshots.
 set -euo pipefail
 MSG="${1:?usage: git_sync.sh \"vX.Y: summary\"}"
@@ -18,6 +23,9 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export KEEL_DIR="${KEEL_DIR:-$ROOT/work/keel}"
 export KEEL_EXPORT="${KEEL_EXPORT:-$KEEL_DIR/ari-app}"
 python3 "$ROOT/scripts/git_export.py" --refresh-names
+PULL_OUT="$(python3 "$ROOT/scripts/git_pull_remote.py" "$KEEL_EXPORT")" || { echo "$PULL_OUT"; echo "git_sync: pull refused, nothing pushed"; exit 1; }
+echo "$PULL_OUT"
+if grep -q '^PULLED_FILES=' <<<"$PULL_OUT"; then python3 "$ROOT/scripts/git_export.py"; fi
 cd "$KEEL_EXPORT"
 [ -d .git ] || git init -q -b main
 git add -A
