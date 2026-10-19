@@ -88,6 +88,7 @@ Credentials: one shell call with credentials `[{"provider":"google","email":"own
   - It works in reverse order. Each step reverts only a value that is still in its repaired state.
   - It covers: People cells and `accepted` (back to the noon value, which re-flags approx), the appended Sheet rows (cleared; the sync skips blank rows), the 11 inserted DB rows (`ari_worker_log_unappend`, which deletes only `source='backfill'` rows from the last 7 days), and the edited rows (content and key restored by id).
   - You can run it again safely, including after a half-done run. Tested at every crash point.
+  - Note (Oct 2026): `ari_worker_log_unappend` is dropped by migration 0038, so this rollback path no longer exists after 0038.
 - **App taps during the pause** are fine. They add DB Log rows without a key, and the sync appends them to the Sheet on resume. Keys are computed from Sheet rows only, so these rows do not touch the repair.
 
 ## 5. Migrations

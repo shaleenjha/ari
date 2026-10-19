@@ -15,10 +15,11 @@ import * as pkijs from "https://esm.sh/pkijs@3.2.4?target=es2022";
 // offsite job (scripts/offsite_drive.py -> Google Drive) never holds plaintext or sign-in user rows. Format: openssl-compatible
 // CMS EnvelopedData, AES-256-CBC, content key wrapped by ECDH (P-384, SHA-256 KDF) to this PUBLIC certificate. Decrypt with
 // "openssl cms -decrypt -binary -inform DER -inkey <private key from vault> -recip ari-offsite-recipient.pem" (RESTORE.md).
-// OFFSITE_CERT_PEM (function secret) overrides the built-in cert; used on staging with a throwaway cert for the round-trip test.
-// It is IGNORED on the prod project, so neither recipient (Hark vault, Owner) can be dropped by a secret change.
+// OFFSITE_CERT_PEM (function secret) overrides the built-in cert ONLY on the staging project (allowlist), for the round-trip
+// test with a throwaway cert. Prod, a custom domain or an unparseable URL always get the built-in bundle, so neither recipient
+// (Hark vault, Owner) can be dropped by a secret change.
 const OFFSITE_BUCKET = "ari-offsite";
-const PROD_REF = "rbkrqlzlblquvgmuohro";
+const STAGING_REF = "ljojwhnfgfreokqspobg";
 // Two recipients: "Ari offsite backup recipient" (key in the Hark vault) and "Ari backup - Owner" (key held by Owner,
 // SHA-256 21:90:2D:64:51:9D:70:E9:3D:BF:32:B1:8B:3E:8A:76:CE:83:20:E0:48:D2:5D:8A:78:8A:6B:89:0E:10:AF:D9).
 const OFFSITE_CERT = `-----BEGIN CERTIFICATE-----
@@ -169,11 +170,11 @@ async function run(sql: postgres.Sql, runId: number) {
             enc_file = ${encFile}, enc_bytes = ${encBytes}, enc_sha256 = ${encSum}, error = null where id = ${runId}`;
 }
 
-// The built-in bundle on prod; the OFFSITE_CERT_PEM override only off prod (staging round-trip tests).
+// Allowlist: the OFFSITE_CERT_PEM override applies only on <staging ref>.supabase.co; every other case gets the built-in bundle.
 function recipientPems(projectUrl: string, override: string | undefined): string {
-  let ref = "";
-  try { ref = new URL(projectUrl).hostname.split(".")[0]; } catch { ref = ""; }
-  return override && ref !== PROD_REF ? override : OFFSITE_CERT;
+  let host = "";
+  try { host = new URL(projectUrl).hostname; } catch { host = ""; }
+  return override && host === `${STAGING_REF}.supabase.co` ? override : OFFSITE_CERT;
 }
 
 // v18.7: constant-time comparison for the x-ari-hook secret (no early exit on the first differing byte)

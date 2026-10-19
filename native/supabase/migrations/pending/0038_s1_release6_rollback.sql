@@ -161,7 +161,9 @@ begin
 end $function$
 ;
 
--- 3. the 0036 repair function as prod had it (repair only; unappend was never applied to prod)
+-- 3. the 0036 repair function as prod had it. Intentionally restores ONLY the repair function: ari_worker_log_unappend
+--    (applied by hand to prod with 0036, Oct 18 2026) is NOT recreated; it was a repair-only delete helper, not needed
+--    after the Oct 18 repair.
 create or replace function public.ari_worker_log_repair(p_old_key text, p_new_key text, p_expect jsonb, p_set jsonb)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare r public.log_entries; n int;

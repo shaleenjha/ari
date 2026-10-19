@@ -83,8 +83,11 @@ end $$;
 
 -- 4. the worker's Log rewrite functions are gone
 do $$ begin
-  if to_regprocedure('public.ari_worker_log_repair(text,text,jsonb,jsonb)') is not null or to_regprocedure('public.ari_worker_log_unappend(text)') is not null
-    then raise exception 'FAIL 0038 part 4: Log repair functions still exist'; end if;
+  if to_regprocedure('public.ari_worker_log_repair(text,text,jsonb,jsonb)') is not null
+    then raise exception 'FAIL 0038 part 4: ari_worker_log_repair still exists'; end if;
+  -- unappend WAS applied by hand to prod with 0036 (Oct 18 2026, prod check Oct 19), so 0038's drop must really remove it
+  if to_regprocedure('public.ari_worker_log_unappend(text)') is not null
+    then raise exception 'FAIL 0038 part 4: ari_worker_log_unappend still exists after 0038'; end if;
 end $$;
 
 -- 5. shadow purge: unmatched after 7 days, everything after 30, matched recent rows stay; nobody but the job can run it

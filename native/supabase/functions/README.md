@@ -31,6 +31,7 @@ So these files are what runs, apart from formatting and comments.
   next edge release (staging first); afterwards move it over `ari-backup/index.ts` and drop Owner's cert from
   `PENDING_IN_FUNCTION` in `scripts/backup_check.py`.
   Also (Claude R-03, Oct 19 2026): the plaintext copy to ari-staging is removed (`STAGING_URL` / `STAGING_SECRET_KEY` are no
-  longer read; `backup_runs.offsite` is always false), and `OFFSITE_CERT_PEM` is ignored on the prod project
-  (`rbkrqlzlblquvgmuohro`), so the built-in two-recipient bundle always applies there. After the deploy, delete the two
+  longer read; `backup_runs.offsite` is always false), and `OFFSITE_CERT_PEM` is honoured only on the staging
+  project (`ljojwhnfgfreokqspobg.supabase.co`, allowlist, issue #4 follow-up); prod, a custom domain, an unparseable or
+  missing URL all get the built-in two-recipient bundle. After the deploy, delete the two
   STAGING_* function secrets and the old plaintext objects in ari-staging's ari-backups bucket.

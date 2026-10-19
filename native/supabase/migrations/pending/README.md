@@ -7,14 +7,15 @@
 | `0033_app2_e1_tenancy.sql` | LIVE (schema `app` with `workspaces` + `memberships` exists) | yes |
 | `0034_app2_e2_backfill.sql` | LIVE | yes |
 | `0035_app2_e3_dual_rls.sql` | LIVE | yes (ledger max is 0035) |
-| `0036_log_repair_rpc.sql` | LIVE (`ari_worker_log_repair` exists in prod; the spec-05 Log repair it served finished Oct 18 2026, 395 rows) | **no** at the Oct 19 check. 0038 part 7 writes the row |
+| `0036_log_repair_rpc.sql` | LIVE (`ari_worker_log_repair` and `ari_worker_log_unappend` exist in prod; the spec-05 Log repair it served finished Oct 18 2026, 395 rows) | **no** at the Oct 19 check. 0038 part 7 writes the row |
 | `0037_members_aal2.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R5: members need the two-step code too | no |
-| `0038_s1_release6.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R6: seven parts, incl. dropping `ari_worker_log_repair` (accept_ingest repair-log retired in v18.17.7) | no |
+| `0038_s1_release6.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R6: seven parts, incl. dropping `ari_worker_log_repair` and `ari_worker_log_unappend` (accept_ingest repair-log retired in v18.17.7) | no |
 
 - `0036_log_repair_rpc.sql` was never applied as a whole file. Per function:
   - `ari_worker_log_repair`: applied by hand, repair only (the Oct 18 Log repair); no ledger row; ledger row via 0038 part 7; dropped by 0038.
-  - `ari_worker_log_unappend`: never reached prod (the file defines it, prod does not have it). 0038's `drop function if exists` is a no-op for it;
-    the 0038 ledger row for 0036 therefore records only `ari_worker_log_repair`.
+  - `ari_worker_log_unappend`: WAS applied by hand to prod with 0036 (Oct 18 2026; confirmed read-only Oct 19: SECURITY DEFINER,
+    EXECUTE to ari_worker, postgres, service_role). 0038's drop removes it (not a no-op), and the 0038 rollback does not
+    recreate it (repair-only delete helper, not needed after the Oct 18 repair).
 - 0037 and 0038 came from the outside auditor's R5/R6 package (Oct 19 2026). Tests, apply order and the prod checks to run first
   (apply_op md5, save the live `ari_worker_log_repair` definition, worker reads `queue.target`) are in `README-R5-R6.md`. CI runs
   them on the throwaway database through `test/run_local.sh`. `test/fixtures_before_0038.sql` is for that throwaway database only:
