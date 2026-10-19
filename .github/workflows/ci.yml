@@ -97,6 +97,7 @@ jobs:
         with: { python-version: '3.12' }
       - run: python3 scripts/test_hygiene_scan.py
       - run: python3 scripts/test_offsite_certs.py   # S1 R3: multi-recipient CMS, nightly recipient check, .cms restore (throwaway certs)
+      - run: python3 scripts/test_book_prune.py   # S1 R4: Book prune refuses mass deletes (>20 rows or >5%)
 
   anti-slop-static:
     name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)

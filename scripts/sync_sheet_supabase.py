@@ -482,6 +482,13 @@ def sync_log(sheet, args, actor):
             sb("PATCH", "log_entries?id=eq.%d" % r["id"], {"sheet_key": log_key(v, seen)}, actor=actor, prefer="return=minimal")
     return len(ins) + len(outgoing)
 
+BOOK_PRUNE_MAX_ROWS = 20     # S1 R4: never delete more than 20 Book rows in one run
+BOOK_PRUNE_MAX_SHARE = 0.05  # ...nor more than 5% of the Book (at least 1 row, so a tiny Book can still lose one)
+ALERTS = []                  # set during a run; main() exits 3 after finishing if any is set, so the scheduled run surfaces it
+
+def book_prune_limit(n_db):
+    return min(BOOK_PRUNE_MAX_ROWS, max(1, int(n_db * BOOK_PRUNE_MAX_SHARE)))
+
 def sync_book(sheet, args, actor):
     header, rows = sheet["Book"]
     seen, out = {}, []
@@ -501,6 +508,12 @@ def sync_book(sheet, args, actor):
     changed = [r for r in out if any((db.get(r["key"]) or {}).get(k) != r[k] for k in r)]
     gone = [k for k in db if k not in {r["key"] for r in out}]
     log("Book", json.dumps(dict(upsert=len(changed), gone=len(gone))))
+    limit = book_prune_limit(len(db))
+    if len(gone) > limit:  # S1 R4 (audit D8): a cleared or half-read Book tab must never hard-delete the Book
+        log("Book", "ALERT: %d of %d Book rows would be deleted (limit %d); deletes skipped, upserts still applied. "
+                    "Check the Sheet's Book tab, then prune by hand." % (len(gone), len(db), limit))
+        ALERTS.append("book_prune_refused: %d of %d rows" % (len(gone), len(db)))
+        gone = []
     if args.dry_run:
         return len(changed) + len(gone)
     for i in range(0, len(changed), 500):
@@ -600,3 +613,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    if ALERTS:
+        print("ALERT", "; ".join(ALERTS), flush=True)
+        sys.exit(3)
