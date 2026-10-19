@@ -1,4 +1,4 @@
-# Ari restore runbook (v18.6, Oct 17 2026)
+# Ari restore runbook (v18.6, Oct 17 2026; sections 0 and 1 revised Oct 19 2026)
 
 Prod project: `ari` (rbkrqlzlblquvgmuohro). Staging: `ari-staging` (ljojwhnfgfreokqspobg).
 Owner auth uid: b14d1605-c766-4684-9a5b-71ffcab6967b.
@@ -13,21 +13,34 @@ Owner auth uid: b14d1605-c766-4684-9a5b-71ffcab6967b.
 ## Who can restore
 Maintenance session only (Forge), with the Supabase Management token bound for that session. Normal Hark runs (worker, sync, backup check) cannot read the bucket: ari_worker gets 400 on storage and 403 on backup_runs, by design.
 
-## 0. Decide the scope
+## 0. What backups exist, then decide the scope
+**The only backups are Ari's own nightly export.** Checked Oct 19 2026 through the Management API (read-only):
+- Supabase managed backups: **none** on this plan (backups list empty). Point-in-time recovery (PITR): **off**.
+  There is no Supabase-side restore point. Do not plan on "restore from the dashboard".
+- What does exist, written once a night by `ari-backup` (03:00 IST):
+  1. `ari-backups` bucket in prod: plain gzip JSON `ari_<stamp>.json.gz`, newest 14.
+  2. `ari-offsite` bucket in prod: the same export encrypted with openssl CMS, `ari_<stamp>.json.gz.cms`, copied byte for byte
+     to the private "Ari backups" Drive folder (see "Offsite copy" below). This is the only copy outside the prod project.
+- The plain copy the function also writes to ari-staging's bucket is **not** counted as a backup: it is slated to stop
+  (Supabase audit S2) and must not be relied on.
+- So the worst-case data loss is everything since the last good nightly run (up to about 24 h).
+
 | Situation | Do |
 |---|---|
-| A few rows wrong or deleted | Section 3 (single-table restore into prod) |
+| A few rows wrong or deleted | Section 3 (single-table restore into prod) from the newest good `ari-backups` object |
 | Prod data broadly corrupted, project alive | Sections 1 to 4 into prod, after a fresh backup of the bad state |
-| Prod project gone | Section 5 (new project), then 1 to 4 |
-| Prod bucket gone or untrusted | Take the object from ari-staging's `ari-backups` bucket instead |
+| Prod project gone | Section 5 (new project), then 1 to 4, from the Drive `.cms` copy (both prod buckets are gone with it) |
+| Prod `ari-backups` bucket gone or untrusted | Use the `ari-offsite` object or the Drive file, decrypted as in "Offsite copy" below |
 
 Always first: pause writers so they don't fight the restore. Pause tasks e8fbd86f (worker) and 56e17ef1 (sync) with scheduled_task update status=paused, and note the times. Leave the Sheet untouched: after the restore the sync would otherwise re-push Sheet values over restored rows; decide per incident which side is the truth.
 
 ## 1. Pick and rehearse
-1. `python3 scripts/restore_drill.py` (newest object) or `python3 scripts/restore_drill.py ari_20261016T2138Z.json.gz`.
+1. Pick the object: the newest night whose `backup_runs` row is verified (`python3 scripts/backup_check.py` shows it).
+   For an encrypted `.cms` object, decrypt it first (key from the Hark vault, command in "Offsite copy" below) to get the `.json.gz`.
+2. `python3 scripts/restore_drill.py` (newest object) or `python3 scripts/restore_drill.py ari_20261016T2138Z.json.gz`.
    It loads the object into a throwaway local Postgres 17 (schema from the newest pg_dump in work/backups or native/supabase/baseline) and writes `work/backups/drill_<object>.json` with counts only.
-2. Proceed only if `mismatches` is `{}` and `rows_restored == rows_backup`. Last drill: 33/33 tables, 2,305/2,305 rows.
-3. Snapshot the current (bad) state first: run the edge function once (`select public.ari_backup_kick();` as postgres) so the pre-restore state is itself recoverable.
+3. Proceed only if `mismatches` is `{}` and `rows_restored == rows_backup`.
+4. Snapshot the current (bad) state first: run the edge function once (`select public.ari_backup_kick();` as postgres) so the pre-restore state is itself recoverable. With no PITR this snapshot is the only record of the bad state.
 
 ## 2. Schema
 - Existing prod: schema is already there; check `select max(version) from supabase_migrations.schema_migrations` matches the backup's ledger. If the backup is older than a migration, restore data into the current schema (columns added later get defaults) or roll the migration back first (native/supabase/rollbacks/).

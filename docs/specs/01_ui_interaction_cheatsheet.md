@@ -1,14 +1,17 @@
-LOCKED Oct 17 2026 by Owner. Sole design source for app2. Changes need Owner's approval.
+LOCKED Oct 17 2026 by Owner. Changes need Owner's approval.
+PARTLY SUPERSEDED Oct 19 2026 (approved by Owner): the palette, grid and motion sections below are replaced by
+docs/specs/07_s2_visual_spec.md (S2 Lamp & Dawn, as shipped). For visuals read 07. This file still owns the interaction
+contract, behaviour, Undo and the copy rules.
 # 01 UI and interaction cheat sheet (app2)
 Supersedes plans/builder-sheet.md Graphite values (#050505/#E2B062).
 
 ## Pinned constraints
-- 8pt grid: sizes, gaps and padding are multiples of 8 (4 only inside a component). Gutters 16 or 24, not 20.
+- SUPERSEDED by 07 §1 and §8 (approved by Owner Oct 19 2026): 4 px grid with 12 and 20 steps. Was: 8pt grid: sizes, gaps and padding are multiples of 8 (4 only inside a component). Gutters 16 or 24, not 20.
 - Touch targets at least 48x48px, chips and icon buttons included.
 - Text contrast at least 4.5:1 on its own surface. Non-text UI at least 3:1.
-- One accent, meaning only primary action, progress, active tab. No green, gradients or glows.
+- SUPERSEDED by 07 §7 (approved by Owner Oct 19 2026): amber lamp accent, teal done #7CCBB8 allowed, rose friction. Was: one accent, meaning only primary action, progress, active tab. No green, gradients or glows. (No gradients or glows still holds.)
 
-## Graphite tokens
+## Graphite tokens (SUPERSEDED by 07 §7, approved by Owner Oct 19 2026; kept for history, do not build from it)
 | token | hex | use | contrast on bg / surface / raised |
 |---|---|---|---|
 | bg | #121212 | background | n/a |
@@ -24,6 +27,7 @@ Supersedes plans/builder-sheet.md Graphite values (#050505/#E2B062).
 Text tokens clear 4.5:1 on all three fills. Line clears 4.5:1 on bg, 3:1 everywhere. Prefer spacing over dividers. No ink3.
 
 ## Ari, the pebble
+The visual mark is now the dial (07 §10). The state rules below still describe when Ari shows working or done.
 One SVG component everywhere. Three states only, never random. No tricks, sleep or thought bubbles.
 
 | state | trigger | returns to |
@@ -38,7 +42,7 @@ Never shows:
 - any change while Owner is typing in a draft.
 - any motion under reduced motion.
 
-## Motion
+## Motion (SUPERSEDED by 07 §5 and §9, approved by Owner Oct 19 2026; the haptics and reduced-motion lines still hold)
 Transform and opacity only (plus SVG `d` for Ari's face). Springs for anything touched or event driven, never linear. Mass 1 throughout.
 
 | token | stiffness | damping | mass | use |

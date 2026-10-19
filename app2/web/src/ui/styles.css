@@ -1,6 +1,6 @@
 @import './tokens.css';
 /* S2 (v18.17.0): Lamp & Dawn tokens from tokens.css (generated from tokens/tokens.json; never edit it by hand), Material 3
-   sizes from the S2 spec: 4 px grid, 16 margins, buttons 40 / 56, rows min-height 56 / 64 / 88, nav 64, 48 px targets.
+   sizes from the S2 spec (docs/specs/07_s2_visual_spec.md): 4 px grid, 16 margins, buttons 40 / 56, rows min-height 56 / 64 / 88, nav 64, 48 px targets.
    Every colour, size, radius and curve is a var(); raw values only in tokens.css (design lint). */
 /* Instrument Sans (OFL, self-hosted in public/fonts, precached by public/sw.js), variable 400 to 700, Latin. */
 @font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 400 700; font-display: swap;
@@ -178,7 +178,7 @@ p.muted, p.meta { margin: 0 0 var(--s-2); font-size: var(--fs-meta); line-height
 .skelbtn { display: block; }
 .skelbtn::before { background: var(--surface-3); border-color: var(--surface-3); }
 @media (prefers-reduced-motion: no-preference) {
-  /* lint-allow: raw-motion skeleton pulse 1.6 s linear, 5 alternating cycles (S2 spec §3 Skeleton and §5 icon 9; the package has no token for it) */
+  /* lint-allow: raw-motion skeleton pulse 1.6 s linear, 5 alternating cycles (spec 07 §3 Skeleton and §5 icon 9; the package has no token for it) */
   .skel .bar, .skel .skelbtn::before, [aria-busy="true"] dd .bar { animation: skelpulse 1.6s linear 5 alternate; }
 }
 @keyframes skelpulse { from { opacity: .5; } to { opacity: .8; } }

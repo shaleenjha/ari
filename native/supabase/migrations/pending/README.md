@@ -1,4 +1,20 @@
-# Pending: app2 E1 to E3 (tenancy, backfill, dual RLS). NOT APPLIED anywhere
+# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod
+
+## Status (checked Oct 19 2026, read-only, counts only; plans/audit data-side live checks)
+| Migration | Prod | Ledger row (`supabase_migrations.schema_migrations`) |
+|---|---|---|
+| `../0032_accept_ingest.sql` | LIVE | yes |
+| `0033_app2_e1_tenancy.sql` | LIVE (schema `app` with `workspaces` + `memberships` exists) | yes |
+| `0034_app2_e2_backfill.sql` | LIVE | yes |
+| `0035_app2_e3_dual_rls.sql` | LIVE | yes (ledger max is 0035) |
+| `0036_log_repair_rpc.sql` | APPLIED WITHOUT A LEDGER ROW: `ari_worker_log_repair` exists in prod | **no**. Backfill the row in a later DB release (see `docs/runbooks/db-changes.md`) |
+
+- These files stay in `pending/` until a DB release moves them, so paths cited elsewhere keep working. Do not re-apply them:
+  they are live. The header of `../0032_accept_ingest.sql` still says "NOT applied"; that line is stale.
+- Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
+  "not applied" or "staging first", read it as history.
+
+## Original write-up (Oct 17 2026)
 
 Written Oct 17 2026 from `app2/docs/migration-map.md` section 2, steps 1 to 3. Renumbered and rewritten lock-safe Oct 17 2026
 (spec `docs/specs/03_app2_database_migration.md`, Owner's decisions 23:21 IST): Otto's `0032_accept_ingest.sql` lands first, so the
