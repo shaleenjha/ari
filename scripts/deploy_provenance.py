@@ -10,7 +10,7 @@ git_push_api.py mirrors that tree onto `main`. So the gate compares git TREES (c
      exported file, any added or removed file, changes the tree hash.
   2. HEAD equals origin/main: the local export repo's HEAD tree equals the tip of GitHub `main` (nothing committed
      locally and left unpushed, nobody else pushed since).
-  3. CI green: every GitHub Actions run for that `main` SHA is completed, at least one is the `ci` workflow, and all
+  3. CI green: every GitHub Actions run for that `main` SHA (ignoring issue/comment-triggered agent runs) is completed, at least one is the `ci` workflow, and all
      concluded `success`.
 
 Limits (stated, not hidden): files outside the export allow-list are invisible to check 1, so callers must refuse to
@@ -90,6 +90,9 @@ def check():
             raise Refused('local export HEAD (tree %s) is not GitHub main %s (tree %s).' % (head_tree[:10], sha[:10], remote_tree[:10]))
 
     runs = _gh('/repos/%s/actions/runs?head_sha=%s&per_page=50' % (REPO, sha)).get('workflow_runs', [])
+    # Runs fired by issue/comment events (the @claude agent) are not checks of this commit: GitHub stamps them with
+    # main's SHA, they are often skipped or long-running, and they vouch for nothing. Only check-type events count.
+    runs = [r for r in runs if r.get('event') not in ('issues', 'issue_comment', 'pull_request_review_comment', 'pull_request_review')]
     if not runs:
         raise Refused('no CI run found for main %s yet.' % sha[:10])
     if not any(r.get('name') == 'ci' for r in runs):
