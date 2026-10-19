@@ -3,7 +3,7 @@
 // Deploy with "Verify JWT" OFF: the caller is checked against vault secret ari_backup_hook_secret.
 // What it does: every table in schema public + auth.users + auth.identities + the migration ledger (DDL replay) +
 // public function definitions + policies + cron jobs -> one gzip JSON in the private bucket ari-backups (prod) and a
-// copy in the private bucket ari-backups of project ari-staging (off-project copy; env STAGING_URL, STAGING_SECRET_KEY).
+// CMS-encrypted copy in bucket ari-offsite (below). S1 R3 (Claude R-03, Oct 19 2026): the plaintext copy to ari-staging is gone.
 // Restore test every run: the stored object is downloaded again, checksum-checked, and every table is loaded into a
 // temp table of the same row type (json_populate_recordset) and counted, in a transaction that is rolled back.
 // Result row in public.backup_runs; Hark's nightly check reads it through ari_worker_backup_status() (metadata only).
@@ -16,7 +16,9 @@ import * as pkijs from "https://esm.sh/pkijs@3.2.4?target=es2022";
 // CMS EnvelopedData, AES-256-CBC, content key wrapped by ECDH (P-384, SHA-256 KDF) to this PUBLIC certificate. Decrypt with
 // "openssl cms -decrypt -binary -inform DER -inkey <private key from vault> -recip ari-offsite-recipient.pem" (RESTORE.md).
 // OFFSITE_CERT_PEM (function secret) overrides the built-in cert; used on staging with a throwaway cert for the round-trip test.
+// It is IGNORED on the prod project, so neither recipient (Hark vault, Owner) can be dropped by a secret change.
 const OFFSITE_BUCKET = "ari-offsite";
+const PROD_REF = "rbkrqlzlblquvgmuohro";
 // Two recipients: "Ari offsite backup recipient" (key in the Hark vault) and "Ari backup - Owner" (key held by Owner,
 // SHA-256 21:90:2D:64:51:9D:70:E9:3D:BF:32:B1:8B:3E:8A:76:CE:83:20:E0:48:D2:5D:8A:78:8A:6B:89:0E:10:AF:D9).
 const OFFSITE_CERT = `-----BEGIN CERTIFICATE-----
@@ -130,18 +132,10 @@ async function run(sql: postgres.Sql, runId: number) {
   // encrypted copy for the offsite job (bucket ari-offsite; the worker can read only this)
   let encFile: string | null = null, encBytes: number | null = null, encSum: string | null = null, encErr: string | null = null;
   try {
-    const enc = await cmsEncrypt(Deno.env.get("OFFSITE_CERT_PEM") || OFFSITE_CERT, gz);
+    const enc = await cmsEncrypt(recipientPems(url, Deno.env.get("OFFSITE_CERT_PEM")), gz);
     encFile = `${name}.cms`; encBytes = enc.length; encSum = await sha256(enc);
     await put(url, key, encFile, enc, OFFSITE_BUCKET); await prune(url, key, OFFSITE_BUCKET);
   } catch (e) { encFile = null; encErr = "enc: " + String(e).slice(0, 200); }
-
-  // off-project copy (ari-staging)
-  let offsite = false, offErr: string | null = null;
-  const surl = Deno.env.get("STAGING_URL"), skey = Deno.env.get("STAGING_SECRET_KEY");
-  try {
-    if (!surl || !skey) throw new Error("staging copy not configured");
-    await put(surl, skey, name, gz); offsite = true; await prune(surl, skey);
-  } catch (e) { offErr = String(e).slice(0, 300); }
 
   // restore test from the stored object
   const dl = await fetch(`${url}/storage/v1/object/${BUCKET}/${name}`, { headers: hdr(key) });
@@ -171,8 +165,15 @@ async function run(sql: postgres.Sql, runId: number) {
   await sql`update public.backup_runs set finished_at = now(), file = ${name}, bytes = ${gz.length}, sha256 = ${digest},
             tables = ${list.length}, rows = ${total}, counts = ${sql.json(counts)}, verified = ${verified},
             mismatches = ${sql.json({ ...mismatches, ...(errors.length ? { _errors: errors } : {}), ...(sameSum ? {} : { _checksum: "mismatch" }) })},
-            offsite = ${offsite}, offsite_error = ${[offErr, encErr].filter(Boolean).join("; ") || null},
+            offsite = false, offsite_error = ${encErr},
             enc_file = ${encFile}, enc_bytes = ${encBytes}, enc_sha256 = ${encSum}, error = null where id = ${runId}`;
+}
+
+// The built-in bundle on prod; the OFFSITE_CERT_PEM override only off prod (staging round-trip tests).
+function recipientPems(projectUrl: string, override: string | undefined): string {
+  let ref = "";
+  try { ref = new URL(projectUrl).hostname.split(".")[0]; } catch { ref = ""; }
+  return override && ref !== PROD_REF ? override : OFFSITE_CERT;
 }
 
 // v18.7: constant-time comparison for the x-ari-hook secret (no early exit on the first differing byte)

@@ -26,3 +26,5 @@ do $$ begin
   raise notice 'ALL 0038 ROLLBACK CHECKS PASSED';
 end $$;
 rollback;
+-- Final row: the Management API returns only the last statement's result, so success = HTTP 201 + this row.
+select 'ALL 0038 ROLLBACK CHECKS PASSED' as result;

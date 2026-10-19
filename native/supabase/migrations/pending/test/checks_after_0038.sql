@@ -123,3 +123,5 @@ do $$ begin
   raise notice 'ALL 0038 TESTS PASSED';
 end $$;
 rollback;
+-- Final row: the Management API returns only the last statement's result, so success = HTTP 201 + this row.
+select case when to_regclass('public.chk38_notif') is null then 'ALL 0038 TESTS PASSED (part 3 skipped: no fixtures)' else 'ALL 0038 TESTS PASSED' end as result;

@@ -382,7 +382,8 @@ def cmd_scan(since, backfill, dry, show=True):
 # --- repair-log: RETIRED (v18.17.7, Oct 19 2026) ----------------------------------------------------------------------------
 # The spec-05 Log history repair (docs/specs/05_log_history_repair.md) finished Oct 18 2026 (395 rows). Migration 0038
 # (S1 release 6, part 4) drops the ari_worker_log_repair RPC this mode called, so the mode is gone too. The command
-# now refuses with exit 2 and touches nothing. The pre-repair snapshots stay under work/backups/log_repair_<utc>/.
+# now refuses with exit 2 and touches nothing. Pre-repair snapshots (full People/Log copies) are deleted once a repair
+# is verified; the Oct 18 one was deleted Oct 19 2026. Only the key journal and finished.json stay in work/backups/log_repair_<utc>/.
 REPAIR_RETIRED = ("repair-log is retired: the spec-05 Log repair finished Oct 18 2026 (395 rows) and migration 0038 "
                   "drops its RPC. Nothing was read or written.")
 

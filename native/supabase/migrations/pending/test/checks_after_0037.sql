@@ -125,3 +125,5 @@ do $$ begin
   raise notice 'ALL 0037 TESTS PASSED (% readable tables checked, % closed)', (select count(*) from t37), (select count(*) from t37_closed);
 end $$;
 rollback;
+-- Final row: the Management API returns only the last statement's result, so success = HTTP 201 + this row.
+select 'ALL 0037 TESTS PASSED' as result;

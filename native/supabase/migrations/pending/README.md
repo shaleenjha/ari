@@ -11,6 +11,10 @@
 | `0037_members_aal2.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R5: members need the two-step code too | no |
 | `0038_s1_release6.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R6: seven parts, incl. dropping `ari_worker_log_repair` (accept_ingest repair-log retired in v18.17.7) | no |
 
+- `0036_log_repair_rpc.sql` was never applied as a whole file. Per function:
+  - `ari_worker_log_repair`: applied by hand, repair only (the Oct 18 Log repair); no ledger row; ledger row via 0038 part 7; dropped by 0038.
+  - `ari_worker_log_unappend`: never reached prod (the file defines it, prod does not have it). 0038's `drop function if exists` is a no-op for it;
+    the 0038 ledger row for 0036 therefore records only `ari_worker_log_repair`.
 - 0037 and 0038 came from the outside auditor's R5/R6 package (Oct 19 2026). Tests, apply order and the prod checks to run first
   (apply_op md5, save the live `ari_worker_log_repair` definition, worker reads `queue.target`) are in `README-R5-R6.md`. CI runs
   them on the throwaway database through `test/run_local.sh`. `test/fixtures_before_0038.sql` is for that throwaway database only:

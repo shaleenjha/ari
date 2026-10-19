@@ -21,6 +21,15 @@ vault secrets created by SQL, storage bucket policies. Data fixes too (backfills
    read-only query that the ledger row exists, then update `migrations/pending/README.md`.
 6. Cron jobs are created with `cron.schedule('<name>', '<schedule>', $$...$$)` inside a migration, never in the dashboard.
 
+## Running a check file through the Management API
+The Management API query endpoint takes one SQL string and returns only the last statement's result. psql meta-commands
+are not SQL, so before sending a file:
+1. Strip every line that starts with a backslash (`\set ON_ERROR_STOP on` and the like).
+2. Send the rest as one request. Each check file is one transaction that ends in `rollback;`, followed by one final
+   `select '... PASSED' as result;`. A failing check raises, which stops the request before that row.
+3. Success = HTTP 201 AND the last row is the PASSED row. Anything else (another status, no row, a different row) is a failure.
+   Locally and in CI, `run_local.sh` runs the same files through psql and greps for `PASSED|FAIL|ERROR`.
+
 ## Live items with NO ledger row (backfill in a later DB release; do not apply anything now)
 Found by the read-only checks of Oct 19 2026 (`plans/audit/data-side-live-checks-2026-10-19.txt`, `live-checks-2-2026-10-19.txt`).
 
