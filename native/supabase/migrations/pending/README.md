@@ -1,4 +1,4 @@
-# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod
+# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): PROPOSED, NOT APPLIED
 
 ## Status (checked Oct 19 2026, read-only, counts only; plans/audit data-side live checks)
 | Migration | Prod | Ledger row (`supabase_migrations.schema_migrations`) |
@@ -7,8 +7,14 @@
 | `0033_app2_e1_tenancy.sql` | LIVE (schema `app` with `workspaces` + `memberships` exists) | yes |
 | `0034_app2_e2_backfill.sql` | LIVE | yes |
 | `0035_app2_e3_dual_rls.sql` | LIVE | yes (ledger max is 0035) |
-| `0036_log_repair_rpc.sql` | APPLIED WITHOUT A LEDGER ROW: `ari_worker_log_repair` exists in prod | **no**. Backfill the row in a later DB release (see `docs/runbooks/db-changes.md`) |
+| `0036_log_repair_rpc.sql` | LIVE (`ari_worker_log_repair` exists in prod; the spec-05 Log repair it served finished Oct 18 2026, 395 rows) | **no** at the Oct 19 check. 0038 part 7 writes the row |
+| `0037_members_aal2.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R5: members need the two-step code too | no |
+| `0038_s1_release6.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R6: seven parts, incl. dropping `ari_worker_log_repair` (accept_ingest repair-log retired in v18.17.7) | no |
 
+- 0037 and 0038 came from the outside auditor's R5/R6 package (Oct 19 2026). Tests, apply order and the prod checks to run first
+  (apply_op md5, save the live `ari_worker_log_repair` definition, worker reads `queue.target`) are in `README-R5-R6.md`. CI runs
+  them on the throwaway database through `test/run_local.sh`. `test/fixtures_before_0038.sql` is for that throwaway database only:
+  never run it on staging or prod. Diamond (`docs/specs/06`) is now migration 0039.
 - These files stay in `pending/` until a DB release moves them, so paths cited elsewhere keep working. Do not re-apply them:
   they are live. The header of `../0032_accept_ingest.sql` still says "NOT applied"; that line is stale.
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says

@@ -1,10 +1,11 @@
-# Migration 0037 spec (agreed with auditor Victor Oct 18 2026; build needs Owner's go)
+# Migration 0039 spec (agreed with auditor Victor Oct 18 2026; build needs Owner's go)
+Renumbered Oct 19 2026 (v18.17.7): S1 releases 5 and 6 took 0037 and 0038, so Diamond is migration 0039. The file name keeps "0037" so existing links work.
 Bundle: app2 command RPCs + payload schema + CI migration role + legacy Log scrub + log immutability.
 - Command RPCs: same-transaction state update + event append. No client-side dual writes in app2. UUIDv7 for new app2 tables and client op ids; legacy identity ids stay.
 - Event payload JSONB: facts + IDs only (actor_id, from/to stage, channel, source, ts, entity ids). PII stays in people/accounts (scrubbable). Any text artifact (draft, quote, snippet) encrypted with a per-person key (crypto-shred on erasure).
 - log_sheet_map(workspace_id, log_id, sheet_key unique, created_at): composite FK (workspace_id, log_id) -> log_entries ON DELETE RESTRICT, ws_guard, RLS, worker insert/select only. Backfill from log_entries.sheet_key, then drop that column. Dropped when Sheet becomes one-way export.
 - Order in one transaction: A) deterministic scrub of legacy detail text (exact people.name -> person_id; unresolved -> [unmatched_contact]); B) one compensating event legacy_pii_scrub (rows modified, pre/post state); C) DROP worker repair RPCs (ari_worker_log_repair, ari_worker_log_unappend); revoke UPDATE/DELETE on log_entries from anon, authenticated, service_role, ari_worker; BEFORE UPDATE OR DELETE row trigger + BEFORE TRUNCATE statement trigger that raise. Bypass only by a visible DISABLE TRIGGER migration.
 - Dry run: read-only on prod as worker; row ids + diffs to a private git-ignored file in Hark workspace; Owner reviews; purge after migration. CI checks counts, checksums, zero unmapped names only. Never PII in CI logs or issues.
-- CI migration role (DATABASE_URL secret in GitHub Actions) introduced with 0037; zero account tokens.
-- Window: pause sync 56e17ef1 + worker e8fbd86f (+ off-hours 228b5138), fresh backup, apply 0037, deploy updated sync_sheet_supabase.py (uses log_sheet_map), smoke + health_check, resume.
-Gates before Phase 1 read-only app2 wiring under 0036: deploy_web.py requires --target=production --confirm; Owner iOS pass on ari-app2-preview.vercel.app. Phase 2 writes after 0037.
+- CI migration role (DATABASE_URL secret in GitHub Actions) introduced with 0039; zero account tokens.
+- Window: pause sync 56e17ef1 + worker e8fbd86f (+ off-hours 228b5138), fresh backup, apply 0039, deploy updated sync_sheet_supabase.py (uses log_sheet_map), smoke + health_check, resume.
+Gates before Phase 1 read-only app2 wiring under 0036: deploy_web.py requires --target=production --confirm; Owner iOS pass on ari-app2-preview.vercel.app. Phase 2 writes after 0039.

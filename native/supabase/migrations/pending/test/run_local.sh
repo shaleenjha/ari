@@ -35,3 +35,18 @@ python3 "$HERE/probe.py" "$DB" "$OUT/probe_after_rollback.json"
 python3 "$HERE/compare.py" "$OUT"
 for m in $M; do api "$PEND/$m.sql"; done; echo "applied 0033..0035 again after the rollback"
 $P -f "$HERE/checks_after_e3.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+
+# S1 releases 5 and 6 (0037, 0038) on top of 0033..0035: synthetic before-state, apply, checks, idempotence,
+# rollbacks (each twice), rollback checks, apply again + checks. Added v18.17.7 (README-R5-R6.md).
+# fixtures_before_0038.sql runs ONLY here, on the throwaway local/CI database. Never on staging or prod.
+$P -f "$HERE/fixtures_before_0038.sql" >/dev/null
+for m in 0037_members_aal2 0038_s1_release6; do api "$PEND/$m.sql"; echo "applied $m"; done
+$P -f "$HERE/checks_after_0037.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+$P -f "$HERE/checks_after_0038.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+for m in 0037_members_aal2 0038_s1_release6; do api "$PEND/$m.sql"; done; echo "re-applied 0037, 0038 (idempotence): no error"
+api "$PEND/0038_s1_release6_rollback.sql"; api "$PEND/0038_s1_release6_rollback.sql"; echo "rolled back 0038 (twice)"
+$P -f "$HERE/checks_after_0038_rollback.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+api "$PEND/0037_members_aal2_rollback.sql"; api "$PEND/0037_members_aal2_rollback.sql"; echo "rolled back 0037 (twice)"
+for m in 0037_members_aal2 0038_s1_release6; do api "$PEND/$m.sql"; done; echo "applied 0037, 0038 again after the rollback"
+$P -f "$HERE/checks_after_0037.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+$P -f "$HERE/checks_after_0038.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'

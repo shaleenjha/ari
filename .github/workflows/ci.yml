@@ -64,7 +64,7 @@ jobs:
 
   sql-prod-shape:
     permissions: { issues: write, contents: read }
-    name: sql-prod-shape (pending 0032-0034 on the prod schema shape, rollbacks, before/after probes)
+    name: sql-prod-shape (pending 0033-0038 on the prod schema shape, rollbacks, before/after probes)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -98,6 +98,7 @@ jobs:
       - run: python3 scripts/test_hygiene_scan.py
       - run: python3 scripts/test_offsite_certs.py   # S1 R3: multi-recipient CMS, nightly recipient check, .cms restore (throwaway certs)
       - run: python3 scripts/test_book_prune.py   # S1 R4: Book prune refuses mass deletes (>20 rows or >5%)
+      - run: python3 scripts/test_log_repair.py   # S1 R6: accept_ingest repair-log retired (0038 drops its RPC)
 
   anti-slop-static:
     name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)
