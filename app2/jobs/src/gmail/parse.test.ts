@@ -3,7 +3,6 @@ import { ACCEPT_SUBJ, NOT_ACCEPT, extractProfile, parseLinkedInEmail, type RawEm
 import { matchPerson } from './match';
 import { ingest, shadowDiff } from './handler';
 import * as F from './fixtures';
-import { Runtime, backoffSeconds, type Job, type JobStore } from '../runtime/worker';
 
 describe('parse', () => {
   it('accept (text, comm link with tracking) -> vanity + headline + company + exact time', () => {
@@ -79,19 +78,6 @@ describe('ingest handler (shadow first)', () => {
     expect(shadowDiff(rows, new Map([['p1', { accepted: 'x' }], ['p2', { accepted: 'y' }]])).agree).toBe(true);
     const d = shadowDiff(rows, new Map([['p1', { accepted: 'x' }], ['p9', { accepted: 'z' }]]));
     expect(d).toMatchObject({ agree: false, missing: ['accept:p9'], extra: ['accept:p2'] });
-  });
-});
-
-describe('runtime', () => {
-  it('backoff caps at 1 h', () => { expect([1, 2, 3, 20].map(backoffSeconds)).toEqual([30, 60, 120, 3600]); });
-  it('runs handlers and records failures', async () => {
-    const done: Array<[string, boolean]> = [];
-    const jobs: Job[] = [{ id: 'j1', workspaceId: 'ws', kind: 'ok', payload: {}, attempts: 1, maxAttempts: 5 },
-      { id: 'j2', workspaceId: 'ws', kind: 'boom', payload: {}, attempts: 1, maxAttempts: 5 }];
-    const store: JobStore = { claim: async () => jobs, finish: async (id, ok) => { done.push([id, ok]); } };
-    const r = await new Runtime(store).register('ok', async () => 1).register('boom', async () => { throw new Error('x'); }).tick();
-    expect(r).toEqual({ ran: 2, failed: 1 });
-    expect(done).toEqual([['j1', true], ['j2', false]]);
   });
 });
 

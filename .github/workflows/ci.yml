@@ -25,7 +25,7 @@ jobs:
       - run: npm run build
 
   jobs:
-    name: jobs (typecheck, gmail fetch/parse/shadow unit)
+    name: jobs (typecheck, runtime timeout/fencing, gmail fetch/parse/shadow unit)
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app2/jobs } }
     steps:
@@ -48,7 +48,7 @@ jobs:
       - run: npm run eval:drafts
 
   sql:
-    name: sql (schema, RLS matrix, task commands, job queue, gmail ingest)
+    name: sql (schema, RLS matrix, task commands, job queue + fencing, gmail ingest)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -100,6 +100,7 @@ jobs:
       - run: python3 scripts/test_book_prune.py   # S1 R4: Book prune refuses mass deletes (>20 rows or >5%)
       - run: python3 scripts/test_log_repair.py   # S1 R6: accept_ingest repair-log retired (0038 drops its RPC)
       - run: python3 scripts/test_git_sync_pull.py   # v18.17.10: pull-first git sync (mocked GitHub API)
+      - run: python3 scripts/test_git_push_branch.py   # S1 job fencing PR: review-branch push, never main, never deletes (mocked GitHub API)
 
   anti-slop-static:
     name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)
