@@ -9,8 +9,9 @@
 #      Copied to Drive as-is; its sha256 must equal backup_runs.enc_sha256 (rpc ari_worker_backup_status).
 #   2. fallback "worker-scope export": every table ari_worker can SELECT (11 tables + 3 report views), gzip JSON. Labelled
 #      in the filename (ari_w_*) so nobody mistakes it for the full export (no auth.users, no ledger, no other tables).
-# Encryption: openssl cms, AES-256-CBC content key wrapped to the recipient cert (EC P-384, ECDH). The private key lives only
-# in the user's vault ("Ari offsite backup private key"); restore steps in native/supabase/RESTORE.md (Offsite on Drive).
+# Encryption: openssl cms, AES-256-CBC content key wrapped to EACH recipient cert (EC P-384, ECDH): native/supabase/offsite/
+# ari-offsite-recipient.pem (private key in the user's Hark vault, "Ari offsite backup private key") and, since S1 R3,
+# ari-offsite-recipient-shal.pem (private key held by Owner only); restore steps in native/supabase/RESTORE.md (Offsite on Drive).
 # Integrity: sha256 of the ciphertext is stored in the Drive file's appProperties and re-checked after a re-download.
 # Usage: python3 scripts/offsite_drive.py   (needs the google credential for ops@example.com on the shell call)
 # Exit 0 = uploaded + re-download checksum matched + pruned to 14. Exit 1 = one-line reason.
@@ -19,7 +20,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import ari_db
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CERT = os.path.join(ROOT, 'native', 'supabase', 'offsite', 'ari-offsite-recipient.pem')
+import offsite_certs  # S1 R3: every native/supabase/offsite/ari-offsite-recipient*.pem is a recipient (Hark vault key + Owner's own)
 FOLDER = 'Ari backups'
 KEEP = 14
 TABLES = ['people', 'accounts', 'queue', 'emails', 'brief', 'log_entries', 'book', 'plays', 'sync_state',
@@ -65,12 +66,8 @@ def worker_scope_export():
 
 
 def encrypt(plain: bytes) -> bytes:
-    with tempfile.TemporaryDirectory() as d:
-        i, o = os.path.join(d, 'in'), os.path.join(d, 'out')
-        open(i, 'wb').write(plain)
-        subprocess.run(['openssl', 'cms', '-encrypt', '-binary', '-aes-256-cbc', '-outform', 'DER', '-in', i, '-out', o,
-                        CERT], check=True, capture_output=True)
-        return open(o, 'rb').read()
+    """Fallback path only: encrypt to EVERY recipient certificate (S1 R3), so either private key opens the file."""
+    return offsite_certs.encrypt(plain)
 
 
 def main():
@@ -92,6 +89,10 @@ def main():
                   'has_auth_users': 'auth.users' in (run.get('counts') or {}),
                   'has_migration_ledger': 'supabase_migrations.schema_migrations' in (run.get('counts') or {})}
     digest = hashlib.sha256(enc).hexdigest()
+    try:  # informational: who can open this file (backup_check.py enforces the match nightly)
+        rcp = offsite_certs.check_recipients(enc)
+    except ValueError as e:
+        rcp = {'ok': False, 'error': str(e)[:120]}
     q = "name = '%s' and mimeType = 'application/vnd.google-apps.folder' and 'root' in parents and trashed = false" % FOLDER
     found = gws('drive', 'files', 'list', '--params', json.dumps({'q': q, 'fields': 'files(id,name)'})).get('files', [])
     if found: folder = found[0]['id']
@@ -129,7 +130,7 @@ def main():
     for f in files[:max(0, len(files) - KEEP)]:
         gws('drive', 'files', 'delete', '--params', json.dumps({'fileId': f['id']})); pruned.append(f['name'])
     print(json.dumps({'ok': True, 'uploaded': target, 'already_there': bool(existing), 'source': source, 'bytes': len(enc),
-                      'sha256': digest, 'kept': min(len(files), KEEP), 'pruned': pruned, 'counts': counts}))
+                      'sha256': digest, 'recipients': rcp, 'kept': min(len(files), KEEP), 'pruned': pruned, 'counts': counts}))
 
 
 if __name__ == '__main__':

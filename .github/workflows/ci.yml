@@ -96,6 +96,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - run: python3 scripts/test_hygiene_scan.py
+      - run: python3 scripts/test_offsite_certs.py   # S1 R3: multi-recipient CMS, nightly recipient check, .cms restore (throwaway certs)
 
   anti-slop-static:
     name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)

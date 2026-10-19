@@ -8,7 +8,9 @@ Owner auth uid: b14d1605-c766-4684-9a5b-71ffcab6967b.
 - One gzip JSON per night, `ari_<YYYYMMDD>T<HHMM>Z.json.gz`, in the **private** bucket `ari-backups` of prod (14 kept) and a copy in the private bucket `ari-backups` of ari-staging.
 - Keys inside the JSON: `public.<table>` (every public table, rows as JSON), `auth.users`, `auth.identities`, `supabase_migrations.schema_migrations` (ledger with DDL statements), plus function definitions, policies and cron jobs.
 - **Not in the backup**: `auth.mfa_factors` / `auth.mfa_challenges` (two-step factors), sessions and refresh tokens, storage objects, vault secrets (ari_backup_hook_secret, push keys), edge function code and env (code is in native/supabase/functions/), Vercel config.
-- Every run restore-tests itself; status: `python3 scripts/backup_check.py` (exit 0 = newest run < 26 h old, verified, off-project copy written).
+- Every run restore-tests itself; status: `python3 scripts/backup_check.py` (exit 0 = newest run < 26 h old, verified, and its
+  encrypted copy in ari-offsite matches `enc_sha256` with exactly the expected recipients; `--drive` also checks the Drive copy).
+  Since S1 R3 the plain staging copy does not count as the off-project copy.
 
 ## Who can restore
 Maintenance session only (Forge), with the Supabase Management token bound for that session. Normal Hark runs (worker, sync, backup check) cannot read the bucket: ari_worker gets 400 on storage and 403 on backup_runs, by design.
@@ -36,8 +38,10 @@ Always first: pause writers so they don't fight the restore. Pause tasks e8fbd86
 
 ## 1. Pick and rehearse
 1. Pick the object: the newest night whose `backup_runs` row is verified (`python3 scripts/backup_check.py` shows it).
-   For an encrypted `.cms` object, decrypt it first (key from the Hark vault, command in "Offsite copy" below) to get the `.json.gz`.
 2. `python3 scripts/restore_drill.py` (newest object) or `python3 scripts/restore_drill.py ari_20261016T2138Z.json.gz`.
+   Encrypted copy (S1 R3): `python3 scripts/restore_drill.py --file ari_<stamp>.json.gz.cms --key key.pem` (the Drive file,
+   no token needed) or `ARI_MAINT=1 python3 scripts/restore_drill.py ari_<stamp>.json.gz.cms --key key.pem` (from bucket
+   ari-offsite). Either recipient's private key works. Shred key.pem afterwards.
    It loads the object into a throwaway local Postgres 17 (schema from the newest pg_dump in work/backups or native/supabase/baseline) and writes `work/backups/drill_<object>.json` with counts only.
 3. Proceed only if `mismatches` is `{}` and `rows_restored == rows_backup`.
 4. Snapshot the current (bad) state first: run the edge function once (`select public.ari_backup_kick();` as postgres) so the pre-restore state is itself recoverable. With no PITR this snapshot is the only record of the bad state.
@@ -94,8 +98,21 @@ Column rules (the drill does exactly this):
 ## Offsite copy on Google Drive (v18.7, second vendor)
 - Where: private folder "Ari backups" in the Google Drive of ops@example.com, newest 14 files `ari_*.json.gz.cms` (full export: every public table, auth users + identities, migration ledger, function/policy/cron definitions) or `ari_w_*.json.gz.cms` (worker-scope fallback, only if the encrypted copy was unreadable).
 - Since v18.7.1 (migration 0025_offsite_encrypted) the ari-backup edge function encrypts the export itself and writes it to private bucket ari-offsite; ari_worker can read only that bucket and only *.cms, so the Drive job never sees plaintext. The Drive file is that object byte for byte; its sha256 equals backup_runs.enc_sha256.
-- Written nightly by task d497bf61 step 2 (scripts/offsite_drive.py). Encrypted with openssl CMS (AES-256-CBC, key wrapped to EC P-384 certificate native/supabase/offsite/ari-offsite-recipient.pem, sha256 fingerprint 89:F0:82:D8:...:CD:77). The job holds only the public certificate.
-- Private key: Hark vault, "Ari offsite backup private key (EC P-384, PKCS8 PEM...)". No other copy exists.
+- Written nightly by task d497bf61 step 2 (scripts/offsite_drive.py). Encrypted with openssl CMS (AES-256-CBC, content key wrapped separately to EACH recipient certificate below). Jobs hold only public certificates.
+- Recipients (S1 R3, Oct 19 2026). Either private key alone decrypts a file encrypted to both:
+
+  | Certificate file | CN | SHA-256 fingerprint | Private key |
+  |---|---|---|---|
+  | `native/supabase/offsite/ari-offsite-recipient.pem` | Ari offsite backup recipient | 89:F0:82:D8:68:F4:1F:E6:93:A8:FC:81:35:B6:9F:AC:E1:55:33:DA:0B:F7:B2:F2:05:EA:AC:B1:2D:C3:CD:77 | Hark vault, "Ari offsite backup private key (EC P-384, PKCS8 PEM...)" |
+  | `native/supabase/offsite/ari-offsite-recipient-shal.pem` | Ari backup - Owner | 21:90:2D:64:51:9D:70:E9:3D:BF:32:B1:8B:3E:8A:76:CE:83:20:E0:48:D2:5D:8A:78:8A:6B:89:0E:10:AF:D9 (EC P-384, expires 2036-10-16) | Held by Owner only, outside Hark |
+
+  Check a file before trusting it: `openssl x509 -in <cert> -noout -fingerprint -sha256` must print the value above.
+- **Status Oct 19 2026:** the Drive fallback path (`offsite_drive.py`) already encrypts to both. The nightly file itself is
+  encrypted by the `ari-backup` edge function, which still has only the first recipient: the two-recipient version is
+  prepared in `native/supabase/functions/pending/ari-backup/index.ts` and ships with the next edge release. Until then
+  `backup_check.py` reports Owner's cert as `waiting_for_function_deploy` (not a failure); after the deploy, remove it from
+  `PENDING_IN_FUNCTION` in `backup_check.py` so a missing recipient fails the check.
 - Decrypt: download the file from Drive, put the key in key.pem (chmod 600), then
-  `openssl cms -decrypt -binary -inform DER -in FILE.cms -inkey key.pem -recip ari-offsite-recipient.pem -out FILE.json.gz`, then gunzip.
+  `openssl cms -decrypt -binary -inform DER -in FILE.cms -inkey key.pem -out FILE.json.gz`, then gunzip (no `-recip` needed:
+  openssl tries each recipient), or let `scripts/restore_drill.py --file FILE.cms --key key.pem` do it and drill in one step.
   Shred key.pem afterwards. Round trip verified Oct 17 2026 04:1x IST (counts matched, 14 tables, 2,748 rows). The in-function encryption (pkijs CMS, same format) was round-tripped on ari-staging with a throwaway cert on Oct 17 04:4x IST: openssl decrypt OK, 36 tables incl. auth.users and the ledger, every count matched.

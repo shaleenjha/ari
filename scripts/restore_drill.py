@@ -1,21 +1,27 @@
-# Ari restore drill for the in-Supabase backups (v18.6). MAINTENANCE ONLY: needs the Management API token bound,
-# which normal Hark runs no longer have. Never run from the worker or a scheduled task.
-# usage: python3 scripts/restore_drill.py [object name]   (default: newest object in bucket ari-backups, prod)
-# Steps: reads the newest backup object with the project's service key (fetched from the Management API into memory,
-# never printed or written), builds the schema in a throwaway local Postgres 17 from the newest pg_dump schema in
-# work/backups (or native/supabase/baseline), loads every public table from the JSON with json_populate_recordset, and
-# compares row counts with the backup manifest. Result: work/backups/drill_<object>.json (counts only, no rows).
+# Ari restore drill for the in-Supabase backups (v18.6; .cms support S1 R3, Oct 19 2026).
+# usage:
+#   python3 scripts/restore_drill.py [object]                 MAINTENANCE ONLY (ARI_MAINT=1 + Management token): newest object
+#                                                             in bucket ari-backups, or the named one; a name ending .cms is read
+#                                                             from bucket ari-offsite and decrypted (needs --key)
+#   python3 scripts/restore_drill.py --file F [--key K]       a local copy, e.g. the Drive file: F is .json.gz or .json.gz.cms
+# --key K (or env ARI_OFFSITE_KEY_FILE): path to ONE recipient's private key (PEM, chmod 600): the Hark vault key or Owner's.
+# The key is only passed to openssl; it is never printed, copied or written. Shred it afterwards (RESTORE.md).
+# Steps: builds the schema in a throwaway local Postgres 17 from the newest pg_dump schema in work/backups (or
+# native/supabase/baseline), loads every public table from the JSON with json_populate_recordset, and compares row counts
+# with the backup. Result: work/backups/drill_<object>.json (counts only, no rows).
 import os, sys, json, glob, gzip, shutil, subprocess, urllib.request
 REF = 'rbkrqlzlblquvgmuohro'
 # v18.7.1: maintenance-only. Refuses to touch the Management API unless a maintenance session opts in explicitly
 # (ARI_MAINT=1) with a fresh short-lived token. No scheduled or worker run sets it.
-if __name__ == '__main__' and os.environ.get('ARI_MAINT') != '1':
-    raise SystemExit('maintenance only: set ARI_MAINT=1 in a maintenance session with a fresh short-lived token')
+# --file mode reads a local copy and needs no token, so it is allowed outside maintenance sessions.
+if __name__ == '__main__' and '--file' not in sys.argv and os.environ.get('ARI_MAINT') != '1':
+    raise SystemExit('maintenance only: set ARI_MAINT=1 in a maintenance session with a fresh short-lived token (or use --file)')
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 OUT = os.path.join(ROOT, 'work', 'backups')
 BIN = '/usr/lib/postgresql/17/bin'
 sys.path.insert(0, os.path.dirname(__file__))
 from db_backup import STUB, ensure_pg
+import offsite_certs
 
 def svc_key():
     r = subprocess.run(['curl', '-s', f'https://api.supabase.com/v1/projects/{REF}/api-keys?reveal=true'], capture_output=True, text=True)
@@ -30,13 +36,29 @@ def http(method, path, key, body=None):
     # direct (no sandbox proxy): the proxy would swap the Authorization header for the ari_worker key on this host
     with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req, timeout=120) as r: return r.read()
 
-def main(name=None):
-    ensure_pg(); key = svc_key()
-    if not name:
-        objs = json.loads(http('POST', 'object/list/ari-backups', key, {'prefix': '', 'limit': 1000}))
-        name = sorted(o['name'] for o in objs if o['name'].startswith('ari_'))[-1]
-    data = json.loads(gzip.decompress(http('GET', f'object/ari-backups/{name}', key)))
-    del key
+def load(raw, name, key_file):
+    """Backup bytes -> dict. A .cms object is decrypted with one recipient's private key first."""
+    if name.endswith('.cms'):
+        if not key_file: raise SystemExit('%s is encrypted: pass --key <private key file> (or ARI_OFFSITE_KEY_FILE)' % name)
+        raw = offsite_certs.decrypt(raw, key_file)
+        name = name[:-4]
+    return json.loads(gzip.decompress(raw)), name
+
+def fetch(name):
+    key = svc_key()
+    try:
+        bucket = 'ari-offsite' if (name or '').endswith('.cms') else 'ari-backups'
+        if not name:
+            objs = json.loads(http('POST', 'object/list/ari-backups', key, {'prefix': '', 'limit': 1000}))
+            name = sorted(o['name'] for o in objs if o['name'].startswith('ari_'))[-1]
+        return http('GET', f'object/{bucket}/{name}', key), name
+    finally:
+        del key
+
+def main(name=None, file=None, key_file=None):
+    ensure_pg()
+    raw, name = (open(file, 'rb').read(), os.path.basename(file)) if file else fetch(name)
+    data, name = load(raw, name, key_file)
     dumps = sorted(glob.glob(os.path.join(OUT, 'ari_*.dump')))
     d = '/tmp/ari_drill_pg'; shutil.rmtree(d, ignore_errors=True)
     run = lambda *a: subprocess.run(list(a), capture_output=True, text=True)
@@ -71,4 +93,9 @@ def main(name=None):
     finally:
         run(BIN + '/pg_ctl', '-D', d, '-m', 'fast', 'stop'); shutil.rmtree(d, ignore_errors=True)
 
-if __name__ == '__main__': main(sys.argv[1] if len(sys.argv) > 1 else None)
+if __name__ == '__main__':
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('object', nargs='?'); ap.add_argument('--file'); ap.add_argument('--key', default=os.environ.get('ARI_OFFSITE_KEY_FILE'))
+    a = ap.parse_args()
+    main(a.object, a.file, a.key)

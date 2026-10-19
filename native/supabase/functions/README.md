@@ -22,3 +22,11 @@ So these files are what runs, apart from formatting and comments.
 - `ari-backup` also bundles `npm:postgres@3.4.4` and `pkijs` (esm.sh) for the CMS encryption.
 - No secret values are in these files: every key comes from the function's environment.
 - Verify JWT is off on all four; each checks its own caller (hook secret header or one-time ticket) inside the code.
+
+## Prepared, not deployed
+- `pending/ari-backup/index.ts` (S1 R3, Oct 19 2026): `ari-backup` encrypting the nightly `.cms` to BOTH recipient
+  certificates (the Hark vault key and Owner's own, `native/supabase/offsite/ari-offsite-recipient*.pem`). Only
+  `cmsEncrypt` and the built-in certificate bundle change. Round trip checked with pkijs 3.2.4 and two throwaway P-384
+  certificates: openssl decrypts with either key, and `scripts/offsite_certs.py` sees exactly two recipients. Ships with the
+  next edge release (staging first); afterwards move it over `ari-backup/index.ts` and drop Owner's cert from
+  `PENDING_IN_FUNCTION` in `scripts/backup_check.py`.
