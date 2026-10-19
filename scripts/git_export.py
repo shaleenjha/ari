@@ -23,15 +23,15 @@ OUT = os.environ.get('KEEL_EXPORT', os.path.join(KEEL, 'ari-app'))
 INCLUDE = [
     'web/ops.html', 'web/sw.js', 'web/vercel.json', 'web/build.json',
     'web/ari.webmanifest', 'web/ari-fonts.css', 'web/ari-supabase.js',
-    'web/ari-*.png', 'web/ari-*.woff2',
+    'web/ari-*.png', 'web/ari-*.woff2', 'web/about.html', 'web/privacy.html', 'web/terms.html',  # served live (Vercel audit V2), S1 R2
     'native/ari/App.tsx', 'native/ari/index.ts', 'native/ari/app.json',
     'native/ari/package.json', 'native/ari/package-lock.json',
     'native/ari/tsconfig.json', 'native/ari/AGENTS.md', 'native/ari/LICENSE',
     'native/ari/.gitignore', 'native/ari/assets/*.png',
     'native/supabase/migrations/*.sql', 'native/supabase/rollbacks/*.sql',
-    'native/supabase/pending/*.sql', 'native/supabase/functions/*/index.ts',
+    'native/supabase/pending/*.sql', 'native/supabase/functions/**',  # S1 R2: '*/index.ts' never matched (audit S4)
     'scripts/brief_upsert.py', 'scripts/daily_report.py', 'scripts/db_backup.py',
-    'scripts/deploy_web.py', 'scripts/deploy_app2_preview.py', 'scripts/reply_ingest.py', 'scripts/retro_stats.py',
+    'scripts/deploy_web.py', 'scripts/deploy_app2_preview.py', 'scripts/deploy_provenance.py', 'scripts/reply_ingest.py', 'scripts/retro_stats.py',
     'scripts/sync_sheet_supabase.py', 'scripts/git_export.py', 'scripts/git_sync.sh', 'scripts/git_push_api.py',
     'scripts/ari_db.py', 'scripts/backup_check.py', 'scripts/restore_drill.py', 'scripts/offsite_drive.py',
     'scripts/health_check.py', 'scripts/phase0_metrics.py', 'scripts/exec_track_handoff.py', 'scripts/worker_precheck.py', 'scripts/draft_tag.py', 'scripts/copy_switch.py', 'scripts/hygiene_scan.py', 'scripts/test_hygiene_scan.py',
@@ -39,7 +39,7 @@ INCLUDE = [
     # Phase 1 (Oct 17 2026): app2 tree + CI, recursive ("dir/**"), build output and deps excluded
     'app2/**', '.github/**',
     # Oct 17 2026: specs, app2 pending migrations, accept ingest
-    'docs/specs/*.md', 'native/supabase/migrations/pending/**', 'native/supabase/baseline/*.sql',  # schema-only prod baseline for the sql-prod-shape CI job (Oct 18)
+    'docs/specs/*.md', 'docs/runbooks/*.md', 'native/supabase/migrations/pending/**', 'native/supabase/baseline/*.sql',  # schema-only prod baseline for the sql-prod-shape CI job (Oct 18)
      'scripts/accept_ingest.py', 'scripts/scan_heartbeat.py', 'scripts/test_scan_heartbeat.py',  # v18.15.4 scan dead-man
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient.pem',
     'repo/README.md:README.md', 'repo/gitignore:.gitignore',
