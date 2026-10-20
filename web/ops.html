@@ -3746,6 +3746,63 @@ html.v1812on #ready>#v175tk,html.v1812on #ready>#v181cold,html.v1812on #ready>[d
 .v18121sc i{flex:none;width:var(--ds-dot);height:var(--ds-dot);border-radius:var(--ds-rpill);box-shadow:inset 0 0 0 1px var(--ds-ink2)}
 .v18121sh .v18121sb{color:var(--ds-ink2);font:400 var(--ds-t3)/var(--ds-lh3) var(--ds-font)}
 .v18121sh .b span{min-height:var(--ds-hit)}
+</style><style>/* ===== Stack card (ops_stack, Oct 20 2026): swipeable outbound numbers on Today, under the up-next card. --ds-* tokens only, no gradients, no glows. ===== */
+html.skcon #v1812{display:flex;flex-direction:column}
+html.skcon #v1812q{display:contents}
+html.skcon #v1812st{order:0}
+html.skcon #v1812q>*{order:4}
+html.skcon #v1812q>.v1812hd{order:1}
+html.skcon #v1812q>.v1812up,html.skcon #v1812q>.v1812done{order:2}
+html.skcon #v1812>#skc{order:3}
+#skc{margin:var(--ds-sp3) 0 var(--ds-sp1);background:var(--ds-surface);border-radius:var(--ds-r3);box-shadow:inset 0 0 0 1px var(--ds-line);font-family:var(--ds-font);color:var(--ds-ink);overflow:hidden;-webkit-user-select:none;user-select:none}
+#skc[hidden]{display:none}
+.skc-h{display:flex;align-items:center;justify-content:space-between;gap:var(--ds-sp2);min-height:48px;padding:0 0 0 var(--ds-sp4)}
+.skc-h b{font-size:var(--ds-t2);line-height:var(--ds-lh2);font-weight:600;color:var(--ds-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.skc-dots{display:flex;flex:none}
+.skc-dot{display:grid;place-items:center;width:48px;height:48px;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.skc-dot i{display:block;width:var(--ds-dot);height:var(--ds-dot);border-radius:var(--ds-rpill);background:var(--ds-ink2);transition:width var(--ds-dur) var(--ds-ease),background-color var(--ds-dur) var(--ds-ease)}
+.skc-dot[aria-current=true] i{width:20px;background:var(--ds-accent)}
+.skc-dot:focus-visible{outline:2px solid var(--ds-accent);outline-offset:-6px;border-radius:var(--ds-r2)}
+.skc-tr{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;touch-action:pan-x pan-y;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.skc-tr::-webkit-scrollbar{display:none}
+.skc-tr.drag{scroll-snap-type:none;scroll-behavior:auto;cursor:grabbing}
+.skc-tr:focus-visible{outline:2px solid var(--ds-accent);outline-offset:-2px}
+.skc-s{flex:0 0 100%;min-width:0;box-sizing:border-box;height:164px;padding:0 var(--ds-sp4) var(--ds-sp3);scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:4px}
+.skc-s>*{flex:none}
+.skc-hl{font-size:var(--ds-t3);line-height:var(--ds-lh3);font-weight:600;color:var(--ds-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skc-ft{margin-top:auto;font-size:var(--ds-t1);line-height:var(--ds-lh1);color:var(--ds-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skc-rows{display:flex;flex-direction:column;gap:3px}
+.skc-r{display:grid;grid-template-columns:64px minmax(0,1fr) 30px 34px;align-items:center;column-gap:var(--ds-sp2);height:15px;font-size:var(--ds-t1);line-height:15px}
+.skc-r .l{color:var(--ds-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skc-r .n{text-align:right;color:var(--ds-ink);font-variant-numeric:tabular-nums;font-weight:600}
+.skc-r .p{text-align:right;color:var(--ds-ink2);font-variant-numeric:tabular-nums}
+.skc-b{height:8px;border-radius:var(--ds-rpill);background:var(--ds-fill);overflow:hidden}
+.skc-b i{display:block;height:100%;min-width:2px;border-radius:var(--ds-rpill);background:var(--ds-accent)}
+.skc-b i.z{min-width:0}
+.skc-r.wide{grid-template-columns:minmax(0,40%) minmax(0,1fr) 108px;height:20px;line-height:20px}
+.skc-r.wide .l{color:var(--ds-ink)}
+.skc-r.wide .n{font-weight:400;color:var(--ds-ink2);white-space:nowrap}
+.skc-r.wide .n b{color:var(--ds-ink);font-weight:600}
+.skc-wk{display:flex;flex-direction:column;gap:4px}
+.skc-wr{display:grid;grid-template-columns:64px repeat(6,minmax(0,1fr));column-gap:4px;align-items:end}
+.skc-wr .l{align-self:center;font-size:var(--ds-t1);line-height:var(--ds-lh1);color:var(--ds-ink2)}
+.skc-wc{display:flex;flex-direction:column;align-items:center;gap:1px}
+.skc-wc svg{display:block;width:100%;height:20px}
+.skc-wc span{font-size:var(--ds-t1);line-height:14px;color:var(--ds-ink2);font-variant-numeric:tabular-nums}
+.skc-wc.now span{color:var(--ds-ink);font-weight:600}
+.skc-wl{display:grid;grid-template-columns:64px repeat(6,minmax(0,1fr));column-gap:4px;font-size:11px;line-height:var(--ds-lh1);color:var(--ds-ink2);text-align:center;white-space:nowrap}
+.skc-wl span:first-child{text-align:left}
+.skc-gap{display:flex;flex-direction:column;gap:6px}
+.skc-g{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;column-gap:var(--ds-sp3);min-height:52px;padding:0 var(--ds-sp3);border-radius:var(--ds-r2);background:var(--ds-fill);color:var(--ds-ink);text-align:left;font:inherit;border:0;width:100%;box-sizing:border-box}
+button.skc-g{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button.skc-g:focus-visible{outline:2px solid var(--ds-accent);outline-offset:-2px}
+.skc-g .n{font-size:var(--ds-t5);line-height:var(--ds-lh5);font-weight:600;font-variant-numeric:tabular-nums}
+.skc-g .t{min-width:0;display:flex;flex-direction:column}
+.skc-g .t b{font-size:var(--ds-t2);line-height:var(--ds-lh2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skc-g .t span{font-size:var(--ds-t1);line-height:var(--ds-lh1);color:var(--ds-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skc-g .c{font-size:var(--ds-t4);line-height:1;color:var(--ds-ink2)}
+.skc-e{margin:auto 0;font-size:var(--ds-t2);line-height:var(--ds-lh2);color:var(--ds-ink2)}
+@media (prefers-reduced-motion:reduce){.skc-tr{scroll-behavior:auto}.skc-dot i{transition:none}}
 </style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -11488,6 +11545,152 @@ let tT=0;function tick(){if(document.hidden)return;scMount();replyTick();
   UNDO.forEach((u,k)=>{if(Date.now()-u.t>=30e3)UNDO.delete(k);paint(k)});PEND.forEach((x,k)=>paint(k))}
 V.tick=tick;
 function boot(){tick();tT=setInterval(tick,1500);addEventListener('online',tick);if(RE.size)flushRe()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script><script>/* ===== Stack card (ops_stack, Oct 20 2026): five swipeable slides of outbound numbers on Today =====
+   Funnel, last 6 ISO weeks, reply rate by DM step, accept rate by account, follow-up gap.
+   Reads the people rows the app already holds (ariV17.store, else ariDATA). Leaves out rows marked personal or pending and deleted rows.
+   Placed in #v1812 and shown right under the up-next card with CSS order, so v18.12's queue render is untouched.
+   No writes, no new data paths. Recomputes when the people rows change. */
+(function(){'use strict';
+const G=typeof window!=='undefined'?window:globalThis;
+const S=G.ariStack={v:'stack-1',errs:[],renders:0,computes:0,idx:0};
+const low=s=>String(s==null?'':s).trim().toLowerCase();
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ---------- dates: every value becomes an IST calendar day, YYYY-MM-DD ---------- */
+function istDay(ms){return new Date(ms+5.5*3600e3).toISOString().slice(0,10)}
+function dayOf(v){if(v==null)return '';const s=String(v).trim();if(!s)return '';
+  if(/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(s)&&/(Z|[+-]\d\d:?\d\d)$/.test(s)){const t=Date.parse(s);if(!isNaN(t))return istDay(t)}
+  const m=s.match(/(\d{4})-(\d\d)-(\d\d)/);return m?m[0]:'?'}/* '?' = done, date unreadable */
+const done=v=>dayOf(v)!=='';
+const dated=v=>{const d=dayOf(v);return d&&d!=='?'?d:''};
+function dnum(d){return Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10))/864e5}
+function diffDays(a,b){return Math.round(dnum(b)-dnum(a))}
+function addDays(d,n){return new Date((dnum(d)+n)*864e5).toISOString().slice(0,10)}
+function isoMonday(d){const wd=(new Date(dnum(d)*864e5).getUTCDay()+6)%7;return addDays(d,-wd)}
+function todayIST(){return istDay(Date.now())}
+const pct=(a,b)=>b>0?Math.round(a*100/b):0;
+
+/* ---------- which rows count ---------- */
+function counts(p){if(!p||p.deleted_at)return false;const r=low(p.review);return r!=='personal'&&r!=='pending'}
+function AE(o){return /alex/i.test(o||'')?'Alex':/blake/i.test(o||'')?'Blake':/bram/i.test(o||'')?'Casey':''}
+
+/* ---------- the numbers ---------- */
+function compute(all,today){S.computes++;today=today||todayIST();const P=(all||[]).filter(counts);
+  const F={connects:0,accepted:0,dm1:0,dm2:0,dm3:0,replied:0,meetings:0};
+  P.forEach(p=>{if(done(p.connect_sent))F.connects++;if(done(p.accepted))F.accepted++;if(done(p.dm1_sent))F.dm1++;if(done(p.dm2_sent))F.dm2++;
+    if(done(p.dm3_sent))F.dm3++;if(done(p.replied))F.replied++;if(done(p.meeting))F.meetings++});
+  /* weekly: last 6 ISO weeks ending with this one */
+  const mon0=isoMonday(today),weeks=[];for(let i=5;i>=0;i--)weeks.push({mon:addDays(mon0,-7*i),c:0,a:0,r:0});
+  const wk=d=>{if(!d)return null;const m=isoMonday(d);return weeks.find(w=>w.mon===m)||null};
+  let undated=0;
+  P.forEach(p=>{[['connect_sent','c'],['accepted','a'],['replied','r']].forEach(([f,k])=>{if(!done(p[f]))return;const d=dated(p[f]);if(!d){undated++;return}const w=wk(d);if(w)w[k]++})});
+  /* reply rate by DM step: a reply belongs to the last DM sent on or before the reply day */
+  const st={pre:{n:0,d:F.accepted},dm1:{n:0,d:F.dm1},dm2:{n:0,d:F.dm2},dm3:{n:0,d:F.dm3}};
+  P.forEach(p=>{if(!done(p.replied))return;const r=dated(p.replied)||'9999-12-31';
+    const at=f=>{const d=dated(p[f]);return done(p[f])&&(!d||d<=r)};
+    const k=at('dm3_sent')?'dm3':at('dm2_sent')?'dm2':at('dm1_sent')?'dm1':'pre';st[k].n++});
+  /* accept rate by account: top 5 by connects */
+  const acc=new Map();P.forEach(p=>{if(!done(p.connect_sent))return;const k=String(p.company||'').trim()||'No company';const x=acc.get(k)||{name:k,c:0,a:0};x.c++;if(done(p.accepted))x.a++;acc.set(k,x)});
+  const top=[...acc.values()].sort((a,b)=>b.c-a.c||b.a-a.a||a.name.localeCompare(b.name)).slice(0,5);
+  /* follow-up gap */
+  const open=p=>!done(p.replied)&&!done(p.meeting)&&!done(p.withdrawn);
+  const noDm1=P.filter(p=>done(p.accepted)&&!done(p.dm1_sent)&&open(p)).map(p=>({p,d:dated(p.accepted),age:dated(p.accepted)?diffDays(dated(p.accepted),today):null}));
+  const noDm2=P.filter(p=>{if(!done(p.dm1_sent)||done(p.dm2_sent)||!open(p))return false;const d=dated(p.dm1_sent);return !!d&&diffDays(d,today)>4})
+    .map(p=>({p,d:dated(p.dm1_sent),age:diffDays(dated(p.dm1_sent),today)}));
+  const byAge=(a,b)=>(b.age==null?-1:b.age)-(a.age==null?-1:a.age);noDm1.sort(byAge);noDm2.sort(byAge);
+  return {F,weeks,undated,st,top,noDm1,noDm2,today,n:P.length}}
+S.compute=compute;S.dayOf=dayOf;
+
+/* ---------- slides ---------- */
+const TITLES=['Funnel','Weekly','By DM step','By account','Follow-ups'];
+const NAMES=['Funnel','Last 6 weeks','Reply rate by DM step','Accept rate by account','Follow-up gap'];
+function bar(v,max){const w=max>0?Math.max(0,Math.min(100,v*100/max)):0;return `<span class="skc-b" aria-hidden="true"><i class="${v>0?'':'z'}" style="width:${w.toFixed(1)}%"></i></span>`}
+function sFunnel(D){const F=D.F;if(!F.connects)return `<p class="skc-e">No connects yet.</p>`;
+  const hl=F.replied?`1 reply per ${Math.round(F.connects/F.replied)} connects`:`No replies yet from ${F.connects} connects`;
+  const rows=[['Connects',F.connects,null],['Accepted',F.accepted,F.connects],['DM1 sent',F.dm1,F.accepted],['DM2 sent',F.dm2,F.dm1],['Replied',F.replied,F.dm1],['Meetings',F.meetings,F.replied]];
+  return `<div class="skc-hl">${E(hl)}</div><div class="skc-rows">${rows.map(([l,n,of])=>`<div class="skc-r" role="img" aria-label="${E(l+' '+n+(of!=null?', '+pct(n,of)+' percent':''))}"><span class="l" aria-hidden="true">${l}</span>${bar(n,F.connects)}<span class="n" aria-hidden="true">${n}</span><span class="p" aria-hidden="true">${of!=null?(of?pct(n,of)+'%':'·'):''}</span></div>`).join('')}</div>
+  <div class="skc-ft">% of the step before. Replied is % of DM1s.</div>`}
+function wkLabel(m,prev){const d=+m.slice(8,10),mo=MON[+m.slice(5,7)-1];return !prev||prev.slice(5,7)!==m.slice(5,7)?d+' '+mo:String(d)}
+function sWeeks(D){const W=D.weeks;const row=(lab,k)=>{const mx=Math.max(1,...W.map(w=>w[k]));
+  return `<div class="skc-wr" role="img" aria-label="${E(lab+' by week: '+W.map(w=>w[k]).join(', '))}"><span class="l" aria-hidden="true">${lab}</span>${W.map((w,i)=>{const h=w[k]?Math.max(2,Math.round(w[k]*20/mx)):0;
+    return `<span class="skc-wc${i===5?' now':''}" aria-hidden="true"><svg viewBox="0 0 20 20" preserveAspectRatio="none"><rect x="0" y="19" width="20" height="1" fill="var(--ds-line2)"/>${h?`<rect x="3" y="${20-h}" width="14" height="${h}" rx="1.5" fill="${i===5?'var(--ds-accent)':'var(--ds-ink2)'}"/>`:''}</svg><span>${w[k]}</span></span>`}).join('')}</div>`};
+  return `<div class="skc-wk">${row('Connects','c')}${row('Accepts','a')}${row('Replies','r')}<div class="skc-wl" aria-hidden="true"><span>Week of</span>${W.map((w,i)=>`<span>${wkLabel(w.mon,i?W[i-1].mon:'')}</span>`).join('')}</div></div>`}
+function sSteps(D){const st=D.st,tot=st.pre.n+st.dm1.n+st.dm2.n+st.dm3.n;
+  const rows=[['After DM1',st.dm1],['After DM2',st.dm2]];if(st.dm3.d||st.dm3.n)rows.push(['After DM3',st.dm3]);if(st.pre.n)rows.unshift(['Before DM1',st.pre]);
+  const mx=Math.max(1,...rows.map(([,x])=>pct(x.n,x.d)));
+  return `<div class="skc-rows" style="gap:6px">${rows.map(([l,x])=>`<div class="skc-r wide" role="img" aria-label="${E(l+': '+x.n+' of '+x.d+', '+pct(x.n,x.d)+' percent')}"><span class="l" aria-hidden="true">${l}</span>${bar(pct(x.n,x.d),mx)}<span class="n" aria-hidden="true"><b>${x.n}</b> of ${x.d} · ${pct(x.n,x.d)}%</span></div>`).join('')}</div>
+  <div class="skc-ft">Reply rate after each DM. ${tot?`Based on ${tot} repl${tot===1?'y':'ies'}.`:'No replies yet.'}</div>`}
+function sAcc(D){if(!D.top.length)return `<p class="skc-e">No connects yet.</p>`;
+  return `<div class="skc-rows" style="gap:5px">${D.top.map(x=>`<div class="skc-r wide" role="img" aria-label="${E(x.name+': '+x.a+' of '+x.c+' accepted, '+pct(x.a,x.c)+' percent')}"><span class="l" aria-hidden="true">${E(x.name)}</span>${bar(pct(x.a,x.c),100)}<span class="n" aria-hidden="true"><b>${x.a}</b> of ${x.c} · ${pct(x.a,x.c)}%</span></div>`).join('')}</div>
+  <div class="skc-ft">Accepted of connects, top ${D.top.length} accounts.</div>`}
+function canOpen(){return !!(G.ariV18&&typeof G.ariV18.ddOpen==='function')}
+function sGap(D){const one=(k,L,lab,unit)=>{const old=L.length&&L[0].age!=null?`Oldest ${L[0].age} day${L[0].age===1?'':'s'}`:L.length?'':'All clear';
+    const inner=`<span class="n">${L.length}</span><span class="t"><b>${lab}</b><span>${old}</span></span>`;
+    return L.length&&canOpen()?`<button type="button" class="skc-g" data-skcgap="${k}" aria-label="${E(L.length+' '+lab+'. '+old+'. Show them.')}">${inner}<span class="c" aria-hidden="true">›</span></button>`:`<div class="skc-g">${inner}<span></span></div>`};
+  return `<div class="skc-gap">${one('dm1',D.noDm1,'Accepted, no DM1 yet')}${one('dm2',D.noDm2,'DM1 over 4 days, no DM2')}</div>`}
+const SL=[sFunnel,sWeeks,sSteps,sAcc,sGap];S.slides=SL;S.TITLES=TITLES;
+
+if(typeof document==='undefined')return;/* node: compute and slides only */
+
+/* ---------- data in ---------- */
+function people(){try{const st=G.ariV17&&G.ariV17.store;if(st&&st.people&&st.people.size)return [...st.people.values()]}catch(e){}
+  return ((G.ariDATA&&G.ariDATA.people)||[])}
+const SIGF=['id','company','review','deleted_at','connect_sent','accepted','dm1_sent','dm2_sent','dm3_sent','replied','meeting','withdrawn'];
+function sig(L){let h=0x811c9dc5;const add=s=>{s=String(s==null?'':s);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}};
+  add(L.length);L.forEach(p=>SIGF.forEach(f=>{add(p&&p[f]);add('|')}));add(todayIST());return h.toString(16)}
+
+/* ---------- mount ---------- */
+const RM=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
+const locked=()=>{try{return document.documentElement.classList.contains('locked')||!!document.querySelector('#lock:not([hidden])')}catch(e){return false}};
+function build(){const el=document.createElement('section');el.id='skc';el.setAttribute('aria-roledescription','carousel');el.setAttribute('aria-label','Outbound numbers');
+  el.innerHTML=`<div class="skc-h"><b id="skct" aria-live="polite">${TITLES[0]}</b><div class="skc-dots" role="group" aria-label="Pick a chart">${TITLES.map((t,i)=>`<button type="button" class="skc-dot" data-skci="${i}" aria-label="${E(NAMES[i])}"${i?'':' aria-current="true"'}><i></i></button>`).join('')}</div></div>
+  <div class="skc-tr" id="skctr" tabindex="0" aria-label="Swipe for more charts">${TITLES.map((t,i)=>`<div class="skc-s" role="group" aria-roledescription="slide" aria-label="${E((i+1)+' of '+TITLES.length+', '+NAMES[i])}" data-skcs="${i}"></div>`).join('')}</div>`;
+  wire(el);return el}
+function mount(){const host=document.getElementById('v1812')||document.getElementById('v184top');if(!host)return null;
+  let el=document.getElementById('skc');if(!el)el=build();
+  if(host.id==='v1812'){const q=document.getElementById('v1812q');if(el.parentNode!==host||(q&&el.previousElementSibling!==q))host.appendChild(el);document.documentElement.classList.add('skcon')}
+  else{if(el.parentNode!==host)host.appendChild(el);document.documentElement.classList.remove('skcon')}
+  return el}
+let LASTSIG='',D=null;
+function render(force){try{const el=mount();if(!el)return;const L=people();
+    if(locked()||!L.some(counts)){el.hidden=true;return}el.hidden=false;
+    const s=sig(L);if(!force&&s===LASTSIG)return;LASTSIG=s;D=compute(L);S.D=D;S.renders++;
+    el.querySelectorAll('[data-skcs]').forEach(sl=>{const i=+sl.dataset.skcs;let h='';try{h=SL[i](D)}catch(e){S.errs.push('slide'+i+' '+e);h='<p class="skc-e">Could not draw this one.</p>'}if(sl.innerHTML!==h)sl.innerHTML=h})}
+  catch(e){S.errs.push('render '+e)}}
+S.render=render;
+
+/* ---------- moving between slides ---------- */
+function setIdx(i){const el=document.getElementById('skc');if(!el)return;i=Math.max(0,Math.min(TITLES.length-1,i));if(i===S.idx&&el.dataset.i===String(i))return;S.idx=i;el.dataset.i=i;
+  el.querySelectorAll('.skc-dot').forEach((d,j)=>{if(j===i)d.setAttribute('aria-current','true');else d.removeAttribute('aria-current')});
+  const t=document.getElementById('skct');if(t)t.textContent=TITLES[i]}
+function go(i){const tr=document.getElementById('skctr');if(!tr)return;i=Math.max(0,Math.min(TITLES.length-1,i));
+  try{tr.scrollTo({left:i*tr.clientWidth,behavior:RM()?'auto':'smooth'})}catch(e){tr.scrollLeft=i*tr.clientWidth}setIdx(i)}
+S.go=go;
+function wire(el){const tr=el.querySelector('.skc-tr');
+  /* the pager pages on horizontal drags; a drag that starts on this card belongs to the card */
+  el.addEventListener('pointerdown',e=>e.stopPropagation());
+  let raf=0;tr.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;if(tr.clientWidth)setIdx(Math.round(tr.scrollLeft/tr.clientWidth))})},{passive:true});
+  el.querySelector('.skc-dots').addEventListener('click',e=>{const b=e.target.closest('[data-skci]');if(b)go(+b.dataset.skci)});
+  tr.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();go(S.idx+1)}else if(e.key==='ArrowLeft'){e.preventDefault();go(S.idx-1)}});
+  /* mouse drag (touch scrolls natively with scroll-snap) */
+  let dr=null;
+  tr.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0||e.target.closest('button'))return;dr={x:e.clientX,s:tr.scrollLeft,m:false};try{tr.setPointerCapture(e.pointerId)}catch(x){}});
+  tr.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x;if(!dr.m&&Math.abs(dx)>6){dr.m=true;tr.classList.add('drag')}if(dr.m)tr.scrollLeft=dr.s-dx});
+  const up=e=>{if(!dr)return;const d=dr;dr=null;if(!d.m)return;tr.classList.remove('drag');const dx=e.clientX-d.x,w=tr.clientWidth||1,from=Math.round(d.s/w);
+    go(Math.abs(dx)>w*.18?from+(dx<0?1:-1):from)};
+  tr.addEventListener('pointerup',up);tr.addEventListener('pointercancel',up);
+  tr.addEventListener('click',e=>{if(tr.classList.contains('drag'))e.preventDefault()},true);
+  /* follow-up gap: open the list in the report drill-down */
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-skcgap]');if(!b||!D||!canOpen())return;const k=b.dataset.skcgap,L=k==='dm1'?D.noDm1:D.noDm2;
+    const rows=L.map(x=>({name:x.p.name||'',title:x.age!=null?`${x.age} day${x.age===1?'':'s'} ${k==='dm1'?'since accept':'since DM1'}`:'',account:x.p.company||'',ae:AE(x.p.owner),ts:''}));
+    try{G.ariV18.ddOpen({m:'skc_'+k,title:k==='dm1'?'Accepted, no DM1 yet':'DM1 over 4 days, no DM2',sub:'Oldest first',unit:'person',local:()=>rows})}catch(x){S.errs.push('open '+x)}})}
+
+function boot(){render(true);setInterval(()=>{if(!document.hidden)render(false)},2000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)render(false)});
+  try{const V162=G.ariV162,_p=V162&&V162.patch;if(_p)V162.patch=function(){const r=_p.apply(this,arguments);setTimeout(()=>render(false),0);return r}}catch(e){S.errs.push('hook '+e)}
+  addEventListener('resize',()=>{const tr=document.getElementById('skctr');if(tr)tr.scrollLeft=S.idx*tr.clientWidth})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
 </script></body>
