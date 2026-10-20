@@ -10329,7 +10329,7 @@ function wireFx(o){o.addEventListener('click',async e=>{const s=e.target.closest
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx,it=cur();
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
-  if(a==='remove'){const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
+  if(a==='remove'){const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);const MU=window.ariV16&&ariV16.mutate;if(!MU){toast('Couldn’t remove that yet.');return}Promise.resolve(MU('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)).catch(()=>toast('Couldn’t remove that yet. Try again in a moment.'));FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='anyway'){it.full=false;fxRender();return}
   if(a==='paste')return pasteFor(it.id,true);
@@ -11125,9 +11125,14 @@ function items(){const m=M();if(!m||!Array.isArray(m.Q))return [];const rr=new S
     if(q.tag==='REPLY'){if(rr.has(String(q.id)))return;out.push({k:'reply',pid:q.id,p,name:q.n,co:coOf(q),tag:'Reply',why:ari(q.why),body:String(q.msg||''),url:q.url||p.linkedin_url||'',grp:'r'});return}
     if(KF[q.tag]){const col=KF[q.tag][1];out.push({k:'dm',pid:q.id,p,name:q.n,co:coOf(q),tag:q.tag,why:ari(q.why),body:String(p[col]!=null?p[col]:(q.msg||'')),url:q.url||p.linkedin_url||'',mark:KF[q.tag][0],col,z:zoneOf(q.z),grp:'d'});return}
     if(q.tag==='WITHDRAW')out.push({k:'withdraw',pid:q.id,p,name:q.n,co:coOf(q),tag:'Withdraw',why:ari(q.why),body:'',url:q.url||p.linkedin_url||'',mark:'withdrawn',grp:'w'})});
+  /* v18.13: today's connects live in the queue too (Today's 15 when loaded, else the model's due connects), note ready to copy */
+  try{const T=(window.ariV184&&ariV184.top)||{},S=window.ariV17&&ariV17.store,pp=id=>(S&&S.people&&S.people.get(id))||{};const P=window.ariPpl;
+    const src=Array.isArray(T.connects)&&T.connects.length?T.connects.map(r=>({id:r.person_id,n:r.name,c:r.company,url:r.linkedin_url})):m.Q.filter(q=>q.tag==='CONNECT').slice(0,15).map(q=>({id:q.id,n:q.n,c:coOf(q),url:q.url||(q.p&&q.p.linkedin_url)}));
+    src.forEach(r=>{const p=pp(r.id),note=(String(p.notes||'').match(/Connect note:\s*([\s\S]*?)(?:\s*\|\s|$)/)||[])[1]||'',ev=P&&P.evOf?P.evOf(p):'';if(p.skipped||p.connect_sent)return;
+      out.push({k:'connect',pid:r.id,p,name:r.n||p.name||'',co:r.c||p.company||'',tag:'Connect',why:(ev?'🎟 '+ev+'. ':'')+(note.trim()?'Connect with this note. It copies when you open the profile.':'Blank invite, no note on file.'),body:note.trim(),url:r.url||p.linkedin_url||'',grp:'c'})})}catch(e){V.errs.push('connects '+e)}
   /* replies first, then DMs by send window (open windows closing soonest first, then later windows, any time last), then old invites */
   const d=out.filter(x=>x.grp==='d'),zo=[...new Set(d.map(x=>x.z.key))].sort((a,b)=>d.find(x=>x.z.key===a).z.rank-d.find(x=>x.z.key===b).z.rank);
-  return [...out.filter(x=>x.grp==='r'),...zo.flatMap(k=>d.filter(x=>x.z.key===k)),...out.filter(x=>x.grp==='w')]}
+  return [...out.filter(x=>x.grp==='r'),...zo.flatMap(k=>d.filter(x=>x.z.key===k)),...out.filter(x=>x.grp==='c'),...out.filter(x=>x.grp==='w')]}
 V.items=items;
 const toSend=L=>L.filter(x=>x.k!=='withdraw').length;
 const minutes=n=>Math.max(1,Math.round(n*1.2));
@@ -11163,8 +11168,8 @@ function upHTML(it){const t=norm(it.body);
   <div class="v1812pri press" role="button" tabindex="0" data-v1812up="1">${btn}</div></div>`}
 function queueHTML(L){if(!L.length)return signed()&&!loading()?doneHTML():'';
   const n=toSend(L);let h=`<div class="v1812hd"><span class="v1812go press" role="button" tabindex="0" data-v1812go="1">Start, ${n||L.length} to ${n?'send':'do'}</span></div>`+upHTML(L[0]);
-  let g='';L.forEach((it,i)=>{if(!i)return;const k=it.grp==='r'?'r':it.grp==='w'?'w':'z'+it.z.key;
-    if(k!==g){g=k;const lab=it.grp==='r'?'Replies':it.grp==='w'?'Old invites to withdraw':it.z.lab;const cnt=L.slice(1).filter(x=>(x.grp==='r'?'r':x.grp==='w'?'w':'z'+x.z.key)===k).length;
+  let g='';const gk=x=>x.grp==='r'||x.grp==='w'||x.grp==='c'?x.grp:'z'+x.z.key;L.forEach((it,i)=>{if(!i)return;const k=gk(it);
+    if(k!==g){g=k;const lab=it.grp==='r'?'Replies':it.grp==='w'?'Old invites to withdraw':it.grp==='c'?'Connects today':it.z.lab;const cnt=L.slice(1).filter(x=>gk(x)===k).length;
       h+=`<div class="v1812gh"><span>${E(lab)}</span><span>${cnt}</span></div>`}
     h+=rowHTML(it,i)});return h}
 
@@ -11253,6 +11258,7 @@ async function logSent(text){const it=cur();if(!it||FX.busy)return;FX.busy=true;
   try{if(it.k==='dm'){const base=String((it.p&&it.p[it.col])||it.body||'');if(text&&norm(text)!==norm(base))await mu('setFields',[it.pid,{[it.col]:text}]);await mu('mark',[it.pid,it.mark]);toast(`${E(it.tag)} sent · ${E(first(it.name))}.`)}
     else if(it.k==='reply'){await mu('setFields',[it.pid,{snooze_until:addDays((M()||{}).sd||new Date().toISOString(),3)}]);toast(`Logged your answer to ${E(first(it.name))}.`)}
     else if(it.k==='withdraw'){await mu('mark',[it.pid,'withdrawn']);toast(`Invite withdrawn · ${E(first(it.name))}.`)}
+    else if(it.k==='connect'){await mu('mark',[it.pid,'connect_sent']);toast(`Connect sent · ${E(first(it.name))}.`)}
     FX.done++;V.logged++;advance();setTimeout(render,50)}
   catch(e){V.errs.push('log '+e);toast('That didn’t log yet. Your tap is saved and retries on its own; check again in a moment.')}
   finally{FX.busy=false}}
@@ -11260,7 +11266,7 @@ function wire(o){o.addEventListener('click',e=>{const g=e.target.closest('[data-
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx;
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
-  if(a==='remove'){const it=cur();const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
+  if(a==='remove'){const it=cur();const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);const MU=window.ariV16&&ariV16.mutate;if(!MU){toast('Couldn’t remove that yet.');return}Promise.resolve(MU('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)).catch(()=>toast('Couldn’t remove that yet. Try again in a moment.'));FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='sent')return logSent(curText());
   if(a==='edited'){const ed=o.querySelector('.fxedit');if(ed){ed.hidden=false;const t=ed.querySelector('textarea');t.value=curText();t.focus()}return}
@@ -11694,5 +11700,96 @@ function boot(){render(true);setInterval(()=>{if(!document.hidden)render(false)}
   addEventListener('resize',()=>{const tr=document.getElementById('skctr');if(tr)tr.scrollLeft=S.idx*tr.clientWidth})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
-</script></body>
+</script>
+<style id="pplcss">
+.pplent{display:flex;gap:var(--ds-sp2);overflow-x:auto;padding:var(--ds-sp2) 0 var(--ds-sp1);scrollbar-width:none}.pplent::-webkit-scrollbar{display:none}
+.pplent span,.pplchips span{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:var(--ds-hit);padding:0 var(--ds-sp4);border-radius:var(--ds-rpill);border:1px solid var(--ds-line2);color:var(--ds-ink);font-size:var(--ds-t2);font-weight:600;cursor:pointer;white-space:nowrap}
+.pplent span small,.pplchips span small{color:var(--ds-ink2);font-weight:500}
+.pplchips span.on{background:var(--ds-ink);color:var(--ds-bg);border-color:var(--ds-ink)}.pplchips span.on small{color:var(--ds-bg);opacity:.75}
+#pplx{position:fixed;inset:0;z-index:2147482900;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#pplx[hidden]{display:none}
+#pplx .top{display:flex;align-items:center;justify-content:space-between;padding:var(--ds-sp4) var(--ds-sp5) var(--ds-sp2)}
+#pplx .top b{font-size:var(--ds-t5);line-height:var(--ds-lh5)}
+#pplx .x{min-width:var(--ds-hit);min-height:var(--ds-hit);display:grid;place-items:center;font-size:24px;cursor:pointer}
+#pplx .srch{margin:0 var(--ds-sp5);min-height:var(--ds-btn);border-radius:var(--ds-r2);border:1px solid var(--ds-line2);background:var(--ds-surface);color:var(--ink);font:inherit;font-size:16px;padding:0 var(--ds-sp4)}
+#pplx .pplchips{display:flex;gap:var(--ds-sp2);overflow-x:auto;padding:var(--ds-sp3) var(--ds-sp5);scrollbar-width:none}#pplx .pplchips::-webkit-scrollbar{display:none}
+#pplx .meta{display:flex;justify-content:space-between;align-items:center;padding:0 var(--ds-sp5) var(--ds-sp2);font-size:var(--ds-t2);color:var(--ds-ink2)}
+#pplx .meta .tg{min-height:var(--ds-hit);display:inline-flex;align-items:center;cursor:pointer;color:var(--ds-ink);font-weight:600}
+#pplx .list{flex:1;overflow-y:auto;padding:0 var(--ds-sp5) 120px;-webkit-overflow-scrolling:touch}
+#pplx .pr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:var(--ds-sp3);min-height:var(--ds-row);padding:var(--ds-sp2) 0;border-bottom:1px solid var(--ds-line);cursor:pointer}
+#pplx .pr .l1{display:block;font-size:var(--ds-t3);line-height:var(--ds-lh3);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pplx .pr .l1 span{font-weight:500;color:var(--ds-ink2)}
+#pplx .pr .l2{display:block;font-size:var(--ds-t2);line-height:var(--ds-lh2);color:var(--ds-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pplx .pr .st{font-size:var(--ds-t1);font-weight:600;color:var(--ds-ink2);border:1px solid var(--ds-line2);border-radius:var(--ds-rpill);padding:4px 10px;white-space:nowrap}
+#pplx .pr .st.q{color:var(--ds-ink);border-color:var(--ds-ink)}
+#pplx .empty{padding:var(--ds-sp6) 0;color:var(--ds-ink2);font-size:var(--ds-t3)}
+#pplx .bar{position:absolute;left:0;right:0;bottom:0;padding:var(--ds-sp3) var(--ds-sp5) calc(var(--ds-sp4) + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--ds-line)}
+#pplx .bar[hidden]{display:none}
+#pplx .go{display:flex;align-items:center;justify-content:center;min-height:var(--ds-btn);border-radius:var(--ds-rpill);background:var(--ds-ink);color:var(--ds-bg);font-size:var(--ds-t3);font-weight:600;cursor:pointer}
+html.pplon{overflow:hidden}
+</style>
+<script>/* ===== Ari v18.13: People finder (Owner, Tue 20 Oct 23:47 IST)
+   Every import gets a tag (read from the row's source, e.g. "wk43 · Leads", "wk43 · AWS reInvent"), event leads get their own
+   people-only list (🎟 Events), and search finds anyone by name, company or title. "Start" opens the one-person-per-screen sender
+   over the queued connects in the current view, with the connect note ready to copy. Reads the live store; writes only via mark. */
+(function(){'use strict';
+const G=window,$=s=>document.querySelector(s);
+const V=G.ariPpl={v:'v18.13',errs:[],opens:0,starts:0};
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const low=s=>String(s||'').toLowerCase();
+function rows(){try{const S=G.ariV17&&ariV17.store;if(S&&S.people&&S.people.size)return [...S.people.values()].filter(p=>p&&!p.deleted_at&&p.name&&low(p.review)!=='personal');
+  const d=G.ariDATA;return ((d&&d.people)||[]).filter(p=>p&&p.name&&low(p.review)!=='personal')}catch(e){V.errs.push('rows '+e);return []}}
+function tagOf(p){const s=String(p.source||'');const m=s.match(/\b(wk\d+)\b[^(]*\(([^)]+)\)/i);if(m)return m[1].toLowerCase()+' · '+m[2].trim();
+  const t=s.match(/^Import:\s*(.+)$/i);return t?t[1].trim():''}
+function evOf(p){const s=[p.title,p.next_action,p.notes].map(x=>String(x||'')).join(' | ');const m=s.match(/🎟\s*EVENT\s+([^·|\n]+)/);return m?m[1].trim():''}
+function noteOf(p){const m=String(p.notes||'').match(/Connect note:\s*([\s\S]*?)(?:\s*\|\s|$)/);return m?m[1].trim():''}
+const cleanTitle=t=>String(t||'').replace(/🎟\s*EVENT\s+[^·]+·\s*/,'').trim();
+function canConnect(p){return /^connect queued$/i.test(p.stage||'')&&!p.connect_sent&&!p.skipped&&!p.withdrawn&&String(p.linkedin_url||'').trim()&&!/founder/i.test((p.lane||'')+' '+(p.route||''))}
+function stLab(p){if(p.skipped)return 'Removed';if(p.meeting)return 'Meeting';if(p.replied)return 'Replied';if(p.dm2_sent)return 'DM2 sent';if(p.dm1_sent)return 'DM1 sent';if(p.accepted)return 'Accepted';if(p.connect_sent)return 'Invited';
+  if(/hold/i.test(p.stage||''))return 'Hold';if(canConnect(p))return 'To connect';return p.stage||'—'}
+function tags(L){const c={};L.forEach(p=>{const t=tagOf(p);if(t)c[t]=(c[t]||0)+1});return Object.entries(c).sort((a,b)=>b[0].localeCompare(a[0])||b[1]-a[1])}
+const F={q:'',tag:'',held:false};
+function view(){const L=rows();let out=L;
+  if(F.tag==='__ev')out=out.filter(p=>evOf(p));else if(F.tag)out=out.filter(p=>tagOf(p)===F.tag);
+  if(!F.held&&(F.tag||F.q))out=out.filter(p=>!/hold/i.test(p.stage||'')&&!p.skipped);
+  const q=low(F.q).trim();if(q)out=out.filter(p=>low(p.name).includes(q)||low(p.company).includes(q)||low(p.title).includes(q)||low(evOf(p)).includes(q));
+  const rk=p=>canConnect(p)?0:p.accepted&&!p.replied?1:2;
+  return out.slice().sort((a,b)=>rk(a)-rk(b)||String(a.company||'').localeCompare(String(b.company||''))||String(a.name).localeCompare(String(b.name)))}
+function chipsHTML(L){const T=tags(L),ev=L.filter(p=>evOf(p)).length;const c=(k,lab,n)=>`<span class="press${F.tag===k?' on':''}" role="button" data-pt="${E(k)}">${E(lab)}${n!=null?` <small>${n}</small>`:''}</span>`;
+  return c('','All',null)+(ev?c('__ev','🎟 Events',ev):'')+T.map(([t,n])=>c(t,t,n)).join('')}
+function rowHTML(p){const ev=evOf(p),st=stLab(p);
+  return `<div class="pr press" role="button" tabindex="0" data-pn="${E(p.name)}"><span style="min-width:0"><span class="l1">${E(p.name)}<span> · ${E(p.company||'')}</span></span><span class="l2">${ev?'🎟 '+E(ev)+' · ':''}${E(cleanTitle(p.title))}</span></span><span class="st${st==='To connect'?' q':''}">${E(st)}</span></div>`}
+function paint(){const o=$('#pplx');if(!o||o.hidden)return;const L=rows(),R=view();
+  const ch=o.querySelector('.pplchips');const h=chipsHTML(L);if(ch.innerHTML!==h)ch.innerHTML=h;
+  const qn=R.filter(canConnect).length;
+  o.querySelector('.meta').innerHTML=`<span>${R.length} ${R.length===1?'person':'people'}${qn?' · '+qn+' to connect':''}</span>${F.tag||F.q?`<span class="tg press" role="button" data-ph="1">${F.held?'Hide held':'Show held'}</span>`:''}`;
+  const list=o.querySelector('.list');const shown=R.slice(0,300);
+  list.innerHTML=shown.length?shown.map(rowHTML).join('')+(R.length>300?`<div class="empty">First 300 shown. Search to narrow.</div>`:''):`<div class="empty">${F.q?'Nobody matches “'+E(F.q)+'”.':'Nobody here yet.'}</div>`;
+  const bar=o.querySelector('.bar');bar.hidden=!qn;if(qn)bar.querySelector('.go').textContent=`Start, ${qn} to connect`}
+function items(){return view().filter(canConnect).map(p=>{const ev=evOf(p),note=noteOf(p);
+  return {k:'connect',pid:p.id,p,name:p.name,co:p.company||'',tag:'Connect',why:(ev?'🎟 '+ev+'. ':'')+(note?'Connect with this note. It copies when you open the profile.':'Blank invite, no note on file.'),body:note,url:p.linkedin_url||'',grp:'c'}})}
+function open(tag){let o=$('#pplx');if(!o){o=document.createElement('div');o.id='pplx';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','People');
+  o.innerHTML='<div class="top"><b>People</b><span class="x press" role="button" aria-label="Close" data-px="1">×</span></div><input class="srch" type="search" placeholder="Search name, company or title" autocomplete="off" enterkeyhint="search" aria-label="Search people"><div class="pplchips" role="tablist"></div><div class="meta"></div><div class="list"></div><div class="bar" hidden><div class="go press" role="button" data-pgo="1"></div></div>';
+  document.body.appendChild(o);wire(o)}
+  if(tag!=null)F.tag=tag;o.hidden=false;document.documentElement.classList.add('pplon');V.opens++;paint()}
+function close(){const o=$('#pplx');if(o)o.hidden=true;document.documentElement.classList.remove('pplon')}
+V.open=open;V.close=close;V.view=view;V.tagOf=tagOf;V.evOf=evOf;V.items=items;
+function wire(o){let t=0;const s=o.querySelector('.srch');s.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{F.q=s.value;paint()},120)});
+  o.addEventListener('click',e=>{const x=e.target.closest('[data-px]');if(x)return close();
+    const c=e.target.closest('[data-pt]');if(c){F.tag=c.dataset.pt;paint();o.querySelector('.list').scrollTop=0;return}
+    if(e.target.closest('[data-ph]')){F.held=!F.held;return paint()}
+    if(e.target.closest('[data-pgo]')){const L=items();const f=G.ariV1812&&ariV1812.openFocus;if(!L.length||!f)return;V.starts++;close();f(L,0);return}
+    const r=e.target.closest('[data-pn]');if(r){try{if(typeof G.openFile==='function')G.openFile(r.dataset.pn,r)}catch(err){V.errs.push('file '+err)}}})}
+/* entry on Today: a chip row under the status line */
+function entry(){try{const w=$('#v1812');if(!w)return;let el=$('#pplent');const L=rows();if(!L.length){if(el)el.remove();return}
+  const ev=L.filter(p=>evOf(p)&&canConnect(p)).length,T=tags(L.filter(canConnect)).slice(0,2);
+  const h=`<span class="press" role="button" data-pe="">Find people</span>${ev?`<span class="press" role="button" data-pe="__ev">🎟 Events <small>${ev}</small></span>`:''}${T.map(([t,n])=>`<span class="press" role="button" data-pe="${E(t)}">${E(t)} <small>${n}</small></span>`).join('')}`;
+  if(!el){el=document.createElement('div');el.id='pplent';el.className='pplent';el.addEventListener('click',e=>{const b=e.target.closest('[data-pe]');if(b){F.q='';const s=$('#pplx .srch');if(s)s.value='';open(b.dataset.pe)}})}
+  const st=$('#v1812st');if(st&&st.nextElementSibling!==el)st.after(el);if(el.innerHTML!==h)el.innerHTML=h}catch(e){V.errs.push('entry '+e)}}
+setInterval(entry,2500);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(entry,400)});
+setTimeout(entry,1200);
+})();
+</script>
+</body>
 </html>
