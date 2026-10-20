@@ -6679,8 +6679,8 @@ function installCard(){const old=$('#v16inst');const want=bip&&!standalone()&&LS
   if(!want){if(old)old.remove();return}if(old)return;const st=$('#stk');if(!st)return;
   st.insertAdjacentHTML('afterend',`<div class="v16inst" id="v16inst">${AF('happy','m')}<div><b>Add Ari to your home screen</b><span>Opens full screen, like an app, straight into tonight.</span></div><div class="v16ib"><span class="press" id="v16ix">Not now</span><span class="press pri" id="v16iy">Add</span></div></div>`);
   $('#v16iy').onclick=()=>{buzz(10);V16.install()};$('#v16ix').onclick=()=>{LSs('ari-inst-x','1');gone($('#v16inst'))}}
-const meta=document.querySelector('meta[name=theme-color]');const TC={sand:'#F2EEE6',graphite:'#050505'};
-function tcol(){if(meta)meta.content=TC[root.dataset.theme]||'#F2EEE6'}tcol();new MutationObserver(tcol).observe(root,{attributes:true,attributeFilter:['data-theme']});
+const meta=document.querySelector('meta[name=theme-color]');const TC={soft:'#E7E2D9',sand:'#E7E2D9',graphite:'#E7E2D9'};
+function tcol(){if(meta)meta.content=TC[root.dataset.theme]||'#E7E2D9'}tcol();new MutationObserver(tcol).observe(root,{attributes:true,attributeFilter:['data-theme']});
 
 /* ---------- notifications (only while Ari is open or in the background; real push comes with the native app) ---------- */
 window.ariV16N=null;let prevDue=-1;
@@ -6692,7 +6692,7 @@ const _apply=apply;
    Onboarding: first run, like a brand-new install
    ========================================================= */
 const PREF={name:'Owner',scope:'LinkedIn only',aes:'Alex and Blake',connects:'About 15 a weekday',cadence:'DM2 at +4 days, DM3 at +7',withdraw:'Withdraw after 14 days',hours:'9 pm to 6 am, your time'};
-const STEPS=['wake','what','memory','signin','essentials','theme','notify','install','ready'];
+const STEPS=['wake','what','memory','signin','essentials','notify','install','ready'];
 let ob=null,obI=0;
 function startOnb(i){window.ARI_ONB=true;obI=i||+LSg('ari-onb-step',0)||0;if(tokValid()&&obI===3)obI=4;
   ob=document.createElement('div');ob.className='onb';ob.id='onb';ob.innerHTML=`<div class="onbbg"></div><div class="onbtop"><div class="onbdots">${STEPS.map(()=>'<i></i>').join('')}</div><span class="press onbskip" id="onbSkip"></span></div><div class="onbstage"><div class="onbAri" id="onbAri">${AF('sleepy','xxl')}</div></div><div class="onbcard" id="onbCard"></div>`;
