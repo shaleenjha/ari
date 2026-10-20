@@ -10245,7 +10245,7 @@ function fxRender(){const o=$('#v184fx'),it=cur();if(!o)return;
   o.innerHTML=`<div class="fxin"><div class="fxtop"><span class="fxp">${FX.i+1} of ${FX.items.length}</span><span class="press fxmore" data-fx="more" role="button" aria-label="More">…</span><span class="press fxx" data-fx="close" role="button" aria-label="Close">×</span></div>
   <div class="fxwho"><b>${E(it.name||'')}</b><span>${E(it.sub||'')}</span></div><div class="fxwhy">${E(it.why||'')}</div>${paste}
   ${seg}${mid}${capN}
-  <div class="fxmenu" hidden><span class="press" data-fx="skip" role="button">Skip for now</span>${it.k==='reply'?'<span class="press" data-fx="notnow" role="button">Not now (dismiss)</span>':''}<span class="press" data-fx="close" role="button">Close</span></div>
+  <div class="fxmenu" hidden><span class="press" data-fx="skip" role="button">Skip for now</span><span class="press" data-fx="remove" role="button">Remove from queue</span>${it.k==='reply'?'<span class="press" data-fx="notnow" role="button">Not now (dismiss)</span>':''}<span class="press" data-fx="close" role="button">Close</span></div>
   <div class="fxbar"><div class="fxpri press" role="button" data-fx="go">${it.k==='connect'?'Open profile':'Copy &amp; open LinkedIn'}</div></div>
   <div class="fxsheet" hidden><b>Sent it?</b><div class="fxedit" hidden><textarea class="fxfinal" rows="4" aria-label="The text you sent" placeholder="Paste the text you sent"></textarea><span class="press fxok" data-fx="editok" role="button">Log it</span></div>
    <div class="fxbtns"><span class="press pri" data-fx="sent" role="button">Sent</span>${it.k==='connect'?'':'<span class="press" data-fx="edited" role="button">Edited</span>'}${it.k==='reply'?'<span class="press" data-fx="meeting" role="button">Meeting booked</span>':''}<span class="press" data-fx="notyet" role="button">Not yet</span></div></div></div>`;
@@ -10271,6 +10271,7 @@ function wireFx(o){o.addEventListener('click',async e=>{const s=e.target.closest
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx,it=cur();
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
+  if(a==='remove'){const pid=it&&it.pid;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='anyway'){it.full=false;fxRender();return}
   if(a==='paste')return pasteFor(it.id,true);
@@ -11172,7 +11173,7 @@ function fxRender(){const o=$('#v1812fx'),it=cur();if(!o)return;
   o.innerHTML=`<div class="fxin"><div class="fxtop"><span class="fxp">${FX.i+1} of ${FX.items.length}</span><span class="press fxmore" data-fx="more" role="button" aria-label="More">…</span><span class="press fxx" data-fx="close" role="button" aria-label="Close">×</span></div>
   <div class="fxwho"><b>${E(it.co||it.name)}</b><span>${E(it.name)} · ${E(it.tag)}</span></div><div class="fxwhy">${E(it.why)}</div>
   <div class="v1812mid">${draftBlock(it)}</div>
-  <div class="fxmenu" hidden><span class="press" data-fx="skip" role="button">Skip for now</span><span class="press" data-fx="close" role="button">Close</span></div>
+  <div class="fxmenu" hidden><span class="press" data-fx="skip" role="button">Skip for now</span><span class="press" data-fx="remove" role="button">Remove from queue</span><span class="press" data-fx="close" role="button">Close</span></div>
   <div class="fxbar"><div class="fxpri press" role="button" tabindex="0" data-v1812open="1">${hasText?'Copy &amp; open LinkedIn':'Open profile'}</div></div>
   <div class="fxsheet" hidden><b>${sheetQ}</b><div class="fxedit" hidden><textarea class="fxfinal" rows="4" aria-label="The text you sent" placeholder="Paste the text you sent"></textarea><span class="press fxok" data-fx="editok" role="button">Log it</span></div>
    <div class="fxbtns"><span class="press pri" data-fx="sent" role="button">${it.k==='withdraw'?'Withdrawn':'Sent'}</span>${it.k==='dm'?'<span class="press" data-fx="edited" role="button">Edited</span>':''}<span class="press" data-fx="notyet" role="button">Not yet</span></div></div></div>`}
@@ -11201,6 +11202,7 @@ function wire(o){o.addEventListener('click',e=>{const g=e.target.closest('[data-
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx;
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
+  if(a==='remove'){const it=cur();const pid=it&&it.pid;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='sent')return logSent(curText());
   if(a==='edited'){const ed=o.querySelector('.fxedit');if(ed){ed.hidden=false;const t=ed.querySelector('textarea');t.value=curText();t.focus()}return}
