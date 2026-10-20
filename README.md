@@ -7,7 +7,6 @@ New here? Read `REPO_MAP.md` first: a plain guide to every folder.
 
 - `app2/` - the new app being built (React PWA, background jobs, practice database).
 - `web/` - the installable web app (single-page `ops.html`, service worker, manifest, icons, fonts, vendored supabase-js).
-- `archive/` - old things kept for reference (the unused Expo starter).
 - `native/supabase/` - Postgres schema: `migrations/` (applied in order), `pending/` (not yet applied), `rollbacks/`, and the `ari-push` edge function.
 - `scripts/` - operational jobs: sheet <-> database sync, reply ingest, daily report, DB backup, deploy, and the git export/sync used to publish this repo.
 

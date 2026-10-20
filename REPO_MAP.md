@@ -119,4 +119,4 @@ Plans, team notes, data files and screenshots are kept in the private workspace,
 
 | Folder | What it was | Safe to ignore? |
 |---|---|---|
-| `archive/native-ari-expo-starter/` | An untouched phone app starter from the very start. Never built on. Kept in case a native app is wanted later. | Yes |
+| (removed) | The unused Expo starter was removed Oct 21 2026; git history before that date still has it. | Yes |
