@@ -168,7 +168,7 @@ def main():
     # F1 / F2 / F5. The list empties itself as the worker rewrites and tags them, so this stops waking the worker.
     rg = script("copy_check.py", "regen", "--count")
     if rg.strip().isdigit() and int(rg) > 0:
-        reasons.append("dm2 regen %s" % rg.strip())
+        reasons.append("style regen %s" % rg.strip())  # AE style guide, 21 Oct 2026: unsent DM1s + DM2s
 
     if reasons:
         print("WORK: " + "; ".join(reasons))

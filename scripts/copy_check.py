@@ -10,7 +10,8 @@
 #        kind: dm1 | dm2 | dm3 | note.  Prints "PASS" or "FLAG: R3 product line in DM1; R5 ..." (exit 0 / 1).
 #        --vendor-line: this text is the "add one short what-we-do line" switch version (R3 not applied).
 #   python3 scripts/copy_check.py arm <person_id>      -> JSON {arm, pick, switch, why}: which DM1 structure Ari uses
-#   python3 scripts/copy_check.py regen [limit]        -> JSON list of unsent DM2s that must be regenerated (F1/F2/F5)
+#   python3 scripts/copy_check.py regen [limit]        -> JSON list of unsent DM1s and DM2s that fail the AE style guide (since 21 Oct 2026)
+#        kind exec = an exec-track note (old v1 checks only); kind note = Owner's connect note (AE guide shape).
 #   python3 scripts/copy_check.py regen --count        -> just the number (used by worker_precheck.py)
 import sys, os, re, json, hashlib, datetime as dt
 
@@ -86,14 +87,14 @@ def closer_shape(s):
 
 def corpus_rows():
     import ari_db
-    rows = ari_db.get("people?select=id,company,name,notes,dm,dm2_text,dm3_text,dm1_sent,dm2_sent,dm3_sent,dm2_due,updated_at&deleted_at=is.null")
+    rows = ari_db.get("people?select=id,account_id,company,name,notes,dm,dm2_text,dm3_text,connect_sent,accepted,dm1_sent,dm2_sent,dm3_sent,dm2_due,stage,route,review,research,replied,updated_at&deleted_at=is.null")
     return rows
 
 
 OFFER = re.compile(r"\b(send|share|pass along|forward)\b[^.?!]{0,40}\b(it|this|that|the|a|how|short|version|read|details|breakdown|map|notes|summary|over)\b|\bwant (it|a copy|the read)\b|\bmapped\b[^.?!]{0,60}\bwant\b", re.I)
 
 
-def check(pid, kind, text, structure="", vendor_line=False, rows=None, has_asset=False):
+def _check_v1(pid, kind, text, structure="", vendor_line=False, rows=None, has_asset=False):
     flags = []
     t = text.strip()
     low = t.lower()
@@ -264,11 +265,191 @@ def check(pid, kind, text, structure="", vendor_line=False, rows=None, has_asset
     return [f for f in flags if not f.startswith("NOTE")], [f for f in flags if f.startswith("NOTE")]
 
 
+# ---------------- AE style guide (Owner, Wed 21 Oct 2026 04:24 IST, option A) ----------------
+# plans/copy-lab/ae-styles.md (from Owner's work Claude) is now the canonical shape for connect notes, DM1 and DM2.
+# Style comes from the account's AE: Blake -> Blake style; Alex, Casey (Owner's call) and no AE -> Alex style.
+# The Copy Lab v1 checks that contradict the guide (no meeting ask, no Vendor line in DM1, stock closer
+# "worth a quick chat", closer reuse, opening share, character caps, S/F structure minimums) are dropped for
+# these kinds; every other floor (dashes, banned phrases, hedges, clarity, links, repeats) still runs.
+AE_STYLE_SINCE = "2026-10-21"
+STYLE_KINDS = ("note", "dm1", "dm2")
+ALLOWED_CUSTOMERS = ["goodrx", "walmart", "visa", "flo health"]
+KNOWN_CUSTOMERS = ALLOWED_CUSTOMERS + ["hippocratic"]
+COMPETITORS = ["protegrity", "private ai", "tonic", "gretel", "incountry", "agentcloak", "very good security", "vgs",
+               "basis theory", "evervault", "bigid", "onetrust", "securiti", "nightfall", "cyera", "thales", "voltage",
+               "piiano", "immuta", "privacera", "tokenex", "vendor alternative"]
+STYLE_BANNED = ["i'd love to", "i would love to", "reason i'm reaching out", "reason i am reaching out", "unlock",
+                "revolutioniz", "transform your", "just following up"]
+GUIDE_FIXED = re.compile(r"(thanks for connecting, [^.]+\.|^\S+, last one from me\.|we built a data privacy layer that|"
+                         r"teams like visa use it\.|worth connecting\?|worth 15 minutes\?|worth a quick call\?|"
+                         r"worth 20 minutes with you and|happy to show how|we talk to|on your 2027 list|most )", re.I)
+V1_DROP = ("M1", "R3", "P1", "R5", "R4", "R2", "R10", "S2 ", "S5 ", "S6 ", "F1 ")
+TRIGGER = re.compile(r"\b(saw|noticed|congrats|just (launched|announced|raised|hired)|announced|launched|raised|hired|joined as)\b", re.I)
+
+
+_ACC = None
+
+
+def _accounts():
+    global _ACC
+    if _ACC is None:
+        import ari_db
+        _ACC = {a["id"]: a for a in (ari_db.get("accounts?select=id,ae,hook_date&deleted_at=is.null") or [])}
+    return _ACC
+
+
+def style_for(pid, rows=None):
+    ae = ""
+    try:
+        import ari_db
+        me = next((r for r in (rows or []) if r.get("id") == pid), None)
+        if me is None:
+            me = (ari_db.get("people?select=id,account_id&id=eq.%s" % pid) or [{}])[0]
+        if me.get("account_id"):
+            ae = (_accounts().get(me["account_id"]) or {}).get("ae") or ""
+    except BaseException:
+        pass
+    return ("blake" if "blake" in ae.lower() else "alex"), ae
+
+
+def _hook_ok(pid, rows=None):
+    # A trigger line must be real and dated: the account needs a hook_date in the last ~6 months, or the
+    # person's V notes a "Trigger: <date>" line.
+    try:
+        import ari_db
+        me = next((r for r in (rows or []) if r.get("id") == pid), None) or \
+            (ari_db.get("people?select=id,account_id,notes&id=eq.%s" % pid) or [{}])[0]
+        if re.search(r"trigger:\s*20\d\d-\d\d-\d\d", (me.get("notes") or "").lower()):
+            return True
+        if me.get("account_id"):
+            a = _accounts().get(me["account_id"]) or {}
+            d = (a.get("hook_date") or "")[:10]
+            if d:
+                return (dt.date.today() - dt.date.fromisoformat(d)).days <= 190
+    except BaseException:
+        return True  # db down: never block on this; the human floor still applies
+    return False
+
+
+def style_flags(pid, kind, text, style, rows=None):
+    f = []
+    t = text.strip()
+    low = t.lower()
+    nw = len(t.split())
+    sents = [x for x in re.split(r"(?<=[.!?])\s+", t) if x]
+    last = (sents[-1] if sents else "").lower()
+    first_name = ""
+    me = next((r for r in (rows or []) if r.get("id") == pid), {}) if rows else {}
+    first_name = ((me.get("name") or "").split(" ") or [""])[0].lower()
+    for b in STYLE_BANNED:
+        if b in low:
+            f.append("G1 banned by the AE guide ('%s')" % b)
+    if "{{" in t:
+        f.append("G1 template placeholder left in")
+    named = [c for c in KNOWN_CUSTOMERS if re.search(r"\b%s\b" % re.escape(c), low)]
+    if "hippocratic" in named:
+        f.append("G2 Hippocratic AI may never be named")
+    if style == "blake" and any(c != "visa" for c in named):
+        f.append("G2 Blake's accounts name Visa only")
+    if style == "blake":
+        comp = [c for c in COMPETITORS if re.search(r"\b%s\b" % re.escape(c), low)]
+        if comp:
+            f.append("G2 Blake's accounts never name a competitor ('%s')" % comp[0])
+    if TRIGGER.search(t) and not _hook_ok(pid, rows):
+        f.append("G3 trigger line with no dated hook on file (drop it and use the plain problem)")
+    if t.count("?") == 0 or not last.endswith("?"):
+        f.append("G4 must end on one closed ask")
+    if kind == "note":
+        if len(t) >= 200:
+            f.append("G5 connect note over 200 characters (%d)" % len(t))
+        if re.search(r"https?://|www\.", low):
+            f.append("G5 link in a connect note")
+        if not re.match(r"^hi \S+,", low):
+            f.append("G6 connect note opens 'Hi <First>,'")
+        if "we built a data privacy layer that" not in low:
+            f.append("G6 connect note says 'we built a data privacy layer that ...'")
+        if not last.startswith("worth connecting"):
+            f.append("G6 connect note ends 'Worth connecting?'")
+        if style == "blake" and "teams like visa use it" not in low:
+            f.append("G6 Blake connect note carries 'Teams like Visa use it.'")
+        if style == "alex" and not (named or re.search(r"\b\d+ of the top\b", low)):
+            f.append("G6 Alex connect note carries one proof line (a number or an allowed customer)")
+        if t.count("?") > 1:
+            f.append("G4 one ask only")
+        return f
+    lim = 65 if (kind == "dm1" and style == "blake") else 55
+    if nw > lim:
+        f.append("G5 over %d words (%d)" % (lim, nw))
+    if kind == "dm1":
+        if not low.startswith("thanks for connecting"):
+            f.append("G6 DM1 opens 'Thanks for connecting, <First>.'")
+        if "we talk to" not in low and style == "blake":
+            f.append("G6 Blake beat 2: 'Most <peer group> we talk to ...'")
+        if style == "alex":
+            if not re.search(r"worth 15 minutes\?$", last):
+                f.append("G6 Alex DM1 ends 'Worth 15 minutes?'")
+            if t.count("?") > 1:
+                f.append("G4 Alex asks for the meeting only, no open question")
+            if re.search(r"\b(20|30|45) (min|mins|minutes)\b", low):
+                f.append("G6 Alex never asks past 15 minutes")
+            if re.search(r"\btokeni[sz]ation\b|\bencrypt|\bvault\b", low):
+                f.append("G7 Alex never explains how it works")
+        else:
+            if t.count("?") != 2:
+                f.append("G6 Blake DM1 has two questions: beat 1 and the ask")
+            if not re.search(r"^worth 20 minutes with you and .+\?$", last):
+                f.append("G6 Blake DM1 ends 'Worth 20 minutes with you and <owner>?'")
+            if "vendor" not in low:
+                f.append("G6 Blake beat 3: one line on what Vendor does")
+    if kind == "dm2":
+        if not re.match(r"^\S+, last one from me\.", low):
+            f.append("G6 DM2 opens '<First>, last one from me.'")
+        if "happy to show how" not in low:
+            f.append("G6 DM2 carries 'happy to show how ...'")
+        if not last.startswith("worth a quick call"):
+            f.append("G6 DM2 ends 'Worth a quick call?'")
+        if t.count("?") > 1:
+            f.append("G4 one ask only")
+    return f
+
+
+def check(pid, kind, text, structure="", vendor_line=False, rows=None, has_asset=False):
+    if kind == "exec":  # exec-track note: v1 note checks, minus closer reuse (its closer is fixed by Owner)
+        fl, notes = _check_v1(pid, "note", text, structure, vendor_line, rows, has_asset)
+        return [x for x in fl if not x.startswith("R4")], notes
+    if kind not in STYLE_KINDS:
+        return _check_v1(pid, kind, text, structure, vendor_line, rows, has_asset)
+    if rows is None:
+        try:
+            rows = corpus_rows()
+        except BaseException:
+            rows = []
+    style, _ = style_for(pid, rows)
+    # The guide's fixed lines are shared on purpose; take them out before the repeat checks see the text.
+    core = GUIDE_FIXED.sub(" ", text)
+    fl, notes = _check_v1(pid, kind, core, structure, True, rows, has_asset)
+    fl = [x for x in fl if not x.startswith(V1_DROP)]
+    if style == "blake" and kind == "dm1":
+        fl = [x for x in fl if x != "R11 more than one question"]
+    fl += style_flags(pid, kind, text, style, rows)
+    return fl, notes
+
+
 # ---------------- deterministic DM1 arm (Hark decision 3) ----------------
 ISV_HINTS = re.compile(r"\b(mcp|agent|api|platform|isv|saas|connector|sdk|marketplace|embedded|ai)\b", re.I)
 
 
 def arm(pid):
+    # Since Wed 21 Oct 2026 (Owner, option A): the AE style guide replaces the Copy Lab v1 arms.
+    style, ae = style_for(pid)
+    name = "AE Blake style" if style == "blake" else "AE Alex style"
+    return {"arm": "ae_style", "pick": name, "style": style, "ae": ae or "none",
+            "switch": "%s, other angle" % name,
+            "why": "plans/copy-lab/ae-styles.md, %s shape. Pick = the trigger version when a real dated hook is on file, "
+                   "else the plain-problem version; switch = the other one, same style." % ("Blake four-beat" if style == "blake" else "Alex")}
+
+
+def _arm_v1(pid):
     h = int(hashlib.md5(("copylab-v1:" + pid).encode()).hexdigest(), 16)
     ae, company, title = "", "", ""
     try:
@@ -295,26 +476,35 @@ def arm(pid):
 
 # ---------------- DM2 regeneration list (Hark decision 5) ----------------
 def regen(limit=200):
-    # Every unsent DM2 written before Copy Lab v1 is regenerated: those drafts are untagged (no F1/F2/F5 structure).
-    # A DM2 drops off this list once the worker has rewritten it and tagged it (draft_tag.py), or when it passes
-    # the checks AND is tagged. Untagged = in ari_worker_untagged_drafts.
-    import ari_db
+    # Since Wed 21 Oct 2026 (Owner, option A): every unsent DM1 and DM2 that fails the AE style guide is redrafted.
+    # Sent messages are never touched. Exec-track people (their K dm is an exec note), Hold, personal, flagged
+    # and replied people are skipped. A row Ari already marked "Flagged:" is not retried.
     rows = corpus_rows()
-    untagged = {(u.get("person_id"), u.get("kind")) for u in (ari_db.rpc("ari_worker_untagged_drafts", {"p_limit": 2000}) or [])}
     out = []
     for r in rows:
-        txt = (r.get("dm2_text") or "").strip()
-        if not txt or r.get("dm2_sent") or not r.get("dm1_sent"):
+        if (r.get("review") or "").lower() == "personal" or r.get("replied"):
             continue
-        fl, _ = check(r["id"], "dm2", txt, rows=rows)
-        bad = [f for f in fl if f.startswith(("M1", "R11", "R10", "R5", "R4", "R6", "P1", "A2"))]
+        st = (r.get("stage") or "").lower()
+        if st in ("hold", "founder") or "founder" in (r.get("route") or "").lower():
+            continue
+        if (r.get("research") or "").lower().startswith("flagged"):
+            continue
         if "flagged:" in (r.get("notes") or "").lower():
-            continue  # Ari already tried twice and marked it for Owner; never loop on it
-        if (r["id"], "dm2") in untagged:
-            bad = bad or ["untagged pre Copy Lab draft"]
-        if bad:
-            out.append({"person_id": r["id"], "company": r.get("company"), "dm2_due": r.get("dm2_due"), "flags": bad})
-    out.sort(key=lambda x: (str(x.get("dm2_due") or "9999"), x["person_id"]))
+            continue
+        for kind, col, sent in (("dm1", "dm", "dm1_sent"), ("dm2", "dm2_text", "dm2_sent")):
+            txt = (r.get(col) or "").strip()
+            if not txt or r.get(sent):
+                continue
+            fl, _ = check(r["id"], kind, txt, rows=rows)
+            # Repeat-only flags (R6/R7) do not trigger a redraft: Owner's own sheet copy reuses the guide's
+            # lines across one segment on purpose. New drafts still have to clear them.
+            fl = [x for x in fl if not x.startswith(("R6", "R7"))]
+            if fl:
+                out.append({"person_id": r["id"], "kind": kind, "company": r.get("company"),
+                            "due": r.get("dm2_due") if kind == "dm2" else r.get("accepted"), "flags": fl[:4]})
+    # accepted people's DM1s first (they are next to send), then DM2s by due date, then the rest
+    out.sort(key=lambda x: (0 if (x["kind"] == "dm1" and x.get("due")) else 1 if x["kind"] == "dm2" else 2,
+                            str(x.get("due") or "9999"), x["person_id"]))
     return out[:limit]
 
 
@@ -344,7 +534,7 @@ def main(a):
     if cmd == "arm":
         print(json.dumps(arm(a[1]))); return 0
     if cmd == "regen":
-        lst = regen()
+        lst = regen(100000)
         if "--count" in a:
             print(len(lst)); return 0
         lim = int(a[1]) if len(a) > 1 and a[1].isdigit() else 200
