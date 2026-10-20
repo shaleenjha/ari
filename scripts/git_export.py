@@ -24,10 +24,7 @@ INCLUDE = [
     'web/ops.html', 'web/sw.js', 'web/vercel.json', 'web/build.json',
     'web/ari.webmanifest', 'web/ari-fonts.css', 'web/ari-supabase.js',
     'web/ari-*.png', 'web/ari-*.woff2', 'web/about.html', 'web/privacy.html', 'web/terms.html',  # served live (Vercel audit V2), S1 R2
-    'native/ari/App.tsx', 'native/ari/index.ts', 'native/ari/app.json',
-    'native/ari/package.json', 'native/ari/package-lock.json',
-    'native/ari/tsconfig.json', 'native/ari/AGENTS.md', 'native/ari/LICENSE',
-    'native/ari/.gitignore', 'native/ari/assets/*.png',
+    # native/ari/ moved to archive/native-ari-expo-starter/ (PR #7, Oct 21 2026)
     'native/supabase/migrations/*.sql', 'native/supabase/rollbacks/*.sql',
     'native/supabase/pending/*.sql', 'native/supabase/functions/**',  # S1 R2: '*/index.ts' never matched (audit S4)
     'scripts/brief_upsert.py', 'scripts/daily_report.py', 'scripts/db_backup.py',
@@ -43,6 +40,8 @@ INCLUDE = [
      'scripts/accept_ingest.py', 'scripts/scan_heartbeat.py', 'scripts/test_scan_heartbeat.py',  # v18.15.4 scan dead-man
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient*.pem',  # S1 R3: every recipient cert (public only)
     'repo/README.md:README.md', 'repo/gitignore:.gitignore',
+    # Oct 21 2026 (PR docs/repo-map-renames): plain repo map at the root, and archive/ for retired code kept for reference
+    'repo/REPO_MAP.md:REPO_MAP.md', 'archive/**',
 ]
 BINARY = ('.png', '.woff2', '.jpg', '.ico')
 # package-lock files are machine-generated registry metadata: scanned for secrets, not for real names

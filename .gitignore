@@ -24,5 +24,4 @@ demo/
 app/
 web/_archive/
 web/ops_v*.html
-native/ari/.git/
 *.png.bak
