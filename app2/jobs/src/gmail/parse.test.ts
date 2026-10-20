@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ACCEPT_SUBJ, NOT_ACCEPT, extractProfile, parseLinkedInEmail, type RawEmail } from './parse';
 import { matchPerson } from './match';
 import { ingest, shadowDiff } from './handler';
-import * as F from './fixtures';
+import * as F from './sample-linkedin-emails';
 
 describe('parse', () => {
   it('accept (text, comm link with tracking) -> vanity + headline + company + exact time', () => {

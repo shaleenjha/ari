@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { fetchAndIngest, gmailIngestHandler, gmailToRaw, MemoryCursor, MemorySink, toRecordJson, type GmailApi } from './fetch';
 import { parseLinkedInEmail } from './parse';
-import { FakeGmail, all, toGmailJson } from './gmail-fixtures';
-import * as F from './fixtures';
+import { FakeGmail, all, toGmailJson } from './fake-gmail-api';
+import * as F from './sample-linkedin-emails';
 import type { Candidate } from './match';
 
 const WS = 'ws-a';

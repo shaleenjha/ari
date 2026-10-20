@@ -1,7 +1,7 @@
 // Synthetic Gmail API JSON built from the synthetic RawEmail fixtures (fake names, ids, companies), plus a fake Gmail API.
 import type { RawEmail } from './parse';
 import { HistoryExpiredError, type GmailApi, type GmailHistoryPage, type GmailMessage } from './fetch';
-import * as F from './fixtures';
+import * as F from './sample-linkedin-emails';
 
 const b64url = (s: string): string => Buffer.from(s, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 

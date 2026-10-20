@@ -10,7 +10,7 @@ Stage 1, "the chassis": the app2 rebuild (React + TS PWA in `app2/`) reading liv
 - `native/supabase/migrations`: 0001 to 0036 applied to prod. 0035/0036 are worker-only Log repair RPCs. `pending/` holds app2 steps not yet applied. `docs/specs/06_migration_0037_locked.md` is the agreed 0037 design (same-transaction state + event RPCs, facts-and-IDs-only payloads).
 - `scripts/deploy_web.py`: production deploys need exactly `--target=production --confirm`; anything else exits 2.
 - `.github/workflows`: CI (typecheck, unit, ~212 e2e on Chromium + WebKit, design lint, verify-mobile, SQL prod-shape). A no-client-writes rule is in CI.
-- `app2/docs/migration-map.md`, `app2/docs/job-system.md`, `app2/docs/gate-failures.md`.
+- `app2/docs/migration-map.md`, `app2/docs/job-system.md`, `app2/docs/ci-gate-first-run-failures.md`.
 - Supabase project `rbkrqlzlblquvgmuohro` (read-only connection): roles and grants for `ari_worker` and `anon`, RLS on every table, security + performance advisors, recent logs.
 
 ## Questions we most want answered

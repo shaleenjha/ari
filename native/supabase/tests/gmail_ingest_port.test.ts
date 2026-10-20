@@ -1,5 +1,5 @@
 // Parity test for the Deno port in functions/ari-gmail-ingest (run: node native/supabase/tests/gmail_ingest_port.test.ts).
-// Synthetic fixtures only (app2/jobs/src/gmail/fixtures.ts): Gmail JSON -> port gmailToRaw -> parser must equal parser(raw).
+// Synthetic fixtures only (app2/jobs/src/gmail/sample-linkedin-emails.ts): Gmail JSON -> port gmailToRaw -> parser must equal parser(raw).
 import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -9,7 +9,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..', '..');
 const dir = mkdtempSync(join(tmpdir(), 'ariport-'));
 writeFileSync(join(dir, 'parse.ts'), readFileSync(join(root, 'app2/jobs/src/gmail/parse.ts')));
-writeFileSync(join(dir, 'fixtures.ts'), readFileSync(join(root, 'app2/jobs/src/gmail/fixtures.ts'), 'utf8').replace(/from '\.\/parse'/g, "from './parse.ts'"));
+writeFileSync(join(dir, 'fixtures.ts'), readFileSync(join(root, 'app2/jobs/src/gmail/sample-linkedin-emails.ts'), 'utf8').replace(/from '\.\/parse'/g, "from './parse.ts'"));
 const port = await import(join(root, 'native/supabase/functions/ari-gmail-ingest/index.ts'));
 const P = await import(join(dir, 'parse.ts'));
 const F = await import(join(dir, 'fixtures.ts'));
