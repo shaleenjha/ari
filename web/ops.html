@@ -6533,7 +6533,7 @@ openFile=function(n,el){_openFile(n,el);const f=PF[n];if(!f)return;const p=f.p,i
   const ed=$('#pfEdit');if(ed)ed.onclick=()=>editDraft(it);
   $$('#ovb [data-mk]').forEach(b=>b.onclick=()=>{const k=b.dataset.mk;buzz(10);if(p[k]){mutate('undo',[p.id,k],'Undone.').then(()=>{closeOv()})}else{mutate('mark',[p.id,k],`${b.textContent.trim()}, logged.`).then(()=>closeOv())}b.classList.add('on')});
   $$('#ovb [data-pf]').forEach(b=>b.onclick=()=>{const k=b.dataset.pf;if(k==='snooze')return snoozeSheet({id:p.id,n:p.name});if(k==='skip')return skipPerson({id:p.id,n:p.name});
-    mutate('setFields',[p.id,k==='unskip'?{skipped:''}:{snooze_until:''}],k==='unskip'?'Back in the queue.':'Unsnoozed.').then(()=>closeOv())})};
+    mutate('setFields',[p.id,k==='unskip'?(/^Removed from queue/.test(p.next_action||p.na||'')&&!p.connect_sent?{skipped:'',stage:'Connect queued',next_action:'Connect with note'}:{skipped:''}):{snooze_until:''}],k==='unskip'?'Back in the queue.':'Unsnoozed.').then(()=>closeOv())})};
 
 /* ---------- Follow-ups ---------- */
 followIn=function(){if(fuShown)return;fuShown=true;const pane=$('#follow');if(!pane)return;const s=M.stats;
@@ -10281,8 +10281,9 @@ const FX={items:[],i:0,pending:false,sel:0,open:false,done:0};V184.FX=FX;
 const KF={DM1:['dm1_sent','dm'],DM2:['dm2_sent','dm2_text'],DM3:['dm3_sent','dm3_text']};
 function qItems(){return ((window.ariM&&ariM.Q)||[]).filter(q=>KF[q.tag]).map(q=>({k:'dm',tag:q.tag,pid:q.id,name:q.n,sub:q.c,why:q.why||'',body:String(q.msg||''),url:q.url||(q.p&&q.p.linkedin_url)||'',field:KF[q.tag][0],col:KF[q.tag][1]}))}
 function repItems(){return ((V184.top&&V184.top.replies)||[]).map(r=>({k:'reply',id:r.id,pid:r.person_id,co:r.company||'',name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.snippet&&r.snippet_source!=='none'?'“'+r.snippet+'”':'They wrote back. Paste their words for a sharper draft, or answer with a safe opener.',drafts:Array.isArray(r.drafts)?r.drafts:[],url:r.thread_url||r.linkedin_url||'',snip:!!(r.snippet&&r.snippet_source!=='none')}))}
+function conNote(pid){try{const L=(window.ariV17&&ariV17.store&&ariV17.store.people&&ariV17.store.people.length?ariV17.store.people:(window.ariDATA&&ariDATA.people)||[]);const p=L.find(x=>x&&String(x.id)===String(pid));const m=p&&String(p.notes||'').match(/Connect note:\s*([\s\S]*?)(?:\s*\|\s|$)/);return m?m[1].trim():''}catch(x){return ''}}
 function conItems(){const T=V184.top||{},A={};((T.meta||{}).accounts_today||[]).forEach(a=>{A[String(a.account_id||a.company||'').toLowerCase()]=a});
-  return (T.connects||[]).map(r=>{const a=A[String(r.account_id||'').toLowerCase()]||A[String(r.company||'').toLowerCase()];return {k:'connect',pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.why||'',url:r.linkedin_url||'',company:r.company,full:a&&+a.cap_left===0,sentAcct:a&&a.sent_today}})}
+  return (T.connects||[]).map(r=>{const a=A[String(r.account_id||'').toLowerCase()]||A[String(r.company||'').toLowerCase()];return {k:'connect',note:conNote(r.person_id),pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.why||'',url:r.linkedin_url||'',company:r.company,full:a&&+a.cap_left===0,sentAcct:a&&a.sent_today}})}
 function openFocus(items,i,sel){if(!items.length)return;FX.items=items;FX.i=Math.max(0,Math.min(i||0,items.length-1));FX.sel=sel||0;FX.pending=false;FX.open=true;FX.done=0;
   let o=$('#v184fx');if(!o){o=document.createElement('div');o.id='v184fx';o.className='v184fx';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','One person at a time');document.body.appendChild(o);wireFx(o)}
   o.hidden=false;document.documentElement.classList.add('v184fxon');fxRender();buzz(6)}
@@ -10294,7 +10295,7 @@ function fxRender(){const o=$('#v184fx'),it=cur();if(!o)return;
   if(!it){o.innerHTML=`<div class="fxin"><div class="fxtop"><span></span><span class="press fxx" data-fx="close" role="button" aria-label="Close">×</span></div><div class="fxdone"><b>That’s today.</b><span>${FX.done?E(FX.done)+' logged. ':''}Next: replies and follow-ups land here as they come due.</span></div><div class="fxbar"><div class="fxpri press" data-fx="close" role="button">Back to Today</div></div></div>`;return}
   const seg=it.k==='reply'&&it.drafts.length?`<div class="fxseg" role="tablist">${it.drafts.map((d,j)=>`<span class="press ${j===FX.sel?'on':''}" role="tab" aria-selected="${j===FX.sel}" data-fxsel="${j}">${E(d.label||d.key)}</span>`).join('')}</div>`:'';
   const body=it.k==='reply'?((it.drafts[FX.sel]||{}).body||''):it.body;
-  const mid=it.k==='connect'?`<div class="fxnote">Blank invite, no note. At this level a bare invite gets accepted more often.</div>`
+  const mid=it.k==='connect'?(it.note?`<div class="fxnote">Connect with this note. It copies when you open the profile.</div><textarea class="fxdraft" aria-label="Connect note" rows="5">${E(it.note)}</textarea>`:`<div class="fxnote">Blank invite, no note. At this level a bare invite gets accepted more often.</div>`)
     :it.k==='reply'&&!it.drafts.length?`<div class="fxnote">${V184.drafting[it.id]?'Drafting with their words…':'Drafting 3 replies…'} You can write your own below.</div><textarea class="fxdraft" aria-label="Your reply" rows="5"></textarea>`
     :`<textarea class="fxdraft" aria-label="Message" rows="6">${E(body)}</textarea>`;
   const capN=it.k==='connect'&&it.full?`<div class="fxcap" role="note">${E(it.sentAcct||4)} invites to ${E(it.company)} today already. Tomorrow is better. <span class="press" data-fx="anyway" role="button">Send anyway</span></div>`:'';
@@ -10303,7 +10304,7 @@ function fxRender(){const o=$('#v184fx'),it=cur();if(!o)return;
   <div class="fxwho"><b>${E(it.name||'')}</b><span>${E(it.sub||'')}</span></div><div class="fxwhy">${E(it.why||'')}</div>${paste}
   ${seg}${mid}${capN}
   <div class="fxmenu" hidden><span class="press" data-fx="skip" role="button">Skip for now</span><span class="press" data-fx="remove" role="button">Remove from queue</span>${it.k==='reply'?'<span class="press" data-fx="notnow" role="button">Not now (dismiss)</span>':''}<span class="press" data-fx="close" role="button">Close</span></div>
-  <div class="fxbar"><div class="fxpri press" role="button" data-fx="go">${it.k==='connect'?'Open profile':'Copy &amp; open LinkedIn'}</div></div>
+  <div class="fxbar"><div class="fxpri press" role="button" data-fx="go">${it.k==='connect'?(it.note?'Copy note &amp; open profile':'Open profile'):'Copy &amp; open LinkedIn'}</div></div>
   <div class="fxsheet" hidden><b>Sent it?</b><div class="fxedit" hidden><textarea class="fxfinal" rows="4" aria-label="The text you sent" placeholder="Paste the text you sent"></textarea><span class="press fxok" data-fx="editok" role="button">Log it</span></div>
    <div class="fxbtns"><span class="press pri" data-fx="sent" role="button">Sent</span>${it.k==='connect'?'':'<span class="press" data-fx="edited" role="button">Edited</span>'}${it.k==='reply'?'<span class="press" data-fx="meeting" role="button">Meeting booked</span>':''}<span class="press" data-fx="notyet" role="button">Not yet</span></div></div></div>`;
   if(it.k==='connect'&&it.full)o.querySelector('[data-fx="go"]').classList.add('dim')}
@@ -10328,7 +10329,7 @@ function wireFx(o){o.addEventListener('click',async e=>{const s=e.target.closest
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx,it=cur();
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
-  if(a==='remove'){const pid=it&&it.pid;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
+  if(a==='remove'){const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='anyway'){it.full=false;fxRender();return}
   if(a==='paste')return pasteFor(it.id,true);
@@ -11259,7 +11260,7 @@ function wire(o){o.addEventListener('click',e=>{const g=e.target.closest('[data-
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx;
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
-  if(a==='remove'){const it=cur();const pid=it&&it.pid;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
+  if(a==='remove'){const it=cur();const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);try{mutate('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)}catch(x){toast('Couldn’t remove that yet.');return}FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='sent')return logSent(curText());
   if(a==='edited'){const ed=o.querySelector('.fxedit');if(ed){ed.hidden=false;const t=ed.querySelector('textarea');t.value=curText();t.focus()}return}
