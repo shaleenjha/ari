@@ -1,4 +1,4 @@
-# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): PROPOSED, NOT APPLIED
+# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST
 
 ## Status (checked Oct 19 2026, read-only, counts only; plans/audit data-side live checks)
 | Migration | Prod | Ledger row (`supabase_migrations.schema_migrations`) |
@@ -8,8 +8,8 @@
 | `0034_app2_e2_backfill.sql` | LIVE | yes |
 | `0035_app2_e3_dual_rls.sql` | LIVE | yes (ledger max is 0035) |
 | `0036_log_repair_rpc.sql` | LIVE (`ari_worker_log_repair` and `ari_worker_log_unappend` exist in prod; the spec-05 Log repair it served finished Oct 18 2026, 395 rows) | **no** at the Oct 19 check. 0038 part 7 writes the row |
-| `0037_members_aal2.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R5: members need the two-step code too | no |
-| `0038_s1_release6.sql` (+ rollback) | PROPOSED, NOT APPLIED. S1 R6: seven parts, incl. dropping `ari_worker_log_repair` and `ari_worker_log_unappend` (accept_ingest repair-log retired in v18.17.7) | no |
+| `0037_members_aal2.sql` (+ rollback) | LIVE Oct 20 2026 (checks_after_0037 PASSED on prod). S1 R5: members need the two-step code too | yes |
+| `0038_s1_release6.sql` (+ rollback) | LIVE Oct 20 2026 (checks_after_0038 PASSED on prod; both repair functions gone). S1 R6: seven parts, incl. dropping `ari_worker_log_repair` and `ari_worker_log_unappend` (accept_ingest repair-log retired in v18.17.7) | yes (ledger 0034 to 0038) |
 
 - `0036_log_repair_rpc.sql` was never applied as a whole file. Per function:
   - `ari_worker_log_repair`: applied by hand, repair only (the Oct 18 Log repair); no ledger row; ledger row via 0038 part 7; dropped by 0038.
@@ -154,3 +154,7 @@ then `bash .../test/lock_local.sh`. Files are sent the way the Management API se
   28 of 42 tables done and no ledger row, the re-run finishes; (3) 2,500 explicit-null rows in `plays` + 3 in `people`: the first 0034 run
   fills 2,000 and stops asking for a re-run, the second finishes, `people.updated_at` untouched; (4) 0033 to 0035 applied under a
   continuous owner + `ari_worker` read/write loop: about 1,000 iterations, 0 errors, every row inserted during the apply got workspace Owner.
+
+
+## Prod apply, Oct 20 2026 ~10:25 IST
+Fresh backup ari_20261020_0454Z (45 tables, 3240 rows; restore-test row counts match, 0 mismatches) taken first. 0037 then 0038 sent through the Management API with a 1-day scoped PAT; checks_after_0037 and checks_after_0038 PASSED; ledger 0034..0038; 9 cron jobs, one row each; post-apply sync run clean. Evidence: work/prod_r5r6/.
