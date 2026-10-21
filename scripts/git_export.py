@@ -37,7 +37,7 @@ INCLUDE = [
     'app2/**', '.github/**',
     # Oct 17 2026: specs, app2 pending migrations, accept ingest
     'docs/specs/*.md', 'docs/privacy-data-inventory.md', 'docs/runbooks/*.md', 'native/supabase/migrations/pending/**', 'native/supabase/baseline/*.sql',  # schema-only prod baseline for the sql-prod-shape CI job (Oct 18)
-     'scripts/accept_ingest.py', 'scripts/scan_heartbeat.py', 'scripts/test_scan_heartbeat.py', 'scripts/copy_check.py', 'scripts/relay_check.py',  # Oct 21 2026: called by the worker task every run, were missing from the repo  # v18.15.4 scan dead-man
+     'scripts/accept_ingest.py', 'scripts/gmail_step.py', 'scripts/test_gmail_step.py', 'docs/specs/worker_step0.txt', 'scripts/scan_heartbeat.py', 'scripts/test_scan_heartbeat.py', 'scripts/copy_check.py', 'scripts/relay_check.py',  # Oct 21 2026: called by the worker task every run, were missing from the repo  # v18.15.4 scan dead-man
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient*.pem',  # S1 R3: every recipient cert (public only)
     'repo/README.md:README.md', 'repo/gitignore:.gitignore',
     # Oct 21 2026 (PR docs/repo-map-renames): plain repo map at the root, and archive/ for retired code kept for reference

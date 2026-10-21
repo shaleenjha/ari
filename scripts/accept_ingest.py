@@ -102,7 +102,7 @@ class Gmail:
     """Paged, metadata-only reader. self.failed is set when any call failed (the cursor must then stay frozen)."""
 
     def __init__(self, call=gws):
-        self.call, self.failed = call, False
+        self.call, self.failed, self.failed_ids = call, False, []
 
     def list_ids(self, after):
         ids, tok = [], None
@@ -122,6 +122,7 @@ class Gmail:
                 {"userId": "me", "id": mid, "format": "metadata", "metadataHeaders": ["From", "Subject", "Date"]})])
         except Exception:
             self.failed = True
+            self.failed_ids.append(mid)
             return None
         h = {x["name"].lower(): x["value"] for x in (d.get("payload") or {}).get("headers", [])}
         return {"id": mid, "ts": int(d.get("internalDate", "0")) // 1000, "from": h.get("from", ""),
@@ -322,11 +323,11 @@ def new_cursor(old, msgs, failed):
     return max([old] + hs)
 
 
-def cmd_scan(since, backfill, dry, show=True):
+def cmd_scan(since, backfill, dry, show=True, skip=()):
     gmail, db = Gmail(), DB()
     sh = read_sheet(["People", "Log", "Brief"])
     ppl = People(rows_as_dicts(*sh["People"]))
-    msgs = gmail.messages(since)
+    msgs = gmail.messages(since, skip=skip)  # skip: ids gmail_step.py gave up on after 3 failed runs
     known = db.known([m["id"] for m in msgs if m["kind"] == "accept"])
     dbp = db.people()
     rows = plan(msgs, ppl, dbp, known)
@@ -334,6 +335,7 @@ def cmd_scan(since, backfill, dry, show=True):
         "window_ist": [ist(since).strftime("%Y-%m-%d %H:%M"), dt.datetime.now(IST).strftime("%Y-%m-%d %H:%M")],
         "linkedin_emails": len(msgs), "accept_emails": sum(1 for m in msgs if m["kind"] == "accept"),
         "message_emails": sum(1 for m in msgs if m["kind"] == "message"), "gmail_failed": gmail.failed,
+        "failed_ids": list(gmail.failed_ids),
         "db_0032": db.has_0032, "db_people_read": dbp is not None,
         "already_in_gmail_events": sum(1 for r in rows if r["known"]),
         "matched": sum(1 for r in rows if r["pid"]), "by_method": {},
@@ -371,7 +373,7 @@ def cmd_scan(since, backfill, dry, show=True):
                 res.append(db.record(r["msg"], r["pid"], at, r["how"]))
             rep["writes"] = {"recorded": len(res), "new_accept": sum(1 for x in res if (x or {}).get("new_accept")),
                              "push": "none (backfill)" if backfill else "caller pushes new_accept rows"}
-            # Sheet Log repair and the Brief cursor stay manual until the morning review (spec 2 steps 4 and 5).
+            # The Brief cursor is written by scripts/gmail_step.py (spec 04 fault #1, Oct 21 2026), never here.
     else:
         rep["writes"] = "none (dry run)"
     if show:
