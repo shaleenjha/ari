@@ -49,7 +49,7 @@ def sheet_table(name):
     return [{h[i]: (r[i] if i < len(r) else '') for i in range(len(h))} for r in v[1:]]
 
 
-def sb(path, body=None):
+def sb(path, body=None, _refetched=False):
     h = {'apikey': SB_PUBLISHABLE, 'Content-Type': 'application/json', 'x-ari-actor': 'hark'}
     jf = os.environ.get('ARI_SB_JWT_FILE')  # tests / outside Hark; in Hark the proxy injects the ari_worker bearer (v18.5)
     if ari_token.enabled():  # S1 R7: broker token (off by default)
@@ -58,9 +58,15 @@ def sb(path, body=None):
         h['Authorization'] = 'Bearer ' + open(jf).read().strip()
     req = urllib.request.Request(SB_URL + '/rest/v1/' + path, method='POST' if body is not None else 'GET',
                                  data=json.dumps(body).encode() if body is not None else None, headers=h)
-    with urllib.request.urlopen(req, timeout=40) as r:
-        t = r.read().decode()
-        return json.loads(t) if t else None
+    try:
+        with urllib.request.urlopen(req, timeout=40) as r:
+            t = r.read().decode()
+            return json.loads(t) if t else None
+    except urllib.error.HTTPError as e:
+        if e.code == 401 and ari_token.enabled() and not _refetched:  # R7 (as ari_db): one fresh token, one retry
+            ari_token.bearer(force=True)
+            return sb(path, body, _refetched=True)
+        raise
 
 
 def d(s):

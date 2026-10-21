@@ -147,6 +147,21 @@ class TestBearer(Base):
         self.assertIn('token ok', out.getvalue()); self.assertNotIn('sig', out.getvalue())
 
 
+    def test_cli_whoami_prints_claims_and_judges_step_c(self):
+        import ari_db
+        good = {'role': 'ari_worker', 'sub': 'uid-1', 'has_session': True, 'ttl': 3600}
+        static = {'role': 'ari_worker', 'sub': None, 'has_session': False, 'ttl': 315360000}
+        os.environ['ARI_WORKER_BROKER'] = '0'
+        for w, uid, rc in ((good, 'uid-1', 0), (static, 'uid-1', 1), (static, None, 0)):
+            if uid: os.environ['ARI_WORKER_UID'] = uid
+            else: os.environ.pop('ARI_WORKER_UID', None)
+            with mock.patch.object(ari_db, 'rpc', return_value=w) as rpc, mock.patch('sys.stdout', new_callable=io.StringIO) as out:
+                self.assertEqual(T.main(['x', 'ensure', '--whoami']), rc)
+            rpc.assert_called_once_with('ari_worker_whoami', actor='worker')
+            self.assertIn('sub=%s' % w['sub'], out.getvalue())
+        os.environ.pop('ARI_WORKER_UID', None)
+
+
 class TestAriDb(Base):
     """ari_db.request: unchanged when off; with the broker, one fresh token and one retry on 401."""
     def setUp(self):
@@ -244,6 +259,26 @@ class TestDailyReport(Base):
         with mock.patch('urllib.request.urlopen', fake_open), mock.patch.object(T, 'bearer', return_value=tok(tag='d')):
             D.sb('people?select=id')
         self.assertEqual(got, ['Bearer ' + tok(tag='d')])
+
+    def test_daily_report_refetches_once_on_401(self):
+        import importlib, daily_report as D; D = importlib.reload(D)
+        got, n = [], {'i': 0}
+        def fake_open(req, timeout=None):
+            got.append(req.get_header('Authorization'))
+            if len(got) == 1: raise http_error(401)
+            return Resp([{'k': 1}])
+        def fake_bearer(force=False, **k):
+            if force: n['i'] += 1
+            return tok(tag=str(n['i']))
+        with mock.patch('urllib.request.urlopen', fake_open), mock.patch.object(T, 'bearer', side_effect=fake_bearer):
+            self.assertEqual(D.sb('people?select=id'), [{'k': 1}])
+        self.assertEqual(got, ['Bearer ' + tok(tag='0'), 'Bearer ' + tok(tag='1')])
+
+    def test_daily_report_second_401_stops(self):
+        import importlib, daily_report as D; D = importlib.reload(D)
+        def fake_open(req, timeout=None): raise http_error(401)
+        with mock.patch('urllib.request.urlopen', fake_open), mock.patch.object(T, 'bearer', return_value=tok()):
+            with self.assertRaises(urllib.error.HTTPError): D.sb('people')
 
 
 class TestRestoreDrillKey(unittest.TestCase):

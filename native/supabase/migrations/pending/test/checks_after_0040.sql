@@ -20,7 +20,18 @@ begin
      or has_table_privilege('anon', 'public.ari_broker_state', 'select') then raise exception 'FAIL 1: table readable'; end if;
   if not exists (select 1 from cron.job where jobname = 'ari-broker-mints-prune') then raise exception 'FAIL 1: prune cron'; end if;
   if not exists (select 1 from supabase_migrations.schema_migrations where version = '0040') then raise exception 'FAIL 1: ledger'; end if;
-  raise notice 'ok 1 objects and grants';
+  -- F3: whoami is ari_worker-only and echoes the JWT claims (never the token)
+  if not has_function_privilege('ari_worker', 'public.ari_worker_whoami()', 'execute') then raise exception 'FAIL 1: ari_worker cannot whoami'; end if;
+  if has_function_privilege('authenticated', 'public.ari_worker_whoami()', 'execute') or has_function_privilege('anon', 'public.ari_worker_whoami()', 'execute')
+     then raise exception 'FAIL 1: whoami open to anon/authenticated'; end if;
+  perform set_config('request.jwt.claims', '{"role":"ari_worker","sub":"00000000-0000-4000-8000-00000000a1a1","session_id":"s1","iat":1000,"exp":4600}', true);
+  g := public.ari_worker_whoami();
+  if g <> '{"role":"ari_worker","sub":"00000000-0000-4000-8000-00000000a1a1","has_session":true,"ttl":3600}'::jsonb then raise exception 'FAIL 1: whoami broker token %', g; end if;
+  perform set_config('request.jwt.claims', '{"role":"ari_worker","iat":1000,"exp":99999999}', true);
+  g := public.ari_worker_whoami();
+  if g->>'sub' is not null or (g->>'has_session')::boolean then raise exception 'FAIL 1: whoami static token %', g; end if;
+  perform set_config('request.jwt.claims', '', true);
+  raise notice 'ok 1 objects, grants and whoami';
 
   -- 2. windows (IST). 2026-10-21 is a Wednesday.
   select windows::text into d from public.ari_broker_state where id = 1;
@@ -54,12 +65,21 @@ begin
   if n <> 1 then raise exception 'FAIL 3: expected exactly one alert for this hour, found %', n; end if;
   if exists (select 1 from public.notifications where dedupe_key like 'ops:broker:%'
              and (title ~* 'worker|token|database|supabase|api' or body ~* 'worker|token|database|supabase|api')) then raise exception 'FAIL 3: alert copy'; end if;
+  -- F1: ops_alert keeps its own fixed text (notifications_privacy lets it through) ...
+  if not exists (select 1 from public.notifications where dedupe_key = 'ops:broker:' || to_char(date_trunc('hour', now()), 'YYYYMMDDHH24')
+                 and title = 'Ari security check' and body like 'Ari blocked an unexpected background sign-in%') then
+    raise exception 'FAIL 3: alert not stored as "Ari security check" (privacy trigger rewrote it?)'; end if;
+  -- ... while a 'replied' row naming a person is still rewritten to the generic text
+  insert into public.notifications(kind, dedupe_key, title, body, url) values ('replied', 'chk0040:replied', 'Priya Fauxley replied', 'Hi Owner, sure, Tuesday works', '/ops');
+  if not exists (select 1 from public.notifications where dedupe_key = 'chk0040:replied' and title = 'New reply on LinkedIn'
+                 and body = 'Someone you messaged wrote back. Open Ari to answer.') then raise exception 'FAIL 3: replied row not rewritten'; end if;
+  delete from public.notifications where dedupe_key = 'chk0040:replied';
   -- older than an hour no longer counts
   update public.ari_broker_mints set at = now() - interval '61 minutes';
   g := public.ari_broker_gate('t5'); if not (g->>'allow')::boolean then raise exception 'FAIL 3: cap did not reset'; end if;
   begin perform public.ari_broker_note('t5', 'refused', null); raise exception 'FAIL 3: bad outcome accepted';
   exception when raise_exception then if sqlerrm like 'FAIL%' then raise; end if; end;
-  raise notice 'ok 3 gate: cap 3 per hour, log, one generic alert per hour';
+  raise notice 'ok 3 gate: cap 3 per hour, log, one "Ari security check" alert per hour, replied still generic';
 
   -- 4. disabled / outside window
   update public.ari_broker_state set enabled = false where id = 1;
@@ -78,6 +98,8 @@ do $$ begin
   if pg_has_role('authenticator', 'ari_worker', 'member') then raise exception 'FAIL 5: authenticator still has ari_worker'; end if;
   if (select enabled from public.ari_broker_state where id = 1) then raise exception 'FAIL 5: broker still enabled'; end if;
   if (select banned_until from auth.users where role = 'ari_worker') is null then raise exception 'FAIL 5: not banned'; end if;
+  if not exists (select 1 from auth.users where role = 'ari_worker' and isfinite(banned_until) and banned_until > now() + interval '99 years')
+     then raise exception 'FAIL 5: ban must be finite (~100 years), not infinity'; end if;
 end $$;
 set session authorization authenticator;
 do $$ begin

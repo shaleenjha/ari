@@ -19,6 +19,9 @@ When ON:
 Env: ARI_WORKER_BROKER=1, ARI_SB_URL (project URL; broker host is derived from its ref), ARI_BROKER_URL (override),
 ARI_SB_JWT_FILE (token file; default work/state/ari_worker_token.jwt), ARI_WORKER_CALLER_FILE (outside Hark only).
 CLI: python3 scripts/ari_token.py ensure   -> prints "token ok, N min left" (never the token itself)
+     python3 scripts/ari_token.py ensure --whoami   -> also asks the database (rpc/ari_worker_whoami, through the proxy)
+       which token it really received: prints role / sub / has_session / ttl; with env ARI_WORKER_UID set, exit 1 unless
+       sub = ARI_WORKER_UID and has_session is true (runbook step c PASS)
 """
 import base64, json, os, re, sys, tempfile, time, urllib.error, urllib.request
 
@@ -192,13 +195,29 @@ def auth_header(force=False):
     return {'Authorization': 'Bearer ' + bearer(force=force)}
 
 
+def whoami():
+    """What the database saw: {'role', 'sub', 'has_session', 'ttl'} (claims only, never the token)."""
+    import ari_db
+    return ari_db.rpc('ari_worker_whoami', actor='worker') or {}
+
+
 def main(argv):
-    if argv[1:] != ['ensure']:
-        print(__doc__.strip().splitlines()[-1]); return 2
+    if argv[1:] not in (['ensure'], ['ensure', '--whoami']):
+        print('usage: python3 scripts/ari_token.py ensure [--whoami]'); return 2
     if not enabled():
-        print('broker off (no flag file, ARI_WORKER_BROKER not 1): nothing to do'); return 0
-    left = check(bearer())
-    print('token ok, %d min left' % (left // 60))
+        print('broker off (no flag file, ARI_WORKER_BROKER not 1): nothing to do')
+    else:
+        left = check(bearer())
+        print('token ok, %d min left' % (left // 60))
+    if '--whoami' not in argv:
+        return 0
+    w = whoami()
+    print('whoami: role=%s sub=%s has_session=%s ttl=%s' % (w.get('role'), w.get('sub'), w.get('has_session'), w.get('ttl')))
+    uid = os.environ.get('ARI_WORKER_UID')
+    if uid:
+        ok = w.get('sub') == uid and w.get('has_session') is True
+        print('step c: %s' % ('PASS (the database received the broker token)' if ok else 'FAIL (not the broker token)'))
+        return 0 if ok else 1
     return 0
 
 

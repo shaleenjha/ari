@@ -8,7 +8,7 @@
 begin;
 revoke ari_worker from authenticator;
 update public.ari_broker_state set enabled = false, updated_at = now() where id = 1;
-update auth.users set banned_until = 'infinity' where role = 'ari_worker';
+update auth.users set banned_until = now() + interval '100 years' where role = 'ari_worker';   -- finite, like Auth's own ban (R7 F2)
 commit;
 select (select count(*) from pg_auth_members m join pg_roles r on r.oid = m.roleid join pg_roles u on u.oid = m.member
          where r.rolname = 'ari_worker' and u.rolname = 'authenticator') as authenticator_has_ari_worker,   -- expect 0

@@ -1,7 +1,9 @@
 -- 0040 (S1 release 7, design D; PENDING, not applied anywhere). Guardrails for the ari-worker-token broker.
--- 0039 is reserved for Diamond (docs/specs/06), so R7 takes 0040. Expand only: two new platform tables (no workspace_id,
--- like backup_runs), four functions, one cron job, one ledger row. Nothing existing is changed, so the live worker
--- (static token) and the app keep working whether or not the broker is deployed.
+-- 0039 is reserved for Diamond (docs/specs/06), so R7 takes 0040. Two new platform tables (no workspace_id, like
+-- backup_runs), five new functions, one cron job, one ledger row, and ONE change to an existing function:
+-- notifications_privacy() (0031) now lets kind 'ops_alert' through unchanged (fixed, name-free health/security text that
+-- used to arrive as "Ari update"); every other kind is rewritten exactly as before. The live worker (static token) and
+-- the app keep working whether or not the broker is deployed. The rollback restores 0031's body exactly.
 -- Rollback: 0040_s1_release7_broker_rollback.sql. Tests: test/checks_after_0040.sql (throwaway local/CI DB only).
 --   1. ari_broker_state: one row. enabled (kill switch part 1), max_per_hour (default 3; the worker's cache makes ~1 the
 --      normal), windows (IST, when a mint is allowed; default = the worker window + the off-hours housekeeping slots).
@@ -10,8 +12,10 @@
 --      cap, logs the call, and on refusal queues ONE generic ops_alert push per hour (no infrastructure words).
 --   4. ari_broker_note(request_id, outcome, reason): the broker records minted / error after the Auth call; an error
 --      alerts the same way.
---   Only service_role (the broker's own named secret key ari_worker_token) may execute 3 and 4. ari_worker, anon and
---   authenticated get nothing here.
+--   5. ari_worker_whoami(): echoes the caller's JWT role / sub / has_session / ttl (never the token). Only ari_worker may
+--      call it; runbook step c uses it through the proxy to prove the worker really sends the broker token.
+--   Only service_role (the broker's own named secret key ari_worker_token) may execute 3 and 4. anon and authenticated
+--   get nothing here; ari_worker gets only 5.
 -- The worker Auth user itself is created through the Auth admin API in the runbook (not SQL), with role ari_worker.
 begin;
 set local lock_timeout = '5s';
@@ -46,7 +50,7 @@ revoke all on sequence public.ari_broker_mints_id_seq from public, anon, authent
 
 -- is p_at (any zone) inside one of the IST windows?
 create or replace function public.ari_broker_in_window(p_at timestamptz, p_windows jsonb) returns boolean
-language sql immutable set search_path = '' as $$
+language sql stable set search_path = '' as $$
   with t as (select (p_at at time zone 'Asia/Kolkata') lt)
   select coalesce(bool_or(
            (w -> 'dow') @> to_jsonb(extract(dow from t.lt)::int)
@@ -98,6 +102,40 @@ begin
 end $$;
 revoke all on function public.ari_broker_note(text, text, text) from public, anon, authenticated, ari_worker;
 grant execute on function public.ari_broker_note(text, text, text) to service_role;
+
+-- 5. server-side identity check for runbook step c (R7 review F3)
+create or replace function public.ari_worker_whoami() returns jsonb language sql stable set search_path = '' as $$
+  select jsonb_build_object('role', c ->> 'role', 'sub', c ->> 'sub', 'has_session', (c ->> 'session_id') is not null,
+                            'ttl', (c ->> 'exp')::bigint - (c ->> 'iat')::bigint)
+    from (select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb c) x
+$$;
+revoke all on function public.ari_worker_whoami() from public, anon, authenticated;
+grant execute on function public.ari_worker_whoami() to ari_worker;
+
+-- 6. ops_alert pushes keep their fixed, name-free text (R7 review F1). Copy of 0031's body; only the first line changed.
+create or replace function public.notifications_privacy() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.kind in ('test', 'digest', 'ops_alert') or coalesce(new.dedupe_key, '') like 'digest:%' then return new; end if;
+  if coalesce((public.ari_pref('push_show_names', 'false'::jsonb) #>> '{}')::boolean, false) then return new; end if;
+  case new.kind
+    when 'replied' then new.title := 'New reply on LinkedIn'; new.body := 'Someone you messaged wrote back. Open Ari to answer.';
+    when 'accepted' then new.title := 'New connection accepted'; new.body := 'Their DM1 draft is ready in Ari.';
+    when 'meeting' then new.title := 'Meeting set'; new.body := 'Open Ari to see the details.';
+    when 'research_done' then
+      if coalesce(new.dedupe_key, '') like 'rescan:%' then new.title := 'Re-scan done'; new.body := 'A fresh look at an account is waiting in Ari.';
+      else new.title := 'Brief ready'; new.body := 'A new account brief is waiting in Ari.'; end if;
+    when 'draft_due' then
+      new.title := case when new.dedupe_key like 'draft:dm1:%' then 'DM1 ready'
+                        when new.dedupe_key like 'draft:dm2:%' then 'DM2 drafted'
+                        when new.dedupe_key like 'draft:dm3:%' then 'DM3 drafted'
+                        else 'Draft ready' end;
+      new.body := 'Ready for your review in Ari.';
+    else new.title := 'Ari update'; new.body := 'Open Ari to see what changed.';
+  end case;
+  return new;
+end $$;
+revoke all on function public.notifications_privacy() from public, anon, authenticated;
 
 select cron.schedule('ari-broker-mints-prune', '17 20 * * *',
   $$delete from public.ari_broker_mints where at < now() - interval '30 days'$$);
