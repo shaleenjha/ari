@@ -491,6 +491,8 @@ def regen(limit=200):
             continue
         if "flagged:" in (r.get("notes") or "").lower():
             continue
+        if "event invite: keep" in (r.get("notes") or "").lower():   # Owner Oct 21 2026: re:Invent leads keep the Descope dinner / booth invite
+            continue
         for kind, col, sent in (("dm1", "dm", "dm1_sent"), ("dm2", "dm2_text", "dm2_sent")):
             txt = (r.get(col) or "").strip()
             if not txt or r.get(sent):
