@@ -18,6 +18,8 @@ Run with google credentials for owner@example.com (the Supabase service binding 
 """
 import json, os, re, subprocess, sys, urllib.request, urllib.error, datetime as dt
 from zoneinfo import ZoneInfo
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import ari_token  # S1 R7
 
 SHEET = 'SHEET_ID_PLACEHOLDER'
 TO = 'work@example.com'
@@ -50,7 +52,9 @@ def sheet_table(name):
 def sb(path, body=None):
     h = {'apikey': SB_PUBLISHABLE, 'Content-Type': 'application/json', 'x-ari-actor': 'hark'}
     jf = os.environ.get('ARI_SB_JWT_FILE')  # tests / outside Hark; in Hark the proxy injects the ari_worker bearer (v18.5)
-    if jf:
+    if ari_token.enabled():  # S1 R7: broker token (off by default)
+        h.update(ari_token.auth_header())
+    elif jf:
         h['Authorization'] = 'Bearer ' + open(jf).read().strip()
     req = urllib.request.Request(SB_URL + '/rest/v1/' + path, method='POST' if body is not None else 'GET',
                                  data=json.dumps(body).encode() if body is not None else None, headers=h)

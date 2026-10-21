@@ -50,3 +50,11 @@ Tested Oct 17 on local Postgres 17 with the prod schema (schema-only restore, sy
 - 0031_copy_tags_edits_rescan_push: local PG17 + staging apply / tests (ALL 0031 TESTS PASSED) / rollback / re-apply / tests, then prod (ledger 0031). Rollback rollbacks/0031_rollback.sql matches prod's pre-0031 function bodies.
 - ari-gmail-oauth redeployed (v3) on staging then prod: browser outcomes redirect to /ops?gmail=...
 - Helper work/maint_0031.py deleted; token revoked on supabase.com (list empty); api.supabase.com 401. Nothing pending here.
+
+## Worker kill switch (S1 R7, Oct 21 2026; usable once migration 0040 is applied)
+Stops every worker credential within a minute, the static token included: run `native/supabase/ops/r7_kill_switch_on.sql`
+through the Management API query endpoint (Owner's short-lived PAT). It revokes `ari_worker` from `authenticator` (PostgREST
+then refuses every ari_worker token), disables the broker gate, and bans the worker Auth user. Undo:
+`native/supabase/ops/r7_kill_switch_off.sql`. If the broker itself is suspect, also set the function secret
+`ARI_BROKER_DISABLED=1` on `ari-worker-token`. Worker-side emergency off without a PAT: `ARI_WORKER_BROKER=0` or delete
+`work/state/ari_worker_broker.on` (falls back to the static token only while it still exists, i.e. before the revoke).

@@ -17,7 +17,7 @@ So these files are what runs, apart from formatting and comments.
 | `ari-gmail-oauth` | 3 | 2026-10-17 09:27 | off | SUPABASE_URL, **SUPABASE_SERVICE_ROLE_KEY**, ARI_GMAIL_CLIENT_ID, ARI_GMAIL_CLIENT_SECRET |
 | `ari-gmail-ingest` | 2 | 2026-10-17 03:12 | off | SUPABASE_URL, **SUPABASE_SERVICE_ROLE_KEY**, ARI_GMAIL_CLIENT_ID, ARI_GMAIL_CLIENT_SECRET |
 
-- All four read the legacy `SUPABASE_SERVICE_ROLE_KEY`. Revoking the legacy keys (S1 release 8) needs each one moved to a
+- All four read the legacy `SUPABASE_SERVICE_ROLE_KEY`. Revoking the legacy keys (S1 release 7) needs each one moved to a
   new secret key first, or it breaks push, the nightly backup and Gmail ingest.
 - `ari-backup` also bundles `npm:postgres@3.4.4` and `pkijs` (esm.sh) for the CMS encryption.
 - No secret values are in these files: every key comes from the function's environment.
@@ -35,3 +35,15 @@ So these files are what runs, apart from formatting and comments.
   project (`ljojwhnfgfreokqspobg.supabase.co`, allowlist, issue #4 follow-up); prod, a custom domain, an unparseable or
   missing URL all get the built-in two-recipient bundle. After the deploy, delete the two
   STAGING_* function secrets and the old plaintext objects in ari-staging's ari-backups bucket.
+
+## S1 R7 (prepared Oct 21 2026, not deployed)
+- `pending/ari-push`, `pending/ari-gmail-oauth`, `pending/ari-gmail-ingest`, `pending/ari-backup`: each reads its OWN named
+  secret key (`ari_push`, `ari_gmail_oauth`, `ari_gmail_ingest`, `ari_backup`) through `secretKey()` and sends it as `apikey`
+  only (an `sb_secret_` key is not a JWT). No fallback to `SUPABASE_SERVICE_ROLE_KEY`: a missing key fails closed.
+  `secretKey()` reads `SUPABASE_SECRET_KEYS` (JSON name -> key) or the function secret `ARI_SK_<NAME>`.
+- `pending/ari-worker-token`: the worker's token broker (design D). Verify JWT off; called only on
+  `https://<ref>.functions.supabase.co/ari-worker-token` with header `x-ari-worker-caller`. Env: `ARI_WORKER_CALLER_SECRET`,
+  `ARI_WORKER_EMAIL`, `ARI_WORKER_PASSWORD`, `ARI_WORKER_UID`, named key `ari_worker_token`, kill switch `ARI_BROKER_DISABLED=1`.
+  Gate and mint log in migration `pending/0040_s1_release7_broker.sql`. Offline tests: `deno test --allow-env pending/ari-worker-token/`.
+- `pending/check_no_legacy_keys.py` (CI) refuses a pending function that reads the legacy key or sends a Bearer secret key.
+- Order and undo: `work/r7/runbook.md` (not in the repo). After each prod deploy, move the pending file over the live one.

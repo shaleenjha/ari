@@ -50,3 +50,13 @@ api "$PEND/0037_members_aal2_rollback.sql"; api "$PEND/0037_members_aal2_rollbac
 for m in 0037_members_aal2 0038_s1_release6; do api "$PEND/$m.sql"; done; echo "applied 0037, 0038 again after the rollback"
 $P -f "$HERE/checks_after_0037.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
 $P -f "$HERE/checks_after_0038.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+
+# S1 release 7 (0040 broker guardrails + kill switch files), on top of 0037/0038. Added Oct 21 2026 (work/r7/runbook.md).
+api "$PEND/0040_s1_release7_broker.sql"; echo "applied 0040"
+$P -f "$HERE/checks_after_0040.sql" 2>&1 | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+api "$PEND/0040_s1_release7_broker.sql"; echo "re-applied 0040 (idempotence): no error"
+api "$PEND/0040_s1_release7_broker_rollback.sql"; api "$PEND/0040_s1_release7_broker_rollback.sql"; echo "rolled back 0040 (twice)"
+n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_broker_%'")$($P -At -c "select count(*) from pg_class where relname like 'ari_broker_%'")
+[ "$n" = "00" ] || { echo "FAIL 0040 rollback left objects ($n)"; exit 1; }; echo "0040 ROLLBACK CHECK PASSED"
+api "$PEND/0040_s1_release7_broker.sql"; echo "applied 0040 again after the rollback"
+$P -f "$HERE/checks_after_0040.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
