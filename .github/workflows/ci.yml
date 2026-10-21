@@ -1,8 +1,12 @@
 name: ci
+# Oct 21 2026 (Owner): Actions minutes hit 90%. Each job runs only when its own area changed;
+# markdown/docs-only pushes run nothing. workflow_dispatch always runs everything.
 on:
   push:
     branches: [main]
+    paths-ignore: ['**/*.md', 'docs/**', 'app2/docs/**']
   pull_request:
+    paths-ignore: ['**/*.md', 'docs/**', 'app2/docs/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,8 +15,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: changes (which areas changed)
+    runs-on: ubuntu-latest
+    permissions: { contents: read, pull-requests: read }
+    outputs:
+      web: ${{ steps.f.outputs.web == 'true' || github.event_name == 'workflow_dispatch' }}
+      jobs: ${{ steps.f.outputs.jobs == 'true' || github.event_name == 'workflow_dispatch' }}
+      sql: ${{ steps.f.outputs.sql == 'true' || github.event_name == 'workflow_dispatch' }}
+      scripts: ${{ steps.f.outputs.scripts == 'true' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: f
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            web: ['.github/workflows/ci.yml', 'app2/web/**']
+            jobs: ['.github/workflows/ci.yml', 'app2/jobs/**']
+            sql: ['.github/workflows/ci.yml', 'app2/db/**', 'native/supabase/**']
+            scripts: ['.github/workflows/ci.yml', 'scripts/**']
+
   web:
+    needs: changes
     name: web (typecheck, unit, build)
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app2/web } }
     steps:
@@ -25,7 +51,9 @@ jobs:
       - run: npm run build
 
   jobs:
+    needs: changes
     name: jobs (typecheck, runtime timeout/fencing, gmail fetch/parse/shadow unit)
+    if: needs.changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app2/jobs } }
     steps:
@@ -37,7 +65,9 @@ jobs:
       - run: npm test
 
   drafts-eval:
+    needs: changes
     name: drafts-eval (Quill style harness, synthetic personas)
+    if: needs.changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app2/jobs } }
     steps:
@@ -48,7 +78,9 @@ jobs:
       - run: npm run eval:drafts
 
   sql:
+    needs: changes
     name: sql (schema, RLS matrix, task commands, job queue + fencing, gmail ingest)
+    if: needs.changes.outputs.sql == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -63,8 +95,10 @@ jobs:
       - run: bash app2/db/run_tests.sh
 
   sql-prod-shape:
+    needs: changes
     permissions: { issues: write, contents: read }
     name: sql-prod-shape (pending 0033-0038 on the prod schema shape, rollbacks, before/after probes)
+    if: needs.changes.outputs.sql == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -89,7 +123,9 @@ jobs:
           gh issue edit 1 --body-file b.md || gh issue comment 1 --body-file b.md
 
   scripts:
+    needs: changes
     name: scripts (python unit)
+    if: needs.changes.outputs.scripts == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -104,7 +140,9 @@ jobs:
       - run: python3 scripts/test_git_push_branch.py   # S1 job fencing PR: review-branch push, never main, never deletes (mocked GitHub API)
 
   anti-slop-static:
+    needs: changes
     name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     defaults: { run: { working-directory: app2/web } }
@@ -120,7 +158,8 @@ jobs:
 
   design-lint:
     name: design-lint (hit targets, dead taps, contrast, rendered copy, Today height, fonts/gradients/glows; 360/390/412 px, Chromium + WebKit; blocking)
-    needs: [web, anti-slop-static]
+    needs: [changes, web, anti-slop-static]
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     # 10 was hit on v18.13.7 (9 min on v18.13.6) before the read-only scenarios; the time budget only, no rule changes.
     timeout-minutes: 20
@@ -138,7 +177,8 @@ jobs:
 
   e2e:
     name: e2e (Playwright 360/390/412 px, Chromium + WebKit; auth hygiene; verify-mobile artifact)
-    needs: web
+    needs: [changes, web]
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app2/web } }
     steps:
