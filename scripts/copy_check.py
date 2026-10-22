@@ -10,6 +10,7 @@
 #        kind: dm1 | dm2 | dm3 | note.  Prints "PASS" or "FLAG: R3 product line in DM1; R5 ..." (exit 0 / 1).
 #        --vendor-line: this text is the "add one short what-we-do line" switch version (R3 not applied).
 #   python3 scripts/copy_check.py arm <person_id>      -> JSON {arm, pick, switch, why}: which DM1 structure Ari uses
+#   python3 scripts/copy_check.py arm2 <person_id>     -> JSON {arm, variant, pick, fallback}: the person's DM2 A/B arm (Oct 22)
 #   python3 scripts/copy_check.py regen [limit]        -> JSON list of unsent DM1s and DM2s that fail the AE style guide (since 21 Oct 2026)
 #        kind exec = an exec-track note (old v1 checks only); kind note = Owner's connect note (AE guide shape).
 #   python3 scripts/copy_check.py regen --count        -> just the number (used by worker_precheck.py)
@@ -272,7 +273,7 @@ def _check_v1(pid, kind, text, structure="", vendor_line=False, rows=None, has_a
 # "worth a quick chat", closer reuse, opening share, character caps, S/F structure minimums) are dropped for
 # these kinds; every other floor (dashes, banned phrases, hedges, clarity, links, repeats) still runs.
 AE_STYLE_SINCE = "2026-10-21"
-STYLE_KINDS = ("note", "dm1", "dm2")
+STYLE_KINDS = ("note", "dm1", "dm2", "dm3")
 ALLOWED_CUSTOMERS = ["goodrx", "walmart", "visa", "flo health"]
 KNOWN_CUSTOMERS = ALLOWED_CUSTOMERS + ["hippocratic"]
 COMPETITORS = ["protegrity", "private ai", "tonic", "gretel", "incountry", "agentcloak", "very good security", "vgs",
@@ -282,7 +283,7 @@ STYLE_BANNED = ["i'd love to", "i would love to", "reason i'm reaching out", "re
                 "revolutioniz", "transform your", "just following up"]
 GUIDE_FIXED = re.compile(r"(thanks for connecting, [^.]+\.|^\S+, last one from me\.|we built a data privacy layer that|"
                          r"teams like visa use it\.|worth connecting\?|worth 15 minutes\?|worth a quick call\?|"
-                         r"worth 20 minutes with you and|happy to show how|we talk to|on your 2027 list|most )", re.I)
+                         r"worth 20 minutes with you and|worth 20 minutes\?|happy to show how|we talk to|on your 2027 list|did you see|one more angle|most )", re.I)
 V1_DROP = ("M1", "R3", "P1", "R5", "R4", "R2", "R10", "S2 ", "S5 ", "S6 ", "F1 ")
 TRIGGER = re.compile(r"\b(saw|noticed|congrats|just (launched|announced|raised|hired)|announced|launched|raised|hired|joined as)\b", re.I)
 
@@ -329,6 +330,28 @@ def _hook_ok(pid, rows=None):
     except BaseException:
         return True  # db down: never block on this; the human floor still applies
     return False
+
+
+def _seen_ok(pid, rows=None):
+    # The "did you see" DM2 arm needs a real dated item: a V notes "DM2 item: yyyy-MM-dd <url>" line, or a dated hook.
+    try:
+        import ari_db
+        me = next((r for r in (rows or []) if r.get("id") == pid), None) or \
+            (ari_db.get("people?select=id,account_id,notes&id=eq.%s" % pid) or [{}])[0]
+        if re.search(r"dm2 item:\s*20\d\d-\d\d-\d\d\s+https?://", (me.get("notes") or "").lower()):
+            return True
+    except BaseException:
+        return True
+    return _hook_ok(pid, rows)
+
+
+def dm2_arm(pid):
+    """DM2 A/B (Owner Oct 22 2026): even hash = 'seen' (did you see this dated item?), odd = 'reason' (a fresh angle)."""
+    h = int(hashlib.md5(("dm2-ab-v1:" + pid).encode()).hexdigest(), 16)
+    a = "seen" if h % 2 == 0 else "reason"
+    return {"arm": a, "variant": "arm=dm2_" + a,
+            "pick": "Did you see this?" if a == "seen" else "One more angle",
+            "fallback": "No real dated item you can name in one line: write the reason arm and tag arm=dm2_reason;fb=1." if a == "seen" else ""}
 
 
 def style_flags(pid, kind, text, style, rows=None):
@@ -401,13 +424,25 @@ def style_flags(pid, kind, text, style, rows=None):
                 f.append("G6 Blake DM1 ends 'Worth 20 minutes with you and <owner>?'")
             if "vendor" not in low:
                 f.append("G6 Blake beat 3: one line on what Vendor does")
-    if kind == "dm2":
+    if kind == "dm2":   # Owner Thu 22 Oct 2026 23:28 IST: DM2 is no longer the close; A/B arms "did you see" and "fresh reason"
+        if "last one from me" in low:
+            f.append("G6 DM2 is not the close any more ('last one from me' moved to DM3)")
+        if re.match(r"^\S+, did you see\b", low) and not _seen_ok(pid, rows):
+            f.append("G3 'did you see' needs a real dated item on file (V notes 'DM2 item: yyyy-MM-dd <url>' or a dated hook)")
+        if not (re.match(r"^\S+, did you see\b", low) or re.match(r"^\S+, one more angle\.", low)):
+            f.append("G6 DM2 opens '<First>, did you see ...' (seen arm) or '<First>, one more angle.' (reason arm)")
+        want = "worth 20 minutes?" if style == "blake" else "worth 15 minutes?"
+        if not last.endswith(want):
+            f.append("G6 DM2 ends '%s'" % want.capitalize())
+        if t.count("?") > (2 if re.match(r"^\S+, did you see\b", low) else 1):
+            f.append("G4 one ask only")
+    if kind == "dm3":   # the close (old DM2 shape), a week after DM2
         if not re.match(r"^\S+, last one from me\.", low):
-            f.append("G6 DM2 opens '<First>, last one from me.'")
+            f.append("G6 DM3 opens '<First>, last one from me.'")
         if "happy to show how" not in low:
-            f.append("G6 DM2 carries 'happy to show how ...'")
+            f.append("G6 DM3 carries 'happy to show how ...'")
         if not last.startswith("worth a quick call"):
-            f.append("G6 DM2 ends 'Worth a quick call?'")
+            f.append("G6 DM3 ends 'Worth a quick call?'")
         if t.count("?") > 1:
             f.append("G4 one ask only")
     return f
@@ -493,9 +528,12 @@ def regen(limit=200):
             continue
         if "event invite: keep" in (r.get("notes") or "").lower():   # Owner Oct 21 2026: re:Invent leads keep the Descope dinner / booth invite
             continue
-        for kind, col, sent in (("dm1", "dm", "dm1_sent"), ("dm2", "dm2_text", "dm2_sent")):
+        for kind, col, sent in (("dm1", "dm", "dm1_sent"), ("dm2", "dm2_text", "dm2_sent"), ("dm3", "dm3_text", "dm3_sent")):
             txt = (r.get(col) or "").strip()
             if not txt or r.get(sent):
+                continue
+            # Oct 22 2026: DM2/DM3 drafts are redrafted only once the step before went out (lazy, saves tokens)
+            if (kind == "dm2" and not r.get("dm1_sent")) or (kind == "dm3" and not r.get("dm2_sent")):
                 continue
             fl, _ = check(r["id"], kind, txt, rows=rows)
             # Repeat-only flags (R6/R7) do not trigger a redraft: Owner's own sheet copy reuses the guide's
@@ -503,9 +541,9 @@ def regen(limit=200):
             fl = [x for x in fl if not x.startswith(("R6", "R7"))]
             if fl:
                 out.append({"person_id": r["id"], "kind": kind, "company": r.get("company"),
-                            "due": r.get("dm2_due") if kind == "dm2" else r.get("accepted"), "flags": fl[:4]})
+                            "due": r.get("dm2_due") if kind == "dm2" else r.get("dm3_due") if kind == "dm3" else r.get("accepted"), "flags": fl[:4]})
     # accepted people's DM1s first (they are next to send), then DM2s by due date, then the rest
-    out.sort(key=lambda x: (0 if (x["kind"] == "dm1" and x.get("due")) else 1 if x["kind"] == "dm2" else 2,
+    out.sort(key=lambda x: (0 if (x["kind"] == "dm1" and x.get("due")) else 1 if x["kind"] in ("dm2", "dm3") else 2,
                             str(x.get("due") or "9999"), x["person_id"]))
     return out[:limit]
 
@@ -535,6 +573,8 @@ def main(a):
         print("PASS"); return 0
     if cmd == "arm":
         print(json.dumps(arm(a[1]))); return 0
+    if cmd == "arm2":
+        print(json.dumps(dm2_arm(a[1]))); return 0
     if cmd == "regen":
         lst = regen(100000)
         if "--count" in a:

@@ -58,6 +58,7 @@ def main():
     reasons, detail = [], []
     now = dt.datetime.now(IST)
     today = now.strftime("%Y-%m-%d")
+    soon = (now + dt.timedelta(days=1)).strftime("%Y-%m-%d")
     s = sheet(["Queue", "People", "Brief"])
     brief = {g(r, "key"): g(r, "value") for r in s["Brief"]}
 
@@ -138,7 +139,7 @@ def main():
         if not g(p, "why"):
             hits["no_why"].append(pid)
         for due, sent, txt in (("dm2_due", "dm2_sent", "dm2_text"), ("dm3_due", "dm3_sent", "dm3_text")):
-            if g(p, due)[:10] == today and not g(p, sent) and not g(p, txt):
+            if g(p, due)[:10] and g(p, due)[:10] <= soon and not g(p, sent) and not g(p, txt) and not g(p, "replied"):   # due by tomorrow (Oct 22: DM3 drafted ahead)
                 hits["followup_due"].append(pid)
         tier, flag = tiers.get(g(p, "company").lower(), ("", ""))
         if (lead and review == "lead" and CSUITE.search(g(p, "title")) and "founder" not in route.lower()
