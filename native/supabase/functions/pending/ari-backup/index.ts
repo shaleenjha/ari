@@ -1,3 +1,5 @@
+// S1 R7 (PENDING, not deployed): reads its own named secret key ari_backup (apikey header only) instead of the legacy
+// SUPABASE_SERVICE_ROLE_KEY. Deploy staging first (work/r7/runbook.md step b); the live source is ../../ari-backup/index.ts.
 // ari-backup (v18.7.1, Oct 17 2026; v18.6 base): nightly logical backup that runs entirely inside Supabase, so no Hark run needs the
 // Management token. Invoked by pg_cron (job ari-nightly-backup -> public.ari_backup_kick()) with header x-ari-hook.
 // Deploy with "Verify JWT" OFF: the caller is checked against vault secret ari_backup_hook_secret.
@@ -78,8 +80,21 @@ async function sha256(b: Uint8Array) {
   const h = new Uint8Array(await crypto.subtle.digest("SHA-256", b));
   return Array.from(h).map((x) => x.toString(16).padStart(2, "0")).join("");
 }
+// S1 R7 (Oct 2026): this function's own named secret key, sent as apikey ONLY (an sb_secret_ key is not a JWT; the
+// gateway turns it into the internal service token). Supabase injects SUPABASE_SECRET_KEYS (JSON, name -> key); if a
+// project does not, the deploy sets ARI_SK_<NAME> as a function secret instead. Never falls back to the legacy
+// SUPABASE_SERVICE_ROLE_KEY. Function secrets are project-wide, so per-function keys buy separate revocation and
+// attribution, not isolation.
+function secretKey(name: string): string {
+  let all: Record<string, string> = {};
+  try { all = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}"); } catch { all = {}; }
+  const k = all[name] ?? Deno.env.get(`ARI_SK_${name.toUpperCase()}`);
+  if (!k || !k.startsWith("sb_secret_")) throw new Error(`secret key ${name} missing`);
+  return k;
+}
+
 function hdr(key: string, extra: Record<string, string> = {}) {
-  return { apikey: key, Authorization: `Bearer ${key}`, ...extra };
+  return { apikey: key, ...extra };
 }
 async function put(url: string, key: string, name: string, body: Uint8Array, bucket = BUCKET) {
   const r = await fetch(`${url}/storage/v1/object/${bucket}/${name}`, {
@@ -103,7 +118,7 @@ async function prune(url: string, key: string, bucket = BUCKET) {
 }
 
 async function run(sql: postgres.Sql, runId: number) {
-  const url = Deno.env.get("SUPABASE_URL")!, key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const url = Deno.env.get("SUPABASE_URL")!, key = secretKey("ari_backup");
   const tabs = await sql`select n.nspname s, c.relname t from pg_class c join pg_namespace n on n.oid = c.relnamespace
                          where n.nspname = 'public' and c.relkind in ('r','p') order by c.relname`;
   const list: [string, string][] = [...tabs.map((r) => [r.s, r.t] as [string, string]), ...EXTRA as [string, string][]];

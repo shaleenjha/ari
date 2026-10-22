@@ -22,6 +22,8 @@ Outside Hark / tests: set ARI_SB_URL, ARI_SB_APIKEY and ARI_SB_JWT_FILE (an ari_
 Database rights: role ari_worker only (native/supabase/migrations/0018_least_privilege_worker.sql); no service_role, no raw SQL.
 """
 import argparse, datetime as dt, hashlib, json, os, re, subprocess, sys, time, urllib.error, urllib.parse, urllib.request
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import ari_token  # S1 R7 (off unless ARI_WORKER_BROKER=1)
 
 SHEET_ID = "SHEET_ID_PLACEHOLDER"
 SB_URL = os.environ.get("ARI_SB_URL") or "https://rbkrqlzlblquvgmuohro.supabase.co"
@@ -212,14 +214,17 @@ def sb(method, path, body=None, actor="sheet", prefer=None, rng=None):
     h = {"Content-Type": "application/json", "x-ari-actor": actor}
     h["apikey"] = SB_PUBLISHABLE
     jf = os.environ.get("ARI_SB_JWT_FILE")
-    if jf:  # tests / outside Hark; in Hark the proxy injects the ari_worker bearer
+    if ari_token.enabled():  # S1 R7: broker token (off by default); 401 re-fetch below
+        h.update(ari_token.auth_header())
+    elif jf:  # tests / outside Hark; in Hark the proxy injects the ari_worker bearer
         h["Authorization"] = "Bearer " + open(jf).read().strip()
     if prefer:
         h["Prefer"] = prefer
     if rng:
         h["Range-Unit"] = "items"; h["Range"] = rng
     data = json.dumps(body).encode() if body is not None else None
-    for attempt in range(3):
+    refetched = False
+    for attempt in range(4 if ari_token.enabled() else 3):  # +1 slot only for the one 401 re-fetch
         req = urllib.request.Request(url, data=data, method=method, headers=h)
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
@@ -227,6 +232,10 @@ def sb(method, path, body=None, actor="sheet", prefer=None, rng=None):
                 return json.loads(t) if t else None
         except urllib.error.HTTPError as e:
             msg = e.read().decode()[:600]
+            if e.code == 401 and ari_token.enabled() and not refetched:  # S1 R7: one fresh token, one retry
+                refetched = True
+                h.update(ari_token.auth_header(force=True))
+                continue
             if e.code >= 500 and attempt < 2:
                 time.sleep(2 * (attempt + 1)); continue
             raise RuntimeError("supabase %s %s -> %s %s" % (method, path, e.code, msg))

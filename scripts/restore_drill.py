@@ -10,7 +10,7 @@
 # native/supabase/baseline), loads every public table from the JSON with json_populate_recordset, and compares row counts
 # with the backup. Result: work/backups/drill_<object>.json (counts only, no rows).
 import os, sys, json, glob, gzip, shutil, subprocess, urllib.request
-REF = 'rbkrqlzlblquvgmuohro'
+REF = os.environ.get('ARI_PROJECT_REF') or 'rbkrqlzlblquvgmuohro'  # R7 staging drill: ARI_PROJECT_REF=ljojwhnfgfreokqspobg
 # v18.7.1: maintenance-only. Refuses to touch the Management API unless a maintenance session opts in explicitly
 # (ARI_MAINT=1) with a fresh short-lived token. No scheduled or worker run sets it.
 # --file mode reads a local copy and needs no token, so it is allowed outside maintenance sessions.
@@ -23,16 +23,34 @@ sys.path.insert(0, os.path.dirname(__file__))
 from db_backup import STUB, ensure_pg
 import offsite_certs
 
+MAINT_KEY = os.environ.get('ARI_MAINT_KEY_NAME') or 'ari_maint'
+
+def pick_key(keys, name=MAINT_KEY, allow_legacy=False):
+    """S1 R7: the named secret key (default ari_maint, type secret), never the legacy service_role JWT unless
+    ARI_ALLOW_LEGACY_KEY=1 (only until R7 step b creates ari_maint)."""
+    if not isinstance(keys, list): raise SystemExit('maintenance token not bound (expected outside maintenance sessions)')
+    for x in keys:
+        if x.get('type') == 'secret' and x.get('name') == name and str(x.get('api_key', '')).startswith('sb_secret_'):
+            return x['api_key']
+    if allow_legacy:
+        for x in keys:
+            if x.get('name') == 'service_role' and x.get('api_key'): return x['api_key']
+    raise SystemExit('no secret key named %s (create it in R7 step b, or set ARI_ALLOW_LEGACY_KEY=1 before the disable)' % name)
+
 def svc_key():
     r = subprocess.run(['curl', '-s', f'https://api.supabase.com/v1/projects/{REF}/api-keys?reveal=true'], capture_output=True, text=True)
-    k = json.loads(r.stdout)
-    if not isinstance(k, list): raise SystemExit('maintenance token not bound (expected outside maintenance sessions)')
-    return [x for x in k if x.get('name') == 'service_role'][0]['api_key']
+    return pick_key(json.loads(r.stdout), allow_legacy=os.environ.get('ARI_ALLOW_LEGACY_KEY') == '1')
+
+def key_headers(key):
+    # an sb_secret_ key is not a JWT: apikey header only (the gateway mints the internal token). The legacy JWT keeps Bearer.
+    h = {'apikey': key, 'Content-Type': 'application/json'}
+    if not key.startswith('sb_secret_'): h['Authorization'] = 'Bearer ' + key
+    return h
 
 def http(method, path, key, body=None):
     req = urllib.request.Request(f'https://{REF}.supabase.co/storage/v1/{path}', method=method,
                                  data=json.dumps(body).encode() if body is not None else None,
-                                 headers={'apikey': key, 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'})
+                                 headers=key_headers(key))
     # direct (no sandbox proxy): the proxy would swap the Authorization header for the ari_worker key on this host
     with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req, timeout=120) as r: return r.read()
 

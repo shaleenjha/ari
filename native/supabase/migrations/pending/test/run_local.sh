@@ -50,3 +50,18 @@ api "$PEND/0037_members_aal2_rollback.sql"; api "$PEND/0037_members_aal2_rollbac
 for m in 0037_members_aal2 0038_s1_release6; do api "$PEND/$m.sql"; done; echo "applied 0037, 0038 again after the rollback"
 $P -f "$HERE/checks_after_0037.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
 $P -f "$HERE/checks_after_0038.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+
+# S1 release 7 (0040 broker guardrails + kill switch files), on top of 0037/0038. Added Oct 21 2026 (work/r7/runbook.md).
+api "$PEND/0040_s1_release7_broker.sql"; echo "applied 0040"
+$P -f "$HERE/checks_after_0040.sql" 2>&1 | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+api "$PEND/0040_s1_release7_broker.sql"; echo "re-applied 0040 (idempotence): no error"
+api "$PEND/0040_s1_release7_broker_rollback.sql"; api "$PEND/0040_s1_release7_broker_rollback.sql"; echo "rolled back 0040 (twice)"
+n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_broker_%' or proname = 'ari_worker_whoami'")$($P -At -c "select count(*) from pg_class where relname like 'ari_broker_%'")$($P -At -c "select count(*) from pg_proc where proname = 'notifications_privacy' and prosrc like '%ops_alert%'")
+[ "$n" = "000" ] || { echo "FAIL 0040 rollback left objects ($n)"; exit 1; }; echo "0040 ROLLBACK CHECK PASSED"
+api "$PEND/0040_s1_release7_broker.sql"; echo "applied 0040 again after the rollback"
+$P -f "$HERE/checks_after_0040.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+# 0040 parallel cap (R7 review): 12 concurrent gate calls in a fresh hour -> exactly 3 allowed (the advisory lock holds it)
+$P -c "delete from public.ari_broker_mints" -c "update public.ari_broker_state set enabled = true, windows = '[{\"dow\":[0,1,2,3,4,5,6],\"from\":\"00:00\",\"to\":\"23:59\"}]' where id = 1"
+for i in $(seq 1 12); do $P -At -c "select public.ari_broker_gate('par$i')" >/dev/null & done; wait
+n=$($P -At -c "select count(*) from public.ari_broker_mints where request_id like 'par%' and outcome = 'allowed'")
+[ "$n" = "3" ] || { echo "FAIL 0040 parallel cap: $n allowed"; exit 1; }; echo "0040 PARALLEL CAP PASSED"

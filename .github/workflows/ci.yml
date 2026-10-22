@@ -97,7 +97,7 @@ jobs:
   sql-prod-shape:
     needs: changes
     permissions: { issues: write, contents: read }
-    name: sql-prod-shape (pending 0033-0038 on the prod schema shape, rollbacks, before/after probes)
+    name: sql-prod-shape (pending 0033-0040 on the prod schema shape, rollbacks, before/after probes)
     if: needs.changes.outputs.sql == 'true'
     runs-on: ubuntu-latest
     services:
@@ -122,6 +122,20 @@ jobs:
           { echo "sql-prod-shape log, run ${{ github.run_id }}"; echo '```'; tail -n 150 prodshape.log | head -c 60000; echo '```'; } > b.md
           gh issue edit 1 --body-file b.md || gh issue comment 1 --body-file b.md
 
+  functions:
+    needs: changes
+    name: functions (S1 R7 broker, deno type check + offline tests)
+    if: needs.changes.outputs.sql == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.x }
+      # ari-push and ari-backup predate strict typing (plain-JS style, pre-existing errors); they are parse-checked only.
+      - run: deno check native/supabase/functions/pending/ari-worker-token/index.ts native/supabase/functions/pending/ari-gmail-oauth/index.ts native/supabase/functions/pending/ari-gmail-ingest/index.ts
+      - run: deno test --allow-env native/supabase/functions/pending/ari-worker-token/
+      - run: python3 native/supabase/functions/pending/check_no_legacy_keys.py   # S1 R7: named sb_secret keys, apikey only
+
   scripts:
     needs: changes
     name: scripts (python unit)
@@ -138,6 +152,7 @@ jobs:
       - run: python3 scripts/test_gmail_step.py   # spec 04 fault #1: code-owned Gmail cursor (monotonic, frozen on failure, skip after 3)
       - run: python3 scripts/test_git_sync_pull.py   # v18.17.10: pull-first git sync (mocked GitHub API)
       - run: python3 scripts/test_git_push_branch.py   # S1 job fencing PR: review-branch push, never main, never deletes (mocked GitHub API)
+      - run: python3 scripts/test_ari_token.py   # S1 R7: worker broker token fetch, cache, 401 re-fetch; off by default (mocked)
 
   anti-slop-static:
     needs: changes
