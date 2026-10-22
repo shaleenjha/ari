@@ -101,7 +101,7 @@ def build(sd):
         if snz and snz > sd:
             continue
         d2due = d(p.get("dm2_due")) or (add(d1, 4) if d1 else "")
-        d3due = d(p.get("dm3_due")) or (add(d1, 7) if d1 else "")
+        d3due = d(p.get("dm3_due")) or (add(d2, 7) if d2 else add(d1, 11) if d1 else "")
         who = {"id": p["id"], "name": p["name"], "title": p.get("title", ""), "co": p.get("company", ""),
                "url": li(p.get("linkedin_url"))}
         if rp:
@@ -145,7 +145,7 @@ def describe(kind, items, first_n=1):
         if i["msg"]:
             lines.append(i["msg"])
         elif i["tag"] == "DM3":
-            lines.append("(No DM3 drafted: Ari's current rule stops at DM2. Send a last nudge only if you want to.)")
+            lines.append("(DM3 not drafted yet. Ari writes it before it is due.)")
         elif i["tag"] in ("DM1", "DM2", "Reply"):
             lines.append("(Ari is still drafting this one; it lands here on the next refresh.)")
         lines.append("")
@@ -227,6 +227,12 @@ def connects(items, have, cursor, sd, now, dry, relayout):
 
 def main():
     dry, cleanup, relayout = "--dry" in sys.argv, "--cleanup" in sys.argv, "--relayout" in sys.argv
+    if not dry:                        # DM3 a week after DM2 (Owner Oct 22): fix dm3_due first so blocks read the rule
+        try:
+            import cadence
+            cadence.main()
+        except BaseException as e:
+            print("cadence: error %s" % e)
     now = dt.datetime.now(IST)
     sd = (now - dt.timedelta(hours=6)).date().isoformat()
     try:

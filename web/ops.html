@@ -113,7 +113,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
   people.forEach(function(p){
     var a=accts[p.company]||{},stage=effStage(p),acct=p.company,bk=bookBy[normCo(p.company)],mhold=!!meetCo[normCo(p.company)]&&stage==='Hold'&&!/^hold$/i.test(p.stage||'');
     var cs=dOnly(p.connect_sent),ac=dOnly(p.accepted),d1=dOnly(p.dm1_sent),d2=dOnly(p.dm2_sent),d3=dOnly(p.dm3_sent),rp=dOnly(p.replied),mt=dOnly(p.meeting),wd=dOnly(p.withdrawn);
-    var d2due=dOnly(p.dm2_due)||(d1?addD(d1,4):''),d3due=dOnly(p.dm3_due)||(d1?addD(d1,7):'');
+    var d2due=dOnly(p.dm2_due)||(d1?addD(d1,4):''),d3due=dOnly(p.dm3_due)||(d2?addD(d2,7):d1?addD(d1,11):'');
     var snz=dOnly(p.snooze_until),snoozed=snz&&snz>sd,skipped=!!String(p.skipped||'').trim();
     var d1due=ac,pend=String(p.review||'').trim().toLowerCase()==='pending',rs=String(p.research||'').trim(); /* v16.1: DM1 is due the moment they accept */
     if(/likely personal/i.test(rs)&&low(p.review)==='lead')rs='Researching'; /* v16.2: Owner said lead, so Hark researches it */
@@ -6331,8 +6331,8 @@ window.ariGoal=()=>Math.max(1,GOAL);
 window.ariWord=n=>n<=0?'Nothing':W(n);
 window.ariMin=n=>n<=0?'All clear.':`About ${Math.max(1,Math.round(n*1.2))} minute${Math.round(n*1.2)===1?'':'s'}.`;
 window.ariVerb=p=>({CONNECT:'Sent a connect to',WITHDRAW:'Withdrew the invite to',REPLY:'Answered',DM1:'Sent DM1 to',DM2:'Sent DM2 to',DM3:'Sent DM3 to'})[p.tag]||'Sent to';
-window.ariSaid=p=>{const f=first(p.n);return p.tag==='CONNECT'?`Logged. I’ll watch for ${f}’s accept, and DM1 is written before it lands.`:p.tag==='DM1'?`Logged. DM2 comes due in four days if ${f} stays quiet.`:p.tag==='DM2'?`Logged. The last note comes due three days from now.`:p.tag==='DM3'?`Logged. That closes the sequence for ${f}, politely.`:p.tag==='WITHDRAW'?`Withdrawn. Tidier than it feels.`:`Logged. If ${f} asks for time, flag it to the AE.`};
-window.ariFu=p=>p.tag==='CONNECT'?'Watching for the accept':p.tag==='DM1'?'DM2 in four days':p.tag==='DM2'?'DM3 in three days':p.tag==='DM3'?'Sequence closed':p.tag==='WITHDRAW'?'Invite withdrawn':'Reply logged';
+window.ariSaid=p=>{const f=first(p.n);return p.tag==='CONNECT'?`Logged. I’ll watch for ${f}’s accept, and DM1 is written before it lands.`:p.tag==='DM1'?`Logged. DM2 comes due in four days if ${f} stays quiet.`:p.tag==='DM2'?`Logged. DM3, the last note, comes due a week from now.`:p.tag==='DM3'?`Logged. That closes the sequence for ${f}, politely.`:p.tag==='WITHDRAW'?`Withdrawn. Tidier than it feels.`:`Logged. If ${f} asks for time, flag it to the AE.`};
+window.ariFu=p=>p.tag==='CONNECT'?'Watching for the accept':p.tag==='DM1'?'DM2 in four days':p.tag==='DM2'?'DM3 in a week':p.tag==='DM3'?'Sequence closed':p.tag==='WITHDRAW'?'Invite withdrawn':'Reply logged';
 
 /* ---------- auth: Google ID token, same storage as the Outbound HQ app ---------- */
 function jwt(t){try{return JSON.parse(decodeURIComponent(escape(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))))}catch(e){return null}}
@@ -6550,13 +6550,13 @@ followIn=function(){if(fuShown)return;fuShown=true;const pane=$('#follow');if(!p
   pane.innerHTML=`<span class="cap">Cadence · ${M.WAIT.length+FU.length+due.length+BG.length} in motion</span>
   <div class="h">${due.length?W(due.length)+' due tonight.':'Nothing due tonight.'}<br><span class="dim">${due.filter(q=>q.msg).length===due.length?(due.length?'Every draft is written.':'I’ll write each one before it’s due.'):W(due.filter(q=>!q.msg).length)+' still need a draft.'}</span></div>
   <div class="rule"><div style="display:flex;justify-content:space-between"><span class="cap">The cadence</span><span class="cap">Days after DM1</span></div><div class="cad" id="cad"><div class="ln"><b></b></div></div>
-   <div class="rulet">DM1 when they accept, DM2 four days later, DM3 at seven. Each brings a new reason rather than a bump. Invites with no accept after fourteen days get withdrawn.</div></div>
+   <div class="rulet">DM1 when they accept, DM2 four days later, DM3 a week after DM2, then done. Each brings a new reason rather than a bump. Invites with no accept after fourteen days get withdrawn.</div></div>
   <div class="strip" id="fstrip"><div><div class="v" data-n="${M.WAIT.length}">0</div><span class="cap">Awaiting accept</span></div><div><div class="v acc" data-n="${due.length}">0</div><span class="cap">Due tonight</span></div><div><div class="v" data-n="${FU.length}">0</div><span class="cap">Next 7 days</span></div><div><div class="v" data-n="${BG.length}">0</div><span class="cap">Background</span></div></div>
   <div class="sec"><span class="cap">Due tonight</span><span class="cap">${due.length}</span></div><div class="list" id="fuDue">${due.length?'':`<p class="wit">${M.WAIT.length?'Nothing yet. The first DM1s unlock when accepts come in.':'Nothing in sequence yet.'}</p>`}</div>
   <div class="sec"><span class="cap">Coming up</span><span class="cap">Next 7 days</span></div><div class="list" id="fuList">${FU.length?'':'<p class="wit">Nothing scheduled this week.</p>'}</div>
   <div class="sec"><span class="cap">Waiting on accept</span><span class="cap">${M.WAIT.length}</span></div><p class="wit" style="margin-top:var(--s2)">Tap Accepted when LinkedIn says yes. Hark also reads the accept emails and marks them on its run.</p><div class="list" id="fuWait"></div>
   <div class="sec"><span class="cap">In the background</span><span class="cap">${BG.length}</span></div><div class="list" id="bgList">${BG.length?'':'<p class="wit">Nobody has finished a sequence yet.</p>'}</div>`;
-  const nodes=[[0,'DM1','day 0'],[4,'DM2','day 4'],[7,'DM3','day 7'],[14,'Withdraw','invite day 14']],cad=$('#cad');
+  const nodes=[[0,'DM1','day 0'],[4,'DM2','day 4'],[11,'DM3','day 11'],[14,'Withdraw','invite day 14']],cad=$('#cad');
   nodes.forEach(([d,l,s2],i)=>{const e=document.createElement('div');e.className='nd'+(i>2?' bg':'');e.style.left=`calc(6px + ${[0,30,52,100][i]}% * .97)`;e.innerHTML=`<i></i><span>${l}<em>${s2}</em></span>`;cad.appendChild(e);A(e.querySelector('i'),[{transform:'scale(0)'},{transform:'scale(1)'}],POP,200+i*140)});
   A(cad.querySelector('.ln b'),[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{d:900,e:'cubic-bezier(.22,1,.36,1)'},150);
   $$('#fstrip .v').forEach((v,i)=>countUp(v,+v.dataset.n,200+i*80));
@@ -6691,7 +6691,7 @@ const _apply=apply;
 /* =========================================================
    Onboarding: first run, like a brand-new install
    ========================================================= */
-const PREF={name:'Owner',scope:'LinkedIn only',aes:'Alex and Blake',connects:'About 15 a weekday',cadence:'DM2 at +4 days, DM3 at +7',withdraw:'Withdraw after 14 days',hours:'9 pm to 6 am, your time'};
+const PREF={name:'Owner',scope:'LinkedIn only',aes:'Alex and Blake',connects:'About 15 a weekday',cadence:'DM2 at +4 days, DM3 a week after DM2',withdraw:'Withdraw after 14 days',hours:'9 pm to 6 am, your time'};
 const STEPS=['wake','what','memory','signin','essentials','notify','install','ready'];
 let ob=null,obI=0;
 function startOnb(i){window.ARI_ONB=true;obI=i||+LSg('ari-onb-step',0)||0;if(tokValid()&&obI===3)obI=4;
@@ -7554,8 +7554,8 @@ function pipeHTML(m){const s=m.stats||{},due=m.Q.filter(q=>/DM1|DM2|DM3|WITHDRAW
    <div class="v163stats"><div><b>${m.WAIT.length}</b><span>Awaiting accept</span></div><div class="acc"><b>${due}</b><span>Due tonight</span></div><div><b>${m.FU.length}</b><span>Next 7 days</span></div><div><b>${m.BG.length}</b><span>Background</span></div></div>
    <div class="v163cad"><div class="v163cadh"><span class="cap">The cadence</span><span class="cap">Days after DM1</span></div>
     <div class="v163cadl"><i style="left:0%"></i><i style="left:28.6%"></i><i style="left:50%"></i><i class="bg" style="left:100%"></i><b></b></div>
-    <div class="v163cadt"><span style="left:0%"><b>DM1</b>day 0</span><span style="left:28.6%"><b>DM2</b>day 4</span><span style="left:50%"><b>DM3</b>day 7</span><span class="r" style="left:100%"><b>Withdraw</b>invite day 14</span></div>
-    <p>DM1 when they accept, DM2 four days later, DM3 at seven. Each brings a new reason, never a bump. Invites with no accept after fourteen days get withdrawn.</p></div>
+    <div class="v163cadt"><span style="left:0%"><b>DM1</b>day 0</span><span style="left:28.6%"><b>DM2</b>day 4</span><span style="left:78.6%"><b>DM3</b>day 11</span><span class="r" style="left:100%"><b>Withdraw</b>invite day 14</span></div>
+    <p>DM1 when they accept, DM2 four days later, DM3 a week after DM2, then done. Each brings a new reason, never a bump. Invites with no accept after fourteen days get withdrawn.</p></div>
    <div class="sec"><span class="cap">Coming up</span><span class="cap">Next 7 days · ${m.FU.length}</span></div><div class="list">${fuRows||'<p class="wit">Nothing scheduled this week.</p>'}</div>
    <div class="sec"><span class="cap">Waiting on accept</span><span class="cap">${wait.length}</span></div><div class="list">${wait.slice(0,WMAX).map(w=>row(w.p,[w.p.company||'No account',`day ${w.age}/14`])).join('')||'<p class="wit">No invites out.</p>'}</div>
    ${wait.length>WMAX?`<div class="v162more press" id="v163wall">Show all ${wait.length}</div>`:''}
