@@ -136,7 +136,9 @@ def build(sd):
 def describe(kind, items, first_n=1):
     head = {"reply": "Answer each reply yourself on LinkedIn. Ari's suggested answer is under each name.",
             "follow": "Send each message on LinkedIn, then tick it in Ari. Withdraw = pull the invite, no message.",
-            "connect": "Send each connect on LinkedIn, then tick it in Ari. A note is shown when the invite takes one; otherwise send it blank."}[kind]
+            # Oct 23 2026 (Owner): blanket connection requests for this run, so the copy says send with no note.
+            # Undo: restore "... A note is shown when the invite takes one; otherwise send it blank."
+            "connect": "Send each connect on LinkedIn as a blank invite with no note, then tick it in Ari."}[kind]
     lines = [head, ""]
     for n, i in enumerate(items, first_n):
         lines.append(f"{n}. [{i['tag']}] {i['name']}, {i['title']} · {i['co']}".replace(",  ·", " ·"))
