@@ -100,6 +100,9 @@ def refresh_names():
         print('WARN names refresh failed, using cached list:', e)
 
 
+# Files that must carry Owner's real name (Owner, Oct 23 2026): no name scrub or real-name scan; secret/email scans still run.
+NO_SCRUB = {'LICENSE'}
+
 SKIP_DIRS = {'node_modules', 'dist', 'test-results', 'playwright-report', '.vite', '__pycache__', 'coverage'}
 
 
@@ -153,8 +156,9 @@ def main():
             shutil.copy2(sp, dp)
             continue
         t = open(sp, encoding='utf-8').read()
-        for rx, rep, _ in rules:
-            t = rx.sub(rep, t)
+        if dst not in NO_SCRUB:
+            for rx, rep, _ in rules:
+                t = rx.sub(rep, t)
         open(dp, 'w', encoding='utf-8').write(t)
         scan = allow.sub('', t)
         for k, p in SECRET.items():
@@ -163,7 +167,7 @@ def main():
         for m in set(re.findall(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', scan)):
             if m not in EMAIL_FIXTURES and not EMAIL_OK.search(m) and not re.search(r'@\d|\.(png|js|css|woff2)$', m):
                 problems.append((dst, 'email', m))
-        if not src.endswith(('ari-supabase.js', 'package-lock.json')):  # vendored / generated, scanned for secrets only
+        if dst not in NO_SCRUB and not src.endswith(('ari-supabase.js', 'package-lock.json')):  # vendored / generated, scanned for secrets only
             for rx in name_res:
                 for m in set(rx.findall(t)):
                     problems.append((dst, 'real_name', m))
