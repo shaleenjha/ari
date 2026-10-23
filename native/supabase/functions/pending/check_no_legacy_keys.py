@@ -41,10 +41,15 @@ if __name__ == '__main__':
     if '--self-test' in sys.argv: sys.exit(0 if self_test() else 1)
     bad, n = [], 0
     for d in sorted(os.listdir(HERE)):
+        if not os.path.isdir(os.path.join(HERE, d)): continue
+        # Oct 23 2026 (live AI layer): every .ts in a function dir (and _shared/**) is scanned, not only index.ts
+        files = sorted(os.path.relpath(os.path.join(dp, f), os.path.join(HERE, d)) for dp, _, fs in os.walk(os.path.join(HERE, d))
+                       for f in fs if f.endswith('.ts'))
+        for rel in files:
+            bad += ['%s/%s:%d: %s' % (d, rel, i, l) for i, l in scan(open(os.path.join(HERE, d, rel)).read())]
         f = os.path.join(HERE, d, 'index.ts')
         if not os.path.isfile(f): continue
         n += 1; src = open(f).read()
-        bad += ['%s/index.ts:%d: %s' % (d, i, l) for i, l in scan(src)]
         if 'secretKey(' not in src: bad.append('%s/index.ts: does not use secretKey()' % d)
     print('\n'.join(bad) if bad else 'pending functions: named secret keys only, apikey header only (%d checked)' % n)
     sys.exit(1 if bad else 0)

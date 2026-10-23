@@ -5,6 +5,7 @@ import { useAsync } from '../ui/useAsync';
 import { Busy } from '../ui/Skeleton';
 import { Stale } from '../ui/Stale';
 import { signOut, useSession } from '../ui/session';
+import { Icon } from '../ui/Icon';
 
 type Tile = { key: string; label: string; value?: (d: WeekReport) => ReactNode; lead?: boolean };
 const NBSP = '\u00a0';
@@ -53,6 +54,7 @@ export function Report() {
           ))}
         </dl>
       )}
+      <a className="card" href="#/import" data-testid="import-link"><Icon name="tidy-up" /><b>Import a CSV</b><Icon name="chevron-right" className="chev" /></a>
       {live && <button type="button" className="btn text signout" data-testid="sign-out" onClick={() => { void signOut(); }}>Sign out</button>}
     </section>
   );

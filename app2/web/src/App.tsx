@@ -6,6 +6,7 @@ import { Today15 } from './screens/Today15';
 import { Replies } from './screens/Replies';
 import { AccountRoom } from './screens/AccountRoom';
 import { Report } from './screens/Report';
+import { Import } from './screens/Import';
 import { SignIn } from './screens/SignIn';
 import { OpenInBrowser } from './screens/OpenInBrowser';
 import { READ_ONLY_LINE, READ_ONLY_TOAST, TOAST_MS, hideReadOnlyToast, useReadOnly, useReadOnlyToast } from './ui/readOnly';
@@ -41,7 +42,7 @@ export function App() {
 function Shell({ ro }: { ro: boolean }) {
   const r = useRoute();
   const screen = useRef<HTMLElement>(null);
-  const active = r.name === 'today15' || r.name === 'account' ? 'today' : r.name;
+  const active = r.name === 'today15' || r.name === 'account' ? 'today' : r.name === 'import' ? 'report' : r.name;
   // The tab for the screen you are on (not a sub screen like Today's 15) scrolls that screen back to the top.
   // Every other tab navigates as a normal link.
   const onTab = (e: MouseEvent<HTMLAnchorElement>, key: string) => {
@@ -63,6 +64,7 @@ function Shell({ ro }: { ro: boolean }) {
         {r.name === 'today15' && <Today15 />}
         {r.name === 'replies' && <Replies />}
         {r.name === 'report' && <Report />}
+        {r.name === 'import' && <Import />}
         {r.name === 'account' && <AccountRoom id={r.id} />}
       </main>
       <nav className="tabs" aria-label="Main">

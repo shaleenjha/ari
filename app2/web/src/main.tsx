@@ -8,6 +8,8 @@ import { liveEnv, resolveMode } from './data/mode';
 import { MockData } from './data/fixtures/mock';
 import { JWT_A, MockPostgrest, WS_A } from './data/fixtures/pgmock';
 import { SyntheticRestData } from './data/fixtures/syntheticRest';
+import { fixtureResolver } from './data/fixtures/importPlans';
+import { setImportResolver } from './data/imports';
 import { isEmbedded } from './ui/embedded';
 import { ErrorBoundary, Fallback } from './ui/ErrorBoundary';
 import { setReadOnly } from './ui/readOnly';
@@ -48,7 +50,11 @@ async function boot() {
       setAuth(auth, err);
       await seedFromDevice();
     }
-  } else setData(mode.data === 'legacy' ? new MockData() : new SyntheticRestData(slowed(new MockPostgrest()), WS_A, JWT_A));
+  } else {
+    setData(mode.data === 'legacy' ? new MockData() : new SyntheticRestData(slowed(new MockPostgrest()), WS_A, JWT_A));
+    // Synthetic import plans (data/fixtures/importPlans.ts). Live has no resolver yet: see data/imports.ts.
+    setImportResolver(fixtureResolver(Math.min(Number(new URLSearchParams(location.search).get('delay')) || 0, 5000)));
+  }
   mount().render(<StrictMode><ErrorBoundary><App /></ErrorBoundary></StrictMode>);
 }
 boot().catch((e: unknown) => {

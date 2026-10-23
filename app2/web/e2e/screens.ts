@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { SAMPLE_CSV } from '../src/data/fixtures/importPlans';
 
 // Screens the design lint walks (e2e/design.spec.ts, e2e/mobile.spec.ts). Synthetic data only.
 
@@ -38,6 +39,10 @@ export const SCREENS: Scenario[] = [
   } },
   // An app's link viewer (forced with ?embed=1): Google sign-in cannot run there, so the app points to the real browser.
   { name: 'Open in browser (link viewer)', path: '/?embed=1#/', ready: async (p) => { await expect(p.getByTestId('open-in-browser')).toBeVisible(); } },
+  { name: 'Import, plan', path: '/#/import', ready: async (p) => {
+    await p.getByTestId('import-file').setInputFiles({ name: 'leads.csv', mimeType: 'text/csv', buffer: Buffer.from(SAMPLE_CSV) });
+    await expect(p.getByTestId('import-plan')).toBeVisible();
+  } },
   { name: 'Report', path: '/#/report', ready: async (p) => { await expect(p.getByTestId('report')).toBeVisible(); } },
   ...['acc-1', 'acc-2', 'acc-3'].map((id): Scenario => ({ name: `Account room ${id}`, path: `/#/account/${id}`, ready: async (p) => { await expect(p.locator('#h-acc')).toBeVisible(); } })),
 ];

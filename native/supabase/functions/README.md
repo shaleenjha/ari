@@ -47,3 +47,54 @@ So these files are what runs, apart from formatting and comments.
   Gate and mint log in migration `pending/0040_s1_release7_broker.sql`. Offline tests: `deno test --allow-env pending/ari-worker-token/`.
 - `pending/check_no_legacy_keys.py` (CI) refuses a pending function that reads the legacy key or sends a Bearer secret key.
 - Order and undo: `work/r7/runbook.md` (not in the repo). After each prod deploy, move the pending file over the live one.
+
+## Live AI layer (prepared Oct 23 2026, code only, NOT deployed; depends on S1 R7)
+Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no secret is set. Draft, not approved (plans/motions-proposal.md "Live layer").
+- `pending/_shared/ai/`: provider layer. Routing (Owner, Oct 23 2026 15:11 IST): ALL drafting on `claude-opus-5-5` (DM1/2/3,
+  rewrites, reply drafts; future motion drafts and connect notes must use the `draft` route); `claude-haiku-5-5` for
+  classification only (accept match, reply intent); `claude-sonnet-5-5` + Anthropic web search for quick research; deep research
+  = `claude-opus-5-5` orchestrating in a tool loop with `grok_search` (Grok `grok-4.7`, `x_search` or `web_search` per call) for
+  fresh signals. OpenAI adapter is an unrouted backup stub. Routing table and placeholder prices in `router.ts`; zod-style output
+  schemas in `schema.ts` (draft = `{text, rationale, source_facts[], confidence, needs_review}`); one transport (`http.ts`) with a
+  host allowlist (LinkedIn refused), per-attempt timeout and exactly one retry (429 / 5xx / network); SSE streaming for draft and
+  rewrite; Quill house-style gate (`style.ts`, verbatim copy of app2/jobs/src/draft-eval/style.ts) forces `needs_review`.
+  Keys only from env `ANTHROPIC_API_KEY` / `XAI_API_KEY` (`OPENAI_API_KEY` optional), never logged or returned.
+- `pending/ari-ai/`: one owner-only endpoint (app session; owner check runs in the database as the user via `ari_ai_caller()`
+  so the aal2 rule applies). Actions: `rewrite`, `draft_dm1`, `quick_research`, `deep_research` (async `ai_jobs` row; LIVE feed in
+  `ai_jobs.steps`: one event per search query `{type: query, source, query}`, per url / post read `{type: read, url, title,
+  domain}`, per finding as it lands `{type: finding, fact, source_url, domain}`, plus status / error; each with `seq` and `at`),
+  `job_stream` (SSE relay of that feed by seq, `progress` events then `done`; realtime on `ai_jobs` works too), `triage_reply`
+  (Haiku classifies intent, Opus drafts book / answer / soft). Internal `x-ari-hook`
+  calls: `process` (event path + stale jobs), `run_job`. Writes only through an RPC allowlist (`db.ts`): DM slots, reply drafts,
+  research rows, `ai_*` tables, generic pushes. No send path, no config endpoint, errors carry no infrastructure words.
+- `pending/ari-gmail-push/`: Pub/Sub push target. Verifies Google's OIDC token (RS256, audience, push service account, expiry),
+  acks 204 at once, then runs `ari-gmail-ingest` immediately and `ari-ai {internal: process}`: classify (Haiku confirms the
+  accept and the person; must agree with the deterministic vanity / name match) -> draft_dm1 (Sonnet; only into an empty DM slot
+  or over Ari's own unedited text) -> `ari_notify('draft_due', 'draft:dm1:ai:<person>')` = generic "DM1 ready" push.
+  Daily watch renewal via cron. The manual "Accepted" tap calls `ari-ai {action: draft_dm1, person_id, source: accepted_tap}`.
+- Idempotency: `ai_triggers` (accept by Gmail msg id, dm1 by person id) claimed in the database before any model call; ingest
+  already dedupes by msg id; pushes dedupe by key. The 10-minute cron (`ari-ai-events`) is the fallback and also picks up
+  manual accepts and stale deep-research jobs. The Hark 10-min worker keeps running unchanged as the outer fallback.
+- Migration `../migrations/pending/0041_ai_layer.sql` (+ `_rollback`), tested by `../migrations/pending/test/checks_after_0041.sql`
+  in `run_local.sh` (CI sql-prod-shape). Spend guard: `ai_budget` (OFF by default, $50 / month, $5 / day), worst-case
+  reservation under an advisory lock before every call, real cost booked after; refusals logged; one generic alert per cap.
+- Offline tests: `deno test --allow-env --allow-read pending/_shared/ai/ai_test.ts pending/ari-ai/ari_ai_test.ts
+  pending/ari-gmail-push/push_test.ts` (list the files explicitly; directory discovery missed two of them here).
+  CI needs one change on main (branch pushes may not edit `.github/`), in the `functions` job:
+  `deno check native/supabase/functions/pending/ari-ai/index.ts native/supabase/functions/pending/ari-gmail-push/index.ts` and
+  `deno test --allow-env --allow-read <the three test files>`.
+
+### Gmail push (Pub/Sub) setup, after deploy (Google Cloud project that owns the ARI_GMAIL_CLIENT_ID OAuth client)
+1. Enable the Pub/Sub API. `gcloud pubsub topics create ari-gmail-push`
+2. Let Gmail publish (Google's fixed Gmail push publisher, domain `system.gserviceaccount.com`): `GSA_DOMAIN=system.gserviceaccount.com; gcloud pubsub topics add-iam-policy-binding ari-gmail-push --member="serviceAccount:gmail-api-push@$GSA_DOMAIN" --role=roles/pubsub.publisher`
+3. Push identity: `gcloud iam service-accounts create ari-gmail-push-invoker` (no roles needed). If the project predates
+   Apr 2021, also grant the Pub/Sub service agent `roles/iam.serviceAccountTokenCreator` on that service account.
+4. Push subscription to the function URL with an OIDC token:
+   `gcloud pubsub subscriptions create ari-gmail-push-sub --topic=ari-gmail-push --push-endpoint=https://<ref>.supabase.co/functions/v1/ari-gmail-push --push-auth-service-account=ari-gmail-push-invoker@<gcp-project>.iam.gserviceaccount.com --push-auth-token-audience=https://<ref>.supabase.co/functions/v1/ari-gmail-push --ack-deadline=30 --message-retention-duration=1h --expiration-period=never`
+5. Tell Ari (SQL, Owner's go): `insert into app_config(key, value) values ('gmail_watch_topic', 'projects/<gcp-project>/topics/ari-gmail-push'), ('gmail_push_audience', 'https://<ref>.supabase.co/functions/v1/ari-gmail-push'), ('gmail_push_sa', 'ari-gmail-push-invoker@<gcp-project>.iam.gserviceaccount.com') on conflict (key) do update set value = excluded.value;`
+6. First watch: `select public.ari_gmail_watch_kick();` then check `gmail_watch.expires_at` is about 7 days out. Renewal:
+   pg_cron `ari-gmail-watch-renew` daily 01:45 IST (a watch lasts 7 days, so a missed day or two is harmless).
+   The watch covers label INBOX (LinkedIn mail in the Social tab still carries INBOX); mail a filter skips the inbox for is
+   caught by the 10-minute fallback.
+7. Off switch: `gcloud pubsub subscriptions delete ari-gmail-push-sub` (the watch lapses in 7 days); everything AI stops at once with
+   `update ai_budget set enabled = false`.

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-export type Route = { name: 'today' } | { name: 'today15' } | { name: 'replies' } | { name: 'report' } | { name: 'account'; id: string };
+export type Route = { name: 'today' } | { name: 'today15' } | { name: 'replies' } | { name: 'report' } | { name: 'import' } | { name: 'account'; id: string };
 export function parse(hash: string): Route {
   const [a, b] = hash.replace(/^#\/?/, '').split('/');
   if (a === 'today15') return { name: 'today15' };
   if (a === 'replies') return { name: 'replies' };
   if (a === 'report') return { name: 'report' };
+  if (a === 'import') return { name: 'import' };
   if (a === 'account' && b) return { name: 'account', id: decodeURIComponent(b) };
   return { name: 'today' };
 }

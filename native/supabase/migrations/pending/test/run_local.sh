@@ -65,3 +65,13 @@ $P -c "delete from public.ari_broker_mints" -c "update public.ari_broker_state s
 for i in $(seq 1 12); do $P -At -c "select public.ari_broker_gate('par$i')" >/dev/null & done; wait
 n=$($P -At -c "select count(*) from public.ari_broker_mints where request_id like 'par%' and outcome = 'allowed'")
 [ "$n" = "3" ] || { echo "FAIL 0040 parallel cap: $n allowed"; exit 1; }; echo "0040 PARALLEL CAP PASSED"
+
+# Live AI layer (0041, PENDING), on top of 0040. Added Oct 23 2026. Synthetic data only (checks_after_0041.sql).
+api "$PEND/0041_ai_layer.sql"; echo "applied 0041"
+$P -f "$HERE/checks_after_0041.sql" 2>&1 | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+api "$PEND/0041_ai_layer.sql"; echo "re-applied 0041 (idempotence): no error"
+api "$PEND/0041_ai_layer_rollback.sql"; api "$PEND/0041_ai_layer_rollback.sql"; echo "rolled back 0041 (twice)"
+n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_ai_%' or proname like 'ari_gmail_watch_%' or proname = 'ari_gmail_push_config'")$($P -At -c "select count(*) from pg_class where relname in ('ai_budget','ai_calls','ai_jobs','ai_triggers','gmail_watch')")$($P -At -c "select count(*) from cron.job where jobname like 'ari-ai-%' or jobname = 'ari-gmail-watch-renew'")$($P -At -c "select count(*) from information_schema.columns where table_name = 'replies' and column_name = 'ai_triage'")
+[ "$n" = "0000" ] || { echo "FAIL 0041 rollback left objects ($n)"; exit 1; }; echo "0041 ROLLBACK CHECK PASSED"
+api "$PEND/0041_ai_layer.sql"; echo "applied 0041 again after the rollback"
+$P -f "$HERE/checks_after_0041.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'

@@ -188,3 +188,32 @@ p.muted, p.meta { margin: 0 0 var(--s-2); font-size: var(--fs-meta); line-height
   background: var(--text-1); color: var(--on-accent); text-decoration: none; }
 .skip:focus, .skip:focus-visible { width: auto; height: auto; min-height: var(--target); padding: 0 var(--s-4); display: flex; align-items: center;
   outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Import a CSV (spec 08). The file input sits inside its label button (sr-only), so the label is the 48 target and the
+   focus ring follows keyboard focus on the input. Options are radio labels in the .btn.opt shape; the chosen one carries
+   the check glyph and a text-1 edge (glyph plus edge, never colour alone). Unchosen options keep the glyph's space. */
+/* The real input covers its label: the whole label is the input's hit box (48+), invisible, still focusable. */
+.imp-hit { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.imp-pick { margin: var(--s-3) 0 var(--s-2); cursor: pointer; }
+.imp-pick:has(.imp-hit:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.imp-pick.is-busy { opacity: .5; cursor: default; }
+.imp-file { color: var(--text-1); overflow-wrap: anywhere; }
+.imp-facts { margin-top: var(--s-2); }
+.card.imp-adds { flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; }
+.card.imp-adds > b { white-space: normal; }
+.card.imp-adds > span.n { white-space: normal; color: var(--text-2); }
+.imp-flag { gap: var(--s-2); content-visibility: auto; contain-intrinsic-size: auto 240px; }   /* up to 100 rows */
+.imp-flag .imp-detail { color: var(--text-1); }
+.row .imp-quiet { color: var(--text-3); }
+.imp-opts { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+.btn.opt.imp-opt { flex-direction: row; align-items: center; justify-content: flex-start; gap: var(--s-2); cursor: pointer; }
+.btn.opt.imp-opt.on::before { border-color: var(--text-1); }
+.imp-opt .imp-mark { visibility: hidden; color: var(--text-1); }
+.imp-opt.on .imp-mark { visibility: visible; }
+.row .imp-opt .imp-optlabel { display: block; flex: 1; min-width: 0; color: var(--text-1); font-size: var(--fs-body); line-height: var(--lh-body); font-weight: var(--fw-body); }
+.imp-opt.on .imp-optlabel { font-weight: var(--fw-body-strong); }
+.imp-opt:has(.imp-hit:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.imp-search { align-self: flex-start; color: var(--text-1); padding: 0 var(--s-2); }
+.imp-search:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.imp-notes { margin: var(--s-3) 0 0; padding: 0; list-style: none; color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); }
+.imp-approve { margin-top: var(--s-6); display: flex; flex-direction: column; gap: var(--s-2); }
