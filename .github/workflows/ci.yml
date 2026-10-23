@@ -24,6 +24,7 @@ jobs:
       jobs: ${{ steps.f.outputs.jobs == 'true' || github.event_name == 'workflow_dispatch' }}
       sql: ${{ steps.f.outputs.sql == 'true' || github.event_name == 'workflow_dispatch' }}
       scripts: ${{ steps.f.outputs.scripts == 'true' || github.event_name == 'workflow_dispatch' }}
+      functions: ${{ steps.f.outputs.functions == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
       - id: f
@@ -34,6 +35,7 @@ jobs:
             jobs: ['.github/workflows/ci.yml', 'app2/jobs/**']
             sql: ['.github/workflows/ci.yml', 'app2/db/**', 'native/supabase/**']
             scripts: ['.github/workflows/ci.yml', 'scripts/**']
+            functions: ['.github/workflows/ci.yml', 'native/supabase/functions/**']
 
   web:
     needs: changes
@@ -124,16 +126,23 @@ jobs:
 
   functions:
     needs: changes
-    name: functions (S1 R7 broker, deno type check + offline tests)
-    if: needs.changes.outputs.sql == 'true'
+    name: functions (edge functions, deno type check + every offline test)
+    if: needs.changes.outputs.functions == 'true' || needs.changes.outputs.sql == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
-        with: { deno-version: v2.x }
+        with: { deno-version: v2.9.7 }   # pinned; bump on purpose, not by drift
       # ari-push and ari-backup predate strict typing (plain-JS style, pre-existing errors); they are parse-checked only.
       - run: deno check native/supabase/functions/pending/ari-worker-token/index.ts native/supabase/functions/pending/ari-gmail-oauth/index.ts native/supabase/functions/pending/ari-gmail-ingest/index.ts
-      - run: deno test --allow-env native/supabase/functions/pending/ari-worker-token/
+      # Every *_test.ts / *.test.ts under functions/ (incl. _shared), listed explicitly: directory discovery missed files.
+      # Passes with a notice when none exist.
+      - name: deno test (all edge function tests)
+        run: |
+          mapfile -t T < <(find native/supabase/functions -type f \( -name '*_test.ts' -o -name '*.test.ts' \) | sort)
+          if [ ${#T[@]} -eq 0 ]; then echo "::notice::no edge function tests found"; exit 0; fi
+          printf '%s\n' "${T[@]}"
+          deno test --allow-env --allow-read "${T[@]}"
       - run: python3 native/supabase/functions/pending/check_no_legacy_keys.py   # S1 R7: named sb_secret keys, apikey only
 
   scripts:
@@ -222,7 +231,7 @@ jobs:
 
   failure-report:
     name: failure-report (posts failed-step logs to issue "CI failure log" so Hark can read them)
-    needs: [web, jobs, drafts-eval, sql, sql-prod-shape, scripts, anti-slop-static, design-lint, e2e]
+    needs: [web, jobs, drafts-eval, sql, sql-prod-shape, functions, scripts, anti-slop-static, design-lint, e2e]
     if: failure()
     runs-on: ubuntu-latest
     permissions: { actions: read, issues: write, contents: read }
