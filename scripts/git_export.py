@@ -40,7 +40,7 @@ INCLUDE = [
      'scripts/accept_ingest.py', 'scripts/gmail_step.py', 'scripts/test_gmail_step.py', 'docs/specs/worker_step0.txt', 'scripts/scan_heartbeat.py', 'scripts/test_scan_heartbeat.py', 'scripts/copy_check.py', 'scripts/relay_check.py', 'scripts/focus_blocks.py', 'scripts/cadence.py',  # Oct 21 2026: called by the worker task every run, were missing from the repo  # v18.15.4 scan dead-man
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient*.pem',  # S1 R3: every recipient cert (public only)
     'scripts/ari_token.py', 'scripts/test_ari_token.py', 'native/supabase/ops/*.sql',  # S1 R7 (Oct 21 2026): broker token client (ari_db imports it), its tests, kill switch + read-only inventory SQL
-    'repo/README.md:README.md', 'repo/gitignore:.gitignore',
+    'repo/README.md:README.md', 'repo/gitignore:.gitignore', 'repo/LICENSE:LICENSE',  # Oct 23 2026: all rights reserved
     # Oct 21 2026 (PR docs/repo-map-renames): plain repo map at the root, and archive/ for retired code kept for reference
     'repo/REPO_MAP.md:REPO_MAP.md', 'archive/**',
 ]
