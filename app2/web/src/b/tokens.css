@@ -1,0 +1,90 @@
+/* GENERATED from tokens/bplus.json by scripts/tokens/gen_bplus.py. Do not edit by hand. */
+:root {
+  color-scheme: light;
+  --p-paper: #F7F6EF;
+  --p-card: #FFFFFF;
+  --p-well: #EFEDE3;
+  --p-ink: #1B1B2E;
+  --p-inkSoft: #4D4C6B;
+  --p-nightPass: #2A2946;
+  --p-nightWell: #1F1E36;
+  --p-lavender: #C2C1EB;
+  --p-salmon: #F7866D;
+  --p-dawn: #FAF79B;
+  --p-mist: #B9B8DC;
+  --p-nightBg: #121220;
+  --p-nightLine: #3D3C5E;
+  --p-paperLine: #DAD8CC;
+  --bg: var(--p-paper);
+  --card: var(--p-card);
+  --well: var(--p-well);
+  --text: var(--p-ink);
+  --text-soft: var(--p-inkSoft);
+  --pass: var(--p-nightPass);
+  --pass-well: var(--p-nightWell);
+  --pass-text: var(--p-paper);
+  --pass-soft: var(--p-mist);
+  --chip-ready: var(--p-lavender);
+  --chip-needs: var(--p-salmon);
+  --chip-due: var(--p-dawn);
+  --on-chip: var(--p-ink);
+  --btn: var(--p-ink);
+  --on-btn: var(--p-paper);
+  --border: var(--p-ink);
+  --line: var(--p-paperLine);
+  --focus: var(--p-ink);
+  --pill: var(--p-ink);
+  --on-pill: var(--p-paper);
+  --font: "Plus Jakarta Sans", system-ui, sans-serif;
+  --fs-1: 0.75rem;
+  --fs-2: 0.875rem;
+  --fs-3: 1rem;
+  --fs-4: 1.125rem;
+  --fs-5: 1.375rem;
+  --fs-6: 1.75rem;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-l: 20px;
+  --r-xl: 28px;
+  --r-pill: 9999px;
+  --tap: 48px;
+  --dur-quick: 160ms;
+  --dur-base: 240ms;
+  --dur-slow: 280ms;
+  --dur-done: 720ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: var(--p-nightBg);
+  --card: var(--p-nightPass);
+  --well: var(--p-nightWell);
+  --text: var(--p-paper);
+  --text-soft: var(--p-mist);
+  --pass: var(--p-nightPass);
+  --pass-well: var(--p-nightWell);
+  --pass-text: var(--p-paper);
+  --pass-soft: var(--p-mist);
+  --chip-ready: var(--p-lavender);
+  --chip-needs: var(--p-salmon);
+  --chip-due: var(--p-dawn);
+  --on-chip: var(--p-ink);
+  --btn: var(--p-paper);
+  --on-btn: var(--p-ink);
+  --border: var(--p-mist);
+  --line: var(--p-nightLine);
+  --focus: var(--p-lavender);
+  --pill: var(--p-paper);
+  --on-pill: var(--p-ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-quick: 1ms; --dur-base: 1ms; --dur-slow: 1ms; --dur-done: 1ms; }
+}

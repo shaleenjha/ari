@@ -13,11 +13,13 @@
     "verify:mobile": "PW_NO_LIVE=1 playwright test --grep @verify --project=webkit-390 --project=chromium-412 --workers=2 --retries=0",
     "verify:summary": "node scripts/verify-summary.mjs",
     "lint:design": "npm run lint:tokens && playwright test --grep @design",
-    "lint:tokens": "python3 scripts/tokens/verify.py",
+    "lint:tokens": "python3 scripts/tokens/verify.py && python3 scripts/tokens/gen_bplus.py --check",
     "tokens": "python3 scripts/tokens/gen_css.py",
     "lint:design:static": "node scripts/design-lint/static.mjs",
     "lint:query": "node scripts/query-lint/query-lint.mjs",
-    "lint:slop": "npm run lint:tokens && npm run lint:design:static && npm run lint:query"
+    "lint:slop": "npm run lint:tokens && npm run lint:design:static && npm run lint:query",
+    "tokens:b": "python3 scripts/tokens/gen_bplus.py",
+    "shots:b": "node scripts/bplus/shots.mjs"
   },
   "dependencies": {
     "idb-keyval": "6.3.0",

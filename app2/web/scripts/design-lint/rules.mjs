@@ -17,6 +17,9 @@ export const WIDTHS = [360, 390, 412];
 export const EFFECTS_ALLOW_LIST = ['src/ui/effects.allowed.css'];
 /** The one file that may hold raw colours (S2 tokens, generated from tokens/tokens.json by scripts/tokens/gen_css.py). Every other stylesheet and inline style uses its variables. */
 export const TOKENS_FILE = 'src/ui/tokens.css';
+/** B+ shell tokens (Oct 24 2026, Owner's lock), generated from tokens/bplus.json by scripts/tokens/gen_bplus.py, which also checks
+ * their contrast in light and dark. The only other file that may hold raw colours. */
+export const B_TOKENS_FILE = 'src/b/tokens.css';
 /** Every text token on every surface token must reach this (WCAG AA body text), whatever size it ends up used at. */
 export const TOKEN_MIN_RATIO = 4.5;
 

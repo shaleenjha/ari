@@ -13,6 +13,7 @@ export declare function declarations(css: string): { prop: string; value: string
 export declare function familyFromShorthand(value: string): string | null;
 export declare function lintCss(css: string, opts: { allowEffects: boolean; tokens?: boolean; vars?: Map<string, string> }): { rule: string; line: number; match: string }[];
 export declare const TOKENS_FILE: string;
+export declare const B_TOKENS_FILE: string;
 export declare const TOKEN_MIN_RATIO: number;
 export declare const RAW_COLOR: RegExp;
 export declare function isBackdropProp(prop: string): boolean;

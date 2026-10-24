@@ -21,7 +21,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { EFFECTS_ALLOW_LIST, TOKENS_FILE, RAW_COLOR, RAW_HEX, checkText, colorDrift, declarations, forbiddenPairs, lintCss, statusGlyphChar, tokenContrast } from './rules.mjs';
+import { B_TOKENS_FILE, EFFECTS_ALLOW_LIST, TOKENS_FILE, RAW_COLOR, RAW_HEX, checkText, colorDrift, declarations, forbiddenPairs, lintCss, statusGlyphChar, tokenContrast } from './rules.mjs';
 import { WEB_ROOT, allowIndex, finding, loadAllowJson, printFindings, staleJsonEntries } from './allow.mjs';
 
 const ROOT = WEB_ROOT;
@@ -143,7 +143,7 @@ export function lintSource(file, text, { jsonEntries } = {}) {
 export function lintCssFile(file, text, { jsonEntries, vars } = {}) {
   const allow = allowIndex(file, text, jsonEntries);
   const strokes = declarations(text).filter((d) => d.prop === 'stroke-width').map((d) => ({ rule: 'icon-stroke', line: d.line, match: `${d.prop}: ${d.value}` }));
-  const out = [...lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file), tokens: file === TOKENS_FILE, vars }), ...strokes,
+  const out = [...lintCss(text, { allowEffects: EFFECTS_ALLOW_LIST.includes(file), tokens: file === TOKENS_FILE || file === B_TOKENS_FILE, vars }), ...strokes,
     ...forbiddenPairs(text).map((x) => ({ rule: 'token-contrast', line: x.line, match: `forbidden pair: ${x.match}` }))]
     .filter((x) => !allow.suppress(x.rule, x.line))
     .map((x) => ({ ...finding(file, x.line, 1, x.rule, x.match, x.match), kind: 'in CSS' }));
@@ -218,6 +218,8 @@ export function run(root = ROOT, { allowJson = join(root, 'scripts/design-lint/a
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const manifest = readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8');
   findings.push(...lintHtmlCopy('index.html', html, { jsonEntries }));
+  // B+ shell page (Oct 24 2026): copy rules only; it holds no colours (theme-color is set from src/b/theme.ts).
+  if (existsSync(join(root, 'b.html'))) findings.push(...lintHtmlCopy('b.html', readFileSync(join(root, 'b.html'), 'utf8'), { jsonEntries }));
   findings.push(...lintManifestCopy('public/manifest.webmanifest', manifest, { jsonEntries }));
   const tk = lintTokens(tokensCss, [['index.html', html], ['public/manifest.webmanifest', manifest]]);
   findings.push(...tk.findings);

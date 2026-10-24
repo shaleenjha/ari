@@ -11,6 +11,8 @@ const put = (req, r) => { if (r.ok) { const c = r.clone(); caches.open(V).then((
 self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
+  // b.html (the B+ demo shell, Oct 24 2026) is network only, so it never replaces the cached '/' shell.
+  if (u.pathname === '/b.html') return;
   if (e.request.mode === 'navigate') {
     // Network first, but never wait forever: after 3 s on a stalled link, serve the cached shell (the app then shows
     // its own "Offline. Retrying." state). The network fetch keeps going and refreshes the cache when it lands.

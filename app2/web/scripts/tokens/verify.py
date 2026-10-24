@@ -5,7 +5,7 @@ npm run lint:design and the anti-slop-static CI job run first. Exit 1 on any FAI
     surface-3 is banned, not checked); border and focus >= 3:1 (border not on surface-3); ink on key, pressed, done >= 4.5
   2 src/ui/tokens.css is exactly what tokens/tokens.json generates (scripts/tokens/gen_css.py)
   3 4 px grid on every space and size dimension (stroke excepted); radii only 8, 12, 16, 20, 28, 9999
-  4 no raw hex anywhere in src/ (CSS, TS/TSX incl. template literals, SVG fill/stroke) except src/ui/tokens.css and tests;
+  4 no raw hex anywhere in src/ (CSS, TS/TSX incl. template literals, SVG fill/stroke) except src/ui/tokens.css, src/b/tokens.css (B+, checked by gen_bplus.py) and tests;
     public/brand/ is the only exempt asset folder (it is outside src/)
 """
 import json, os, re, sys
@@ -41,7 +41,7 @@ HEX = re.compile(r'#[0-9A-Fa-f]{3,8}\b')
 for d, _, fs in os.walk(os.path.join(ROOT, 'src')):
     for n in fs:
         p = os.path.join(d, n); rel = os.path.relpath(p, ROOT)
-        if rel == os.path.join('src', 'ui', 'tokens.css') or re.search(r'\.test\.tsx?$', n) or not n.endswith(('.css', '.ts', '.tsx', '.svg')): continue
+        if rel in (os.path.join('src', 'ui', 'tokens.css'), os.path.join('src', 'b', 'tokens.css')) or re.search(r'\.test\.tsx?$', n) or not n.endswith(('.css', '.ts', '.tsx', '.svg')): continue
         for i, line in enumerate(open(p, encoding='utf8'), 1):
             if HEX.search(line): fails.append(f'raw hex {rel}:{i} {HEX.search(line).group()}')
 print('4 no raw hex in src/')
