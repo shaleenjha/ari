@@ -91,7 +91,10 @@ jobs:
           TRUNC=""
           if [ "$(wc -c < /tmp/review_diff.txt)" -gt 200000 ]; then
             TRUNC="The diff was TRUNCATED at 200 KB, so parts are unseen: the verdict can be FIX or BLOCK, never PASS."
+            echo "REVIEW_TRUNCATED=1" >> "$GITHUB_ENV"
           fi
+          # Never let PR-controlled Claude settings, hooks or CLAUDE.md load.
+          rm -rf .claude CLAUDE.md .mcp.json
           cat > /tmp/review_prompt.txt <<PROMPT
           You are the outside security and platform reviewer for this repo (Ari: an outbound prep app on
           Supabase Postgres + Edge Functions + pg_cron, a React PWA, and Python jobs). Review ONLY the change
@@ -113,8 +116,8 @@ jobs:
           Never read files outside the repo checkout or /tmp/review_*. Never mention or tag anyone, and no
           links, images or HTML. $TRUNC
           PROMPT
-          claude -p "$(cat /tmp/review_prompt.txt)" \
-            --allowedTools "Read(//home/runner/work/**),Read(//tmp/review_*),Grep(//home/runner/work/**),Glob(//home/runner/work/**),Edit(//tmp/review_body.md),Write(//tmp/review_body.md)" \
+          claude -p "$(cat /tmp/review_prompt.txt)" --setting-sources user \
+            --allowedTools "Read(//home/runner/work/ari/ari/**),Read(//tmp/review_*),Grep(//home/runner/work/ari/ari/**),Glob(//home/runner/work/ari/ari/**),Edit(//tmp/review_body.md),Write(//tmp/review_body.md)" \
             --disallowedTools "Read(//proc/**),Read(//home/runner/.claude/**),Read(//etc/**),Bash,WebFetch,WebSearch" \
             --max-turns 40
           [ -s /tmp/review_body.md ] || { echo "::error::Claude wrote no review"; exit 1; }
@@ -127,13 +130,13 @@ jobs:
         run: |
           BODY=/tmp/review_body.md
           # Block anything that looks like a credential or personal data before it goes public.
-          if grep -nEi 'sk-ant-[a-z0-9_-]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY|xox[abpr]-[A-Za-z0-9-]{10,}|sb_secret_[A-Za-z0-9_-]{10,}|linkedin\.com/in/[A-Za-z0-9_-]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}|\+?[0-9][0-9 ()-]{9,}[0-9]' "$BODY"; then
+          if grep -qEi 'sk-ant-[a-z0-9_-]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY|xox[abpr]-[A-Za-z0-9-]{10,}|sb_secret_[A-Za-z0-9_-]{10,}|linkedin\.com/in/[A-Za-z0-9_-]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}|\+?[0-9][0-9 ()-]{9,}[0-9]' "$BODY"; then
             echo "::error::Review text matched the sensitive-data scan; not posting it."
-            VERDICT="$(head -1 "$BODY" | grep -oE 'Verdict: (PASS|FIX|BLOCK)' || echo 'Verdict: FIX')"
-            printf '%s\n\nThe full review was withheld because it matched the sensitive-data scan. See the workflow run log.\n' "$VERDICT" > "$BODY"
+            printf 'Verdict: FIX\n\nThe full review was withheld because it matched the sensitive-data scan. The owner reruns it privately.\n' > "$BODY"
           fi
           # Defuse mentions, links, images and HTML so a steered review can't ping people or load URLs.
           sed -i -E 's/@/@\xE2\x80\x8B/g; s#https?://#hxxp://#g; s/!\[/[/g; s/</\&lt;/g' "$BODY"
+          if [ "${REVIEW_TRUNCATED:-}" = "1" ]; then sed -i '1s/^Verdict: PASS$/Verdict: FIX/' "$BODY"; fi
           # The first line must be an exact verdict; otherwise treat it as FIX.
           if ! head -1 "$BODY" | grep -qxE 'Verdict: (PASS|FIX|BLOCK)'; then
             { echo 'Verdict: FIX'; echo; echo '(The reviewer did not give a clean verdict line.)'; echo; cat "$BODY"; } > /tmp/review_fixed.md
