@@ -1,4 +1,4 @@
-# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST
+# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST. 0042 security hardening: on STAGING only (Oct 24 2026), not on prod
 
 ## Status (checked Oct 19 2026, read-only, counts only; plans/audit data-side live checks)
 | Migration | Prod | Ledger row (`supabase_migrations.schema_migrations`) |
@@ -10,6 +10,7 @@
 | `0036_log_repair_rpc.sql` | LIVE (`ari_worker_log_repair` and `ari_worker_log_unappend` exist in prod; the spec-05 Log repair it served finished Oct 18 2026, 395 rows) | **no** at the Oct 19 check. 0038 part 7 writes the row |
 | `0037_members_aal2.sql` (+ rollback) | LIVE Oct 20 2026 (checks_after_0037 PASSED on prod). S1 R5: members need the two-step code too | yes |
 | `0038_s1_release6.sql` (+ rollback) | LIVE Oct 20 2026 (checks_after_0038 PASSED on prod; both repair functions gone). S1 R6: seven parts, incl. dropping `ari_worker_log_repair` and `ari_worker_log_unappend` (accept_ingest repair-log retired in v18.17.7) | yes (ledger 0034 to 0038) |
+| `0042_security_hardening.sql` (+ rollback) | **NOT on prod.** ON STAGING since Oct 24 2026 (~11:35 IST): applied, checks_after_0042 PASSED, rolled back, re-applied, PASSED again (evidence work/security/staging-0042/). Default lock (anon/authenticated) re-asserted for public + app; daily row counts + row-drop ops_alert (cron `ari-rowcount-daily` 08:00 IST). Prod waits for Owner's go | staging yes (0042); prod no |
 
 - `0036_log_repair_rpc.sql` was never applied as a whole file. Per function:
   - `ari_worker_log_repair`: applied by hand, repair only (the Oct 18 Log repair); no ledger row; ledger row via 0038 part 7; dropped by 0038.
@@ -24,6 +25,22 @@
   they are live. The header of `../0032_accept_ingest.sql` still says "NOT applied"; that line is stale.
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
+
+## 0042 security hardening (Oct 24 2026): on staging, NOT on prod
+- Files: `0042_security_hardening.sql`, `0042_security_hardening_rollback.sql`, `test/checks_after_0042.sql`. Spec: plans/ari-app-status.md
+  "Backlog: Supabase hardening". Inventory + cascade review (report only): work/security/inventory-2026-10-24.md, work/security/cascade-review.md.
+  Re-runnable grant inventory: `../../ops/security_grants_inventory.sql` (read-only).
+- Numbering: 0039 Diamond (spec 06), 0040 R7 and 0041 AI layer are pending and not applied anywhere; 0042 does not depend on them.
+  Staging and prod ledgers both end at 0038 (Oct 24), so 0042 lands after 0038 with a gap; the ledger allows that.
+- `checks_after_0042.sql` is staging/prod-safe: one statement, synthetic rows, ends in a deliberate raise. Through the Management API
+  the reply `ALL 0042 CHECKS PASSED (deliberate raise ...)` (HTTP 400) is a pass; `FAIL n: ...` is a fail.
+- Not in `test/run_local.sh` yet (no local Postgres in the session that built it). Proposed lines, unverified:
+  ```bash
+  api "$PEND/0042_security_hardening.sql"; echo "applied 0042"
+  out=$($P -f "$HERE/checks_after_0042.sql" 2>&1 || true); grep -q "ALL 0042 CHECKS PASSED" <<<"$out" || { echo "FAIL 0042: $out"; exit 1; }; echo "0042 CHECKS PASSED"
+  api "$PEND/0042_security_hardening.sql"; api "$PEND/0042_security_hardening_rollback.sql"; api "$PEND/0042_security_hardening_rollback.sql"; echo "0042 re-applied, rolled back twice"
+  api "$PEND/0042_security_hardening.sql"; echo "applied 0042 again"
+  ```
 
 ## Original write-up (Oct 17 2026)
 
