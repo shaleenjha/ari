@@ -58,7 +58,7 @@ api "$PEND/0040_s1_release7_broker.sql"; echo "re-applied 0040 (idempotence): no
 api "$PEND/0040_s1_release7_broker_rollback.sql"; api "$PEND/0040_s1_release7_broker_rollback.sql"; echo "rolled back 0040 (twice)"
 n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_broker_%' or proname = 'ari_worker_whoami'")$($P -At -c "select count(*) from pg_class where relname like 'ari_broker_%'")$($P -At -c "select count(*) from pg_proc where proname = 'notifications_privacy' and prosrc like '%ops_alert%'")
 [ "$n" = "000" ] || { echo "FAIL 0040 rollback left objects ($n)"; exit 1; }; echo "0040 ROLLBACK CHECK PASSED"
-a=$($P -At -c "select count(*) from pg_class where relname like 'r7_archive_broker_%' and relrowsecurity and not has_table_privilege('anon', oid, 'select') and not has_table_privilege('authenticated', oid, 'select')")
+a=$($P -At -c "select count(*) from pg_class where relname like 'r7_archive_broker_%' and relrowsecurity and not has_table_privilege('anon', oid, 'select') and not has_table_privilege('authenticated', oid, 'select') and (not exists (select 1 from pg_roles where rolname = 'service_role') or not has_table_privilege('service_role', oid, 'select'))")
 [ "$a" -ge 2 ] || { echo "FAIL 0040 rollback archive missing or readable ($a)"; exit 1; }; echo "0040 ROLLBACK ARCHIVE CHECK PASSED"
 api "$PEND/0040_s1_release7_broker.sql"; echo "applied 0040 again after the rollback"
 $P -f "$HERE/checks_after_0040.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'

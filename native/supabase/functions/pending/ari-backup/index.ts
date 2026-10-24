@@ -205,23 +205,30 @@ Deno.serve(async (req) => {
   const hook = req.headers.get("x-ari-hook");
   if (!hook || hook.length > 256) return new Response("unauthorized", { status: 401 }); // no DB work for unauthenticated calls
   const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!, { prepare: false, max: 1, idle_timeout: 0 }); // 0: the one connection (and its advisory lock) must not drop mid-backup
-  const [s] = await sql`select decrypted_secret v from vault.decrypted_secrets where name = 'ari_backup_hook_secret'`;
-  if (!safeEq(hook, s?.v)) { await sql.end(); return new Response("unauthorized", { status: 401 }); }
-  // one backup at a time: a session advisory lock (this client has exactly one connection) held until the job ends
-  let r: { id: number };
+  const json = (b: unknown, status = 202) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
+  let handedOff = false; // once the job owns the connection, only the job ends it
   try {
+    const [s] = await sql`select decrypted_secret v from vault.decrypted_secrets where name = 'ari_backup_hook_secret'`;
+    if (!safeEq(hook, typeof s?.v === "string" ? s.v : null)) return new Response("unauthorized", { status: 401 });
+    // one backup at a time: a session advisory lock (this client has exactly one connection) held until the job ends
     const [lk] = await sql`select pg_try_advisory_lock(hashtext('ari_backup_run')) ok`;
-    if (!lk?.ok) { await sql.end(); return new Response(JSON.stringify({ ok: true, already_running: true }), { status: 202, headers: { "content-type": "application/json" } }); }
+    if (!lk?.ok) return json({ ok: true, already_running: true });
     const [busy] = await sql`select id from public.backup_runs where finished_at is null and started_at > now() - interval '30 minutes' limit 1`;
-    if (busy) { await sql.end(); return new Response(JSON.stringify({ ok: true, already_running: busy.id }), { status: 202, headers: { "content-type": "application/json" } }); }
-    [r] = await sql`insert into public.backup_runs default values returning id`;
-  } catch (e) { console.error(String(e).slice(0, 300)); await sql.end(); return new Response("error", { status: 500 }); }
-  const job = (async () => {
-    try { await run(sql, r.id); }
-    catch (e) { await sql`update public.backup_runs set finished_at = now(), verified = false, error = ${String(e).slice(0, 500)} where id = ${r.id}`; }
-    finally { try { await sql`select pg_advisory_unlock(hashtext('ari_backup_run'))`; } catch (_) { /* session end releases it */ } await sql.end(); }
-  })();
-  // @ts-ignore EdgeRuntime is provided by Supabase
-  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(job); else await job;
-  return new Response(JSON.stringify({ ok: true, run: r.id }), { status: 202, headers: { "content-type": "application/json" } });
+    if (busy) return json({ ok: true, already_running: busy.id });
+    const [r] = await sql`insert into public.backup_runs default values returning id`;
+    const job = (async () => {
+      try { await run(sql, r.id); }
+      catch (e) { await sql`update public.backup_runs set finished_at = now(), verified = false, error = ${String(e).slice(0, 500)} where id = ${r.id}`; }
+      finally { try { await sql`select pg_advisory_unlock(hashtext('ari_backup_run'))`; } catch (_) { /* session end releases it */ } await sql.end(); }
+    })();
+    handedOff = true;
+    // @ts-ignore EdgeRuntime is provided by Supabase
+    if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(job); else await job;
+    return json({ ok: true, run: r.id });
+  } catch (e) {
+    console.error(String(e).slice(0, 300));
+    return new Response("error", { status: 500 });
+  } finally {
+    if (!handedOff) await sql.end().catch(() => {}); // every non-job path closes the connection (and releases any lock)
+  }
 });
