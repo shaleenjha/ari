@@ -106,5 +106,5 @@ jobs:
           of the diff. Never push, never edit repo files, never mention or tag anyone.
           PROMPT
           claude -p "$(cat /tmp/review_prompt.txt)" \
-            --allowedTools "Read,Grep,Glob,Write(/tmp/review_body.md),Bash(git diff:*),Bash(git log:*),Bash(gh issue create:*),Bash(gh issue list:*),Bash(gh pr comment:*)" \
+            --allowedTools "Read,Grep,Glob,Edit(//tmp/review_body.md),Write(//tmp/review_body.md),Bash(git diff:*),Bash(git log:*),Bash(gh issue create:*),Bash(gh issue list:*),Bash(gh pr comment:*)" \
             --max-turns 40
