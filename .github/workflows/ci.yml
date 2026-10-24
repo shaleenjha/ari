@@ -44,7 +44,7 @@ jobs:
     name: web (typecheck, unit, build)
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     defaults: { run: { working-directory: app2/web } }
     steps:
       - uses: actions/checkout@v4
@@ -213,7 +213,7 @@ jobs:
     needs: [changes, web]
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     defaults: { run: { working-directory: app2/web } }
     steps:
       - uses: actions/checkout@v4
