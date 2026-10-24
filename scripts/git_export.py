@@ -122,8 +122,8 @@ def scrub(text, dst, rules, files):
 # ---------- export-time transforms for files whose demo data is a real snapshot ----------
 _FIRST = ['Avery', 'Jordan', 'Riley', 'Casey', 'Morgan', 'Quinn', 'Rowan', 'Sasha', 'Emery', 'Finley', 'Harper', 'Indra',
           'Jules', 'Kiran', 'Lane', 'Marlo', 'Noor', 'Oakley', 'Parker', 'Reese', 'Sage', 'Tatum', 'Umi', 'Wren']
-_LAST = ['Sampleton', 'Mockley', 'Fakerton', 'Testova', 'Placeholt', 'Demoreau', 'Fixtura', 'Nullworth', 'Stubridge',
-         'Exampleton', 'Pseudova', 'Fauxley', 'Shamwell', 'Dummond', 'Mockett', 'Testard', 'Decoyne', 'Fictorio']
+_LAST = ['Sampleton', 'Mockley', 'Fakerton', 'Quillova', 'Placeholt', 'Demoreau', 'Fixtura', 'Nullworth', 'Stubridge',
+         'Exampleton', 'Pseudova', 'Fauxley', 'Shamwell', 'Dummond', 'Mockett', 'Quillard', 'Decoyne', 'Fictorio']
 _COS = ['Quorvelline', 'Ostrevanthe', 'Brennuvia Labs', 'Thessquorn', 'Saffrevane Health', 'Moquadrel', 'Fyndraquel',
         'Exquorra Pay', 'Durnaquill', 'Pyrrhovane', 'Nuvasquell', 'Norquiveth Pay', 'Glimvasse Health', 'Dravequin Systems',
         'Clovardine Labs', 'Quellivarn Insurance', 'Bravossine Health', 'Kelvarrow Labs', 'Marquessine Bank',

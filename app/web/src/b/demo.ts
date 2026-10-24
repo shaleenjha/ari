@@ -33,7 +33,7 @@ const p = (id: string, name: string, role: string, company: string): Person => (
 export const PEOPLE = {
   maya: p('maya', 'Maya Sampleton', 'VP Data Platform', 'Bravossine Health'),
   daniel: p('daniel', 'Daniel Mockley', 'Head of Security Engineering', 'Kelvarrow Labs'),
-  priya: p('priya', 'Priya Testova', 'Director of Privacy', 'Marquessine Bank'),
+  priya: p('priya', 'Priya Quillova', 'Director of Privacy', 'Marquessine Bank'),
   lucas: p('lucas', 'Lucas Demoreau', 'Staff Engineer, Payments', 'Orquadrine Systems'),
   hannah: p('hannah', 'Hannah Placeholt', 'CISO', 'Quellivarn Insurance'),
   omar: p('omar', 'Omar Nullworth', 'Data Governance Lead', 'Tolvessine Pharma'),
@@ -43,7 +43,7 @@ export const PEOPLE = {
   ravi: p('ravi', 'Ravi Shamwell', 'Director of Platform', 'Kelvarrow Labs'),
   grace: p('grace', 'Grace Dummond', 'Privacy Engineer', 'Marquessine Bank'),
   tom: p('tom', 'Tom Mockett', 'CTO', 'Halvenquist Freight'),
-  nina: p('nina', 'Nina Testard', 'Security Architect', 'Quellivarn Insurance'),
+  nina: p('nina', 'Nina Quillard', 'Security Architect', 'Quellivarn Insurance'),
   felix: p('felix', 'Felix Decoyne', 'VP Product', 'Orquadrine Systems'),
   aisha: p('aisha', 'Aisha Inventa', 'Chief Data Officer', 'Tolvessine Pharma'),
   leo: p('leo', 'Leo Mockley', 'Engineering Manager', 'Plessivarn Retail'),
