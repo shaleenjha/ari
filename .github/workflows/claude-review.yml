@@ -131,7 +131,15 @@ jobs:
           Output: write the review to /tmp/review_body.md and nothing else. It is published publicly.
           First line exactly "Verdict: PASS", "Verdict: FIX" or "Verdict: BLOCK". Then at most 8 findings,
           each: severity (high/med/low), file:line, what is wrong, the smallest fix. No praise, no summary
-          of the diff. Never quote a secret, key, token, password, email address, phone number, person's
+          of the diff.
+
+          Severity rule (owner's decision, Oct 24 2026): high and med are fixed before the next deploy.
+          A low that touches data exposure or secrets (a leak, a weaker secret check, access wider than
+          needed) is marked "low (security)" and is also fixed now. Every other low is marked
+          "low (backlog)": it goes to a weekly backlog where the most important one is fixed each week,
+          so keep backlog lows short and never let them alone turn the verdict into FIX. PASS = no high,
+          no med and no low (security). Do not repeat a backlog low you can see is already reported in
+          plans/audit/lows-backlog.md; report it again only if this change makes it worse. Never quote a secret, key, token, password, email address, phone number, person's
           name or profile URL: if you find one committed, say only file:line and its kind ("an API key").
           Never read files outside the repo checkout or /tmp/review_*. Never mention or tag anyone, and no
           links, images or HTML. $TRUNC
