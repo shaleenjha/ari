@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
   const hook = req.headers.get("x-ari-hook");
   if (!hook || hook.length > 256) return new Response("unauthorized", { status: 401 }); // missing or oversized: no DB work
   // Free pre-check, no DB: the same hook secret is also a function secret (ARI_BACKUP_HOOK). A wrong header never opens a
-  // connection. Unset = refuse everything (fail closed). Rotation: change the vault secret and ARI_BACKUP_HOOK together.
+  // connection. Unset = refuse everything (fail closed). Setup, length (32+ random bytes) and rotation: ../DEPLOY_SECRETS.md.
   const pre = Deno.env.get("ARI_BACKUP_HOOK") ?? "";
   if (!pre) { console.error("ARI_BACKUP_HOOK is not set"); return new Response("unauthorized", { status: 401 }); }
   if (!safeEq(hook, pre)) return new Response("unauthorized", { status: 401 });
@@ -214,7 +214,10 @@ Deno.serve(async (req) => {
   let handedOff = false; // once the job owns the connection, only the job ends it
   try {
     const [s] = await sql`select decrypted_secret v from vault.decrypted_secrets where name = 'ari_backup_hook_secret'`;
-    if (!safeEq(hook, typeof s?.v === "string" ? s.v : null)) return new Response("unauthorized", { status: 401 }); // vault stays the source of truth
+    if (!safeEq(hook, typeof s?.v === "string" ? s.v : null)) { // vault stays the source of truth
+      console.error("hook secret drift: ARI_BACKUP_HOOK matches but the vault secret does not (rotate both, see DEPLOY_SECRETS.md)");
+      return new Response("unauthorized", { status: 401 }); // finally below closes the connection (handedOff is false)
+    }
     // one backup at a time: a session advisory lock (this client has exactly one connection) held until the job ends
     const [lk] = await sql`select pg_try_advisory_lock(hashtext('ari_backup_run')) ok`;
     if (!lk?.ok) return json({ ok: true, already_running: true });

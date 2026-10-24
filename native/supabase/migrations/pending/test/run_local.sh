@@ -60,7 +60,7 @@ n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_broker_%' or
 [ "$n" = "000" ] || { echo "FAIL 0040 rollback left objects ($n)"; exit 1; }; echo "0040 ROLLBACK CHECK PASSED"
 a=$($P -At -c "select count(*) from pg_class where relname like 'r7_archive_broker_%' and relrowsecurity and not has_table_privilege('anon', oid, 'select') and not has_table_privilege('authenticated', oid, 'select') and (not exists (select 1 from pg_roles where rolname = 'service_role') or not has_table_privilege('service_role', oid, 'select'))")
 [ "$a" -ge 2 ] || { echo "FAIL 0040 rollback archive missing or readable ($a)"; exit 1; }; g=$($P -At -c "select count(*) from information_schema.role_table_grants t join pg_class c on c.relname = t.table_name and c.relnamespace = 'public'::regnamespace where t.table_schema = 'public' and t.table_name like 'r7_archive_broker_%' and t.grantee <> pg_get_userbyid(c.relowner)")
-t=$($P -At -c "select count(*) from pg_class where relname like 'r7_archive_broker_%'")
+t=$($P -At -c "select count(*) from pg_class where relkind = 'r' and relname like 'r7_archive_broker_%'")
 [ "$g" = "0" ] && [ "$t" = "$a" ] || { echo "FAIL 0040 rollback archive grants/count (grants $g, tables $t, locked $a)"; exit 1; }
 echo "0040 ROLLBACK ARCHIVE CHECK PASSED"
 api "$PEND/0040_s1_release7_broker.sql"; echo "applied 0040 again after the rollback"
