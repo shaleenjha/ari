@@ -165,7 +165,8 @@ async function handle(req) {
   if (!subsRes.ok) return Response.json({ ok: false, error: "subscriptions unavailable" }, { status: 502 }); // before claiming, so no attempt is burned
   const subs = await subsRes.json();
   const tokRes = await rest("push_tokens?revoked_at=is.null&active=is.true&select=id,token,kinds,device,platform");
-  const toks = tokRes.ok ? await tokRes.json() : [];
+  if (!tokRes.ok) return Response.json({ ok: false, error: "app tokens unavailable" }, { status: 502 }); // before claiming
+  const toks = await tokRes.json();
   const rows = await rpc("ari_claim_notifications", { p_limit: 50 });
   if (!rows?.length) return Response.json({ ok: true, claimed: 0, subscriptions: subs.length, app_tokens: toks.length });
   const report = [];

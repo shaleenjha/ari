@@ -100,6 +100,7 @@ async function handle(req: Request): Promise<Response> {
     if (!scopeOk(tj.scope)) { await revoke(); return back('scope'); }
     const pr = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', { headers: { Authorization: `Bearer ${tj.access_token}` } });
     const email = String((await pr.json().catch(() => ({}))).emailAddress ?? '').toLowerCase();
+    if (!ALLOW) { console.error('ARI_GMAIL_ALLOW is not set'); await revoke(); return back('setup'); }
     if (!pr.ok || !safeEq(email, ALLOW)) { await revoke(); return back('account'); }
     if (!tj.refresh_token) return back('retry');
     await rpc('ari_gmail_connect', { p_address: email, p_refresh_token: tj.refresh_token });
