@@ -21,6 +21,8 @@
 set -euo pipefail
 MSG="${1:?usage: git_sync.sh \"Area: what changes\" (or \"vX.Y: summary\")}"
 [[ "$MSG" =~ ^((v[0-9]+(\.[0-9]+)*|phase[0-9]+)|[A-Z][A-Za-z0-9]*( [A-Za-z0-9]+)?):\ .+ ]] || { echo "title must look like 'Area: what changes' (e.g. 'Docs: rewrite README'), or the older 'vX.Y: summary' / 'phaseN: summary'"; exit 1; }
+TITLE="${MSG%%$'\n'*}"; (( ${#TITLE} <= 72 )) || { echo "title is ${#TITLE} chars; keep it to 72 or fewer (docs/engineering/commit-convention.md)"; exit 1; }
+! grep -qi "^Co-Authored-By:" <<<"$MSG" || { echo "no Co-Authored-By trailers (docs/engineering/commit-convention.md)"; exit 1; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export KEEL_DIR="${KEEL_DIR:-$ROOT/work/keel}"
 export KEEL_EXPORT="${KEEL_EXPORT:-$KEEL_DIR/ari-app}"

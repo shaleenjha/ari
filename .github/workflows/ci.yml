@@ -16,6 +16,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  commit-titles:
+    name: commit titles (Area - what changes, PRs only)
+    # Pushes to main already pass this check in scripts/git_sync.sh; PR branches (claude/*) do not.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: check every PR commit title
+        env: { BASE: "${{ github.event.pull_request.base.sha }}", HEAD: "${{ github.event.pull_request.head.sha }}" }
+        run: |
+          bad=0
+          while IFS= read -r sha; do
+            t=$(git log -1 --format=%s "$sha"); b=$(git log -1 --format=%B "$sha")
+            if ! [[ "$t" =~ ^[A-Z][A-Za-z0-9]*(\ [A-Za-z0-9]+)?:\ .+ ]] || (( ${#t} > 72 )); then echo "::error::$sha title must be 'Area: what changes', 72 chars max: $t"; bad=1; fi
+            if grep -qi '^Co-Authored-By:' <<<"$b"; then echo "::error::$sha has a Co-Authored-By trailer"; bad=1; fi
+          done < <(git rev-list --no-merges "$BASE..$HEAD")
+          exit $bad
+
   changes:
     name: changes (which areas changed)
     runs-on: ubuntu-latest

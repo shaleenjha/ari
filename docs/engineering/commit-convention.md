@@ -50,3 +50,6 @@ GitHub turns every email in a Co-Authored-By trailer into a listed contributor, 
 - Never the per-file contents API. It makes one commit per file and stamps the wrong author email.
 - Never force push.
 
+## Enforced
+- `scripts/git_sync.sh` refuses a title that is not `Area: what changes`, is over 72 characters, or carries a Co-Authored-By trailer.
+- CI job `commit-titles` runs the same check on every commit in a pull request (claude/* branches), PRs only, so pushes to main spend no extra minutes.
