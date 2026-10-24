@@ -89,6 +89,7 @@ async function handle(req: Request): Promise<Response> {
   if (u.pathname.endsWith('/callback')) {
     const state = u.searchParams.get('state') ?? '', code = u.searchParams.get('code') ?? '';
     if (u.searchParams.get('error')) return back('denied');
+    if (!ALLOW) { console.error('ARI_GMAIL_ALLOW is not set'); return back('setup'); } // fail closed before any exchange
     const verifier = state && code ? await rpc('ari_gmail_state_take', { p_state: state }) : null;
     if (!verifier) return back('expired');
     const tr = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', body: new URLSearchParams({
@@ -100,7 +101,6 @@ async function handle(req: Request): Promise<Response> {
     if (!scopeOk(tj.scope)) { await revoke(); return back('scope'); }
     const pr = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', { headers: { Authorization: `Bearer ${tj.access_token}` } });
     const email = String((await pr.json().catch(() => ({}))).emailAddress ?? '').toLowerCase();
-    if (!ALLOW) { console.error('ARI_GMAIL_ALLOW is not set'); await revoke(); return back('setup'); }
     if (!pr.ok || !safeEq(email, ALLOW)) { await revoke(); return back('account'); }
     if (!tj.refresh_token) return back('retry');
     await rpc('ari_gmail_connect', { p_address: email, p_refresh_token: tj.refresh_token });

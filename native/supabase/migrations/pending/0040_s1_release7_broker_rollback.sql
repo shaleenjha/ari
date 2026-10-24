@@ -34,20 +34,22 @@ revoke all on function public.notifications_privacy() from public, anon, authent
 drop function if exists public.ari_broker_note(text, text, text);
 drop function if exists public.ari_broker_gate(text);
 drop function if exists public.ari_broker_in_window(timestamptz, jsonb);
--- keep the audit log and the kill-switch state: archived to dated, locked-down tables (RLS on, no grants), never dropped outright.
--- The whole file runs in one transaction, so a failure leaves nothing half done.
+-- keep the audit log and the kill-switch state: archived to dated, locked-down tables (RLS on, no grants, so only the database owner reads them; intended), never dropped outright.
+-- The whole file runs in one transaction, so a failure (even a same-second re-run name clash) leaves nothing half done.
 do $$ declare n text; begin
   if to_regclass('public.ari_broker_mints') is not null then
-    n := 'ari_broker_mints_archive_' || to_char(now(), 'YYYYMMDDHH24MISS');
+    n := 'r7_archive_broker_mints_' || to_char(now(), 'YYYYMMDDHH24MISS');
     execute format('create table public.%I as select * from public.ari_broker_mints', n);
     execute format('alter table public.%I enable row level security', n);
-    execute format('revoke all on public.%I from public, anon, authenticated, ari_worker', n);
+    execute format('revoke all on public.%I from public, anon, authenticated', n);
+    if exists (select 1 from pg_roles where rolname = 'ari_worker') then execute format('revoke all on public.%I from ari_worker', n); end if;
   end if;
   if to_regclass('public.ari_broker_state') is not null then
-    n := 'ari_broker_state_archive_' || to_char(now(), 'YYYYMMDDHH24MISS');
+    n := 'r7_archive_broker_state_' || to_char(now(), 'YYYYMMDDHH24MISS');
     execute format('create table public.%I as select * from public.ari_broker_state', n);
     execute format('alter table public.%I enable row level security', n);
-    execute format('revoke all on public.%I from public, anon, authenticated, ari_worker', n);
+    execute format('revoke all on public.%I from public, anon, authenticated', n);
+    if exists (select 1 from pg_roles where rolname = 'ari_worker') then execute format('revoke all on public.%I from ari_worker', n); end if;
   end if;
 end $$;
 drop table if exists public.ari_broker_mints;
