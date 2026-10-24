@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
   // Free pre-check, no DB: the same hook secret is also a function secret (ARI_BACKUP_HOOK). A wrong header never opens a
   // connection. Unset = refuse everything (fail closed). Setup, length (32+ random bytes) and rotation: ../DEPLOY_SECRETS.md.
   const pre = Deno.env.get("ARI_BACKUP_HOOK") ?? "";
-  if (!pre) { console.error("ARI_BACKUP_HOOK is not set"); return new Response("unauthorized", { status: 401 }); }
+  if (pre.length < 32) { console.error("ARI_BACKUP_HOOK is unset or shorter than 32 characters"); return new Response("unauthorized", { status: 401 }); }
   if (!safeEq(hook, pre)) return new Response("unauthorized", { status: 401 });
   const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!, { prepare: false, max: 1, idle_timeout: 0 }); // 0: the one connection (and its advisory lock) must not drop mid-backup
   const json = (b: unknown, status = 202) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
