@@ -1,6 +1,7 @@
 name: ci
 # Oct 21 2026 (Owner): Actions minutes hit 90%. Each job runs only when its own area changed;
 # markdown/docs-only pushes run nothing. workflow_dispatch always runs everything.
+# Oct 24 2026: every job has a timeout so a hung step cannot eat the monthly minutes.
 on:
   push:
     branches: [main]
@@ -18,6 +19,7 @@ jobs:
   changes:
     name: changes (which areas changed)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions: { contents: read, pull-requests: read }
     outputs:
       web: ${{ steps.f.outputs.web == 'true' || github.event_name == 'workflow_dispatch' }}
@@ -42,6 +44,7 @@ jobs:
     name: web (typecheck, unit, build)
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults: { run: { working-directory: app2/web } }
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +60,7 @@ jobs:
     name: jobs (typecheck, runtime timeout/fencing, gmail fetch/parse/shadow unit)
     if: needs.changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults: { run: { working-directory: app2/jobs } }
     steps:
       - uses: actions/checkout@v4
@@ -71,6 +75,7 @@ jobs:
     name: drafts-eval (Quill style harness, synthetic personas)
     if: needs.changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults: { run: { working-directory: app2/jobs } }
     steps:
       - uses: actions/checkout@v4
@@ -84,6 +89,7 @@ jobs:
     name: sql (schema, RLS matrix, task commands, job queue + fencing, gmail ingest)
     if: needs.changes.outputs.sql == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:17
@@ -102,6 +108,7 @@ jobs:
     name: sql-prod-shape (pending 0033-0040 on the prod schema shape, rollbacks, before/after probes)
     if: needs.changes.outputs.sql == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:17
@@ -129,6 +136,7 @@ jobs:
     name: functions (edge functions, deno type check + every offline test)
     if: needs.changes.outputs.functions == 'true' || needs.changes.outputs.sql == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
@@ -150,6 +158,7 @@ jobs:
     name: scripts (python unit)
     if: needs.changes.outputs.scripts == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -204,6 +213,7 @@ jobs:
     needs: [changes, web]
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults: { run: { working-directory: app2/web } }
     steps:
       - uses: actions/checkout@v4
@@ -234,6 +244,7 @@ jobs:
     needs: [web, jobs, drafts-eval, sql, sql-prod-shape, functions, scripts, anti-slop-static, design-lint, e2e]
     if: failure()
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions: { actions: read, issues: write, contents: read }
     env: { GH_TOKEN: "${{ github.token }}", GH_REPO: "${{ github.repository }}" }
     steps:
