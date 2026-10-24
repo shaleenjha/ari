@@ -25,7 +25,7 @@ import os, sys, json, shutil, subprocess, tempfile, urllib.request, urllib.error
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 KEEL = os.environ.get('KEEL_DIR', os.path.join(ROOT, 'work', 'keel'))
 LOCAL = os.environ.get('KEEL_EXPORT', os.path.join(KEEL, 'ari-app'))
-REPO = os.environ.get('KEEL_REPO', 'shaleenjha/crm.os')
+REPO = os.environ.get('KEEL_REPO', 'shaleenjha/ari')
 API = 'https://api.github.com'
 
 

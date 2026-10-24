@@ -22,6 +22,10 @@ def gws(args):
 
 
 def main():
+    # RETIRED Oct 24 2026 (Owner): Claude is on call for risky changes only, via the automatic
+    # .github/workflows/claude-review.yml; the Gmail relay is off. Prints nothing so runners stay silent.
+    if os.environ.get('ARI_RELAY_ON') != '1':
+        return
     try:
         seen = set(json.load(open(SEEN)))
     except Exception:

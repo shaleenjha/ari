@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Keel: commit + push a scrubbed, code-only snapshot to the private GitHub repo.
+# Keel: commit + push a scrubbed, code-only snapshot to the public GitHub repo shaleenjha/ari.
 # Run at the end of EVERY deploy:   bash scripts/git_sync.sh "Area: what changes"   (e.g. "Docs: rewrite README")
 #
 # 1. scripts/git_export.py copies the allow-listed code into the export tree,
@@ -13,11 +13,11 @@
 # 2. Commits locally in the export tree. Title must be "Area: what changes" (one or two words, capitalised, see
 #    docs/engineering/commit-convention.md); the older "vX.Y: summary" and "phaseN: summary" still pass.
 #    A body may follow the title after a blank line.
-# 3. Pushes to the private repo through the GitHub connector (scripts/git_push_api.py,
+# 3. Pushes to the repo through the GitHub connector (scripts/git_push_api.py,
 #    git data API), because the sandbox holds no git credentials.
 #    It refuses unless remote main is still the commit step 1b synced to; it never forces.
 #    Agents run steps 1b-3 in a shell call with credentials [{"provider":"github"}].
-# Never make the repo public. Never add data, CSVs, drafts, plans or screenshots.
+# The repo is public (Owner, Oct 24 2026): the export scan is the only gate. Never add data, CSVs, drafts, plans or screenshots.
 set -euo pipefail
 MSG="${1:?usage: git_sync.sh \"Area: what changes\" (or \"vX.Y: summary\")}"
 [[ "$MSG" =~ ^((v[0-9]+(\.[0-9]+)*|phase[0-9]+)|[A-Z][A-Za-z0-9]*( [A-Za-z0-9]+)?):\ .+ ]] || { echo "title must look like 'Area: what changes' (e.g. 'Docs: rewrite README'), or the older 'vX.Y: summary' / 'phaseN: summary'"; exit 1; }

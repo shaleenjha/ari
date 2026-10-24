@@ -12,8 +12,9 @@ state file. This script refuses to push unless remote main is still exactly that
 
 Usage: python3 scripts/git_push_api.py <export_dir> [owner/repo]
        python3 scripts/git_push_api.py <export_dir> [owner/repo] --branch <name>   (review branch, see push_branch)
-Repo defaults to $KEEL_REPO or shaleenjha/crm.os. Refuses to push to a public repo.
+Repo defaults to $KEEL_REPO or shaleenjha/ari (public by Owner's choice, Oct 24 2026). A public repo is allowed only if listed in PUBLIC_OK; any other public repo is refused.
 """
+PUBLIC_OK = {'shaleenjha/ari'}  # Owner, Oct 24 2026: the scrubbed repo is public
 import os, re, sys, json, base64, subprocess, urllib.request, urllib.error
 
 API = 'https://api.github.com'
@@ -50,7 +51,7 @@ def main():
     if not args:
         raise SystemExit('usage: git_push_api.py <export_dir> [owner/repo] [--branch <name>]')
     src = os.path.abspath(args[0])
-    repo = args[1] if len(args) > 1 else os.environ.get('KEEL_REPO', 'shaleenjha/crm.os')
+    repo = args[1] if len(args) > 1 else os.environ.get('KEEL_REPO', 'shaleenjha/ari')
     push_branch(gh, repo, src, branch) if branch else push(gh, repo, src)
 
 
@@ -92,8 +93,8 @@ def push_branch(gh, repo, src, branch):
     """
     check_branch(branch)
     info = gh('GET', '/repos/' + repo)
-    if not info.get('private'):
-        raise SystemExit('REFUSING: %s is not private' % repo)
+    if not info.get('private') and repo not in PUBLIC_OK:
+        raise SystemExit('REFUSING: %s is public and not in PUBLIC_OK' % repo)
     msg = git('log', '-1', '--format=%B', cwd=src).decode().strip()
     name, email = git('log', '-1', '--format=%an%x00%ae', cwd=src).decode().strip().split('\x00')
     if not email.endswith('@users.noreply.github.com'):
@@ -139,8 +140,8 @@ def push(gh, repo, src, state_path=None):
     from git_pull_remote import load_state, save_state
     st = load_state(state_path)
     info = gh('GET', '/repos/' + repo)
-    if not info.get('private'):
-        raise SystemExit('REFUSING: %s is not private' % repo)
+    if not info.get('private') and repo not in PUBLIC_OK:
+        raise SystemExit('REFUSING: %s is public and not in PUBLIC_OK' % repo)
     msg = git('log', '-1', '--format=%B', cwd=src).decode().strip()
     local = {}
     for line in git('ls-tree', '-r', 'HEAD', cwd=src).decode().splitlines():

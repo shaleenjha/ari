@@ -164,7 +164,7 @@ class PushBranch(unittest.TestCase):
         gh = lambda m, p, b=None, ok404=False: {'private': False}
         with self.assertRaises(SystemExit) as e:
             gpa.push_branch(gh, 'o/r', self.src, 's1/x')
-        self.assertIn('not private', str(e.exception))
+        self.assertIn('not in PUBLIC_OK', str(e.exception))
 
 
 if __name__ == '__main__':
