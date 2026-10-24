@@ -30,7 +30,9 @@ test('Import: pick a CSV, see the plan, change a fix, the label follows, approve
   await expect(approve).toHaveText('Add 4, skip 1 duplicate, use 2 found profiles, park 1');
   await expect(page.getByTestId('flag-4-search')).toHaveCount(0);
   await expect(page.getByTestId('flag-4').getByRole('radio', { checked: true })).toHaveCount(1);
-  // aria-disabled on purpose (it explains instead of writing); Playwright refuses aria-disabled clicks, so force it
+  // aria-disabled on purpose (it explains instead of writing); Playwright refuses aria-disabled clicks, so force it.
+  // A forced click skips the "not covered" check, so centre the key first: at 360 px a minimal scroll leaves it under the fixed tabs.
+  await approve.evaluate((el) => el.scrollIntoView({ block: 'center' }));
   await approve.click({ force: true });
   await expect(page.getByTestId('import-off')).toContainText('Nothing was added');
   expect(writes).toEqual([]);
