@@ -108,7 +108,7 @@ function found(r: ImportRow, c: Candidate, confidence: number, why: string): Fla
     chosen: 'use_profile', confidence, source: `${sourceLabel(c)} (${why})`, searchUrl: searchUrl(r) };
 }
 
-const sourceLabel = (c: Candidate) => c.source === 'brave' ? 'web search' : 'lemlist People database';
+const sourceLabel = (c: Candidate) => c.source === 'brave' ? 'web search' : 'lemlist People';
 /** Opened on the Owner's phone, never fetched by Ari. */
 export const searchUrl = (r: ImportRow) =>
   `https://www.google.com/search?q=${encodeURIComponent(`"${r.name}" "${r.company}" site:linkedin.com/in`)}`;

@@ -38,7 +38,7 @@ function missing(r: ImportRow, band: number): Flag {
       { full_name: r.name, company: r.company, title: 'VP Engineering', linkedin_url: slug(r.name, '-a'), source: 'lemlist' },
       { full_name: r.name, company: `${r.company} Labs`, title: 'Engineering Manager', linkedin_url: slug(r.name, '-b'), source: 'lemlist' },
     ];
-    return { ...base, detail: `${r.name} has no LinkedIn URL. Two possible profiles`, chosen: 'park_no_linkedin', confidence: 0.64, source: 'lemlist People database',
+    return { ...base, detail: `${r.name} has no LinkedIn URL. Two possible profiles`, chosen: 'park_no_linkedin', confidence: 0.64, source: 'lemlist People',
       options: [park, ...two.map((c) => ({ key: 'choose_profile' as const, label: describe(c), candidate: c }))] };
   }
   return { ...base, detail: `${r.name} has no LinkedIn URL and no match was found`, options: [park], chosen: 'park_no_linkedin' };
