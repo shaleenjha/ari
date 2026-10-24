@@ -154,12 +154,15 @@ async function handle(req) {
   const rpc = async (fn, args = {}) => { const r = await rest(`rpc/${fn}`, { method: "POST", body: JSON.stringify(args) });
     if (!r.ok) throw new Error(`${fn}: ${r.status} ${await r.text()}`); const t = await r.text(); return t ? JSON.parse(t) : null; };
 
+  const hook = req.headers.get("x-ari-hook");
+  if (!hook || hook.length > 256) return new Response("unauthorized", { status: 401 }); // no secret lookup for unauthenticated calls
   const conf = await rpc("ari_push_config");
-  if (!safeEq(req.headers.get("x-ari-hook"), conf?.hook_secret)) return new Response("unauthorized", { status: 401 });
+  if (!safeEq(hook, conf?.hook_secret)) return new Response("unauthorized", { status: 401 });
   const cfg = { jwk: JSON.parse(conf.vapid_private_jwk), vapid_public_key: conf.vapid_public_key, subject: conf.subject };
 
   // v2 (v17.1.1): only active, non-revoked web subscriptions, plus native Ari app tokens (Expo)
   const subsRes = await rest("push_subscriptions?revoked_at=is.null&active=is.true&select=id,endpoint,p256dh,auth,kinds,device,browser");
+  if (!subsRes.ok) return Response.json({ ok: false, error: "subscriptions unavailable" }, { status: 502 }); // before claiming, so no attempt is burned
   const subs = await subsRes.json();
   const tokRes = await rest("push_tokens?revoked_at=is.null&active=is.true&select=id,token,kinds,device,platform");
   const toks = tokRes.ok ? await tokRes.json() : [];
@@ -198,6 +201,6 @@ async function handle(req) {
 if (typeof Deno !== "undefined" && Deno.serve) {
 Deno.serve(async (req) => {
     try { return await handle(req); }
-    catch (e) { return Response.json({ ok: false, error: String(e) }, { status: 500 }); }
+    catch (e) { console.error(String(e).slice(0, 300)); return Response.json({ ok: false, error: "error" }, { status: 500 }); }
   });
 }

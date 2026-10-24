@@ -79,7 +79,10 @@ def check(tok, now=None):
         raise ValueError('alg %s, expected ES256' % h.get('alg'))
     if p.get('role') != EXPECT_ROLE:
         raise ValueError('role %s, expected %s' % (p.get('role'), EXPECT_ROLE))
-    exp, iat = int(p.get('exp', 0)), int(p.get('iat', 0))
+    try:
+        exp, iat = int(p.get('exp') or 0), int(p.get('iat') or 0)
+    except (TypeError, ValueError):
+        raise ValueError('bad exp/iat claim')
     if exp - iat > EXPECT_TTL + 60:
         raise ValueError('lifetime %ss, expected <= %ss' % (exp - iat, EXPECT_TTL))
     if exp <= now:
@@ -139,8 +142,8 @@ def _fetch(opener=None, sleep=time.sleep):
             if e.code >= 500 and attempt == 0:
                 last = 'HTTP %s' % e.code; sleep(2); continue
             raise BrokerError('ERR broker %s %s' % (e.code, msg))
-        except urllib.error.URLError as e:
-            last = str(e.reason)[:120]
+        except (urllib.error.URLError, OSError) as e:
+            last = str(getattr(e, 'reason', e))[:120]
             if attempt == 0:
                 sleep(2); continue
         except ValueError as e:

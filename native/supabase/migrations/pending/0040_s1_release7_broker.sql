@@ -65,7 +65,7 @@ revoke all on function public.ari_broker_in_window(timestamptz, jsonb) from publ
 grant execute on function public.ari_broker_in_window(timestamptz, jsonb) to service_role;
 
 create or replace function public.ari_broker_gate(p_request_id text) returns jsonb
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = '' as $$
 declare st public.ari_broker_state; n int; why text; ok boolean;
 begin
   perform pg_advisory_xact_lock(hashtext('ari_broker_gate'));
@@ -78,8 +78,12 @@ begin
     if n >= st.max_per_hour then why := 'rate'; end if;
   end if;
   ok := why is null;
-  insert into public.ari_broker_mints(request_id, outcome, reason)
-  values (left(coalesce(p_request_id, ''), 64), case when ok then 'allowed' else 'refused' end, coalesce(why, 'ok'));
+  -- a refusal with the same reason inside the last minute is not logged again (no unbounded growth from a loop)
+  if ok or not exists (select 1 from public.ari_broker_mints
+                        where outcome = 'refused' and reason = why and at > now() - interval '1 minute') then
+    insert into public.ari_broker_mints(request_id, outcome, reason)
+    values (left(coalesce(p_request_id, ''), 64), case when ok then 'allowed' else 'refused' end, coalesce(why, 'ok'));
+  end if;
   if not ok then
     perform public.ari_notify('ops_alert', 'ops:broker:' || to_char(date_trunc('hour', now()), 'YYYYMMDDHH24'),
       'Ari security check', 'Ari blocked an unexpected background sign-in. Open Hark if this keeps happening.', '/ops', null, null);
@@ -90,7 +94,7 @@ revoke all on function public.ari_broker_gate(text) from public, anon, authentic
 grant execute on function public.ari_broker_gate(text) to service_role;
 
 create or replace function public.ari_broker_note(p_request_id text, p_outcome text, p_reason text default null) returns void
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = '' as $$
 begin
   if p_outcome not in ('minted', 'error') then raise exception 'bad outcome'; end if;
   update public.ari_broker_mints set outcome = p_outcome, reason = coalesce(left(p_reason, 120), reason)

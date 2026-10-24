@@ -13,7 +13,8 @@
 // platform serves function HTML as text/plain (Owner saw raw HTML after connecting). The app shows the result as a toast.
 
 export const SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
-export const ALLOW = 'owner@example.com';
+// The one mailbox allowed to connect comes from function secret ARI_GMAIL_ALLOW (no address in code); empty = nobody.
+export const ALLOW = (typeof Deno !== 'undefined' && Deno.env?.get('ARI_GMAIL_ALLOW')) || '';
 const APP = 'https://ari-web.vercel.app/ops';
 
 export function b64u(buf: ArrayBuffer | Uint8Array): string {

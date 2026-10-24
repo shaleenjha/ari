@@ -197,7 +197,9 @@ async function handle(req: Request): Promise<Response> {
     const t = await r.text(); return t ? JSON.parse(t) : null;
   };
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
-  if (!safeEq(req.headers.get('x-ari-hook'), await rpc('ari_gmail_hook'))) return new Response('unauthorized', { status: 401 });
+  const hook = req.headers.get('x-ari-hook');
+  if (!hook || hook.length > 256) return new Response('unauthorized', { status: 401 });
+  if (!safeEq(hook, await rpc('ari_gmail_hook'))) return new Response('unauthorized', { status: 401 });
 
   const cfg = await rpc('ari_gmail_ingest_config');
   if (cfg?.status !== 'connected' || !cfg.refresh_token) return Response.json({ skipped: cfg?.status ?? 'disconnected' });

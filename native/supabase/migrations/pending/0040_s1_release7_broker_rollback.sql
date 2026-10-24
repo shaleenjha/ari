@@ -34,6 +34,15 @@ revoke all on function public.notifications_privacy() from public, anon, authent
 drop function if exists public.ari_broker_note(text, text, text);
 drop function if exists public.ari_broker_gate(text);
 drop function if exists public.ari_broker_in_window(timestamptz, jsonb);
+-- keep the audit log and the kill-switch state: archived to dated tables, never dropped outright
+do $$ begin
+  if to_regclass('public.ari_broker_mints') is not null then
+    execute format('create table public.%I as select * from public.ari_broker_mints', 'ari_broker_mints_archive_' || to_char(now(), 'YYYYMMDDHH24MISS'));
+  end if;
+  if to_regclass('public.ari_broker_state') is not null then
+    execute format('create table public.%I as select * from public.ari_broker_state', 'ari_broker_state_archive_' || to_char(now(), 'YYYYMMDDHH24MISS'));
+  end if;
+end $$;
 drop table if exists public.ari_broker_mints;
 drop table if exists public.ari_broker_state;
 delete from supabase_migrations.schema_migrations where version = '0040';

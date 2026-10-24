@@ -19,10 +19,10 @@ import * as pkijs from "https://esm.sh/pkijs@3.2.4?target=es2022";
 // "openssl cms -decrypt -binary -inform DER -inkey <private key from vault> -recip ari-offsite-recipient.pem" (RESTORE.md).
 // OFFSITE_CERT_PEM (function secret) overrides the built-in cert ONLY on the staging project (allowlist), for the round-trip
 // test with a throwaway cert. Prod, a custom domain or an unparseable URL always get the built-in bundle, so neither recipient
-// (Hark vault, Owner) can be dropped by a secret change.
+// (Hark vault, owner) can be dropped by a secret change.
 const OFFSITE_BUCKET = "ari-offsite";
 const STAGING_REF = "ljojwhnfgfreokqspobg";
-// Two recipients: "Ari offsite backup recipient" (key in the Hark vault) and "Ari backup - Owner" (key held by Owner,
+// Two recipients: "Ari offsite backup recipient" (key in the Hark vault) and "Ari backup - owner" (key held by the owner,
 // SHA-256 21:90:2D:64:51:9D:70:E9:3D:BF:32:B1:8B:3E:8A:76:CE:83:20:E0:48:D2:5D:8A:78:8A:6B:89:0E:10:AF:D9).
 const OFFSITE_CERT = `-----BEGIN CERTIFICATE-----
 MIIB4DCCAWagAwIBAgIULZi9W1WcjG6cDFJeZbULrFuXeCQwCgYIKoZIzj0EAwIw
@@ -49,7 +49,7 @@ HaNRPeV52kKUVVuPGLTIUc7dhLrjeQIxANgpi6LWdS0DCs3yIw57Ao7QUCXT/tFe
 -----END CERTIFICATE-----`;
 pkijs.setEngine("webcrypto", new pkijs.CryptoEngine({ name: "webcrypto", crypto: globalThis.crypto }));
 // S1 R3 (prepared Oct 19 2026, NOT deployed): every certificate in the PEM bundle is a recipient, so either private key
-// (Hark vault, or Owner's own) opens the file. Keep in step with native/supabase/offsite/ari-offsite-recipient*.pem;
+// (Hark vault, or the owner's own) opens the file. Keep in step with native/supabase/offsite/ari-offsite-recipient*.pem;
 // scripts/backup_check.py checks the recipients of each night's file against those files.
 async function cmsEncrypt(pems: string, data: Uint8Array): Promise<Uint8Array> {
   const blocks = pems.match(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g) || [];
@@ -138,7 +138,7 @@ async function run(sql: postgres.Sql, runId: number) {
       (select coalesce(json_agg(json_build_object('name', jobname, 'schedule', schedule, 'command', command)), '[]'::json) from cron.job) cron`);
     parts.push(`"_schema":${JSON.stringify(meta)}`);
   });
-  const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 13) + "Z"; // 20261017T2130Z
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z"; // 20261017T213045Z (seconds, so two runs in one hour never collide)
   const name = `ari_${stamp}.json.gz`;
   const text = `{"_meta":${JSON.stringify({ taken_utc: new Date().toISOString(), project: url, counts })},${parts.join(",")}}`;
   const gz = await gzip(text);
@@ -202,9 +202,13 @@ function safeEq(a: string | null, b: string | null | undefined): boolean {
 }
 
 Deno.serve(async (req) => {
+  const hook = req.headers.get("x-ari-hook");
+  if (!hook || hook.length > 256) return new Response("unauthorized", { status: 401 }); // no DB work for unauthenticated calls
   const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!, { prepare: false, max: 1, idle_timeout: 20 });
   const [s] = await sql`select decrypted_secret v from vault.decrypted_secrets where name = 'ari_backup_hook_secret'`;
-  if (!safeEq(req.headers.get("x-ari-hook"), s?.v)) { await sql.end(); return new Response("unauthorized", { status: 401 }); }
+  if (!safeEq(hook, s?.v)) { await sql.end(); return new Response("unauthorized", { status: 401 }); }
+  const [busy] = await sql`select id from public.backup_runs where finished_at is null and started_at > now() - interval '30 minutes' limit 1`;
+  if (busy) { await sql.end(); return new Response(JSON.stringify({ ok: true, already_running: busy.id }), { status: 202, headers: { "content-type": "application/json" } }); }
   const [r] = await sql`insert into public.backup_runs default values returning id`;
   const job = (async () => {
     try { await run(sql, r.id); }

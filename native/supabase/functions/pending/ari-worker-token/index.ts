@@ -69,6 +69,6 @@ export async function handle(req: Request, env = (k: string) => Deno.env.get(k),
 if (typeof Deno !== "undefined" && Deno.serve && Deno.env.get("ARI_BROKER_TEST") !== "1") {
   Deno.serve(async (req) => {
     try { return await handle(req); }
-    catch (e) { return json(500, { error: String(e).slice(0, 200) }); }
+    catch (e) { console.error(String(e).slice(0, 300)); return json(500, { error: 'error' }); }
   });
 }

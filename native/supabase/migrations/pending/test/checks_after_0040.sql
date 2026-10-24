@@ -59,6 +59,7 @@ begin
   g := public.ari_broker_gate('t3'); if not (g->>'allow')::boolean then raise exception 'FAIL 3: third refused'; end if;
   g := public.ari_broker_gate('t4'); if (g->>'allow')::boolean or g->>'reason' <> 'rate' then raise exception 'FAIL 3: 4th in an hour allowed %', g; end if;
   select count(*) into n from public.ari_broker_mints where outcome = 'refused' and reason = 'rate'; if n <> 1 then raise exception 'FAIL 3: refusal not logged'; end if;
+  g := public.ari_broker_gate('t5'); select count(*) into n from public.ari_broker_mints where outcome = 'refused' and reason = 'rate'; if n <> 1 then raise exception 'FAIL 3: repeat refusal within a minute logged again'; end if;
   if not exists (select 1 from public.ari_broker_mints where request_id = 't1' and outcome = 'minted') then raise exception 'FAIL 3: note minted'; end if;
   if not exists (select 1 from public.ari_broker_mints where request_id = 't2' and outcome = 'error' and reason = 'auth 400') then raise exception 'FAIL 3: note error'; end if;
   select count(*) into n from public.notifications where dedupe_key = 'ops:broker:' || to_char(date_trunc('hour', now()), 'YYYYMMDDHH24');
