@@ -30,7 +30,8 @@ test('Import: pick a CSV, see the plan, change a fix, the label follows, approve
   await expect(approve).toHaveText('Add 4, skip 1 duplicate, use 2 found profiles, park 1');
   await expect(page.getByTestId('flag-4-search')).toHaveCount(0);
   await expect(page.getByTestId('flag-4').getByRole('radio', { checked: true })).toHaveCount(1);
-  await approve.click();
+  // aria-disabled on purpose (it explains instead of writing); Playwright refuses aria-disabled clicks, so force it
+  await approve.click({ force: true });
   await expect(page.getByTestId('import-off')).toContainText('Nothing was added');
   expect(writes).toEqual([]);
   // every option and the key are 48 px or more
