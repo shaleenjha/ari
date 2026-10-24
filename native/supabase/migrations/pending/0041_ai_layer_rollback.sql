@@ -13,6 +13,7 @@ do $$ begin
     execute 'alter publication supabase_realtime drop table public.ai_jobs';
   end if;
 end $$;
+drop function if exists public.ari_ai_import_book();
 drop function if exists public.ari_ai_prune();
 drop function if exists public.ari_gmail_watch_kick();
 drop function if exists public.ari_ai_kick();
