@@ -249,7 +249,7 @@ begin
 end $$;
 revoke all on function public.ari_gmail_ingest_kick() from public, anon, authenticated;
 
--- ---------- nightly shadow diff: ari.shadow-diff/v1 (same rules as app2/jobs/src/gmail/shadow.ts) ----------
+-- ---------- nightly shadow diff: ari.shadow-diff/v1 (same rules as app/jobs/src/gmail/shadow.ts) ----------
 -- ids only (person ids, Gmail ids), never names or snippets. Writes gmail_shadow_diffs only.
 create or replace function public.ari_gmail_shadow_diff(p_night date default null) returns jsonb
 language plpgsql security definer set search_path = public as $$

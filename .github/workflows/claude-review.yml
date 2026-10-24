@@ -12,8 +12,6 @@ on:
     branches: [main]
     paths:
       - 'native/supabase/**'
-      - 'app2/db/**'
-      - 'app2/jobs/**'
       - 'app/db/**'
       - 'app/jobs/**'
       - '**/auth/**'
@@ -27,8 +25,6 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - 'native/supabase/**'
-      - 'app2/db/**'
-      - 'app2/jobs/**'
       - 'app/db/**'
       - 'app/jobs/**'
       - '**/auth/**'
@@ -68,7 +64,7 @@ jobs:
           fi
           git cat-file -e "$BASE" 2>/dev/null || BASE="$(git rev-list --max-parents=0 HEAD | tail -1)"
           git diff --stat "$BASE" "$HEAD" > /tmp/review_stat.txt
-          git diff "$BASE" "$HEAD" -- native/supabase app2/db app2/jobs app/db app/jobs '*auth*' '*sw.js' scripts .github/workflows > /tmp/review_diff.txt
+          git diff "$BASE" "$HEAD" -- native/supabase app/db app/jobs '*auth*' '*sw.js' scripts .github/workflows > /tmp/review_diff.txt
           echo "BASE=$BASE" >> "$GITHUB_ENV"; echo "HEAD=$HEAD" >> "$GITHUB_ENV"
 
       - name: Claude reviews

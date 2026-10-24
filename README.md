@@ -18,24 +18,24 @@ Ari is an outbound prep system for one sales rep. Ari prepares, Owner sends. Ari
 New here? Read [`REPO_MAP.md`](REPO_MAP.md) first. It is a plain guide to every folder.
 
 - `web/`: the live installable web app (`ops.html`, frozen), service worker, manifest, public pages.
-- `app2/`: the new app. `app2/web` is the React PWA, `app2/jobs` holds background jobs and the draft eval, `app2/db` holds the practice schema and its tests.
+- `app/`: the new app. `app/web` is the React PWA, `app/jobs` holds background jobs and the draft eval, `app/db` holds the practice schema and its tests.
 - `native/supabase/`: database migrations, rollbacks, tests and edge functions.
 - `scripts/`: sync, reports, backups, deploy and the git export used to publish this repo.
 - `docs/`: specs, runbooks and engineering notes.
 
 ## Requirements
 
-- Node 22 and npm (app2/web, app2/jobs)
+- Node 22 and npm (app/web, app/jobs)
 - Python 3.12 (scripts)
 - Deno 2 (edge functions)
 - PostgreSQL 17 client tools (SQL tests)
 
 ## Local setup
 
-New app (`app2/web`):
+New app (`app/web`):
 
 ```
-cd app2/web
+cd app/web
 npm ci
 npm run dev          # local dev server
 npm run typecheck
@@ -46,10 +46,10 @@ npm run e2e
 npm run build
 ```
 
-Background jobs (`app2/jobs`):
+Background jobs (`app/jobs`):
 
 ```
-cd app2/jobs
+cd app/jobs
 npm ci
 npm run typecheck
 npm test
@@ -59,7 +59,7 @@ npm run eval:drafts  # scores drafts against the house style
 Database tests (a local Postgres 17 on port 5432):
 
 ```
-bash app2/db/run_tests.sh
+bash app/db/run_tests.sh
 bash native/supabase/migrations/pending/test/run_local.sh
 ```
 

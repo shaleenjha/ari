@@ -57,7 +57,7 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
   fresh signals. OpenAI adapter is an unrouted backup stub. Routing table and placeholder prices in `router.ts`; zod-style output
   schemas in `schema.ts` (draft = `{text, rationale, source_facts[], confidence, needs_review}`); one transport (`http.ts`) with a
   host allowlist (LinkedIn refused), per-attempt timeout and exactly one retry (429 / 5xx / network); SSE streaming for draft and
-  rewrite; Quill house-style gate (`style.ts`, verbatim copy of app2/jobs/src/draft-eval/style.ts) forces `needs_review`.
+  rewrite; Quill house-style gate (`style.ts`, verbatim copy of app/jobs/src/draft-eval/style.ts) forces `needs_review`.
   Keys only from env `ANTHROPIC_API_KEY` / `XAI_API_KEY` (`OPENAI_API_KEY` optional), never logged or returned.
 - `pending/ari-ai/`: one owner-only endpoint (app session; owner check runs in the database as the user via `ari_ai_caller()`
   so the aal2 rule applies). Actions: `rewrite`, `draft_dm1`, `quick_research`, `deep_research` (async `ai_jobs` row; LIVE feed in

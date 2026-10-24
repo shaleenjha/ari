@@ -1,4 +1,4 @@
-# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST. 0042 security hardening and 0043 definer caller checks: LIVE in prod since Oct 24 2026 ~11:54 IST (staging first)
+# app E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST. 0042 security hardening and 0043 definer caller checks: LIVE in prod since Oct 24 2026 ~11:54 IST (staging first)
 
 ## Status (checked Oct 19 2026, read-only, counts only; plans/audit data-side live checks)
 | Migration | Prod | Ledger row (`supabase_migrations.schema_migrations`) |
@@ -53,15 +53,15 @@ Proposed `run_local.sh` lines follow the 0042 pattern below (unverified locally)
 
 ## Original write-up (Oct 17 2026)
 
-Written Oct 17 2026 from `app2/docs/migration-map.md` section 2, steps 1 to 3. Renumbered and rewritten lock-safe Oct 17 2026
+Written Oct 17 2026 from `app/docs/migration-map.md` section 2, steps 1 to 3. Renumbered and rewritten lock-safe Oct 17 2026
 (spec `docs/specs/03_app2_database_migration.md`, Owner's decisions 23:21 IST): Otto's `0032_accept_ingest.sql` lands first, so the
-app2 set is now 0033 to 0035. Expand only: nothing is dropped or renamed, and the live app (owner over PostgREST as `authenticated`,
+app set is now 0033 to 0035. Expand only: nothing is dropped or renamed, and the live app (owner over PostgREST as `authenticated`,
 the worker as `ari_worker`) keeps working unchanged. Rehearsed only in a throwaway local Postgres 17 (see "Local rehearsal").
 Staging first, then prod, never the other way.
 
 | File | What | Rollback (same folder) |
 |---|---|---|
-| `0033_app2_e1_tenancy.sql` | schema `app`; `app.workspaces` + `app.memberships` (app2 shape); workspace "Owner" (`f5a1e000-0000-4000-8000-000000000001`) + owner membership (uid `is_owner()` is pinned to, role sdr); nullable `workspace_id uuid default <Owner>` on the 42 tenant tables (`backup_runs` stays platform-side) | `0033_app2_e1_tenancy_rollback.sql` |
+| `0033_app2_e1_tenancy.sql` | schema `app`; `app.workspaces` + `app.memberships` (app shape); workspace "Owner" (`f5a1e000-0000-4000-8000-000000000001`) + owner membership (uid `is_owner()` is pinned to, role sdr); nullable `workspace_id uuid default <Owner>` on the 42 tenant tables (`backup_runs` stays platform-side) | `0033_app2_e1_tenancy_rollback.sql` |
 | `0034_app2_e2_backfill.sql` | trigger `ws_guard`, batched backfill of nulls (expected 0), `workspace_id` NOT NULL via a validated CHECK, FK to `app.workspaces` (NOT VALID, then VALIDATE), unique `(workspace_id, <pk>)` per table (`<table>_ws_pk_uidx`) | `0034_app2_e2_backfill_rollback.sql` |
 | `0035_app2_e3_dual_rls.sql` | `app.is_member` / `app.has_role` (authenticated only); member read policies on `app.*`; the 37 owner policies on the 42 tenant tables become `<old> OR (select app.is_member(workspace_id))`; the 11 `ari_worker` policies and the 2 owner policies 0032 adds (`gmail_events`, `scan_runs`, no `workspace_id`) untouched | `0035_app2_e3_dual_rls_rollback.sql` (each policy verbatim, generated) |
 

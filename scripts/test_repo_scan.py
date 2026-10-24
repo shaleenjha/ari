@@ -67,7 +67,7 @@ class Names(unittest.TestCase):
 
 class Generated(unittest.TestCase):
     def test_lockfile_secrets_only(self):
-        self.assertEqual(kinds('"author": "x' + '@' + 'gmail.com"', path='app2/web/package-lock.json'), [])
+        self.assertEqual(kinds('"author": "x' + '@' + 'gmail.com"', path='app/web/package-lock.json'), [])
 
 
 if __name__ == '__main__':

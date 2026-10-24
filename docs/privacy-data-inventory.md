@@ -50,7 +50,7 @@
 | **AI agent transcripts** (Hark's platform) | What the agent reads while drafting: a prospect's reply, their profile and notes, and every message sent to them | [FILL IN: platform] | [FILL IN: platform retention] |
 | **Owner's work inbox, and Slack via his work assistant "Wren"** | Daily report and exec-track handoff: names, titles, companies, LinkedIn links, connection-note text. Email drafts if any exist. | Thrandvex's Google Workspace and Slack | Thrandvex's retention rules [FILL IN] |
 | **Owner's personal Gmail** | LinkedIn's own emails, which Ari reads. Ari doesn't create them. | Google account | As long as Owner keeps them |
-| **Owner's phones** | app2: today's list, kept 24 hours, wiped on sign-out. ops.html: an encrypted copy of the last load, plus unsent drafts and edits waiting to send. | Device lock and the app's own lock | app2: 24 h. ops.html: until "Clear cached data", because sign-out doesn't clear it. Drafts 72 h. |
+| **Owner's phones** | app: today's list, kept 24 hours, wiped on sign-out. ops.html: an encrypted copy of the last load, plus unsent drafts and edits waiting to send. | Device lock and the app's own lock | app: 24 h. ops.html: until "Clear cached data", because sign-out doesn't clear it. Drafts 72 h. |
 | **Phone notification services** (Apple, Google) | The generic notification text only | Their transport encryption | Delivery only |
 | **Google's favicon service** | Company website domains, to show logos | n/a | n/a |
 | **Supabase and Vercel logs** | Request addresses, which carry record IDs, not text | The providers | Short platform retention [FILL IN plan values] |

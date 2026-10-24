@@ -2,7 +2,7 @@ LOCKED Oct 17 2026 by Owner. Changes need Owner's approval.
 PARTLY SUPERSEDED Oct 19 2026 (approved by Owner): the palette, grid and motion sections below are replaced by
 docs/specs/07_s2_visual_spec.md (S2 Lamp & Dawn, as shipped). For visuals read 07. This file still owns the interaction
 contract, behaviour, Undo and the copy rules.
-# 01 UI and interaction cheat sheet (app2)
+# 01 UI and interaction cheat sheet (app)
 Supersedes plans/builder-sheet.md Graphite values (#050505/#E2B062).
 
 ## Pinned constraints

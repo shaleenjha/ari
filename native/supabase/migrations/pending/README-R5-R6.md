@@ -9,7 +9,7 @@
 | `test/checks_after_0037.sql` | The CI gate: enrol a factor, prove a Google-only (`aal1`) session reads 0 rows and can't write |
 | `test/fixtures_before_0038.sql` | Local/CI only. Puts the throwaway database in prod's before-state with synthetic rows: 0036's functions, plus notifications that carry names. |
 | `test/checks_after_0038.sql`, `test/checks_after_0038_rollback.sql` | R6 tests |
-| `app2/docs/code-step-spec.md` (repo path) | The app2 code step, for Tony |
+| `app/docs/code-step-spec.md` (repo path) | The app code step, for Tony |
 
 ## How they were tested
 
@@ -42,7 +42,7 @@ The proposed `run_local.sh` lines below were run end to end on a fresh build: al
 5. **R6 part 6 (replies CASCADE) is safe now**, because part 1 removes the owner's DELETE in the same release, so only a maintenance session can delete a person. But **no hard erase until R8**: while the Sheet is two-way, the next sync re-creates the person and records the current draft as sent (data-side D2).
 6. **R6 part 7:** if release 2 already wrote the 0036 ledger row and the two cron jobs, this part changes nothing. It's an `on conflict` insert, and `cron.schedule` with an existing name updates that job. Confirm the update-in-place behaviour once on staging: the test's part 7 asserts exactly one row per job name.
 7. **R6 part 3** uses the wording the privacy trigger writes **today** (0031:307-328), not 0016's older wording, so stored rows match new ones. The test compares them kind by kind through the trigger.
-8. **R5 can land any time.** It changes nothing until a factor exists. Owner enrols only after the app2 code step ships (spec attached). ops.html already has its own code step.
+8. **R5 can land any time.** It changes nothing until a factor exists. Owner enrols only after the app code step ships (spec attached). ops.html already has its own code step.
 9. **Two of R6's seven parts can't be undone** by the rollback: the notification rewrite and the shadow-event purge. The rollback says so; backups hold the old state for 14 nights.
 
 ## Proposed lines for `native/supabase/migrations/pending/test/run_local.sh` (append at the end)

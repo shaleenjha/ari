@@ -15,7 +15,7 @@ to a real company or person is unintended.
 | `design-taste.html` | Oct 15 2026 | A one-page board of the look and type choices that set the app's design direction. |
 | `ops-simplify-mockup.html` | Oct 20 2026 | First mockup of the simplified app: Today, People and focus screens on fake data. |
 | `ops-simplify-soft-v2.html` | Oct 20 2026 | Second round of the simplified mockup in the soft light theme, with three accent colours (`?accent=a|b|c`). |
-| `bplus-wallet-mockup.html` | Oct 23 2026 | The B+ "wallet" mockup that led to the new app's shell (`app2/web/src/b/`). Its built-in snapshot of app data was rebuilt on synthetic data, with the same counts and stages. |
+| `bplus-wallet-mockup.html` | Oct 23 2026 | The B+ "wallet" mockup that led to the new app's shell (`app/web/src/b/`). Its built-in snapshot of app data was rebuilt on synthetic data, with the same counts and stages. |
 
 Left out on purpose, because they hold real prospect data that cannot be scrubbed reliably: the Oct 13 to 15
 prototypes (records prototypes v1 and v2, the person-page mockup, the dossier page, the first Outbound and Ari

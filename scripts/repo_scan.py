@@ -17,7 +17,7 @@ What it flags (exit 1 on any finding):
   name       words whose salted SHA-256 is on the blocked list. The list holds hashes only, so this file names
              no real person or company; git_export.py adds the full private list on top.
 
-Fixtures and demo data must use the synthetic workspace (scripts/seller_config.py DEFAULT, app2 fixtures):
+Fixtures and demo data must use the synthetic workspace (scripts/seller_config.py DEFAULT, app fixtures):
 invented company names and clearly fake people.
 """
 import os, re, sys, hashlib, subprocess

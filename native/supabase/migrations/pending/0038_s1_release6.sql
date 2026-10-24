@@ -2,7 +2,7 @@
 -- One release, seven parts, all small. Synthetic-tested on the local prod shape: pending/test/checks_after_0038.sql.
 -- Rollback: rollbacks/0038_rollback.sql. Two parts cannot be undone by design: the notification rewrite (3) and the
 -- shadow-event purge (5) delete or replace text; the nightly backups keep the old state for 14 nights.
---   1. The signed-in role loses DELETE on the 17 mirrored tables (data-side D2). Nothing in ops.html, app2 or any migration
+--   1. The signed-in role loses DELETE on the 17 mirrored tables (data-side D2). Nothing in ops.html, app or any migration
 --      deletes from them; the worker's Book prune runs as ari_worker. push_subscriptions / push_tokens are left as they are.
 --   2. apply_op writes no names: Log detail is the company (or nothing), queue 'Draft reply' details carry no name (D3).
 --   3. Stored notifications get the generic text the privacy trigger writes today (0031:307-328). dedupe_key, person_id,

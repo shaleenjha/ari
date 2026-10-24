@@ -1,4 +1,4 @@
-// Live AI layer (PENDING). Copied VERBATIM from app2/jobs/src/draft-eval/style.ts (Quill); keep in step. Used to force
+// Live AI layer (PENDING). Copied VERBATIM from app/jobs/src/draft-eval/style.ts (Quill); keep in step. Used to force
 // needs_review on any model draft that breaks a hard house-style gate. Below this line: verbatim.
 // Quill: DM style scorer for Ari's drafting engine. Deterministic, no LLM. Scores a LinkedIn DM against the house style:
 // 1 to 2 lines, under 300 characters (works as a connection note), no em/en dashes, no hedging, no banned phrases, one ask,

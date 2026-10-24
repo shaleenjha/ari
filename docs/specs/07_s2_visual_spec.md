@@ -1,11 +1,11 @@
-APPROVED Oct 19 2026 by Owner. Visual source for app2, as shipped in v18.17.0 to v18.17.2 (S2). Changes need Owner's approval.
-# 07 S2 visual spec: Lamp & Dawn (app2)
+APPROVED Oct 19 2026 by Owner. Visual source for app, as shipped in v18.17.0 to v18.17.2 (S2). Changes need Owner's approval.
+# 07 S2 visual spec: Lamp & Dawn (app)
 
 This records the S2 design package as it ships. It replaces the palette, grid and motion sections of
 `docs/specs/01_ui_interaction_cheatsheet.md` (marked SUPERSEDED there). Spec 01 still owns the interaction contract
 (pick plus one alternative, copy and open LinkedIn, optimistic UI and outbox, Undo), behaviour and the copy rules.
 
-- **Values:** `app2/web/tokens/tokens.json` is the single source. `app2/web/src/ui/tokens.css` is generated from it
+- **Values:** `app/web/tokens/tokens.json` is the single source. `app/web/src/ui/tokens.css` is generated from it
   (`scripts/tokens/gen_css.py`) and is the only place raw values live. CI (`npm run lint:slop`, `scripts/tokens/verify.py`)
   checks contrast, tokens.css == gen(tokens.json), the 4 px grid and radius set, and no raw hex in `src/`.
   If this document and tokens.json ever disagree, tokens.json wins and this document is fixed.
@@ -20,7 +20,7 @@ This records the S2 design package as it ships. It replaces the palette, grid an
   Rose means an objection. Ari prepares, the rep sends.
 
 
-Base: Claude's Lamplit kit (layout, hierarchy, type, icons, dial). Colour: **Lamp & Dawn** (the package `palette/` folder). Sizes and motion: Material 3 (Compose `material3/tokens/*.kt`, androidx-main, read 18 Oct 2026). All values are CSS px at 1 dp = 1 px. Every value is a token in `app2/web/tokens/tokens.json`; `app2/web/src/ui/tokens.css` is generated from it and is all the screens and prototype read. Copy rule: counts, names, times and plain facts only. No commentary anywhere in the chrome.
+Base: Claude's Lamplit kit (layout, hierarchy, type, icons, dial). Colour: **Lamp & Dawn** (the package `palette/` folder). Sizes and motion: Material 3 (Compose `material3/tokens/*.kt`, androidx-main, read 18 Oct 2026). All values are CSS px at 1 dp = 1 px. Every value is a token in `app/web/tokens/tokens.json`; `app/web/src/ui/tokens.css` is generated from it and is all the screens and prototype read. Copy rule: counts, names, times and plain facts only. No commentary anywhere in the chrome.
 
 ## 1. Material rules applied (no Material colour, ripples, state-layer tints or shadows)
 
@@ -92,7 +92,7 @@ A full-width tile 05 closes it; Sign out is a 48 text button.
 
 24 × 24 grid with a 2 px safe margin, 1.5 px stroke, round caps and joins, `currentColor`. The check is the only 2 px stroke. The only fill is the amber index dot (`var(--accent)`). Sizes: 16 for chips and states, 20 inside keys and rows, 24 in the nav.
 
-The set has 19 icons: signal, copy, open-link, send, check, done, ready, waiting, on-hold, friction, tidy-up, offline, refresh, chevron-right, delta-up, delta-down, nav-today, nav-replies, nav-report. Files: `app2/web/src/ui/icons/sprite.svg` (`<use href="#ari-copy"/>`), sources in the package `icons/map.json` (Phosphor Regular geometry, MIT, redrawn as strokes, plus custom glyphs). Every state glyph ships with its word.
+The set has 19 icons: signal, copy, open-link, send, check, done, ready, waiting, on-hold, friction, tidy-up, offline, refresh, chevron-right, delta-up, delta-down, nav-today, nav-replies, nav-report. Files: `app/web/src/ui/icons/sprite.svg` (`<use href="#ari-copy"/>`), sources in the package `icons/map.json` (Phosphor Regular geometry, MIT, redrawn as strokes, plus custom glyphs). Every state glyph ships with its word.
 
 ## 5. Motion
 
@@ -264,10 +264,10 @@ A ring one step from closed, with the amber index sitting in the gap. It is the 
   Each send sweeps the index (§5 icon 4).
 - All Clear: the ring closes and turns teal, the check pops (§5 All Clear). Empty state: a 64 mark, ring in text-3, amber index.
 - App icon (180 master): canvas #121212, arc stroke #ECE6DC at 9.84 with round caps, amber #F0AA3C index dot r8.51.
-  Files: `app2/web/public/brand/`.
+  Files: `app/web/public/brand/`.
 - No face, mascot, quips, streaks or confetti. This replaces spec 01's pebble as the visual mark.
 
 ## Sources
 - S2 design package (private workspace, `work/s2-package/ari-s2-design/`: `spec.md`, `brand/BRAND.md`, `README.md`), Oct 18 2026.
-- `app2/web/tokens/tokens.json` and `app2/web/src/ui/styles.css` at v18.17.2.
+- `app/web/tokens/tokens.json` and `app/web/src/ui/styles.css` at v18.17.2.
 - S2 design review 01 finding S2-1 (Oct 19 2026), which asked for this file.

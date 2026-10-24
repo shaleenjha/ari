@@ -5,7 +5,7 @@
 -- Rollback: 0043_definer_caller_checks_rollback.sql (restores the three bodies verbatim and the authenticated grant). Checks: test/checks_after_0043.sql.
 --
 -- Callers found before writing this (Oct 24 2026, prod and staging bodies identical, md5 in work/security/prod-0042-0043/00_defs_*.json):
---   ari_account_implied(uuid): no app caller. web/ops.html, app2/, scripts/, edge functions and cron never call it. Only the
+--   ari_account_implied(uuid): no app caller. web/ops.html, app/, scripts/, edge functions and cron never call it. Only the
 --     SECURITY DEFINER functions ari_account_stage_backfill() and ari_account_stage_reconcile() call it, and they run as postgres.
 --     So: revoke execute from authenticated (the house rule for a function with no app caller). Body unchanged.
 --   ari_pref(text,jsonb): web/ops.html does not call it directly, but it calls ari_today_top (SECURITY INVOKER), and ari_today15 /

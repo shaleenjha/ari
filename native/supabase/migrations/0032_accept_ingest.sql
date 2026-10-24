@@ -1,7 +1,7 @@
 -- 0032 accept ingest + scan dead-man's switch (spec docs/specs/04_engine_watchdog_and_ingest.md, sections 1 and 3).
 -- STATUS: written Oct 17 2026 by Otto; NOT applied. Staging first, after 0026_health_alerts (this file asserts it).
 -- Numbering note: native/supabase/migrations/pending/ also holds a 0032_app2_e1_tenancy.sql; the two must be renumbered
--- before both land (this one was assigned 0032 by Hark; the pending app2 set is not touched here).
+-- before both land (this one was assigned 0032 by Hark; the pending app set is not touched here).
 --
 -- 1. gmail_events: one row per Gmail message the accept ingest handled (msg_id = idempotency key). Owner-read only.
 -- 2. people.accepted_source: 'gmail' | 'manual' (Today queue tap, spec section 4) | null (older rows).

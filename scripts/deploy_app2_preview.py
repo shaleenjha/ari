@@ -1,4 +1,4 @@
-# Deploy app2/web (synthetic data) as a Vercel PREVIEW in its own project "ari-app2-preview".
+# Deploy app/web (synthetic data) as a Vercel PREVIEW in its own project "ari-app2-preview".
 # Never touches the live project ari-web. Inside ari-app2-preview it deploys target=production (that project's own
 # production domain is the stable phone-test URL); the name guard below refuses any other project.
 # Usage: python3 scripts/deploy_app2_preview.py --go          synthetic data
@@ -6,10 +6,10 @@
 # Bare run or any other args prints this and exits 2.
 import os, sys, json, base64, subprocess, time
 if sys.argv[1:] not in (['--go'], ['--go', '--live']):
-    print('deploy_app2_preview.py: run with --go [--live] to build app2/web and deploy a PREVIEW (project ari-app2-preview). Nothing deployed.'); sys.exit(2)
+    print('deploy_app2_preview.py: run with --go [--live] to build app/web and deploy a PREVIEW (project ari-app2-preview). Nothing deployed.'); sys.exit(2)
 LIVE = sys.argv[1:] == ['--go', '--live']
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-WEB = os.path.join(ROOT, 'app2', 'web')
+WEB = os.path.join(ROOT, 'app', 'web')
 PROJECT = 'ari-app2-preview'
 assert PROJECT != 'ari-web'
 # Provenance gate (S1 R2): refuse unless the workspace equals GitHub main and CI on that commit is green. Exit 3 otherwise.

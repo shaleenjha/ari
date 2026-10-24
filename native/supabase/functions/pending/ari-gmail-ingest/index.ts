@@ -4,7 +4,7 @@
 // header x-ari-hook), keeps ONLY parsed fields (msg id, event type, profile URL, name, exact time) in gmail_shadow_events.
 // Never stores or logs bodies, snippets or tokens. Changes nothing in people/replies. Deploy with Verify JWT OFF.
 // Secrets: ARI_GMAIL_CLIENT_ID / ARI_GMAIL_CLIENT_SECRET (function secrets); refresh token + hook secret in Supabase Vault (service-role RPCs).
-// The parser below is copied VERBATIM from app2/jobs/src/gmail/parse.ts (keep in step; test: native/supabase/tests/gmail_ingest_port.test.ts).
+// The parser below is copied VERBATIM from app/jobs/src/gmail/parse.ts (keep in step; test: native/supabase/tests/gmail_ingest_port.test.ts).
 // ======================= parser (verbatim) =======================
 // gmail-ingest: deterministic parser for LinkedIn notification emails. No LLM.
 // Input is a Gmail message reduced to headers + text/html. Output is a typed event or 'unknown' with a reason.
@@ -112,7 +112,7 @@ export function parseLinkedInEmail(e: RawEmail): ParsedEvent {
   return { ...base, kind: 'unknown', reason: 'unrecognised_subject' };
 }
 
-// ======================= Gmail message JSON -> RawEmail (port of app2/jobs/src/gmail/fetch.ts gmailToRaw, Deno) =======================
+// ======================= Gmail message JSON -> RawEmail (port of app/jobs/src/gmail/fetch.ts gmailToRaw, Deno) =======================
 const MAX_BODY = 200_000;
 export function b64urlDecode(data: string): string {
   const s = data.replace(/-/g, '+').replace(/_/g, '/');

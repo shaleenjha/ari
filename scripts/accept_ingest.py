@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Ari accept ingest (spec docs/specs/04_engine_watchdog_and_ingest.md, Oct 17 2026; Otto). Gmail parser = SUPPLEMENT:
 # Owner's decision (Oct 17 23:21) is that the manual Accepted tap in the Today queue is the primary path.
-# Regexes mirror app2/jobs/src/gmail/parse.ts (ACCEPT_SUBJ / NOT_ACCEPT / FULLNAME / LINKEDIN_FROM): change both together.
+# Regexes mirror app/jobs/src/gmail/parse.ts (ACCEPT_SUBJ / NOT_ACCEPT / FULLNAME / LINKEDIN_FROM): change both together.
 #
 # usage (project folder; shell credentials [{"provider":"google","email":"owner@example.com"}]; Supabase as ari_worker
 # through scripts/ari_db.py):

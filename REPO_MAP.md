@@ -7,7 +7,7 @@ A plain guide to what is in this repo. Read it top to bottom once. After that, u
 ## The short version
 
 - `web/` is the app you use today. It is frozen. Only safety fixes go in.
-- `app2/` is the new app being built. All new screens go here.
+- `app/` is the new app being built. All new screens go here.
 - `native/supabase/` is the database: its change history, backups and server functions. The name "native" is old and misleading.
 - `scripts/` are small programs Hark runs on a timer or by hand: sync, reports, backups, deploys, checks.
 - `.github/` runs the automatic checks on every change. Red means not shipped.
@@ -28,28 +28,28 @@ The app on your phone right now. One big page plus the files it needs.
 | `web/build.json` | The version number of what is live. | Yes |
 | `web/about.html`, `privacy.html`, `terms.html` | Public pages: about, privacy, terms. | Yes |
 
-## 2. New app (`app2/`)
+## 2. New app (`app/`)
 
-The rebuild. Built beside the live app. It reads real data but does not write yet. See `app2/README.md` for commands.
+The rebuild. Built beside the live app. It reads real data but does not write yet. See `app/README.md` for commands.
 
 | Folder or file | What it does | Safe to ignore? |
 |---|---|---|
-| `app2/web/src/screens/` | One file per screen: Today, Today's 15 (`Today15.tsx`), Replies, Account room, Report, Sign in. Start here to see the product. | No |
-| `app2/web/src/ui/` | Shared building blocks: icons, colours (`tokens.css`), offline cache, back button, error screen. | Mostly yes |
-| `app2/web/src/data/` | How the app fetches data. `fixtures/` is fake data for tests, all from one invented sales world (made-up companies, clearly fake people). | Yes |
-| `app2/web/e2e/` | Robot tests that tap through the app on small phone sizes. | Yes |
-| `app2/web/scripts/design-lint/` | The design rules checker: tap size, contrast, banned words. | Yes, unless a check fails |
-| `app2/web/scripts/query-lint/` | Checker that stops the app from writing data directly. | Yes |
-| `app2/web/tokens/`, `scripts/tokens/` | The design colour and size list, and the tool that turns it into CSS. | Yes |
-| `app2/web/public/` | Icons, splash screen, font and offline file for the new app. | Yes |
-| `app2/jobs/src/gmail/` | Reads LinkedIn emails from Gmail and spots accepts and replies. | Yes |
-| `app2/jobs/src/gmail/sample-linkedin-emails.ts` | Fake LinkedIn emails used by the tests. | Yes |
-| `app2/jobs/src/gmail/fake-gmail-api.ts` | A pretend Gmail used by the tests. | Yes |
-| `app2/jobs/src/draft-eval/` | Scores drafted DMs against the house style (length, no dashes, no hype). | Yes |
-| `app2/jobs/src/runtime/` | The engine that runs background jobs one at a time, safely. | Yes |
-| `app2/db/` | The new app's database design, its change files and tests. Practice only; not the live database. | Yes |
-| `app2/docs/` | Notes for builders: job system, Gmail fetch, draft scoring, migration plan, sign-in code step. | Yes |
-| `app2/docs/references/` | Outside style guides the builders follow. | Yes |
+| `app/web/src/screens/` | One file per screen: Today, Today's 15 (`Today15.tsx`), Replies, Account room, Report, Sign in. Start here to see the product. | No |
+| `app/web/src/ui/` | Shared building blocks: icons, colours (`tokens.css`), offline cache, back button, error screen. | Mostly yes |
+| `app/web/src/data/` | How the app fetches data. `fixtures/` is fake data for tests, all from one invented sales world (made-up companies, clearly fake people). | Yes |
+| `app/web/e2e/` | Robot tests that tap through the app on small phone sizes. | Yes |
+| `app/web/scripts/design-lint/` | The design rules checker: tap size, contrast, banned words. | Yes, unless a check fails |
+| `app/web/scripts/query-lint/` | Checker that stops the app from writing data directly. | Yes |
+| `app/web/tokens/`, `scripts/tokens/` | The design colour and size list, and the tool that turns it into CSS. | Yes |
+| `app/web/public/` | Icons, splash screen, font and offline file for the new app. | Yes |
+| `app/jobs/src/gmail/` | Reads LinkedIn emails from Gmail and spots accepts and replies. | Yes |
+| `app/jobs/src/gmail/sample-linkedin-emails.ts` | Fake LinkedIn emails used by the tests. | Yes |
+| `app/jobs/src/gmail/fake-gmail-api.ts` | A pretend Gmail used by the tests. | Yes |
+| `app/jobs/src/draft-eval/` | Scores drafted DMs against the house style (length, no dashes, no hype). | Yes |
+| `app/jobs/src/runtime/` | The engine that runs background jobs one at a time, safely. | Yes |
+| `app/db/` | The new app's database design, its change files and tests. Practice only; not the live database. | Yes |
+| `app/docs/` | Notes for builders: job system, Gmail fetch, draft scoring, migration plan, sign-in code step. | Yes |
+| `app/docs/references/` | Outside style guides the builders follow. | Yes |
 
 ## 3. Database (`native/supabase/`)
 
@@ -131,5 +131,5 @@ Dropped from the repo because nothing used them any more (the private workspace 
 | File | Why |
 |---|---|
 | `scripts/retro_stats.py` | One-off weekly retro script; nothing calls it. |
-| `app2/docs/audit/01-stage1-audit-brief.md` | One-time brief for the Stage 1 outside audit. History. |
-| `app2/docs/ci-gate-first-run-failures.md` | Notes on the first run of the strict checks. History. |
+| `app/docs/audit/01-stage1-audit-brief.md` | One-time brief for the Stage 1 outside audit. History. |
+| `app/docs/ci-gate-first-run-failures.md` | Notes on the first run of the strict checks. History. |

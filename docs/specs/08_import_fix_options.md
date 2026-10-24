@@ -30,7 +30,7 @@ approves the lot. Code: `native/supabase/functions/pending/_shared/import/` (res
 
 ## Deploy needs (not done)
 - Supabase secret `LEMLIST_API_KEY` (key in Hark's vault, account ops-account@, trial ends about Nov 7 2026).
-- Wire `resolveImport` into the CSV import job and the card renderer in app2. Owner's go required, after R7.
+- Wire `resolveImport` into the CSV import job and the card renderer in app. Owner's go required, after R7.
 
 ## Update Oct 23 2026: solo-budget waterfall for missing URLs
 Order: (1) URL in the CSV, free; (2) Brave Search API, `"Name" "Company" site:linkedin.com/in`, $5 per 1,000 with $5 free credit a month (1,000 queries), env BRAVE_SEARCH_API_KEY, cap usage at the free credit; (3) lemlist People database while the trial lasts (ends about Nov 7 2026), env LEMLIST_API_KEY; (4) park, with a prefilled Google search link (`searchUrl`) the Owner opens on the phone. `defaultLookup = waterfall(brave, lemlist)` in import/brave.ts. A source with no key, an error or no profile passes to the next. Brave results are search-engine titles and URLs only; nothing reaches linkedin.com, and Brave's no-storage term is met because only the one approved URL is written. Same confidence rules as above.

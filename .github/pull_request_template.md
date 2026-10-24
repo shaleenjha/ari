@@ -9,7 +9,7 @@
 ## Checklist
 
 - [ ] Title is `Area: what changes`
-- [ ] CI green (including lint:design for app2/web)
+- [ ] CI green (including lint:design for app/web)
 - [ ] Design change: checked on iPhone and Android
 - [ ] Migration: in order, with a rollback
 - [ ] No secrets or real lead data

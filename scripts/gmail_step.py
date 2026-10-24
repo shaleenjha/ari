@@ -13,7 +13,7 @@
 # usage (project folder, shell credentials [{"provider":"google","email":"owner@example.com"}]):
 #   python3 scripts/gmail_step.py          run it (prints one JSON line, plus any ALERT: line)
 #   python3 scripts/gmail_step.py --dry    plan only, writes nothing (no replies, accepts, cursor or state)
-# Legacy Python path: app2 gmail-ingest (app2/jobs/src/gmail) replaces this at promote.
+# Legacy Python path: app gmail-ingest (app/jobs/src/gmail) replaces this at promote.
 import sys, os, json, subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))

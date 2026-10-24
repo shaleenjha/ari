@@ -41,9 +41,9 @@ INCLUDE = [
     'scripts/ari_db.py', 'scripts/backup_check.py', 'scripts/restore_drill.py', 'scripts/offsite_drive.py',
     'scripts/health_check.py', 'scripts/phase0_metrics.py', 'scripts/exec_track_handoff.py', 'scripts/worker_precheck.py', 'scripts/draft_tag.py', 'scripts/copy_switch.py', 'scripts/hygiene_scan.py', 'scripts/test_hygiene_scan.py',
     'native/supabase/tests/*.sql', 'native/supabase/tests/*.ts',
-    # Phase 1 (Oct 17 2026): app2 tree + CI, recursive ("dir/**"), build output and deps excluded
-    'app2/**', '.github/**',
-    # Oct 17 2026: specs, app2 pending migrations, accept ingest
+    # Phase 1 (Oct 17 2026): app tree + CI, recursive ("dir/**"), build output and deps excluded
+    'app/**', '.github/**',
+    # Oct 17 2026: specs, app pending migrations, accept ingest
     'docs/specs/*.md', 'docs/engineering/*.md', 'docs/privacy-data-inventory.md', 'docs/RELEASES.md', 'docs/runbooks/*.md', 'native/supabase/migrations/pending/**', 'native/supabase/baseline/*.sql',  # schema-only prod baseline for the sql-prod-shape CI job (Oct 18)
      'scripts/accept_ingest.py', 'scripts/gmail_step.py', 'scripts/test_gmail_step.py', 'docs/specs/worker_step0.txt', 'scripts/scan_heartbeat.py', 'scripts/test_scan_heartbeat.py', 'scripts/copy_check.py', 'scripts/relay_check.py', 'scripts/focus_blocks.py', 'scripts/cadence.py',  # Oct 21 2026: called by the worker task every run, were missing from the repo  # v18.15.4 scan dead-man
     'native/supabase/RESTORE.md', 'native/supabase/pending/MAINTENANCE.md', 'native/supabase/offsite/ari-offsite-recipient*.pem',  # S1 R3: every recipient cert (public only)
@@ -231,7 +231,7 @@ def refresh_names():
 NO_SCRUB = {'LICENSE'}
 
 # Dead files inside recursive includes, dropped from the export (Oct 24 2026 scrub build; listed in REPO_MAP).
-EXCLUDE = {'app2/docs/audit/01-stage1-audit-brief.md', 'app2/docs/ci-gate-first-run-failures.md'}
+EXCLUDE = {'app/docs/audit/01-stage1-audit-brief.md', 'app/docs/ci-gate-first-run-failures.md'}
 
 SKIP_DIRS = {'node_modules', 'dist', 'test-results', 'playwright-report', '.vite', '__pycache__', 'coverage'}
 

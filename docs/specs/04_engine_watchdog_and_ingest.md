@@ -23,8 +23,8 @@ Latent defects:
 Patch (NOT applied; needs Owner's approval):
 
 ```diff
---- a/app2/jobs/src/gmail/parse.ts
-+++ b/app2/jobs/src/gmail/parse.ts
+--- a/app/jobs/src/gmail/parse.ts
++++ b/app/jobs/src/gmail/parse.ts
 -const LINKEDIN_FROM = /@([a-z0-9-]+\.)*linkedin\.com>?\s*$/i;
 -const ACCEPT_SUBJ = [/^(.+?) accepted your invitation/i, /^(.+?) has accepted your invitation/i, /^You and (.+?) are now connected/i];
 +const LINKEDIN_FROM = /<?\s*[^<>\s@]+@(?:[a-z0-9-]+\.)*linkedin\.com\s*>?\s*$/i;  // DKIM checked below

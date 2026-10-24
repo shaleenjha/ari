@@ -16,7 +16,7 @@ Code: branch `live/ai-layer` (`native/supabase/functions/pending/{_shared/ai,ari
 | `ANTHROPIC_API_KEY` | Anthropic key | Opus (all drafts, deep research orchestration), Sonnet (quick research), Haiku (classify); set a provider-side monthly limit too |
 | `XAI_API_KEY` | xAI key | Grok searches inside deep research (x_search / web_search); set a provider-side limit too |
 | `ARI_PUBLISHABLE_KEY` | only if `SUPABASE_PUBLISHABLE_KEYS` is not injected | public by design (the app ships it) |
-| `ARI_APP_ORIGINS` | comma list of app origins allowed by CORS | default `https://ari-web.vercel.app`; add the app2 origin |
+| `ARI_APP_ORIGINS` | comma list of app origins allowed by CORS | default `https://ari-web.vercel.app`; add the app origin |
 | `ARI_GMAIL_CLIENT_ID` / `_SECRET` | already set for ingest | reused by ari-gmail-push for users.watch |
 | `OPENAI_API_KEY` | optional, unused | backup stub only |
 

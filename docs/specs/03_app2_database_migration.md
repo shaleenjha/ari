@@ -1,4 +1,4 @@
-# 03 · app2 database migration (E1 to E3)
+# 03 · app database migration (E1 to E3)
 
 Pending, not applied. Source: `native/supabase/migrations/pending/` (sha256 in section 9). Renumbered Oct 17 2026 (Otto's `0032_accept_ingest.sql` lands first): E1 is **0033**, E2 **0034**, E3 **0035**. Rewritten lock-safe the same day per the approved section 5 (Owner's decisions, 23:21 IST). All six files are generated (`test/gen_e12.py` for 0033/0034, `test/gen_e3.py` for 0035), so the SQL below is an excerpt: the header comments are dropped, every phase shows its first per-table transaction and a count of the rest, and two literals are redacted: `<owner-uid>` and `<owner-name>`. The workspace id is a synthetic constant.
 
@@ -24,7 +24,7 @@ begin
     raise exception '0033 precheck: 0026 (health_alerts) is not applied';
   end if;
   if not exists (select 1 from supabase_migrations.schema_migrations where version = '0032') then
-    raise exception '0033 precheck: 0032 (accept_ingest) is not applied; it must land before app2 E1';
+    raise exception '0033 precheck: 0032 (accept_ingest) is not applied; it must land before app E1';
   end if;
   select max(version) into mx from supabase_migrations.schema_migrations;
   if mx > '0035' then raise exception '0033 precheck: max(version) is %, expected 0032 (or 0033..0035 on a re-run)', mx; end if;
@@ -80,7 +80,7 @@ begin;
 set local lock_timeout = '5s';
 set local statement_timeout = '60s';
 alter table public.account_briefs add column if not exists workspace_id uuid default 'f5a1e000-0000-4000-8000-000000000001'::uuid;
-comment on column public.account_briefs.workspace_id is 'app2 tenancy (0033 E1). Every row belongs to workspace <owner-name> until app2 adds members.';
+comment on column public.account_briefs.workspace_id is 'app tenancy (0033 E1). Every row belongs to workspace <owner-name> until app adds members.';
 commit;
 -- ... 41 more transactions of the same form, one per table ...
 -- ---------- ledger (only when every table has the column) ----------
@@ -153,7 +153,7 @@ do $$
 declare n int;
 begin
   if not exists (select 1 from supabase_migrations.schema_migrations where version = '0033') then
-    raise exception '0034 precheck: 0033 (app2 E1) is not applied';
+    raise exception '0034 precheck: 0033 (app E1) is not applied';
   end if;
   select count(*) into n from information_schema.columns
    where table_schema = 'public' and column_name = 'workspace_id' and table_name = any(array['account_briefs', 'account_stage_history', 'accounts', 'app_changes', 'app_config', 'app_usage', 'ari_notes', 'ari_prefs', 'attachments', 'book', 'brief', 'copy_guidance', 'decisions', 'draft_edits', 'draft_tags', 'emails', 'events', 'gmail_connect_tickets', 'gmail_connection', 'gmail_ingest_runs', 'gmail_oauth_states', 'gmail_shadow_diffs', 'gmail_shadow_events', 'hygiene_findings', 'log_entries', 'messages', 'notifications', 'ops', 'people', 'plays', 'push_subscriptions', 'push_tokens', 'queue', 'replies', 'research', 'scan_heartbeat', 'sent_messages', 'sync_state', 'targets', 'task_events', 'tasks', 'threads']);
@@ -386,7 +386,7 @@ do $$
 declare n int;
 begin
   if not exists (select 1 from supabase_migrations.schema_migrations where version = '0034') then
-    raise exception '0035 precheck: 0034 (app2 E2) is not applied';
+    raise exception '0035 precheck: 0034 (app E2) is not applied';
   end if;
   select count(*) into n from pg_policies where schemaname = 'public' and roles = '{authenticated}'
     and (coalesce(qual, '') || coalesce(with_check, '')) like '%is_owner()%';

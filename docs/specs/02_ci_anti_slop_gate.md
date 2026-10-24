@@ -24,7 +24,7 @@ const INFRA = /\b(?:supabase|vercel|postgres(?:ql)?|postgrest|rls|databases?|api
 
 ```
 src/today/Card.tsx:42:13  exclamation  "!"  in: You're all set!
-::error file=app2/web/src/today/Card.tsx,line=42,col=13,title=exclamation::"!" in UI copy
+::error file=app/web/src/today/Card.tsx,line=42,col=13,title=exclamation::"!" in UI copy
 ```
 
 ## 2. Headless mobile harness
@@ -163,7 +163,7 @@ function viaVariable(top, checker) {
 }
 ```
 
-`allowed`/`finding` reuse §1. Programs: `app2/web` and `app2/jobs` tsconfigs. `query-lint.test.ts` (vitest): `fixtures/fail.ts` reports exactly its `// expect` lines, `fixtures/pass.ts` nothing.
+`allowed`/`finding` reuse §1. Programs: `app/web` and `app/jobs` tsconfigs. `query-lint.test.ts` (vitest): `fixtures/fail.ts` reports exactly its `// expect` lines, `fixtures/pass.ts` nothing.
 
 ```ts
 // pass.ts
@@ -183,7 +183,7 @@ const q3 = sb.from('tasks').select('id'); return q3; // expect: query-unbounded
 
 ## 4. CI wiring (`.github/workflows/ci.yml`)
 
-app2/web scripts: `"lint:query": "node scripts/query-lint/query-lint.mjs"`, `"lint:slop": "npm run lint:design:static && npm run lint:query"`.
+app/web scripts: `"lint:query": "node scripts/query-lint/query-lint.mjs"`, `"lint:slop": "npm run lint:design:static && npm run lint:query"`.
 
 | job | needs | command | budget |
 |---|---|---|---|
