@@ -1,4 +1,4 @@
-# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST. 0042 security hardening: on STAGING only (Oct 24 2026), not on prod
+# app2 E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST. 0042 security hardening and 0043 definer caller checks: LIVE in prod since Oct 24 2026 ~11:54 IST (staging first)
 
 ## Status (checked Oct 19 2026, read-only, counts only; plans/audit data-side live checks)
 | Migration | Prod | Ledger row (`supabase_migrations.schema_migrations`) |
@@ -10,7 +10,8 @@
 | `0036_log_repair_rpc.sql` | LIVE (`ari_worker_log_repair` and `ari_worker_log_unappend` exist in prod; the spec-05 Log repair it served finished Oct 18 2026, 395 rows) | **no** at the Oct 19 check. 0038 part 7 writes the row |
 | `0037_members_aal2.sql` (+ rollback) | LIVE Oct 20 2026 (checks_after_0037 PASSED on prod). S1 R5: members need the two-step code too | yes |
 | `0038_s1_release6.sql` (+ rollback) | LIVE Oct 20 2026 (checks_after_0038 PASSED on prod; both repair functions gone). S1 R6: seven parts, incl. dropping `ari_worker_log_repair` and `ari_worker_log_unappend` (accept_ingest repair-log retired in v18.17.7) | yes (ledger 0034 to 0038) |
-| `0042_security_hardening.sql` (+ rollback) | **NOT on prod.** ON STAGING since Oct 24 2026 (~11:35 IST): applied, checks_after_0042 PASSED, rolled back, re-applied, PASSED again (evidence work/security/staging-0042/). Default lock (anon/authenticated) re-asserted for public + app; daily row counts + row-drop ops_alert (cron `ari-rowcount-daily` 08:00 IST). Prod waits for Owner's go | staging yes (0042); prod no |
+| `0042_security_hardening.sql` (+ rollback) | LIVE Oct 24 2026 ~11:53 IST (checks_after_0042 PASSED on prod; staging since ~11:35). Default lock (anon/authenticated) re-asserted for public + app; daily row counts + row-drop ops_alert (cron `ari-rowcount-daily` 08:00 IST). Evidence work/security/staging-0042/, work/security/prod-0042-0043/ | yes (0042) |
+| `0043_definer_caller_checks.sql` (+ rollback) | LIVE Oct 24 2026 ~11:54 IST (checks_after_0043 PASSED on staging and prod; staging rollback rehearsed twice, byte-identical restore). `ari_account_implied` revoked from authenticated (no app caller); `ari_pref` and `ari_push_ack` filter by `is_owner() OR app.is_member(workspace_id)` for signed-in API callers | yes (0043) |
 
 - `0036_log_repair_rpc.sql` was never applied as a whole file. Per function:
   - `ari_worker_log_repair`: applied by hand, repair only (the Oct 18 Log repair); no ledger row; ledger row via 0038 part 7; dropped by 0038.
@@ -26,7 +27,15 @@
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
 
-## 0042 security hardening (Oct 24 2026): on staging, NOT on prod
+## 0042 + 0043 on prod (Oct 24 2026, Owner "B" 11:45 IST)
+Evidence: work/security/prod-0042-0043/README.md. Fresh verified backup first (backup_runs id 12, ari_20261024T0622Z, 48 tables,
+5,326 rows, 0 mismatches, offsite ok). Prod ACL fingerprints before = staging's. After 0042: rel/fn ACL fingerprints unchanged,
+cron gains `ari-rowcount-daily`, ledger 0042. After 0043: the only ACL change is `ari_account_implied` losing authenticated (fn
+fingerprint now 9ad9de5e…, same as staging after 0043); ari_worker grants fingerprint unchanged. Smoke test (owner + random uid,
+rolled back) passed. `test/checks_after_0043.sql` is staging/prod-safe (one statement, synthetic rows, deliberate raise).
+Proposed `run_local.sh` lines follow the 0042 pattern below (unverified locally).
+
+## 0042 security hardening (Oct 24 2026): history (staging write-up)
 - Files: `0042_security_hardening.sql`, `0042_security_hardening_rollback.sql`, `test/checks_after_0042.sql`. Spec: plans/ari-app-status.md
   "Backlog: Supabase hardening". Inventory + cascade review (report only): work/security/inventory-2026-10-24.md, work/security/cascade-review.md.
   Re-runnable grant inventory: `../../ops/security_grants_inventory.sql` (read-only).

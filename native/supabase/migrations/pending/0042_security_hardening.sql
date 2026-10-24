@@ -1,5 +1,5 @@
 -- 0042 Supabase security hardening (Oct 24 2026; spec plans/ari-app-status.md "Backlog: Supabase hardening", Owner yes 09:10 IST).
--- STAGING ONLY so far (ari-staging, applied Oct 24 2026). NOT on prod: prod waits for Owner's go. Rollback: 0042_security_hardening_rollback.sql.
+-- LIVE on staging (Oct 24 2026 ~11:35 IST) and PROD (Oct 24 2026 ~11:53 IST, Owner "B" 11:45; evidence work/security/prod-0042-0043/). Rollback: 0042_security_hardening_rollback.sql.
 -- Checks: test/checks_after_0042.sql (one transaction, synthetic rows, ends in a deliberate raise so nothing is kept).
 --   1. Default lock. New objects that postgres creates in schemas public and app start closed to anon (and authenticated, as
 --      0016 already set for public) until a migration grants them. Default privileges only act on objects created LATER: no
