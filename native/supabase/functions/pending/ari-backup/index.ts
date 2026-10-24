@@ -201,15 +201,34 @@ function safeEq(a: string | null, b: string | null | undefined): boolean {
   return d === 0 && x.length === y.length;
 }
 
+// Cheap gate before any DB connection: the hook secret is cached per isolate for 5 minutes, so a wrong header is refused
+// from memory, and more than 10 wrong headers a minute get 429 with no DB work at all.
+let hookCache: { v: string; at: number } | null = null;
+let badHits: number[] = [];
+async function hookSecret(): Promise<string | null> {
+  if (hookCache && Date.now() - hookCache.at < 300_000) return hookCache.v;
+  const c = postgres(Deno.env.get("SUPABASE_DB_URL")!, { prepare: false, max: 1, idle_timeout: 5 });
+  try {
+    const [s] = await c`select decrypted_secret v from vault.decrypted_secrets where name = 'ari_backup_hook_secret'`;
+    const v = typeof s?.v === "string" ? s.v : null;
+    hookCache = v ? { v, at: Date.now() } : null;
+    return v;
+  } finally { await c.end().catch(() => {}); }
+}
+
 Deno.serve(async (req) => {
   const hook = req.headers.get("x-ari-hook");
-  if (!hook || hook.length > 256) return new Response("unauthorized", { status: 401 }); // no DB work for unauthenticated calls
+  if (!hook || hook.length > 256) return new Response("unauthorized", { status: 401 }); // missing or oversized: no DB work
+  const now = Date.now(); badHits = badHits.filter((t) => now - t < 60_000);
+  if (badHits.length >= 10) return new Response("too many requests", { status: 429 });
+  if (hookCache && now - hookCache.at < 300_000 && !safeEq(hook, hookCache.v)) { badHits.push(now); return new Response("unauthorized", { status: 401 }); }
+  let secret: string | null;
+  try { secret = await hookSecret(); } catch (e) { console.error(String(e).slice(0, 300)); return new Response("error", { status: 500 }); }
+  if (!safeEq(hook, secret)) { badHits.push(now); return new Response("unauthorized", { status: 401 }); }
   const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!, { prepare: false, max: 1, idle_timeout: 0 }); // 0: the one connection (and its advisory lock) must not drop mid-backup
   const json = (b: unknown, status = 202) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
   let handedOff = false; // once the job owns the connection, only the job ends it
   try {
-    const [s] = await sql`select decrypted_secret v from vault.decrypted_secrets where name = 'ari_backup_hook_secret'`;
-    if (!safeEq(hook, typeof s?.v === "string" ? s.v : null)) return new Response("unauthorized", { status: 401 });
     // one backup at a time: a session advisory lock (this client has exactly one connection) held until the job ends
     const [lk] = await sql`select pg_try_advisory_lock(hashtext('ari_backup_run')) ok`;
     if (!lk?.ok) return json({ ok: true, already_running: true });
