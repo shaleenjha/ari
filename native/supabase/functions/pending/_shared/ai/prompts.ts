@@ -40,7 +40,7 @@ export function packContext(ctx: Ctx): string {
 
 export function draftDm1Prompt(ctx: Ctx): { system: string; user: string } {
   return {
-    system: `You write the first LinkedIn message (DM1) Owner, a Senior SDR at Vendor (a data privacy vault), sends right after
+    system: `You write the first LinkedIn message (DM1) Owner, a Senior SDR at Thrandvex (a data privacy vault), sends right after
 someone accepts his connection request. Goal: a relevant, specific opener that earns a reply. Not a pitch deck.
 ${HOUSE}
 ${DATA_RULE}
@@ -89,7 +89,7 @@ Reply with JSON only: {"pick": <index or -1>, "runner_up": <index or -1>, "confi
 /** Haiku: classify only. */
 export function triagePrompt(ctx: Ctx): { system: string; user: string } {
   return {
-    system: `You classify a LinkedIn reply to Owner (Senior SDR at Vendor). Do not draft anything.
+    system: `You classify a LinkedIn reply to Owner (Senior SDR at Thrandvex). Do not draft anything.
 ${DATA_RULE}
 Reply with JSON only: {"intent": "interested|meeting|question|referral|not_now|not_interested|unsubscribe|other",
  "urgency": "high|normal|low", "summary": "<one sentence>", "needs_review": true|false}`,
@@ -100,7 +100,7 @@ Reply with JSON only: {"intent": "interested|meeting|question|referral|not_now|n
 /** Opus: the three reply drafts, given Haiku's classification. */
 export function replyDraftsPrompt(ctx: Ctx, triage: Ctx): { system: string; user: string } {
   return {
-    system: `You draft three different replies Owner (Senior SDR at Vendor) could send to a LinkedIn reply.
+    system: `You draft three different replies Owner (Senior SDR at Thrandvex) could send to a LinkedIn reply.
 Exactly three drafts with keys "book" (proposes a short call plainly), "answer" (answers what they said; the default pick) and
 "soft" (low pressure, keeps the door open). Each under 300 characters, first person as Owner, no em or en dashes, no hedging,
 one ask at most, only facts in the context. If they say no or unsubscribe, all three are gracious, short closes.
@@ -137,7 +137,7 @@ export const DEEP_TOOLS = [
 ];
 
 export function deepSystemPrompt(focus?: string): string {
-  return `You run deep research on one prospect and their company for Owner's outreach (Owner is a Senior SDR at Vendor, a data
+  return `You run deep research on one prospect and their company for Owner's outreach (Owner is a Senior SDR at Thrandvex, a data
 privacy vault). Plan, then search: use grok_search with source "x" for fresh public posts by the company and its leaders, and
 source "web" for news, launches, funding, hiring, compliance or data-privacy events, talks and podcasts. Prefer the last 90 days.
 Call record_finding the moment you have a concrete, citable fact (one call per fact). Never invent a url: only cite urls that

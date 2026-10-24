@@ -16,7 +16,7 @@ create table if not exists public.account_briefs (
   status text not null default 'queued' check (status in ('queued','building','ready')),
   thesis text,
   why_now jsonb not null default '[]'::jsonb,      -- [{date, text, label: Verified|Inference|Hypothesis, url, kind: trigger|context}]
-  data_flow jsonb not null default '[]'::jsonb,    -- [{step, where, data, vendor}]
+  data_flow jsonb not null default '[]'::jsonb,    -- [{step, where, data, thrandvex}]
   committee jsonb not null default '[]'::jsonb,    -- [{team, role, why, people:[{person_id, name, title, priority, objection}]}]
   angle text,
   soft_angles jsonb not null default '[]'::jsonb,  -- [{kind: role_pain|peer_move|hiring|product_change, text, url}] non-trigger angles

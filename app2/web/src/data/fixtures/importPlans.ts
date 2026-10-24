@@ -76,5 +76,5 @@ export const SAMPLE_CSV = [
   'Jonah Exampleton,Thessquorn Health,Head of Security,,',
   'Tess Sampleton,Clovardine Labs,,,',
   'Ilan Brookample,Moquadrel,Staff Engineer,,',
-  'Sana Fauxwell,Norquiveth Pay,Director of Risk,,linkedin.com/in/sana-fauxwell-example',
+  'Suvi Fauxwell,Norquiveth Pay,Director of Risk,,linkedin.com/in/suvi-fauxwell-example',
 ].join('\n');

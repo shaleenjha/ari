@@ -36,7 +36,7 @@ The rebuild. Built beside the live app. It reads real data but does not write ye
 |---|---|---|
 | `app2/web/src/screens/` | One file per screen: Today, Today's 15 (`Today15.tsx`), Replies, Account room, Report, Sign in. Start here to see the product. | No |
 | `app2/web/src/ui/` | Shared building blocks: icons, colours (`tokens.css`), offline cache, back button, error screen. | Mostly yes |
-| `app2/web/src/data/` | How the app fetches data. `fixtures/` is fake data for tests. | Yes |
+| `app2/web/src/data/` | How the app fetches data. `fixtures/` is fake data for tests, all from one invented sales world (made-up companies, clearly fake people). | Yes |
 | `app2/web/e2e/` | Robot tests that tap through the app on small phone sizes. | Yes |
 | `app2/web/scripts/design-lint/` | The design rules checker: tap size, contrast, banned words. | Yes, unless a check fails |
 | `app2/web/scripts/query-lint/` | Checker that stops the app from writing data directly. | Yes |
@@ -49,8 +49,6 @@ The rebuild. Built beside the live app. It reads real data but does not write ye
 | `app2/jobs/src/runtime/` | The engine that runs background jobs one at a time, safely. | Yes |
 | `app2/db/` | The new app's database design, its change files and tests. Practice only; not the live database. | Yes |
 | `app2/docs/` | Notes for builders: job system, Gmail fetch, draft scoring, migration plan, sign-in code step. | Yes |
-| `app2/docs/audit/01-stage1-audit-brief.md` | The brief given to the outside auditor for Stage 1. | Yes |
-| `app2/docs/ci-gate-first-run-failures.md` | What failed the first time the strict checks ran. History. | Yes |
 | `app2/docs/references/` | Outside style guides the builders follow. | Yes |
 
 ## 3. Database (`native/supabase/`)
@@ -86,13 +84,16 @@ Hark runs many of these on a timer. Names here must not change without updating 
 | `draft_tag.py`, `copy_switch.py` | Label drafts so Ari learns which messages work. | Yes |
 | `daily_report.py` | Builds and emails the morning report. | Yes |
 | `exec_track_handoff.py` | Emails the daily exec track list to your work inbox. | Yes |
-| `phase0_metrics.py`, `retro_stats.py` | Product and weekly numbers: meetings, accepts, replies. | Yes |
+| `phase0_metrics.py` | Product numbers: meetings, accepts, replies. | Yes |
+| `copy_check.py` | The code check every drafted message must pass before Ari shows it. | Yes |
+| `seller_config.py` | Who the seller is, the AE books and which customers a draft may name. Real values live in a private file outside the repo; the repo carries an invented demo workspace. | Yes |
 | `ari_db.py` | The one door scripts use to reach the database, with limited rights. | Yes |
 | `db_backup.py`, `backup_check.py`, `restore_drill.py`, `offsite_drive.py`, `offsite_certs.py` | Backups: make, check, practise restoring, copy offsite, lock the copy. | Yes |
 | `deploy_web.py` | The only way to put the live app online. Refuses anything unusual. | Yes |
 | `deploy_app2_preview.py` | Puts the new app on a separate test link for your phone check. | Yes |
 | `deploy_provenance.py` | Blocks a deploy unless the code passed the checks on GitHub. | Yes |
 | `git_sync.sh`, `git_export.py`, `git_pull_remote.py`, `git_push_api.py` | Publish code to this repo with real names removed and secrets blocked. | Yes |
+| `repo_scan.py` | The leak check: no real names, personal emails, phone numbers, real-looking LinkedIn links or keys. Runs in CI on every push. | Yes |
 | `test_*.py` | Automatic tests for the scripts above. | Yes |
 
 ## 5. Automatic checks (`.github/`)
@@ -100,6 +101,7 @@ Hark runs many of these on a timer. Names here must not change without updating 
 | File | What it does | Safe to ignore? |
 |---|---|---|
 | `workflows/ci.yml` | Runs every check on each change: types, tests, design rules, copy rules, database rehearsal. One failure blocks shipping. | Yes, unless red |
+| `workflows/repo-scan.yml` | The leak check (`scripts/repo_scan.py`) on every push, docs included. Red means real data got in. | Yes, unless red |
 | `workflows/claude.yml` | Lets the outside auditor reply when someone writes @claude on GitHub. | Yes |
 
 ## 6. Plans and docs (`docs/`, root files)
@@ -119,4 +121,15 @@ Plans, team notes, data files and screenshots are kept in the private workspace,
 
 | Folder | What it was | Safe to ignore? |
 |---|---|---|
+| `archive/ui/` | Old versions of the live app and design mockups, on synthetic data. Its README lists each one with its date. | Yes |
 | (removed) | The unused Expo starter was removed Oct 21 2026; git history before that date still has it. | Yes |
+
+## 8. Removed in the Oct 24 2026 clean-up
+
+Dropped from the repo because nothing used them any more (the private workspace keeps its own copies):
+
+| File | Why |
+|---|---|
+| `scripts/retro_stats.py` | One-off weekly retro script; nothing calls it. |
+| `app2/docs/audit/01-stage1-audit-brief.md` | One-time brief for the Stage 1 outside audit. History. |
+| `app2/docs/ci-gate-first-run-failures.md` | Notes on the first run of the strict checks. History. |

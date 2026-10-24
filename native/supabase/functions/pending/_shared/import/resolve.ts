@@ -39,7 +39,7 @@ export function normCompany(c?: string | null): string {
   return (c ?? '').toLowerCase().replace(/&/g, ' and ').replace(/[.,'’()]/g, ' ').replace(SUFFIX, ' ').replace(/\s+/g, ' ').trim();
 }
 export function normName(n?: string | null): string {
-  return (n ?? '').toLowerCase().replace(/,.*$/, '')                     // "Jose Marlow, PhD" -> "jose marlow"
+  return (n ?? '').toLowerCase().replace(/,.*$/, '')                     // "Jose Sampleton, PhD" -> "jose sampleton"
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z\s'-]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 const sameCompany = (a?: string, b?: string) => { const x = normCompany(a), y = normCompany(b); return !!x && !!y && (x === y || x.startsWith(y + ' ') || y.startsWith(x + ' ')); };

@@ -1,6 +1,6 @@
 # Ari v18.15.4 (Basalt): signal-scan heartbeat + dead-man check. No migration: rows live in the existing
 # key/value table `brief` (role ari_worker has select/insert/update there, migration 0018), one key per book:
-#   scan_hb:alex | scan_hb:blake | scan_hb:bram -> JSON {started_at, finished_at, accounts_processed, errors}
+#   scan_hb:<book> (one per AE book in scripts/seller_config.py) -> JSON {started_at, finished_at, accounts_processed, errors}
 #   scan_hb:armed  -> ISO time the watch was armed, or empty (disarmed: no alerts while the scans are paused)
 # Why not scan_runs (0032): ari_worker cannot read it, and its built-in ari_scan_deadman() uses a 25 min miss rule
 # meant for a 10 min cadence, so daily scans written there would false-alarm every 12 h.
@@ -17,7 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, 'work', 'v187', 'scan_deadman_state.json')
-BOOKS = {'alex': 'Alex Rivera', 'blake': 'Blake Moreno', 'bram': 'Casey Brooks'}
+import seller_config
+BOOKS = dict(seller_config.load()['aes'])   # book key -> AE full name (private settings; synthetic defaults in the repo)
 SLOT_DAYS = (1, 2, 3, 4, 5)          # Tue..Sat (Mon = 0)
 SLOT_TIME = (4, 30)
 GRACE = dt.timedelta(minutes=45)

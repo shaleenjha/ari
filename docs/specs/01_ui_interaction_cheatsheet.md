@@ -87,7 +87,7 @@ States per draft: `PICK`, `ALT`, `EDITED(base=PICK|ALT)`.
 - One row per tap; back counts. In-flight repeats are idempotent.
 - Edit = any saved text change, attributed to its base (`switched-from=<pick>` when ALT).
 - Switches shape priors, never outcomes.
-- Labels: "Ari's pick · S2 Confirm or correct", chip "Switch to S6 Who owns this". DM1 adds "Add a Vendor line". Uncleared drafts show "Flagged: <check>".
+- Labels: "Ari's pick · S2 Confirm or correct", chip "Switch to S6 Who owns this". DM1 adds "Add a Thrandvex line". Uncleared drafts show "Flagged: <check>".
 
 ### Copy and open LinkedIn
 One button: copy, then open. If copy fails, select the text, show "Copy failed. Text selected." and do not open.

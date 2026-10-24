@@ -70,12 +70,12 @@ function normCo(s){s=String(s||'').toLowerCase().replace(/\(.*?\)/g,' ').replace
   s=s.replace(/\b(inc|incorporated|llc|ltd|limited|corp|corporation|co|company|the|holdings|group|ai|technologies|technology|labs|hq)\b/g,' ').replace(/\s+/g,'').trim();return s}
 window.ariNormCo=normCo;
 function low(s){return String(s||'').trim().toLowerCase()}
-function playOf(p,a,bk){var o=String(p.owner||a.owner||(bk&&bk[1])||''),txt=low((a.hook||'')+' '+(a.one_liner||'')+' '+(a.why_vendor||'')+' '+(bk&&bk[4]||'')+' '+p.title);
-  if(/blake/i.test(o))return {k:'B',l:'Play B, Blake ISV',pain:'its customers’ sensitive data now flows into agents, connectors and prompts at runtime, and their security review is where its deals slip'};
-  if(/alex/i.test(o)){if(/train|dataset|data licens|rl |evaluation|ai data|licens/.test(txt))return {k:'A',l:'Play A, Alex AI data',pain:'it sells or trains on data that its buyers’ security and legal review will gate'};
-    return {k:'H',l:'Healthcare, Alex',pain:'PHI sits in free text (notes, transcripts, claims) that AI is now reading, and a BAA does not govern what each model sees'}}
-  if(/bram/i.test(o))return {k:'H',l:'Healthcare, Casey’s book',pain:'PHI sits in free text that AI is now reading, and a BAA does not govern what each model sees'};
-  return {k:'?',l:'No AE book yet',pain:'sensitive data may be reaching AI there, but the account is not in Alex’s, Blake’s or Casey’s book'}}
+function playOf(p,a,bk){var o=String(p.owner||a.owner||(bk&&bk[1])||''),txt=low((a.hook||'')+' '+(a.one_liner||'')+' '+(a.why_thrandvex||'')+' '+(bk&&bk[4]||'')+' '+p.title);
+  if(/idris/i.test(o))return {k:'B',l:'Play B, Idris ISV',pain:'its customers’ sensitive data now flows into agents, connectors and prompts at runtime, and their security review is where its deals slip'};
+  if(/tamsin/i.test(o)){if(/train|dataset|data licens|rl |evaluation|ai data|licens/.test(txt))return {k:'A',l:'Play A, Tamsin AI data',pain:'it sells or trains on data that its buyers’ security and legal review will gate'};
+    return {k:'H',l:'Healthcare, Tamsin',pain:'PHI sits in free text (notes, transcripts, claims) that AI is now reading, and a BAA does not govern what each model sees'}}
+  if(/bram/i.test(o))return {k:'H',l:'Healthcare, Bram’s book',pain:'PHI sits in free text that AI is now reading, and a BAA does not govern what each model sees'};
+  return {k:'?',l:'No AE book yet',pain:'sensitive data may be reaching AI there, but the account is not in Tamsin’s, Idris’s or Bram’s book'}}
 function roleWhy(t){t=low(t);
   if(/ciso|security|trust/.test(t))return 'owns the security review that decides how sensitive data reaches AI';
   if(/\bceo\b|chief exec|founder|president/.test(t))return 'sets the data policy buyers review, so check the exec track first';
@@ -139,7 +139,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
     if(item){item.n=p.name;item.c=[p.title,acct].filter(Boolean).join(' · ');item.id=p.id;item.url=liHttps(p.linkedin_url);item.acc=item.tag==='REPLY'?1:0;item.p=p;Q.push(item);next=next||({CONNECT:'Send the connect',DM1:'Send DM1',DM2:'Send DM2',DM3:'Send DM3',WITHDRAW:'Withdraw the invite',REPLY:'Answer the reply'})[item.tag]}
     var found=[];if(a.hook)found.push([a.hook_date?short(dOnly(a.hook_date)):'Hook',a.hook_url?'<a class="v16src" href="'+esc(a.hook_url)+'" target="_blank" rel="noopener">'+esc((String(a.hook_url).match(/^https?:\/\/([^\/]+)/)||[,'source'])[1].replace(/^www\./,''))+'</a>':'Account hook',esc(a.hook),a.hook_date&&diffD(sd,dOnly(a.hook_date))<=30?1:0]);
     if(p.notes)found.push(['Notes','Research note',esc(p.notes),0]);
-    var angle=[];if(p.route)angle.push(['Route',esc(p.route)]);if(a.why_vendor)angle.push(['Why us',esc(a.why_vendor)]);if(a.suggested_order)angle.push(['Order',esc(a.suggested_order)]);
+    var angle=[];if(p.route)angle.push(['Route',esc(p.route)]);if(a.why_thrandvex)angle.push(['Why us',esc(a.why_thrandvex)]);if(a.suggested_order)angle.push(['Order',esc(a.suggested_order)]);
     hist.unshift([nice(sd),'Next: '+esc(next||'·'),'nx']);
     var why0=String(p.why||p.role||'').trim()||composeWhy(p,a,bk,stage,false);if(stage==='Founder')why0='On the exec track. '+why0;if(mhold)why0='Meeting set on '+acct+', so outreach is held. '+why0;
     PF[p.name]={id:p.id,ae:AE_SHORT(p.owner),acct:acct,stage:step,role:p.title,url:liHttps(p.linkedin_url),why:esc(why0)+(a.one_liner?'<br><br>'+esc(a.one_liner):''),found:found,angle:angle,wr:'',tl:hist,p:p,next:next,item:item};
@@ -3848,11 +3848,11 @@ button.skc-g:focus-visible{outline:2px solid var(--ds-accent);outline-offset:-2p
 
     <div class="sec"><span class="cap">Decisions</span><span class="cap" id="decN">2</span></div>
     <div class="list">
-      <div class="dec" id="decNorquiveth"><div><div class="t">Norquiveth: hold or go?</div><div class="d">There is a founder tie on the exec side. Four messages are drafted and waiting.</div>
+      <div class="dec" id="decSuvarquel"><div><div class="t">Suvarquel: hold or go?</div><div class="d">There is a founder tie on the exec side. Four messages are drafted and waiting.</div>
         <div class="opin press" id="opin"><span class="arif s" data-face="think"></span><span>Ari has an opinion</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
         <div class="dchat" id="dchat"><div><div class="dthread" id="dthread"></div><div class="dq" id="dq"><span class="press">Go with that</span><span class="press">Why not use the exec track?</span></div>
-          <div class="dcomp"><textarea class="in" id="din" rows="1" placeholder="Ask Ari about Norquiveth"></textarea><div class="cbtn act has press" id="dsend"><svg class="snd" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div></div></div>
-        <div class="acts"><div class="b sec2 press" data-dec>Keep holding</div><div class="b sec2 press" data-dec>Ask Alex</div></div></div></div>
+          <div class="dcomp"><textarea class="in" id="din" rows="1" placeholder="Ask Ari about Suvarquel"></textarea><div class="cbtn act has press" id="dsend"><svg class="snd" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div></div></div>
+        <div class="acts"><div class="b sec2 press" data-dec>Keep holding</div><div class="b sec2 press" data-dec>Ask Tamsin</div></div></div></div>
       <div class="dec"><div><div class="t">Withdraw 6 stale invites?</div><div class="d">All past 14 days with no accept.</div><div class="acts"><div class="b sec2 press" data-dec>Not yet</div><div class="b sec2 press" data-dec>Show me</div></div></div></div>
     </div>
 
@@ -3864,7 +3864,7 @@ button.skc-g:focus-visible{outline:2px solid var(--ds-accent);outline-offset:-2p
       <div class="run press" id="runRamp"><div class="top"><span class="t">Find 3 at Ravquiller, security side</span><span class="eta"><span class="pd"></span>2 MIN</span></div>
         <div class="steps"><i class="d"></i><i class="d"></i><i class="n"></i><i></i></div>
         <div class="now"><span class="rtk">Reading Ravquiller’s data residency post</span></div></div>
-      <div class="run press" id="runScan"><div class="top"><span class="t">Trigger scan, Blake’s book</span><span class="eta"><span class="pd"></span>9 MIN</span></div>
+      <div class="run press" id="runScan"><div class="top"><span class="t">Trigger scan, Idris’s book</span><span class="eta"><span class="pd"></span>9 MIN</span></div>
         <div class="steps"><i class="d"></i><i class="n"></i><i></i><i></i></div>
         <div class="now"><span class="m" style="font-size:12px">14 / 40 accounts checked</span></div></div>
     </div>
@@ -3893,7 +3893,7 @@ button.skc-g:focus-visible{outline:2px solid var(--ds-accent);outline-offset:-2p
   <section class="pane" id="prospect">
     <span class="cap">Week 42 · picked Mon 12 Oct</span>
     <div class="h">Six accounts this week.<br><span class="dim">Twenty-six people to connect with.</span></div>
-    <p class="wit">Picked from Alex’s and Blake’s books on <b>fresh triggers</b>, with nobody already in play. They refresh every Monday.</p>
+    <p class="wit">Picked from Tamsin’s and Idris’s books on <b>fresh triggers</b>, with nobody already in play. They refresh every Monday.</p>
     <div class="sec"><span class="cap">Accounts</span><span class="cap" id="pc">0 / 26 sent</span></div>
     <div class="list" id="accts"></div>
   </section>
@@ -4221,7 +4221,7 @@ function followIn(){if(fuShown)return;fuShown=true;
   $$('#follow .fu').forEach((e,i)=>{e.onclick=()=>openFile(e.dataset.n,e);A(e,[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],SOFT,300+i*30)});
   setTimeout(()=>think('Four are due today and all four are written. Two for Friday are still drafting, and I’ll finish them tonight.',{face:'happy',ms:5200,transient:1}),900)}
 // default files for follow-up people without research written yet
-FU.concat(BG).forEach(f=>{if(PF[f.n])return;const acct=f.c.split(' · ')[1];PF[f.n]={id:'P'+(100+Math.floor(Math.random()*80)),ae:/Ripvassel|Chekvarrow|Globex|Initech/.test(acct)?'Alex':'Blake',acct,stage:f.step==='DM3'?4:f.step==='DM2'?3:5,slot:['ETm','CTm','PTm','PTa'][f.n.length%4],
+FU.concat(BG).forEach(f=>{if(PF[f.n])return;const acct=f.c.split(' · ')[1];PF[f.n]={id:'P'+(100+Math.floor(Math.random()*80)),ae:/Ripvassel|Chekvarrow|Guvrandine|Vexquilla/.test(acct)?'Tamsin':'Idris',acct,stage:f.step==='DM3'?4:f.step==='DM2'?3:5,slot:['ETm','CTm','PTm','PTa'][f.n.length%4],
   why:`${acct} is in the book with a live trigger this month, and ${f.n.split(' ')[0]} owns the systems where its sensitive data lives.`,
   found:[['Oct','Trigger',f.why||`${acct} activity this month, logged when DM1 went out.`,1],['LinkedIn','Tenure','Verified in role for over a year.',0]],
   angle:[['Lead',f.step?'A new reason, never a bump.':'Wait for a real trigger.'],['Avoid','“Just following up.”']],
@@ -4230,10 +4230,10 @@ FU.concat(BG).forEach(f=>{if(PF[f.n])return;const acct=f.c.split(' · ')[1];PF[f
 /* ---------------- tasks ---------------- */
 const TK=[
  {t:'Find 3 at Ravquiller, security side',eta:'2 MIN',p:.62,now:['Reading Ravquiller’s data residency post','Sales Navigator: 14 in security and data','Checking tenure on 6 profiles'],
-  steps:[['Checked ownership','Blake’s book, no flags, nobody in play'],['Found candidates','14 in security and data on Sales Navigator'],['Researching','Reading posts, talks and tenure for 6 people'],['Drafting','DM1 for the best three, with reasons']],cur:2,
+  steps:[['Checked ownership','Idris’s book, no flags, nobody in play'],['Found candidates','14 in security and data on Sales Navigator'],['Researching','Reading posts, talks and tenure for 6 people'],['Drafting','DM1 for the best three, with reasons']],cur:2,
   feed:['opened ravquiller.example/blog/data-residency','read 1,840 words · <b>hook: EU card data</b>','opened LinkedIn activity for Mia Synthby (public)','tenure 3y 2m · in role 14m · <b>verified</b>','searched podcasts “Ravquiller privacy”','found 1 talk, 12 Sep · saved quote','scoring 6 people on fit and recency','Ana Moralesynth 0.91 · Omar Nullworth 0.88 · Mia Synthby 0.74']},
- {t:'Trigger scan, Blake’s book',eta:'9 MIN',p:.35,now:['14 / 40 accounts checked','Reading Mervanquelle’s Series D release','Checking job posts at Plavossine'],
-  steps:[['Loaded book','40 accounts from Blake'],['Scanning','News, job posts, filings, exec moves'],['Scoring','Fresh and relevant only'],['Queued','New signals into Prospect']],cur:1,
+ {t:'Trigger scan, Idris’s book',eta:'9 MIN',p:.35,now:['14 / 40 accounts checked','Reading Mervanquelle’s Series D release','Checking job posts at Plavossine'],
+  steps:[['Loaded book','40 accounts from Idris'],['Scanning','News, job posts, filings, exec moves'],['Scoring','Fresh and relevant only'],['Queued','New signals into Prospect']],cur:1,
   feed:['loaded 40 accounts','mervanquelle.example/press · Series D · <b>EU expansion</b>','plavossine.example/careers · 6 new roles · <b>Dublin</b>','brevaquine.example/blog · nothing new since 2 Oct','chekvarrow.example · new VP Security already logged','ripvassel.example/newsroom · reading']}];
 const TKQ=[{t:'Draft Monday’s DM2 batch',s:'Starts 21:00 tonight · 6 people'}];
 const TKD=[{t:'Rewrote 4 DMs to two lines',s:'Done 08:12'},{t:'Picked week 42 accounts',s:'Done Mon 05:30'}];
@@ -4299,7 +4299,7 @@ openTaskChat.fill=(()=>{
   let t=0;const at=(ms,f)=>taskTimers.push(setTimeout(f,t+=ms));let ty;
   at(380,()=>bubble(th,'mine','Find 3 more at Ravquiller, security side'));
   at(450,()=>ty=typing(th));
-  at(1100,()=>{ty.remove();bubble(th,'ari','Ravquiller’s in Blake’s book, no flags. Sales Navigator shows 14 in security and data. Ana Moralesynth and Omar Nullworth already look right.')});
+  at(1100,()=>{ty.remove();bubble(th,'ari','Ravquiller’s in Idris’s book, no flags. Sales Navigator shows 14 in security and data. Ana Moralesynth and Omar Nullworth already look right.')});
   at(1500,()=>bubble(th,'mine','Skip anyone under director'));
   at(400,()=>ty=typing(th));
   at(1000,()=>{ty.remove();bubble(th,'ari','Done. Omar’s out. Checking Ravi Kumarsynth, Director of Data, instead.');$('#tl3').classList.add('on')});
@@ -4342,9 +4342,9 @@ let chatSeeded=false;
 function chatIn(){if(chatSeeded)return;chatSeeded=true;
   const s=document.createElement('div');s.className='stamp cap';s.textContent='Today';thread.appendChild(s);
   let t=0;const at=(ms,f)=>setTimeout(f,t+=ms);
-  at(150,()=>bubble(thread,'ari','Morning. Kevin replied overnight and nine messages are ready. One thing needs you: Norquiveth, hold or go?',{time:'05:40'}));
+  at(150,()=>bubble(thread,'ari','Morning. Kevin replied overnight and nine messages are ready. One thing needs you: Suvarquel, hold or go?',{time:'05:40'}));
   at(350,()=>voiceBubble(thread,'mine',7,null,'05:41'));
-  at(350,()=>bubble(thread,'ari','Holding Norquiveth until Alex weighs in. I’ll flag it to him in the morning.',{time:'05:42'}))}
+  at(350,()=>bubble(thread,'ari','Holding Suvarquel until Tamsin weighs in. I’ll flag it to him in the morning.',{time:'05:42'}))}
 /* composer */
 const inp=$('#in'),act=$('#act');let pending=[];
 inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(120,inp.scrollHeight)+'px';act.classList.toggle('has',!!inp.value.trim()||pending.length>0)});
@@ -4464,22 +4464,22 @@ $('#chatX').onclick=closeChat;
   h.addEventListener('pointerup',e=>{if(y0!=null&&e.clientY-y0>60)closeChat();y0=null})})();
 /* decision: inline chat with Ari */
 const dthread=$('#dthread');let opSeeded=false;
-function openOpinion(){const d=$('#decNorquiveth');if(!d||d.classList.contains('gone'))return;const pane=$('#ready');
+function openOpinion(){const d=$('#decSuvarquel');if(!d||d.classList.contains('gone'))return;const pane=$('#ready');
   const y=d.offsetTop-96,s0=pane.scrollTop,t0=performance.now();const st=t=>{const p=Math.min(1,(t-t0)/600),e=1-Math.pow(1-p,4);pane.scrollTop=s0+(y-s0)*e;if(p<1)requestAnimationFrame(st)};
   if(page!==0)goPage(0);requestAnimationFrame(st);toggleOpinion(true)}
 function toggleOpinion(force){const o=$('#opin'),dc=$('#dchat'),open=force!==undefined?force:!dc.classList.contains('open');
   o.classList.toggle('open',open);dc.classList.toggle('open',open);buzz(8);
   const r=o.getBoundingClientRect();lookAt(r.left+r.width/2,r.top,2400);
   if(open&&!opSeeded){opSeeded=true;setFace('think',1400);const ty=typing(dthread);
-    setTimeout(()=>{ty.remove();bubble(dthread,'ari','I’d keep holding. There is a founder tie on the exec side, so a cold note from you lands awkwardly whichever way it goes, and Alex can get a cleaner read in one Slack message than we’d get from four DMs.')},1100)}}
+    setTimeout(()=>{ty.remove();bubble(dthread,'ari','I’d keep holding. There is a founder tie on the exec side, so a cold note from you lands awkwardly whichever way it goes, and Tamsin can get a cleaner read in one Slack message than we’d get from four DMs.')},1100)}}
 $('#opin').onclick=()=>toggleOpinion();
 function dSay(txt){if(!txt)return;bubble(dthread,'mine',txt.replace(/</g,'&lt;'));const ty=typing(dthread);setFace('think');
   setTimeout(()=>{ty.remove();setFace(baseFace());
-    if(/go with/i.test(txt)){bubble(dthread,'ari','Done. Norquiveth stays on hold, and I’ll put the question to Alex in tomorrow’s report.');
-      setTimeout(()=>{const d=$('#decNorquiveth');d.classList.add('gone');const n=$('#decN');n.textContent=Math.max(0,+n.textContent-1);hop();setFace('happy',1600);
-        addLog({tm:nowT(),who:'you',tx:'Norquiveth: keep holding',sm:'Decision, with Ari'})},1500)}
-    else if(/exec/i.test(txt))bubble(dthread,'ari','Because the exec track would land as a founder note rather than a buyer conversation, and Alex owns the account either way.');
-    else bubble(dthread,'ari','Fair point. I’ll weigh that in and keep Norquiveth on hold until you tell me otherwise.')},1000)}
+    if(/go with/i.test(txt)){bubble(dthread,'ari','Done. Suvarquel stays on hold, and I’ll put the question to Tamsin in tomorrow’s report.');
+      setTimeout(()=>{const d=$('#decSuvarquel');d.classList.add('gone');const n=$('#decN');n.textContent=Math.max(0,+n.textContent-1);hop();setFace('happy',1600);
+        addLog({tm:nowT(),who:'you',tx:'Suvarquel: keep holding',sm:'Decision, with Ari'})},1500)}
+    else if(/exec/i.test(txt))bubble(dthread,'ari','Because the exec track would land as a founder note rather than a buyer conversation, and Tamsin owns the account either way.');
+    else bubble(dthread,'ari','Fair point. I’ll weigh that in and keep Suvarquel on hold until you tell me otherwise.')},1000)}
 $$('#dq span').forEach(q=>q.onclick=()=>dSay(q.textContent));
 $('#dsend').onclick=()=>{const v=$('#din').value.trim();$('#din').value='';dSay(v)};
 
@@ -4510,9 +4510,9 @@ let prosShown=false;function prospectIn(on){if(!on)return;if(!prosShown){prosSho
    Founder lane: brief Aide through Wren
    ========================================================= */
 const EX=[
- {n:'Karen Mockley',t:'Chief Information Security Officer',c:'Cobraquenth',ae:'Blake',url:'linkedin.com/in/karen-mockley-example',why:'Spoke at Brannoquay Summit on 7 Oct about keeping customer PII out of analytics pipelines.',note:'Karen spoke at Brannoquay Summit on keeping PII out of analytics. Vendor’s vault does exactly that for Cobraquenth-scale data, and Blake would value 20 minutes with her team.',sel:1,st:0},
- {n:'David Sampleton',t:'Chief Technology Officer',c:'Tovarquine',ae:'Alex',url:'linkedin.com/in/david-sampleton-example',why:'Tovarquine announced a payments expansion into the UK on 10 Oct.',note:'Tovarquine is taking payments into the UK, which brings new data residency rules. Worth a short exec note on how Vendor keeps card and guest data local.',sel:1,st:0},
- {n:'Meera Synthby',t:'Chief Data Officer',c:'Invarrelle',ae:'Blake',url:'linkedin.com/in/meera-synthby-example',why:'New in seat since 28 Sep, previously led privacy at Ubrevaine.',note:'Meera just joined Invarrelle as CDO after leading privacy at Ubrevaine. A congratulations from the exec track with one line on data privacy vaults would land well.',sel:0,st:0}];
+ {n:'Karen Mockley',t:'Chief Information Security Officer',c:'Cobraquenth',ae:'Idris',url:'linkedin.com/in/karen-mockley-example',why:'Spoke at Brannoquay Summit on 7 Oct about keeping customer PII out of analytics pipelines.',note:'Karen spoke at Brannoquay Summit on keeping PII out of analytics. Thrandvex’s vault does exactly that for Cobraquenth-scale data, and Idris would value 20 minutes with her team.',sel:1,st:0},
+ {n:'David Sampleton',t:'Chief Technology Officer',c:'Tovarquine',ae:'Tamsin',url:'linkedin.com/in/david-sampleton-example',why:'Tovarquine announced a payments expansion into the UK on 10 Oct.',note:'Tovarquine is taking payments into the UK, which brings new data residency rules. Worth a short exec note on how Thrandvex keeps card and guest data local.',sel:1,st:0},
+ {n:'Meera Synthby',t:'Chief Data Officer',c:'Invarrelle',ae:'Idris',url:'linkedin.com/in/meera-synthby-example',why:'New in seat since 28 Sep, previously led privacy at Ubrevaine.',note:'Meera just joined Invarrelle as CDO after leading privacy at Ubrevaine. A congratulations from the exec track with one line on data privacy vaults would land well.',sel:0,st:0}];
 const EX2=[
  {n:'Paul Beckample',t:'CISO',c:'Chevalquorn',st:2},{n:'Aisha Grantsynth',t:'CTO',c:'Afvranelle',st:3}];
 const STAGES=['Drafted','Queued','Handed off','Connected','Accepted'];
@@ -4625,18 +4625,18 @@ ACC.forEach(a=>{const t=tAdd(a.n,{ae:a.ae});a.pp.forEach(p=>pAdd(t,p[0],p[1],'TO
 Object.values(PF).forEach(f=>{});
 for(const [n,f] of Object.entries(PF)){if(f.acct&&THX[f.acct]&&!THX[f.acct].ae)THX[f.acct].ae=f.ae}
 /* Kavrenelle: the parallel-outreach example */
-const KP=tAdd('Ixterlane Health',{ae:'Alex',when:'09:12',unread:2,
+const KP=tAdd('Kavrenelle Permanente',{ae:'Tamsin',when:'09:12',unread:2,
   ctx:{why:'Kavrenelle is consolidating patient data onto one cloud platform, announced 6 Oct, and is hiring a Director of Data Privacy.',angle:'Patient PII crossing more systems during the move. Same story for all five, told from each person’s seat.',next:'Ravi and Meera accepted. Their DM1s are drafted and say different things.',avoid:'Repeating a line across the five. They sit on the same Slack.'}});
 [['Ravi Synthby','VP Data Platform','ACCEPTED',1],['Meera Fixtura','Dir. Security Architecture','ACCEPTED',1],['Dan Decoyne','CISO, KH Digital','PENDING'],['Lucy Placeholt','Head of Privacy Eng','PENDING'],['Carlos Diazample','Principal Eng, Data','PENDING']].forEach(p=>pAdd(KP,p[0],p[1],p[2],p[3]));
 KP.seed=[['ari','Kavrenelle now has five people in play, so I’ve grouped them here. Ravi and Meera accepted overnight, and the other three invites are pending.','08:58'],
  ['ari','I drafted both DM1s so they don’t overlap. Ravi gets the platform move, and Meera gets the security review that comes with it. Dan stays untouched until one of them replies, because the CISO should hear about us from his own team.','09:12']];
 /* richer seeds */
-if(THX['Brevaquine']){const b=THX['Brevaquine'];b.when='07:40';b.unread=1;b.ctx={why:'Brevaquine split its core ledger into separate services on 2 Oct.',angle:'PII crossing more service boundaries.',next:'Answer Kevin today on LinkedIn, then flag to Alex if he asks for time.',avoid:'Feature lists. He asked a real question.'};
+if(THX['Brevaquine']){const b=THX['Brevaquine'];b.when='07:40';b.unread=1;b.ctx={why:'Brevaquine split its core ledger into separate services on 2 Oct.',angle:'PII crossing more service boundaries.',next:'Answer Kevin today on LinkedIn, then flag to Tamsin if he asks for time.',avoid:'Feature lists. He asked a real question.'};
  b.seed=[['ari','Kevin replied overnight. He said they’re rethinking how PII moves between services, which is our exact opening. A two-line reply is in Ready.','07:40']]}
 if(THX['Ravquiller']){const r=THX['Ravquiller'];r.when='06:15';r.seed=[['ari','Two Ravquiller accepts this morning, Omar and Ana. I’m keeping their notes apart: Omar on residency, Ana on the SOC 2 work her team owns.','06:15']]}
 if(THX['Ripvassel']){const r=THX['Ripvassel'];r.when='Yest';r.seed=[['ari','Lena and Omar are both on DM2 at Ripvassel. I’d send Lena’s first, since their CISO’s vendor-sprawl talk gives her the better hook.','Yest']]}
 TH.forEach(t=>{if(!t.last){const s=t.seed&&t.seed[t.seed.length-1];t.last=s?s[1]:`${t.pp.length} ${t.pp.length===1?'person':'people'} in play. Nothing new today.`;if(!t.when)t.when=s?s[2]:''}});
-const GEN=tAdd('General',{gen:1,when:'05:42',last:'Holding Norquiveth until Alex weighs in.'});GEN.el=$('#thread');
+const GEN=tAdd('General',{gen:1,when:'05:42',last:'Holding Suvarquel until Tamsin weighs in.'});GEN.el=$('#thread');
 /* order: General, then unread, then most people */
 function tOrder(){return [GEN].concat(TH.filter(t=>!t.gen).sort((a,b)=>(b.unread-a.unread)||((b.when?1:0)-(a.when?1:0))||(b.pp.length-a.pp.length)))}
 const mono=n=>n.replace(/[^A-Za-z ]/g,'').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()||n.slice(0,2).toUpperCase();
@@ -4665,7 +4665,7 @@ function openThread(n){const t=THX[n];if(!t)return;curT=t;buzz(8);t.unread=0;
 function closeThread(){curT=null;buzz(6);renderTList();pane.classList.add('inlist');inp.placeholder='Ask Ari, or name an account';
   A($('#tlist'),[{opacity:0,transform:'translateX(-24px)'},{opacity:1,transform:'none'}],SOFT)}
 function wrapUp(t){const m=document.createElement('div');m.className='memc';
-  const items=t.gen?['You prefer Norquiveth held until Alex decides']:[`${t.n}: ${t.ctx?t.ctx.next:'current status'}`,`Angle that’s working: ${t.ctx&&t.ctx.angle?t.ctx.angle:'the trigger in the brief'}`];
+  const items=t.gen?['You prefer Suvarquel held until Tamsin decides']:[`${t.n}: ${t.ctx?t.ctx.next:'current status'}`,`Angle that’s working: ${t.ctx&&t.ctx.angle?t.ctx.angle:'the trigger in the brief'}`];
   m.innerHTML=`<span class="cap">Before I close this, keep these?</span>${items.map(x=>`<label><input type="checkbox" checked><span>${x}</span></label>`).join('')}<span class="b press">Save to ${t.gen?'memory':t.n+'’s file'}</span>`;
   thread.appendChild(m);A(m,[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],SOFT);thread.scrollTop=1e6;
   m.querySelector('.b').onclick=()=>{const k=m.querySelectorAll('input:checked').length;m.querySelector('.b').remove();
@@ -4675,7 +4675,7 @@ function wrapUp(t){const m=document.createElement('div');m.className='memc';
 const _send=send;
 send=function(){const txt=inp.value.trim();
   if(!curT){let hit=TH.find(t=>!t.gen&&new RegExp('\\b'+t.n.split(' ')[0].replace(/[^\w]/g,'')+'\\b','i').test(txt));
-    if(!hit&&txt){const m=txt.match(/\b(?:at|for|about)\s+([A-Z][\w&.-]+(?:\s[A-Z][\w&.-]+)?)/);if(m){const ae=(txt.match(/\b(Alex|Blake|Casey)\b/i)||[])[1]||'';hit=tAdd(m[1],{fresh:1,ae:ae?ae[0].toUpperCase()+ae.slice(1).toLowerCase():'',when:nowT(),last:'New thread',ctx:{why:'New account. I’m pulling its triggers now.',next:'Find four or five people across security, data and platform.'},seed:[['ari',`New thread for ${m[1]}${ae?', in '+(ae[0].toUpperCase()+ae.slice(1).toLowerCase())+'’s book':''}. Everyone I find there, and everything we say about them, will live here.`,nowT()]]})}}
+    if(!hit&&txt){const m=txt.match(/\b(?:at|for|about)\s+([A-Z][\w&.-]+(?:\s[A-Z][\w&.-]+)?)/);if(m){const ae=(txt.match(/\b(Tamsin|Idris|Bram)\b/i)||[])[1]||'';hit=tAdd(m[1],{fresh:1,ae:ae?ae[0].toUpperCase()+ae.slice(1).toLowerCase():'',when:nowT(),last:'New thread',ctx:{why:'New account. I’m pulling its triggers now.',next:'Find four or five people across security, data and platform.'},seed:[['ari',`New thread for ${m[1]}${ae?', in '+(ae[0].toUpperCase()+ae.slice(1).toLowerCase())+'’s book':''}. Everyone I find there, and everything we say about them, will live here.`,nowT()]]})}}
     openThread((hit||GEN).n);if(hit)toast(`Filed under ${hit.n}`)}
   const t=curT;_send();if(t&&!t.gen){t.last=txt||'Attachment';t.when=nowT()}else if(t){GEN.last=txt||GEN.last;GEN.when=nowT()}};
 const _reply=reply;
@@ -4976,12 +4976,12 @@ Object.assign(TK[0],{rings:['POSTS','TALKS','ROLES','FIT'],scanStep:2,hits:[8,21
   go:()=>{goPage(0);setTimeout(()=>smoothTop($('#ready'),$('#queue').offsetTop-80),300)},cta2:'Open Ready',doneLine:'3 people, drafts in your queue',
   say:'Ravquiller is done. I found three people worth your time, and their first messages are drafted in Ready for you to send.'});
 Object.assign(TK[1],{rings:['NEWS','JOBS','FILES','EXEC'],scanStep:1,hits:[6,11,19,27,35],p0:.35,
-  hitLines:['<b>Mervanquelle</b> · Series D · EU expansion','<b>Plavossine</b> · 6 data roles · Dublin','<b>Globex</b> · embedded payroll API','<b>Tovarquine</b> · UK payments launch','<b>Cobraquenth</b> · CISO talk at Brannoquay Summit'],
+  hitLines:['<b>Mervanquelle</b> · Series D · EU expansion','<b>Plavossine</b> · 6 data roles · Dublin','<b>Guvrandine</b> · embedded payroll API','<b>Tovarquine</b> · UK payments launch','<b>Cobraquenth</b> · CISO talk at Brannoquay Summit'],
   feed:['brevaquine.example/blog · nothing new since 2 Oct','chekvarrow.example · new VP Security, already logged','ripvassel.example/newsroom · nothing new','sec.gov · no filings this week for 12 accounts','linkedin · exec moves · quiet at 9 accounts','ravquiller.example/careers · 2 roles, neither security'],
   post:{2:['scoring 5 signals on freshness and fit','dropped 2 older than 30 days · <b>kept 5</b>'],3:['queued 5 accounts into Prospect · <b>week 42</b>','drafts only · nothing goes out without you']},
-  result:{t:'Five fresh signals across forty accounts.',rows:[['Mervanquelle','Series D and EU expansion, 8 Oct'],['Plavossine','Six data platform roles in Dublin'],['Globex','Embedded payroll API, more partners'],['Tovarquine','Payments launch in the UK'],['Cobraquenth','CISO spoke on PII in analytics']],cta:'Open in Prospect'},
+  result:{t:'Five fresh signals across forty accounts.',rows:[['Mervanquelle','Series D and EU expansion, 8 Oct'],['Plavossine','Six data platform roles in Dublin'],['Guvrandine','Embedded payroll API, more partners'],['Tovarquine','Payments launch in the UK'],['Cobraquenth','CISO spoke on PII in analytics']],cta:'Open in Prospect'},
   go:()=>goPage(2),cta2:'Open Prospect',doneLine:'5 fresh signals, in Prospect',
-  say:'The scan on Blake’s book is done, with five fresh signals out of forty accounts. Mervanquelle and Plavossine look strongest, and both are waiting in Prospect.'});
+  say:'The scan on Idris’s book is done, with five fresh signals out of forty accounts. Mervanquelle and Plavossine look strongest, and both are waiting in Prospect.'});
 TK.forEach(k=>{k.state='run';k.scan0=Math.min(34,Math.round(k.p0*40))});
 function finishTask(k,quiet){if(k.state==='done')return;k.state='done';k.p=1;
   const row=k===TK[0]?$('#runRamp'):$('#runScan');
@@ -5104,7 +5104,7 @@ const FU1={fresh:'Lena’s follow-up is due and already written, so you can open
 const SEED=ARI_PH==='wind'?[[FU1.wind,'idle',el=>openFile('Lena Fischample',el),'Open Lena',nowT()]]:[
  [FU1[ARI_PH],'idle',el=>openFile('Lena Fischample',el),'Open Lena',nowT()],
  ['Kevin replied at two in the morning his time, which says more than anything he wrote. His answer is drafted and ready for you to send, so he’s next after Lena.','happy',el=>openFile('Kevin Oseimock',el),'Open Kevin','05:40'],
- ['Fifteen connects are queued for today, each with a fresh reason from Blake’s trigger scan, and they’re ready for you to send.','focus',el=>goPage(2),'Open Prospect','07:55'],
+ ['Fifteen connects are queued for today, each with a fresh reason from Idris’s trigger scan, and they’re ready for you to send.','focus',el=>goPage(2),'Open Prospect','07:55'],
  ['Six invitations have sat unanswered for fourteen days. I’d withdraw them with some dignity, and the button is yours.','concern',null,'','09:02']];
 stkLayout(true);
 momentum(false);setFace(baseFace());
@@ -5224,7 +5224,7 @@ function renderChips(an){const el=$('#cchips');el.innerHTML=(curCtx?chipHTML(cur
   if(an&&!RM)el.querySelectorAll('.cchip').forEach((ch,i)=>A(ch,[{opacity:0,transform:'translateY(8px) scale(.9)'},{opacity:1,transform:'none'}],BOUNCE,60+i*40));placeholder()}
 function placeholder(){const c=curCtx;if(c&&c.entity_type==='app'){inp.placeholder='Describe the change you want';return}inp.placeholder=!c?'Message Ari, or type @ to tag':c.entity_type==='task'?'Add to this task':c.entity_type==='screen'?`Ask about ${c.screen}`:`Message about ${c.entity_type==='person'?first(c.label):c.label.length>22?c.label.slice(0,21)+'…':c.label}`}
 const SUG={task:['How long is left?'],person:['Make it shorter','Why now?','Skip until Monday'],account:['Who’s warm here?','Find 2 more'],
-  decision:['What would you do?','Ask Alex first'],card:['Do it','Remind me at 4'],step:['Skip this step','Why this step?'],app:['Make the stack cards smaller','More motion on Ari','A weekly LinkedIn recap'],screen:['How’s my pace?','Who’s first tonight?']};
+  decision:['What would you do?','Ask Tamsin first'],card:['Do it','Remind me at 4'],step:['Skip this step','Why this step?'],app:['Make the stack cards smaller','More motion on Ari','A weekly LinkedIn recap'],screen:['How’s my pace?','Who’s first tonight?']};
 function renderSugg(){const sg=$('#sugg'),L=view==='list'?[]:curCtx?(SUG[curCtx.entity_type]||[]):['How’s my pace?','Who’s first tonight?','How were you made?'];
   sg.classList.toggle('hide',!L.length);sg.innerHTML=L.map(s=>`<span class="press">${s}</span>`).join('');sg.querySelectorAll('span').forEach(s=>s.onclick=()=>{inp.value=s.textContent;inp.dispatchEvent(new Event('input'));send()})}
 
@@ -5280,8 +5280,8 @@ function respond(txt,att,c){const _v14=window.ariV14&&ariV14.respond(txt,att,c);
     if(/who|status|where|how|warm/.test(low))return {a:`Across ${L}, ${hot.length?hot.join(' and ')+' '+(hot.length>1?'are':'is')+' warm':'nobody is warm yet'}${pend?`, and ${WORDS[pend]?WORDS[pend].toLowerCase():pend} ${pend===1?'invite is':'invites are'} pending`:''}. ${t.ctx?t.ctx.next:''}`};
     if(/find|add|more|another/.test(low))return {a:`I’ll look for more at ${L} and keep them in this thread, so the context carries over. I’ll check they don’t overlap with the ${t.pp.length} already in play.`,task:[`Find more at ${L}`,['Check','Find','Draft'],null,t.pp.length?`Two more at ${L}, both drafted and in Prospect.`:`Four people at ${L} are in Prospect, each with a reason.`]};
     return {a:`Noted for ${L}. I’ll apply it to every draft for this account, not just one person.`}}
-  if(T==='decision'){if(/alex|ask/.test(low))return {a:'I’ll put it to Alex in tomorrow’s report and bring his answer back here, so the decision stays in one place.'};
-    return {a:c.entity_id==='suki'?'I’d keep holding. A cold note from you lands awkwardly while there is a founder tie on the exec side, and Alex can get a cleaner read in one Slack message than we’d get from four DMs.':'I’d withdraw all six today. An invitation that has sat for two weeks has already given its answer, and withdrawing keeps your pending count healthy.'}}
+  if(T==='decision'){if(/tamsin|ask/.test(low))return {a:'I’ll put it to Tamsin in tomorrow’s report and bring his answer back here, so the decision stays in one place.'};
+    return {a:c.entity_id==='suki'?'I’d keep holding. A cold note from you lands awkwardly while there is a founder tie on the exec side, and Tamsin can get a cleaner read in one Slack message than we’d get from four DMs.':'I’d withdraw all six today. An invitation that has sat for two weeks has already given its answer, and withdrawing keeps your pending count healthy.'}}
   if(T==='card'){if(/remind|later|at \d/.test(low))return {a:'I’ll bring that note back at four, your time, and leave it off the stack until then.'};return {a:'Done. I’ve acted on that note and taken it off your stack.'}}
   if(T==='step'){const tk=TK[+c.entity_id.split('#')[0].slice(2)];if(/skip/.test(low))return {a:`I’ll skip ${L.toLowerCase()} in ${tk.t}. The rest of the task carries on, and I’ll note what we gave up by skipping it.`};
     if(/why/.test(low))return {a:`${L} is there because ${tk.steps[+c.entity_id.split('#')[1]][1].toLowerCase()}, and drafting without it would mean guessing.`};
@@ -5477,7 +5477,7 @@ function decorate(){
   $$('#queue .q>.qh, #done .q>.qh').forEach(h=>{if(h._ctx)return;const q=Q[+h.parentElement.dataset.i];deco(h,()=>ctxPerson(q.n,'Ready'),a=>{const r=h.querySelector('.tag,.chk')||h.lastElementChild;h.insertBefore(a,r)})});
   $$('#follow .fu').forEach(h=>{if(h._ctx)return;const n=h.dataset.n,f=FU.find(x=>x.n===n);deco(h,()=>ctxPerson(n,'Follow-ups',f?`${f.step} · ${(STL[f.st]||'').toLowerCase()}`:'Background'),a=>h.insertBefore(a,h.lastElementChild))});
   $$('#accts .acch').forEach(h=>{if(h._ctx)return;const n=h.querySelector('.nm').textContent;deco(h,()=>ctxAcct(n,'Prospect'),a=>h.insertBefore(a,h.lastElementChild))});
-  $$('#ready .dec').forEach(h=>{if(h._ctx)return;const t=h.querySelector('.t'),lab=t.textContent.trim(),id=h.id==='decNorquiveth'?'suki':'stale-invites';deco(h,()=>cx('decision',id,lab,'Decision'),a=>t.appendChild(a))});
+  $$('#ready .dec').forEach(h=>{if(h._ctx)return;const t=h.querySelector('.t'),lab=t.textContent.trim(),id=h.id==='decSuvarquel'?'suki':'stale-invites';deco(h,()=>cx('decision',id,lab,'Decision'),a=>t.appendChild(a))});
   $$('#stkSt .sc:not(.empty)').forEach(h=>{if(h._ctx)return;const n=NOTES.find(x=>x.id===h.dataset.id);if(!n)return;deco(h,()=>cx('card',n.id,shortNote(n.t),'Note',n.at),a=>h.querySelector('.sh').appendChild(a))});
   $$('#runRamp, #runScan').forEach(h=>{if(h._ctx)return;const k=TK[h.id==='runRamp'?0:1];deco(h,()=>ctxTask(k),a=>{const t=h.querySelector('.top .t');t.after(a)})});
   $$('#tkRun .tk').forEach(h=>{if(h._ctx)return;const k=TK[+h.dataset.i];deco(h,()=>ctxTask(k),a=>h.querySelector('.top .t').after(a))});
@@ -5613,7 +5613,7 @@ let chal=null,chalUsed=false;
 window.ariV13={respond(txt,att,c){if(att)return null;const low=txt.toLowerCase().trim(),T=c&&c.entity_type;
   if(chal&&/^(go|do it|yes|yep|just|both|fine|ok|okay|find|still|anyway|i want)/.test(low)){const was=chal;chal=null;
     return {a:`Fair enough, it’s your call. I’m finding three at ${was} now, and I’ll leave a note to their new VP Security as a draft in case the afternoon changes your mind.`,
-      task:[`Find 3 at ${was}`,['Check','Find','Draft'],[`Checking ${was} is still in Alex’s book`,'Looking for three on the security and data side','Drafting three notes, each with its own reason'],`Three people at ${was} are in Prospect with notes drafted, and the VP’s note is waiting beside them.`]}}
+      task:[`Find 3 at ${was}`,['Check','Find','Draft'],[`Checking ${was} is still in Tamsin’s book`,'Looking for three on the security and data side','Drafting three notes, each with its own reason'],`Three people at ${was} are in Prospect with notes drafted, and the VP’s note is waiting beside them.`]}}
   chal=null;
   if(!chalUsed&&/find\s*(3|three).*checkr/.test(low)){chalUsed=true;chal='Chekvarrow';setTimeout(()=>setFace('sly',2600),RM?220:1150);
     return {a:'I can, though Chekvarrow’s new VP Security has been in the seat since 1 October, and I’d bet she answers before any three of her team do. Say go and I’ll do the three anyway.'}}
@@ -5872,7 +5872,7 @@ const FACTS=ARI0.FACTS;
 const CHEV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
 const UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
 const ring=(p)=>`<svg class="rg" viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.9" pathLength="100"/><circle class="fg" cx="18" cy="18" r="15.9" pathLength="100" data-p="${p}"/></svg>`;
-const LOOP=[['Find','I source people with fresh signals from Alex’s and Blake’s books.'],['Connect','About fifteen invites a weekday, each queued with its own reason.'],['Accepts','When someone accepts, their first message is already written.'],['Follow up','The second message at four days, the third at seven, and I suggest withdrawing at fourteen.'],['Replies','A reply jumps the queue, with an answer drafted in a line or two.'],['Momentum','I keep score, so you only have to keep going.']];
+const LOOP=[['Find','I source people with fresh signals from Tamsin’s and Idris’s books.'],['Connect','About fifteen invites a weekday, each queued with its own reason.'],['Accepts','When someone accepts, their first message is already written.'],['Follow up','The second message at four days, the third at seven, and I suggest withdrawing at fourteen.'],['Replies','A reply jumps the queue, with an answer drafted in a line or two.'],['Momentum','I keep score, so you only have to keep going.']];
 const pg_=document.createElement('div');pg_.className='apg';pg_.id='ariPage';pg_.setAttribute('role','dialog');pg_.setAttribute('aria-label','Ari');
 pg_.innerHTML=`<div class="apbg"></div>
 <div class="aptop"><span class="apbk press" id="apBk" aria-label="Back">${CHEV}</span><span class="aptt" id="apTt">Ari</span><span class="apver">V14</span></div>
@@ -6204,7 +6204,7 @@ const LOG=[
  {v:'v18.2.3',d:'Oct 16',items:['Pings: Send a test ping now goes through Apple or Google to every device, and Devices shows whether each phone actually showed the last ping']},
  {v:'v18.2.2',d:'Oct 16',items:['Unlock once: one Face ID or fingerprint per open. Setting up a passkey, updating Ari or the phone’s own unlock sheet no longer asks a second time','Briefs now ping you when ready']},
  {v:'v18.2.1',d:'Oct 16',items:['Account pages have tabs: Brief, People, Email and File, under a header with the stage, health and task chain that stays put while you scroll','Brief opens on one summary card: the thesis, three key facts and the angle. Why now, data flow and softer angles fold into cards you tap','Swipe left or right to change tabs. Each account remembers its tab: Brief until the quick check is done, then People']},
- {v:'v18.2',d:'Oct 16',items:['Account pages open as a war room: a brief to read first (thesis, why now with Verified, Inference and Hypothesis labels, where sensitive data moves and where Vendor sits, the buying committee by team, the angle)','A quick check unlocks each account’s drafts; skip it only by typing skip','One review card per account with every draft by team: the shared angle plus a personal line where there is one. Your edits teach Ari your style','Two email tracks per account, grouped by team, copy one step at a time for your Vendor tools','The account task chain: Research account, Find people, Build brief, Quick check, Review copy','Today: what Ari is doing right now, briefs to read, and moves while an invite is pending, with softer angles marked when there is no public trigger','Every DM marked sent keeps its exact text on the person’s page, dated and editable','Report: this week against goal, the funnel with its leak, an action under every number, going cold and account momentum. The rest sits under More']},
+ {v:'v18.2',d:'Oct 16',items:['Account pages open as a war room: a brief to read first (thesis, why now with Verified, Inference and Hypothesis labels, where sensitive data moves and where Thrandvex sits, the buying committee by team, the angle)','A quick check unlocks each account’s drafts; skip it only by typing skip','One review card per account with every draft by team: the shared angle plus a personal line where there is one. Your edits teach Ari your style','Two email tracks per account, grouped by team, copy one step at a time for your Thrandvex tools','The account task chain: Research account, Find people, Build brief, Quick check, Review copy','Today: what Ari is doing right now, briefs to read, and moves while an invite is pending, with softer angles marked when there is no public trigger','Every DM marked sent keeps its exact text on the person’s page, dated and editable','Report: this week against goal, the funnel with its leak, an action under every number, going cold and account momentum. The rest sits under More']},
  {v:'v18.1',d:'Oct 16',items:['Ari keeps three faces: calm, working and done, and never switches at random','Settings are shorter: Light, Dark or Auto, one Motion switch, pings, lock and account. About reads like an app’s About page','With Motion off Ari stands still in a clean pose, on iPhone too','Every account has a health score out of 100, on Accounts, Pipeline, the account page and the Report','Going cold on Today: accepts with no DM1, follow-ups past due, quiet engaged accounts and invites to withdraw, each with the next step','The Report loads in one go, and the stage filter now reaches the trends and the activity calendar']},
  {v:'v18.0.2',d:'Oct 16',items:['On iPhone the app now fills the whole screen, so the tab bar sits on the bottom edge instead of floating']},
  {v:'v18.0.1',d:'Oct 16',items:['On iPhone the tab bar sits flush at the bottom again, and the first-run tip no longer covers your notes']},
@@ -6215,7 +6215,7 @@ const LOG=[
  {v:'v17.1',d:'Oct 16',items:['Today never doubles up: the list is rebuilt from your data on every live update, and checks itself','Assign account works: search your accounts and the Book, or add a new one; the AE, play and why come with it','iPhone Home Screen app fills the whole screen, and the tab bar never covers Mark sent, Replied, Snooze, Skip or Save','Locks the moment you leave (change it in Settings), and Settings now live in one place: tap me up top','Account pages with logos, contacts and research in sections; LinkedIn URL on every person file','Send to exec track shows up on the exec track at once, every stage change has Undo, and an undone reply cancels its draft','Smoother on Android: no glass blur, fewer shadows, idle animations stopped, the notes stack drags on the GPU']},
  {v:'v17',d:'Oct 16',items:['Live: when Hark drafts, researches or finds people, it lands on your screen within seconds, no reload, nothing jumps','Opens instantly with your last data, then catches up; the line under my name says Synced live and when Hark last scanned','Every tap saves instantly, with the outbox and Undo kept; your Sheet still gets everything','Assign account and Personal context save properly now, and every draft uses them','Pings: new accepts, replies, drafts ready, meetings and tonight’s follow-ups (Android now; iPhone from the Home Screen app)']},
  {v:'v16.3',d:'Oct 15',items:['Fresh every time: I fetch the moment you open or come back, show your last data while I do, and never show zeros. The line under my name says when I last synced and when Hark last scanned','Tap your pace under Up next to see today, yesterday and the whole week','Marks are instant and can’t get lost: they wait in an outbox and retry until your Sheet has them, with Undo','One Today tab: tonight’s list grouped by Eastern, Central and Pacific send windows in your time, then the pipeline. Follow-ups and Log folded in; every tab has a label','Every person shows the next step (Mark DM2 sent, Mark replied, Mark meeting set) with Undo, wherever they appear','Draft message on every contact, trigger or not; edit it in place and copy it','Assign account for people with no account, and Personal context on every file, used in every draft','Find 4 to 5 people here replaces Map this account','A calmer chat, consistent buttons, no Updated pills, and the scan is back']},
- {v:'v16.2',d:'Oct 15',items:['Ari locks every time you open it: Face ID, fingerprint or your device PIN, with Google as the fallback. Nothing shows before you unlock','Every account in Alex’s, Blake’s and Casey’s books, searchable, with research status, last scan and every person you and Hark found','Account research is back on real scans, with Map this account','Send to exec track from any person file, and the exec track lists the real exec people','Lead or Personal on every person file, any time','Each card names the next step: Mark connect sent, Mark DM1 sent, with Undo','Meetings: mark an account as meeting set and outreach there is held','Much lighter: refreshes no longer redraw the screen you are on, and only the Ari you can see is animating']},
+ {v:'v16.2',d:'Oct 15',items:['Ari locks every time you open it: Face ID, fingerprint or your device PIN, with Google as the fallback. Nothing shows before you unlock','Every account in Tamsin’s, Idris’s and Bram’s books, searchable, with research status, last scan and every person you and Hark found','Account research is back on real scans, with Map this account','Send to exec track from any person file, and the exec track lists the real exec people','Lead or Personal on every person file, any time','Each card names the next step: Mark connect sent, Mark DM1 sent, with Undo','Meetings: mark an account as meeting set and outreach there is held','Much lighter: refreshes no longer redraw the screen you are on, and only the Ari you can see is animating']},
  {v:'v16.1',d:'Oct 15',items:['New connections to sort sit at the top of Today: Lead or Personal, one tap. Personal people disappear from everything','While I research someone you see me working on it, and the draft appears on its own when it’s ready','I check your Sheet every minute while I’m open, and again whenever you come back','DM1 is due the moment someone accepts. No three-day wait','A double tap counts once, a tick stays ticked until the Sheet confirms it, and a hiccup from Google gets a quiet retry']},
  {v:'v16',d:'Oct 15',items:['Ari is real now: tonight’s queue, follow-ups, accounts, report and log come from your Sheet','Every tick, snooze, skip and draft edit writes back to the Sheet','LinkedIn opens in the LinkedIn app, with the draft already copied','A proper first run, sign-in, and an installable app with offline support','I remember how I was made: it’s on About']},
  {v:'v15',d:'Oct 15',items:['A mouth in every state, and a tongue where it fits','Ari’s tricks, listed with hints and a found count','I talk when I reply, yawn when I wake, and blow a raspberry if provoked','Sends fly, ticks draw, cards settle, empty states read themselves in','This What’s new, once per build']},
@@ -6575,7 +6575,7 @@ followIn=function(){if(fuShown)return;fuShown=true;const pane=$('#follow');if(!p
 /* ---------- Prospect: accounts with people still to connect ---------- */
 prospectIn=function(on){if(!on||prosShown)return;prosShown=true;const pane=$('#prospect');if(!pane)return;const tot=ACC.reduce((a,x)=>a+x.pp.length,0),sent=ACC.reduce((a,x)=>a+x.done,0);
   pane.innerHTML=`<span class="cap">Accounts in play</span><div class="h">${W(ACC.length)} account${ACC.length===1?'':'s'}.<br><span class="dim">${W(tot-sent)} ${tot-sent===1?'person':'people'} still to connect with.</span></div>
-   <p class="wit">From Alex’s and Blake’s books, each with a dated hook. Tap the LinkedIn mark to open the profile in the app, the tick once the invite is sent.</p>
+   <p class="wit">From Tamsin’s and Idris’s books, each with a dated hook. Tap the LinkedIn mark to open the profile in the app, the tick once the invite is sent.</p>
    <div class="sec"><span class="cap">Accounts</span><span class="cap" id="pc">${sent} / ${tot} sent</span></div><div class="list" id="accts"></div>`;
   renderAccts();$$('#accts .acc').forEach((e,i)=>A(e,[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],SOFT,Math.min(i,10)*40))};
 renderAccts=function(){const box=$('#accts');if(!box)return;box.innerHTML='';if(!ACC.length){box.innerHTML='<p class="wit">Everyone in the Sheet has been invited. Hark maps new accounts on Mondays.</p>';return}
@@ -6691,7 +6691,7 @@ const _apply=apply;
 /* =========================================================
    Onboarding: first run, like a brand-new install
    ========================================================= */
-const PREF={name:'Owner',scope:'LinkedIn only',aes:'Alex and Blake',connects:'About 15 a weekday',cadence:'DM2 at +4 days, DM3 a week after DM2',withdraw:'Withdraw after 14 days',hours:'9 pm to 6 am, your time'};
+const PREF={name:'Owner',scope:'LinkedIn only',aes:'Tamsin and Idris',connects:'About 15 a weekday',cadence:'DM2 at +4 days, DM3 a week after DM2',withdraw:'Withdraw after 14 days',hours:'9 pm to 6 am, your time'};
 const STEPS=['wake','what','memory','signin','essentials','notify','install','ready'];
 let ob=null,obI=0;
 function startOnb(i){window.ARI_ONB=true;obI=i||+LSg('ari-onb-step',0)||0;if(tokValid()&&obI===3)obI=4;
@@ -6827,7 +6827,7 @@ const IOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(/Macintosh/.test(navig
 document.documentElement.classList.toggle('ios',IOS);
 const NC=window.ariNormCo,QS2=new URLSearchParams(location.search);
 const low2=s=>String(s||'').trim().toLowerCase();
-const AEOF=o=>{o=String(o||'');return /alex/i.test(o)?'Alex':/blake/i.test(o)?'Blake':/bram/i.test(o)?'Casey':''};
+const AEOF=o=>{o=String(o||'');return /tamsin/i.test(o)?'Tamsin':/idris/i.test(o)?'Idris':/bram/i.test(o)?'Bram':''};
 const IST=5.5*3600e3;
 function istStamp(t){const d=new Date((t||Date.now())+IST);return d.toISOString().slice(0,16).replace('T',' ')}
 function createdMs(s){s=String(s||'').trim();let m=s.match(/^(\d{4}-\d\d-\d\d)[ T](\d{1,2}):(\d\d)/);if(m)return Date.parse(`${m[1]}T${m[2].padStart(2,'0')}:${m[3]}:00+05:30`);m=s.match(/^(\d{4}-\d\d-\d\d)$/);if(m)return Date.parse(m[1]+'T12:00:00+05:30');return 0}
@@ -7134,9 +7134,9 @@ function renderAcctList(){const box=$('#v162al');if(!box)return;const all=buildA
 prospectIn=function(on){if(!on||prosShown)return;prosShown=true;const pane=$('#prospect');if(!pane)return;const all=buildAccts();
   const cnt=k=>all.filter(x=>x.status===k).length,tags=[...new Set(all.map(x=>x.tag).filter(t=>t&&t!=='other'))].sort();
   if(!pane.querySelector('#v162al')){
-    pane.innerHTML=`<span class="cap">Accounts · Alex, Blake and Casey</span><div class="h" id="v162ah"></div>
+    pane.innerHTML=`<span class="cap">Accounts · Tamsin, Idris and Bram</span><div class="h" id="v162ah"></div>
      <div class="v162tools"><input class="v162search" id="v162q" type="search" placeholder="Search accounts or people" autocomplete="off" enterkeyhint="search">
-      <div class="v162chips" id="v162ae">${['all','Alex','Blake','Casey','Other'].map(a=>`<span class="press" data-ae="${a}">${a==='all'?'All AEs':a}</span>`).join('')}</div>
+      <div class="v162chips" id="v162ae">${['all','Tamsin','Idris','Bram','Other'].map(a=>`<span class="press" data-ae="${a}">${a==='all'?'All AEs':a}</span>`).join('')}</div>
       <div class="v162chips" id="v162st"></div>
       <select class="v162sel" id="v162tag"></select></div>
      <div class="v162scan" id="v162scanh" style="display:none"><div class="v1711rd" aria-hidden="true"><span class="v1711hd">${AF('focus','l')}</span><span class="v1711bk"><i></i><i></i></span></div><div class="v1711tt"><b>Ari is researching</b><div class="v162hint">I map accounts and read up on them every few minutes. Rows update here on their own.</div><div class="bar"><b></b></div></div></div>
@@ -7173,7 +7173,7 @@ function meetForm(company){const x=buildAccts().find(z=>z.n===company||NC(z.n)==
    <div><div class="v162chips" data-f="nm"><span class="press ${a.meeting_status==='not a meeting'?'on':''}" data-v="1">Not a meeting</span></div></div>
    <div><label>Who</label><input data-f="person" list="v162pl" value="${E(a.meeting_person||'')}" placeholder="Name"><datalist id="v162pl">${ppl.map(n=>`<option value="${E(n)}">`).join('')}</datalist></div>
    <div><label>Date</label><input data-f="date" type="date" value="${E(String(a.meeting_date||'').slice(0,10))}"></div>
-   <div><label>AE</label><div class="v162chips" data-f="ae">${['Alex','Blake','Casey','Other'].map(s=>`<span class="press ${(AEOF(a.meeting_ae)||x.ae)===s?'on':''}" data-v="${s}">${s}</span>`).join('')}</div></div>
+   <div><label>AE</label><div class="v162chips" data-f="ae">${['Tamsin','Idris','Bram','Other'].map(s=>`<span class="press ${(AEOF(a.meeting_ae)||x.ae)===s?'on':''}" data-v="${s}">${s}</span>`).join('')}</div></div>
    <div><label>Notes</label><textarea data-f="notes" maxlength="900">${E(a.meeting_notes||'')}</textarea></div></div>
    <div class="v16btns"><div class="b sec2 press" data-x="no">Cancel</div><div class="b pri press" data-x="yes">Save to Sheet</div></div>`,(s,close)=>{
     s.querySelectorAll('.v162chips[data-f] span').forEach(c=>c.onclick=()=>{const f=c.parentNode.dataset.f;if(f==='nm'){c.classList.toggle('on')}else c.parentNode.querySelectorAll('span').forEach(z=>z.classList.toggle('on',z===c));
@@ -7182,7 +7182,7 @@ function meetForm(company){const x=buildAccts().find(z=>z.n===company||NC(z.n)==
     s.querySelector('[data-x=no]').onclick=close;
     s.querySelector('[data-x=yes]').onclick=()=>{const g=f=>(s.querySelector(`.v162chips[data-f="${f}"] .on`)||{}).dataset;const nm=!!g('nm'),sv=nm?'':(g('src')||{}).v||'',ae=(g('ae')||{}).v||'';
       if(!nm&&!sv){const er=s.querySelector('#v186srcE');if(er){er.hidden=false;er.scrollIntoView({block:'center',behavior:'smooth'})}buzz([10,40,10]);return}
-      const AE={Alex:'Alex Rivera',Blake:'Blake Moreno',Casey:'Casey Brooks'}[ae]||ae;
+      const AE={Tamsin:'Tamsin Synthwell',Idris:'Idris Mockwright',Bram:'Bram Sampleby'}[ae]||ae;
       const set={meeting_status:nm?'not a meeting':'set',meeting_source:sv,meeting_person:s.querySelector('[data-f=person]').value.trim(),meeting_date:s.querySelector('[data-f=date]').value,meeting_ae:AE,meeting_notes:s.querySelector('[data-f=notes]').value.trim()};
       close();saveMeeting(x.n,set)}})}
 window.ariMeetForm=c=>meetForm(c);window.ariSheet=(h,f)=>sheet(h,f);
@@ -7195,7 +7195,7 @@ V162.meetForm=meetForm;V162.saveMeeting=saveMeeting;
    Tasks: Hark's queue (picked up within ~5 min), account research by
    book on real scans, and Add leads from a CSV
    ===================================================================== */
-const BOOKS=[['Alex','Alex Rivera'],['Blake','Blake Moreno'],['Casey','Casey Brooks']];
+const BOOKS=[['Tamsin','Tamsin Synthwell'],['Idris','Idris Mockwright'],['Bram','Bram Sampleby']];
 function scanTimes(){const now=Date.now();const day=t=>{const d=new Date(t+IST);return d.getUTCDay()};const at=dd=>{const d=new Date(now+IST);d.setUTCHours(4,30,0,0);return d.getTime()-IST+dd*864e5};
   let last=0,next=0;for(let i=0;i>=-8;i--){const t=at(i);if(t<=now&&day(t)>=2&&day(t)<=6){last=t;break}}for(let i=0;i<=8;i++){const t=at(i);if(t>now&&day(t)>=2&&day(t)<=6){next=t;break}}
   const f=t=>{const d=new Date(t+IST);return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()]+' '+d.getUTCDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]+', 4:30 am'};return {last:f(last),next:f(next),nextT:next}}
@@ -7724,7 +7724,7 @@ function put(t,r){if(!r)return;const k=r[KEY17[t]];if(k==null)return;const cur=S
 /* rows -> exactly the payload Ari.gs ariData() returned, so every screen keeps working unchanged */
 const P_TS=['connect_sent','accepted','dm1_sent','dm2_sent','dm3_sent','replied','meeting','withdrawn'];
 const P_COLS=['id','company','owner','name','title','linkedin_url','role','route','connect_day','stage','dm','connect_sent','accepted','dm1_sent','dm2_due','dm2_sent','dm3_due','dm3_sent','replied','meeting','next_action','notes','withdrawn','source','review','research','snooze_until','skipped','dm2_text','dm3_text','why','context'];
-const A_COLS=['company','owner','one_liner','hook','hook_date','hook_url','why_vendor','suggested_order','status','meeting_status','meeting_source','meeting_date','meeting_person','meeting_ae','meeting_notes','play','domain'];
+const A_COLS=['company','owner','one_liner','hook','hook_date','hook_url','why_thrandvex','suggested_order','status','meeting_status','meeting_source','meeting_date','meeting_person','meeting_ae','meeting_notes','play','domain'];
 const cut17=(s,n)=>s.length<=n?s:s.slice(0,n)+'…';
 function cell(r,dk,k){let v=r[dk];const ex=r.extra||{};if(v==null||v===''){v=(dk in r)?((ex._raw||{})[dk]):ex[k]}return v==null?'':v}
 function rPerson(r){const o={};P_COLS.forEach(k=>{const dk=k==='why'?'why_this_person':k;let v=r[dk];
@@ -8089,7 +8089,7 @@ function acctHTML171(x){const a=x.acc||{},ae=window.ariAE(x.owner||a.owner||''),
   const S=sigs171(x);
   const sec=(t,body,right)=>body?`<div class="v171card"><div class="cap"><span>${t}</span>${right?`<span>${right}</span>`:''}</div>${body}</div>`:'';
   const para=t=>t?`<p class="v171clamp">${E(t)}</p>`:'';
-  const pains=String(a.why_vendor||'').split(/(?<=\.)\s+(?=[A-Z])/).filter(Boolean);
+  const pains=String(a.why_thrandvex||'').split(/(?<=\.)\s+(?=[A-Z])/).filter(Boolean);
   const snap=`<div class="v171kv">${a.one_liner?`<span>What</span><div>${E(a.one_liner)}</div>`:''}<span>AE</span><div>${E(x.owner||a.owner||'Not set')}</div>${x.tier?`<span>Tier</span><div>${E(x.tier)}${x.fit?' · fit '+E(x.fit):''}</div>`:''}<span>Stage</span><div>${pp.length?pp.length+' contact'+(pp.length>1?'s':'')+' · '+E([...new Set(pp.map(p=>V162S.label(p)))].slice(0,3).join(', ')):'No contacts yet'}</div>${x.checked?`<span>Scanned</span><div>${E(x.checked)}</div>`:''}</div>`;
   const why=S.length?S.slice(0,4).map(s=>`<div class="v171sig"><div class="d">${E(s.k)}${s.d?' · '+E(s.d):''}${s.u?` · <a class="v171src" href="${E(s.u)}" target="_blank" rel="noopener">Source ↗</a>`:''}</div><p class="v171clamp">${E(s.t)}</p></div>`).join(''):'<p class="v171empty">No dated signal yet. Hark checks this book on every scan.</p>';
   const meetB=meet?`<div class="v171kv"><span>Status</span><div>Meeting set</div>${a.meeting_date?`<span>Date</span><div>${E(a.meeting_date)}</div>`:''}${a.meeting_person?`<span>With</span><div>${E(a.meeting_person)}</div>`:''}${a.meeting_source?`<span>Source</span><div>${E(a.meeting_source)}</div>`:''}${a.meeting_ae?`<span>AE</span><div>${E(a.meeting_ae)}</div>`:''}</div>${a.meeting_notes?para(a.meeting_notes):''}`:'';
@@ -8560,7 +8560,7 @@ const HINT={Target:'No people yet',Researching:'Finding and reading up',Mapped:'
 const rank=s=>{const i=MAIN.indexOf(s);return i<0?0:i+1};
 const still=()=>(typeof RM!=='undefined'&&RM)||HTML.classList.contains('v171still');
 const low=s=>String(s||'').trim().toLowerCase();
-const AEO=o=>/alex/i.test(o||'')?'Alex':/blake/i.test(o||'')?'Blake':/bram/i.test(o||'')?'Casey':'';
+const AEO=o=>/tamsin/i.test(o||'')?'Tamsin':/idris/i.test(o||'')?'Idris':/bram/i.test(o||'')?'Bram':'';
 const st17=()=>window.ariV17&&ariV17.store;
 const af=(f,s)=>typeof AF==='function'?AF(f,s):'';
 const logo=(co,sz)=>{try{return ariV171.logo(co,sz)}catch(e){return ''}};
@@ -8717,7 +8717,7 @@ function pipeIn(force){const P=$('#pipeline');if(!P)return;const m=boardModel();
   if(!force&&sig===pipeSig&&P.firstChild)return;pipeSig=sig;V175.renders++;
   const bd=P.querySelector('.v175board'),sl=bd?bd.scrollLeft:0,st=P.scrollTop;
   const eng=m.L.filter(a=>rank(stageOf(a))>=4).length;
-  const chips=['Alex','Blake','Casey'].map(n=>{const c=accts().filter(a=>AEO(a.owner)===n).length;return `<span class="v163chip press ${PF.ae===n?'on':''}" data-v175ae="${n}" role="button" aria-pressed="${PF.ae===n}">${n} · ${c}</span>`}).join('');
+  const chips=['Tamsin','Idris','Bram'].map(n=>{const c=accts().filter(a=>AEO(a.owner)===n).length;return `<span class="v163chip press ${PF.ae===n?'on':''}" data-v175ae="${n}" role="button" aria-pressed="${PF.ae===n}">${n} · ${c}</span>`}).join('');
   const nav=MAIN.map((s,i)=>`<span class="st press ${i===pipeCol?'on':''}" data-v175nav="${i}" role="button"><b>${m.cols[s].length}</b><span>${E5(SHORT[s]||s)}</span></span>${i<MAIN.length-1?`<i class="cv" title="Reached the next stage">${m.conv[i]==null?'':m.conv[i]+'%'}</i>`:''}`).join('')+`<span class="st press side ${pipeCol===MAIN.length?'on':''}" data-v175nav="${MAIN.length}" role="button"><b>${m.side}</b><span>Side</span></span>`;
   P.innerHTML=`<div class="v175ph"><div><b>Pipeline</b><span>${m.L.length} account${m.L.length===1?'':'s'}${PF.ae?` in ${PF.ae}’s book`:''} · ${eng} engaged or further</span></div></div>
    <div class="v175flt v162chips">${chips}<span class="v1711clr press" data-v175clr="1" style="display:${PF.ae?'inline-flex':'none'}">Clear</span></div>
@@ -8867,7 +8867,7 @@ const n0=v=>+v||0;
 /* ---------- filters + period ---------- */
 const PER=[['today','Today'],['yesterday','Yesterday'],['this_week','This week'],['last_week','Last week'],['this_month','This month'],['custom','Custom']];
 const PL=Object.fromEntries(PER);
-const AES=['Alex','Blake','Casey','Unassigned'],PLAYS=[['economy','Data Economy'],['sanitization','Sanitization'],['unassigned','No play']],STG=[['Target','Target'],['Researching','Researching'],['Mapped','Mapped'],['Engaged','Engaged'],['Meeting','Meetings'],['Opp','Opps']];
+const AES=['Tamsin','Idris','Bram','Unassigned'],PLAYS=[['economy','Data Economy'],['sanitization','Sanitization'],['unassigned','No play']],STG=[['Target','Target'],['Researching','Researching'],['Mapped','Mapped'],['Engaged','Engaged'],['Meeting','Meetings'],['Opp','Opps']];
 let F={period:'today',from:'',to:'',ae:'',play:'',stage:''};
 try{const s=JSON.parse(sessionStorage.getItem('ari-rep-f')||'null');if(s&&PL[s.period])F=Object.assign(F,s)}catch(e){}
 const saveF=()=>{try{sessionStorage.setItem('ari-rep-f',JSON.stringify(F))}catch(e){}};
@@ -9190,7 +9190,7 @@ function ddFrom(el){const m=el.dataset.v18m,o={p:el.dataset.v18p||'',f:el.datase
   const fl=[o.ae?o.ae+'’s book':filtLabel(),o.acc?el.closest('.v18aw')?.querySelector('b')?.textContent||o.acc:''].filter(Boolean).join(' · ');
   ddOpen({m,args,title:ML[m]||m,sub:[rl,fl].filter(Boolean).join(' · '),unit:/^(meeting|opp|accounts_worked|stage_change|stage_manual|account_added)$/.test(m)?'account':''})}
 function ddStage(stage,level){const pp=()=>{const S=st17();return S&&S.people?[...S.people.values()]:((window.ariDATA&&ariDATA.people)||[])},aa=()=>{const S=st17();return S&&S.accounts&&S.accounts.size?[...S.accounts.values()]:((window.ariDATA&&ariDATA.accounts)||[])};
-  const AE=o=>/alex/i.test(o||'')?'Alex':/blake/i.test(o||'')?'Blake':/bram/i.test(o||'')?'Casey':'';
+  const AE=o=>/tamsin/i.test(o||'')?'Tamsin':/idris/i.test(o||'')?'Idris':/bram/i.test(o||'')?'Bram':'';
   if(level==='account')ddOpen({m:'stage',title:stage,sub:'Accounts in this stage now'+(F.ae?' · '+F.ae+'’s book':''),unit:'account',note:'Current stage, from your accounts. Pipeline has the board.',
     local:()=>aa().filter(a=>!a.deleted_at&&(a.stage||'Target')===stage&&(!F.ae||AE(a.owner)===F.ae)).map(a=>({account:a.company,name:a.company,ae:AE(a.owner),account_stage:a.stage||'Target',ts:a.stage_changed_at})).sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||'')))});
   else ddOpen({m:'pstage',title:stage,sub:'People at this stage now'+(F.ae?' · '+F.ae+'’s book':''),unit:'person',note:'Current stage, from your people (personal contacts left out).',
@@ -9590,7 +9590,7 @@ setInterval(()=>refreshAll(false),5*60e3);
 /* =====================================================================
    v18.2 (Oct 16): War room.
    - Account pages open on a brief to read (thesis, why now with labels, where sensitive data moves and
-     where Vendor sits, buying committee by team, angle), then a quick check that unlocks the drafts,
+     where Thrandvex sits, buying committee by team, angle), then a quick check that unlocks the drafts,
      then the account's people and drafts by team (one review card), and its two email tracks.
    - The account task chain: Research account > Find people > Build brief > Quick check > Review copy.
    - Today: a live feed of what Ari is doing and just found, briefs waiting to be read, and moves while
@@ -9706,7 +9706,7 @@ const WRK=w=>(w.kind==='trigger'?0:w.date?1:2);
 function briefHTML(name,b){const u=uiOf(NC(name));const W=(b.why_now||[]).slice().sort((x,y)=>WRK(x)-WRK(y)||String(y.date||'').localeCompare(String(x.date||'')));
   const why=W.map(w=>`<div class="v182wn"><div class="d">${w.date?E1(dLabel(w.date)):w.label==='Hypothesis'?'Our bet':'Our read'}</div><div><p>${E1(w.text)}</p><div class="m">${lab(w.label)}${w.kind==='trigger'?'<span class="v182lb l-t">Trigger</span>':''}${w.url?`<a class="v182src" href="${E1(w.url)}" target="_blank" rel="noopener">${E1((()=>{try{return new URL(w.url).hostname.replace(/^www\./,'')}catch(e){return 'source'}})())} ↗</a>`:''}</div></div></div>`).join('');
   const F=b.data_flow||[];
-  const flow=F.length?`<div class="v182flow">${F.map((f,i)=>`<div class="v182fs${f.here?' here':''}"><div class="n"><i>${i+1}</i></div><div class="c"><b>${E1(f.step)}</b><span class="w">${E1(f.where||'')}</span>${f.data?`<span class="dt"><em>Data</em>${E1(f.data)}</span>`:''}${f.vendor?`<div class="sk"><em>${f.here?'Vendor sits here':'Vendor'}</em>${E1(f.vendor)}</div>`:''}</div></div>`).join('')}</div>`:'';
+  const flow=F.length?`<div class="v182flow">${F.map((f,i)=>`<div class="v182fs${f.here?' here':''}"><div class="n"><i>${i+1}</i></div><div class="c"><b>${E1(f.step)}</b><span class="w">${E1(f.where||'')}</span>${f.data?`<span class="dt"><em>Data</em>${E1(f.data)}</span>`:''}${f.thrandvex?`<div class="sk"><em>${f.here?'Thrandvex sits here':'Thrandvex'}</em>${E1(f.thrandvex)}</div>`:''}</div></div>`).join('')}</div>`:'';
   const cm=(b.committee||[]).map((t,ti)=>{const open=u.cm[ti]!==false;return `<div class="v182tm"><div class="v182th press" data-v182cm="${ti}" aria-expanded="${open}"><b>${E1(t.team)}</b><span>${(t.people||[]).length}</span><i class="ch ${open?'on':''}">›</i></div>
     ${open?`${t.who?`<p class="v182tw">${E1(t.who)}</p>`:''}${t.moves?`<p class="v182tw"><em>What moves them</em> ${E1(t.moves)}</p>`:''}
     ${(()=>{const P=t.people||[],top=P.filter(x=>!/^P3/i.test(x.priority||'')),more=P.length-top.length,show=u.cmAll[ti]||!top.length?P:top;return show.map(x=>{const p=x.person_id&&pById(x.person_id);const p1=/^P1/i.test(x.priority||'');return `<div class="v182cp press" ${p?`data-v182pf="${E1(p.name)}"`:''}><span class="pr p-${E1(String(x.priority||'').toLowerCase())}">${E1(x.priority||'')}</span><div class="qm"><b>${E1(x.name)}</b><span>${E1([x.title,x.role].filter(Boolean).join(' · '))}</span>${x.objection?`<i class="ob">Likely objection: “${E1(x.objection)}”</i>`:''}${p1&&x.answer?`<i class="an">${E1(x.answer)}</i>`:''}</div>${p?`<span class="v182st">${E1(p.stage||'')}</span>`:''}</div>`}).join('')+(more&&top.length?`<span class="v182lk press" data-v182cma="${ti}">${u.cmAll[ti]?'Show fewer':'Show '+more+' more (P3)'}</span>`:'')})()}`:''}</div>`}).join('');
@@ -9716,7 +9716,7 @@ function briefHTML(name,b){const u=uiOf(NC(name));const W=(b.why_now||[]).slice(
   return `<div class="v171card v182brief"><div class="cap"><span>Brief to read</span><span>${b.built_at?'Built '+E1(dLabel(String(b.built_at).slice(0,10))):''}</span></div>
     <p class="v182th1">${E1(b.thesis||'')}</p>${b.angle?`<div class="v182ang"><em>The angle</em><p>${E1(b.angle)}</p></div>`:''}</div>
    ${W.length?`<div class="v171card"><div class="cap"><span>Why now</span><span>${W.filter(w=>w.label==='Verified').length} verified</span></div>${why}</div>`:''}
-   ${flow?`<div class="v171card"><div class="cap"><span>Where sensitive data moves</span><span>${F.filter(f=>f.here).length} of ${F.length} steps</span></div><p class="v182mut">One call, start to finish. Highlighted steps are where Vendor sits.</p>${flow}</div>`:''}
+   ${flow?`<div class="v171card"><div class="cap"><span>Where sensitive data moves</span><span>${F.filter(f=>f.here).length} of ${F.length} steps</span></div><p class="v182mut">One call, start to finish. Highlighted steps are where Thrandvex sits.</p>${flow}</div>`:''}
    ${cm?`<div class="v171card"><div class="cap"><span>Buying committee</span><span>${(b.committee||[]).reduce((s,t)=>s+(t.people||[]).length,0)} people</span></div>${cm}</div>`:''}
    ${soft}
    ${b.doc_url?`<a class="v182doc press" href="${E1(b.doc_url)}" target="_blank" rel="noopener"><span>Open the full account plan</span>${AR_SVG}</a>`:''}`}
@@ -9754,7 +9754,7 @@ function reviewHTML(name,b){const pp=peopleAt(name),u=uiOf(NC(name)),lockd=gated
 
 /* email track: the account's two sequences, by team */
 function seqHTML(name,b){const S=(b&&b.sequences)||[];if(!S.length)return '';const u=uiOf(NC(name));
-  return `<div class="v171card v182seq"><div class="cap"><span>Email track</span><span>${S.length} sequences</span></div><p class="v182mut">Copy each step into your Vendor tools and send from there. Ari never sends.</p>
+  return `<div class="v171card v182seq"><div class="cap"><span>Email track</span><span>${S.length} sequences</span></div><p class="v182mut">Copy each step into your Thrandvex tools and send from there. Ari never sends.</p>
    ${S.map((s,si)=>{const open=u.seq===si;return `<div class="v182sq"><div class="v182th press" data-v182sq="${si}" aria-expanded="${open}"><b>${E1(s.team)}</b><span>${(s.steps||[]).length} steps</span><i class="ch ${open?'on':''}">›</i></div>
     ${open?`<div class="v182sb"><div class="v182sbj press" data-v182cpy="${E1(s.subject)}"><em>Subject</em><b>${E1(s.subject)}</b><span class="v182cpi">${CP_SVG}</span></div>${s.pain?`<p class="v182mut"><span class="v182lb l-h">Hypothesis</span> ${E1(s.pain)}</p>`:''}
      ${(s.steps||[]).map((t,ti)=>`<div class="v182stp k-${/^E/.test(t.code)?'e':/^Call/.test(t.code)?'c':'l'}"><div class="hh182"><b>${E1(t.code)}</b><span>Day ${E1(t.day)} · ${E1(t.kind)}</span><span class="v171btn sm press" data-v182cps="${si}|${ti}">${CP_SVG}Copy</span></div><p class="v171clamp">${E1(t.body)}</p></div>`).join('')}</div>`:''}</div>`}).join('')}</div>`}
@@ -9769,7 +9769,7 @@ function movesFor(name,focus){const b=briefFor(name),pp=peopleAt(name),a=accRow(
   nxt.forEach(p=>M.push({id:'cn:'+p.id,k:'person',t:`Connect with ${p.name}`,s:[p.title,teamOf(b,p.id)].filter(Boolean).join(' · ')||'Another way into the account',a:{f:p.name}}));
   /* the email track step */
   const team=focus?teamOf(b,focus.id,focus.name):null;const seqs=((b&&b.sequences)||[]).filter(s=>!team||s.team===team);
-  seqs.slice(0,focus?1:2).forEach(s=>{const st=(s.steps||[]).find(t=>/^E\d/.test(t.code)&&!mvDone(name,'em:'+s.team+':'+t.code));if(st)M.push({id:'em:'+s.team+':'+st.code,k:'email',t:`Email ${st.code} · ${s.team} track${focus?' to '+first(focus.name):''}`,s:`Day ${st.day}. Copies the step for your Vendor tools`,a:{copy:(st.code==='E1'?'Subject: '+s.subject+'\n\n':'')+st.body}})});
+  seqs.slice(0,focus?1:2).forEach(s=>{const st=(s.steps||[]).find(t=>/^E\d/.test(t.code)&&!mvDone(name,'em:'+s.team+':'+t.code));if(st)M.push({id:'em:'+s.team+':'+st.code,k:'email',t:`Email ${st.code} · ${s.team} track${focus?' to '+first(focus.name):''}`,s:`Day ${st.day}. Copies the step for your Thrandvex tools`,a:{copy:(st.code==='E1'?'Subject: '+s.subject+'\n\n':'')+st.body}})});
   /* account news / posts worth engaging with yourself */
   const eng=((b&&b.why_now)||[]).filter(w=>w.url).slice(0,2);
   if(!eng.length&&a.hook_url)eng.push({url:a.hook_url,text:a.hook||'The account news',date:a.hook_date});
@@ -9777,7 +9777,7 @@ function movesFor(name,focus){const b=briefFor(name),pp=peopleAt(name),a=accRow(
   /* softer angles when there is no public trigger */
   const trig=ready(b)?hasTrigger(b):!!a.hook_date;
   if(!trig){const S=(b&&b.soft_angles)||[];if(S.length)S.slice(0,2).forEach((x,i)=>M.push({id:'sa:'+i,k:'soft',t:(SOFT[x.kind]||'Softer angle')+': '+cutW(x.text,80),s:'Softer angle, no public trigger. Tap to copy',a:{copy:x.text}}));
-    else if(a.why_vendor)M.push({id:'sa:acct',k:'soft',t:'Role pain: '+cutW(String(a.why_vendor).split(/(?<=\.)\s/)[0],90),s:'Softer angle, no public trigger. Tap to copy',a:{copy:a.why_vendor}})}
+    else if(a.why_thrandvex)M.push({id:'sa:acct',k:'soft',t:'Role pain: '+cutW(String(a.why_thrandvex).split(/(?<=\.)\s/)[0],90),s:'Softer angle, no public trigger. Tap to copy',a:{copy:a.why_thrandvex}})}
   return {M,pending}}
 V182.movesFor=movesFor;
 const MVI={person:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19c1-3.4 3.6-5 6.5-5s5.5 1.6 6.5 5M18 8v6M15 11h6"/></svg>',
@@ -9790,7 +9790,7 @@ function movesHTML(name,focus,o){o=o||{};const {M,pending}=movesFor(name,focus);
    <p class="v182mut s">Ari never posts, likes or sends. These are yours to do.</p></div>`}
 function runMove(name,id){const r=movesFor(name,null).M.concat(...peopleAt(name).filter(pend).map(p=>movesFor(name,p).M));const m=r.find(x=>x.id===id);if(!m)return;bz(8);
   if(m.a.f){mvSet(name,id,1);try{openFile(m.a.f)}catch(e){V182.errs.push('mvf '+e)}}
-  else if(m.a.copy){copy(m.a.copy);mvSet(name,id,1);tst(`${OK_SVG} Copied. ${m.k==='email'?'Paste it into your Vendor tools.':'Use it in your own words.'}`)}
+  else if(m.a.copy){copy(m.a.copy);mvSet(name,id,1);tst(`${OK_SVG} Copied. ${m.k==='email'?'Paste it into your Thrandvex tools.':'Use it in your own words.'}`)}
   else if(m.a.url){mvSet(name,id,1);try{V162.noLockOnce=true}catch(e){}try{ariV162.noLockOnce=true}catch(e){}window.open(m.a.url,'_blank','noopener')}
   setTimeout(()=>{paintAcct();paintPerson();paintToday()},60)}
 
@@ -9827,7 +9827,7 @@ function factsOf(b){const F=[],W=b.why_now||[],byD=(x,y)=>String(y.date||'').loc
   if(tr)F.push({k:tr.kind==='trigger'?'Trigger':'Latest signal',d:tr.date?dLabel(tr.date):'',t:cutW(tr.text,118),go:'why'});
   else if((b.soft_angles||[]).length)F.push({k:'No public trigger',t:'Lead with a softer angle: '+cutW(b.soft_angles[0].text,90),go:'soft'});
   const fl=b.data_flow||[],hs=fl.filter(f=>f.here);
-  if(fl.length)F.push({k:'Where Vendor sits',t:`${hs.length} of ${fl.length} steps${hs.length?': '+hs.slice(0,3).map(f=>f.step).join(', ')+(hs.length>3?' and '+(hs.length-3)+' more':''):''}`,go:'flow'});
+  if(fl.length)F.push({k:'Where Thrandvex sits',t:`${hs.length} of ${fl.length} steps${hs.length?': '+hs.slice(0,3).map(f=>f.step).join(', ')+(hs.length>3?' and '+(hs.length-3)+' more':''):''}`,go:'flow'});
   const C=b.committee||[],n=C.reduce((s,t)=>s+(t.people||[]).length,0),p1=[];C.forEach(t=>(t.people||[]).forEach(x=>{if(/^P1/i.test(x.priority||''))p1.push(x.name)}));
   if(n)F.push({k:'Who to win',t:`${n} people in ${C.length} team${C.length===1?'':'s'}${p1.length?'. P1: '+p1.slice(0,3).join(', ')+(p1.length>3?' +'+(p1.length-3):''):''}`,go:'people'});
   return F.slice(0,3)}
@@ -9840,16 +9840,16 @@ function whyHTML(name,b){const W=(b.why_now||[]).slice().sort((x,y)=>WRK(x)-WRK(
   return `<div class="v171card v1821wn" id="v1821why"><div class="cap"><span>Why now</span><span>${W.filter(w=>w.label==='Verified').length} verified · tap to read</span></div>
    ${W.map((w,i)=>{const k='w:'+i,on=X.has(k);return `<div class="v1821it press${on?' on':''}" role="button" tabindex="0" aria-expanded="${on}" data-v1821x="${k}"><div class="hh"><span class="dd">${w.date?E1(dLabel(w.date)):w.label==='Hypothesis'?'Our bet':'Our read'}</span>${lab(w.label)}${w.kind==='trigger'?'<span class="v182lb l-t">Trigger</span>':''}<i class="ch">${CH_SVG}</i></div><p class="pv">${E1(w.text)}</p>${w.url?`<a class="v182src xb" href="${E1(w.url)}" target="_blank" rel="noopener">${E1(host(w.url))} ↗</a>`:''}</div>`}).join('')}</div>`}
 function flowHTML(name,b){const F=b.data_flow||[];if(!F.length)return '';const X=xOf(name);
-  return `<div class="v171card v1821fw" id="v1821flow"><div class="cap"><span>Where sensitive data moves</span><span>Vendor at ${F.filter(f=>f.here).length} of ${F.length}</span></div>
-   <ol class="v1821fl">${F.map((f,i)=>{const k='f:'+i,on=X.has(k);return `<li class="press${f.here?' here':''}${on?' on':''}" role="button" tabindex="0" aria-expanded="${on}" data-v1821x="${k}"><span class="n">${i+1}</span><div class="c"><div class="t"><b>${E1(f.step)}</b>${f.here?'<span class="sk">Vendor</span>':''}<i class="ch">${CH_SVG}</i></div><span class="w">${E1(f.where||'')}</span><div class="xb">${f.data?`<p><em>Data</em>${E1(f.data)}</p>`:''}${f.vendor?`<p class="skt"><em>${f.here?'Vendor here':'Vendor'}</em>${E1(f.vendor)}</p>`:''}</div></div></li>`}).join('')}</ol>
-   <p class="v182mut s">Tap a step for what moves there and what Vendor does.</p></div>`}
+  return `<div class="v171card v1821fw" id="v1821flow"><div class="cap"><span>Where sensitive data moves</span><span>Thrandvex at ${F.filter(f=>f.here).length} of ${F.length}</span></div>
+   <ol class="v1821fl">${F.map((f,i)=>{const k='f:'+i,on=X.has(k);return `<li class="press${f.here?' here':''}${on?' on':''}" role="button" tabindex="0" aria-expanded="${on}" data-v1821x="${k}"><span class="n">${i+1}</span><div class="c"><div class="t"><b>${E1(f.step)}</b>${f.here?'<span class="sk">Thrandvex</span>':''}<i class="ch">${CH_SVG}</i></div><span class="w">${E1(f.where||'')}</span><div class="xb">${f.data?`<p><em>Data</em>${E1(f.data)}</p>`:''}${f.thrandvex?`<p class="skt"><em>${f.here?'Thrandvex here':'Thrandvex'}</em>${E1(f.thrandvex)}</p>`:''}</div></div></li>`}).join('')}</ol>
+   <p class="v182mut s">Tap a step for what moves there and what Thrandvex does.</p></div>`}
 function softHTML(name,b){const S=b.soft_angles||[];if(!S.length)return '';const trig=hasTrigger(b),X=xOf(name),u=uiOf(NC(name));
   const rows=S.map((s,i)=>{const k='s:'+i,on=X.has(k);return `<div class="v1821it press${on?' on':''}" role="button" tabindex="0" aria-expanded="${on}" data-v1821x="${k}"><div class="hh"><span class="dd">${E1(SOFT[s.kind]||s.kind||'Angle')}</span><span class="v182cpi press" role="button" aria-label="Copy" data-v182cpy="${E1(s.text)}">${CP_SVG}</span><i class="ch">${CH_SVG}</i></div><p class="pv">${E1(s.text)}</p></div>`}).join('');
   return `<div class="v171card v1821so${trig?'':' v182prom'}" id="v1821soft"><div class="cap"><span>${trig?'If the trigger does not land':'No public trigger: softer angles'}</span><span class="v182lb l-s">Softer</span></div>
    ${trig&&!u.soft?`<div class="v1821more press" role="button" tabindex="0" data-v182soft="1"><span>${S.length} softer angles: role pain, peer moves, hiring, product change</span><i>${CH_SVG}</i></div>`:rows}</div>`}
 function acctSum(name){const a=accRow(name)||{};const fx=[];
   if(a.hook)fx.push({k:a.hook_date?'Latest signal · '+dLabel(a.hook_date):'Signal',t:cutW(a.hook,140),u:a.hook_url});
-  if(a.why_vendor)fx.push({k:'Our read',t:cutW(String(a.why_vendor).split(/(?<=\.)\s/)[0],150)});
+  if(a.why_thrandvex)fx.push({k:'Our read',t:cutW(String(a.why_thrandvex).split(/(?<=\.)\s/)[0],150)});
   if(!a.one_liner&&!fx.length)return '';
   return `<div class="v171card v1821sum"><div class="cap"><span>What we know</span><span>Before the brief</span></div>${a.one_liner?`<p class="v1821ts s">${E1(a.one_liner)}</p>`:''}
    ${fx.length?`<div class="v1821kf">${fx.map(f=>`<div class="v1821f"><em>${E1(f.k)}</em><p>${E1(f.t)}</p>${f.u?`<a class="v182src" href="${E1(f.u)}" target="_blank" rel="noopener">${E1(host(f.u))} ↗</a>`:''}</div>`).join('')}</div>`:''}</div>`}
@@ -9903,8 +9903,8 @@ function peoplePane(name){const b=briefFor(name),pp=peopleAt(name),a=accRow(name
 
 /* Email: the two sequences, each step a card with a one-line preview */
 function emailPane(name){const b=briefFor(name),S=(b&&ready(b)&&b.sequences)||[];const X=xOf(name);
-  if(!S.length)return `<div class="v171card v182bld"><div class="v182bl">${af('idle','m')}<div><b>Email tracks come with the brief</b><span>${b&&!ready(b)?'Ari is building it. ':''}Two sequences, one per team, each step ready to copy into your Vendor tools.</span></div></div></div>`;
-  return `<p class="v182mut v1821in">Copy each step into your Vendor tools and send from there. Ari never sends.</p>`+S.map((s,si)=>`<div class="v171card v1821sq"><div class="cap"><span>${E1(s.team)} track</span><span>${(s.steps||[]).length} steps</span></div>
+  if(!S.length)return `<div class="v171card v182bld"><div class="v182bl">${af('idle','m')}<div><b>Email tracks come with the brief</b><span>${b&&!ready(b)?'Ari is building it. ':''}Two sequences, one per team, each step ready to copy into your Thrandvex tools.</span></div></div></div>`;
+  return `<p class="v182mut v1821in">Copy each step into your Thrandvex tools and send from there. Ari never sends.</p>`+S.map((s,si)=>`<div class="v171card v1821sq"><div class="cap"><span>${E1(s.team)} track</span><span>${(s.steps||[]).length} steps</span></div>
     ${s.subject?`<div class="v182sbj press" data-v182cpy="${E1(s.subject)}"><em>Subject</em><b>${E1(s.subject)}</b><span class="v182cpi">${CP_SVG}</span></div>`:''}
     ${s.pain?`<p class="v1821hy press" data-v1821cl="1"><span class="v182lb l-h">Hypothesis</span> ${E1(s.pain)}</p>`:''}
     <div class="v1821sts">${(s.steps||[]).map((t,ti)=>{const k='q:'+si+':'+ti,on=X.has(k);return `<div class="v1821st k-${/^E/.test(t.code)?'e':/^Call/i.test(t.code)?'c':'l'} press${on?' on':''}" role="button" tabindex="0" aria-expanded="${on}" data-v1821x="${k}"><span class="cd">${E1(t.code)}</span><div class="v1821tx"><span class="mt">Day ${E1(t.day)} · ${E1(t.kind)}</span><p>${E1(t.body)}</p></div><span class="v171btn sm press cpb" role="button" aria-label="Copy ${E1(t.code)}" data-v182cps="${si}|${ti}">${CP_SVG}</span></div>`}).join('')}</div></div>`).join('')}
@@ -10086,7 +10086,7 @@ document.addEventListener('click',e=>{let b,t=e.target;
   if((b=t.closest('[data-v182ed]'))){e.preventDefault();u.ed=b.dataset.v182ed;inject(true);setTimeout(()=>{const x=document.getElementById('v182ta');if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}},30);return}
   if(t.closest('[data-v182edx]')){e.preventDefault();u.ed=null;document.activeElement&&document.activeElement.blur();inject(true);return}
   if((b=t.closest('[data-v182eds]'))){e.preventDefault();edSave(b.dataset.v182eds);document.activeElement&&document.activeElement.blur();return}
-  if((b=t.closest('[data-v182cps]'))){e.preventDefault();const [si,ti]=b.dataset.v182cps.split('|').map(Number);const s=(bf.sequences||[])[si],st=s&&(s.steps||[])[ti];if(!st)return;copy(st.body);bz(8);tst(`${OK_SVG} ${E1(st.code)} copied for your Vendor tools`);return}
+  if((b=t.closest('[data-v182cps]'))){e.preventDefault();const [si,ti]=b.dataset.v182cps.split('|').map(Number);const s=(bf.sequences||[])[si],st=s&&(s.steps||[])[ti];if(!st)return;copy(st.body);bz(8);tst(`${OK_SVG} ${E1(st.code)} copied for your Thrandvex tools`);return}
 },true);
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='v182ta'){const n=document.getElementById('v182n');if(n){const l=e.target.value.length;n.textContent=l+' / 300';n.classList.toggle('over',l>300)}}});
 document.addEventListener('keydown',e=>{const t=e.target;if((e.key==='Enter'||e.key===' ')&&t&&t.matches&&t.matches('[data-v182mv]')){e.preventDefault();t.click()}if(e.key==='Enter'&&t&&t.id==='v182sk'){e.preventDefault();const b=document.querySelector('[data-v182sko]');if(b)b.click()}});
@@ -10097,7 +10097,7 @@ let moreOpen=false;
 function pplLead(){return (DATA().people||[]).filter(p=>low(p.review||'lead')==='lead'&&!isFounder(p)&&!/hold/i.test(p.stage||''))}
 const todayIST=()=>new Date(Date.now()+5.5*3600e3).toISOString().slice(0,10);
 const dd=(a,b)=>Math.round((Date.parse(b)-Date.parse(a))/864e5);
-const AEX=o=>/alex/i.test(o||'')?'Alex':/blake/i.test(o||'')?'Blake':/bram/i.test(o||'')?'Casey':'';
+const AEX=o=>/tamsin/i.test(o||'')?'Tamsin':/idris/i.test(o||'')?'Idris':/bram/i.test(o||'')?'Bram':'';
 function actions(ae){const aeOk=o=>!ae||(ae==='Unassigned'?!AEX(o):AEX(o)===ae);const P=pplLead().filter(p=>aeOk(p.owner)),t=todayIST();
   const noDm1=P.filter(p=>p.accepted&&!p.dm1_sent&&!p.replied);
   const dm2=P.filter(p=>p.dm1_sent&&!p.dm2_sent&&!p.replied&&dd(String(p.dm1_sent).slice(0,10),t)>=4);
@@ -10643,8 +10643,8 @@ new MutationObserver(()=>{if(document.querySelector('[data-v1881gm]:not([data-v1
     [new RegExp('Briefed '+S,'g'),'Handed off'],
     [new RegExp('Brief '+S,'g'),'Exec track handoff'],
     [new RegExp('brief(ed)? '+S,'g'),'handed off'],
-    [new RegExp(A+' co-founded','g'),'Vendor\u2019s CEO co-founded'],
-    [new RegExp(A+' is a co-founder','g'),'Vendor\u2019s CEO is a co-founder'],
+    [new RegExp(A+' co-founded','g'),'Thrandvex\u2019s CEO co-founded'],
+    [new RegExp(A+' is a co-founder','g'),'Thrandvex\u2019s CEO is a co-founder'],
     [new RegExp(A+'[\'\u2019]s (exec )?(LinkedIn )?(exec )?(lane|track|route)','g'),'the exec track'],
     [new RegExp('\\b'+A+' (lane|route|track)\\b','g'),'exec track'],
     [new RegExp('\\b(to|with|via|through|from|for|by|on) '+A+'( and '+S+')?\\b','g'),'$1 the exec track'],
@@ -11611,7 +11611,7 @@ const pct=(a,b)=>b>0?Math.round(a*100/b):0;
 
 /* ---------- which rows count ---------- */
 function counts(p){if(!p||p.deleted_at)return false;const r=low(p.review);return r!=='personal'&&r!=='pending'}
-function AE(o){return /alex/i.test(o||'')?'Alex':/blake/i.test(o||'')?'Blake':/bram/i.test(o||'')?'Casey':''}
+function AE(o){return /tamsin/i.test(o||'')?'Tamsin':/idris/i.test(o||'')?'Idris':/bram/i.test(o||'')?'Bram':''}
 
 /* ---------- the numbers ---------- */
 function compute(all,today){S.computes++;today=today||todayIST();const P=(all||[]).filter(counts);

@@ -6,9 +6,9 @@
 # Code, not a model, runs these checks. Read-only on the database (worker role through scripts/ari_db.py).
 #
 # usage (shell, project folder; the Supabase ari_worker binding is injected by the proxy):
-#   python3 scripts/copy_check.py check <person_id> <kind> <draft.txt> [--structure S2] [--vendor-line] [--asset asset.txt]
+#   python3 scripts/copy_check.py check <person_id> <kind> <draft.txt> [--structure S2] [--seller-line] [--asset asset.txt]
 #        kind: dm1 | dm2 | dm3 | note.  Prints "PASS" or "FLAG: R3 product line in DM1; R5 ..." (exit 0 / 1).
-#        --vendor-line: this text is the "add one short what-we-do line" switch version (R3 not applied).
+#        --seller-line (older name --<seller>-line): this text is the "add one short what-we-do line" switch version (R3 not applied).
 #   python3 scripts/copy_check.py arm <person_id>      -> JSON {arm, pick, switch, why}: which DM1 structure Ari uses
 #   python3 scripts/copy_check.py arm2 <person_id>     -> JSON {arm, variant, pick, fallback}: the person's DM2 A/B arm (Oct 22)
 #   python3 scripts/copy_check.py regen [limit]        -> JSON list of unsent DM1s and DM2s that fail the AE style guide (since 21 Oct 2026)
@@ -18,6 +18,21 @@ import sys, os, re, json, hashlib, datetime as dt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+import seller_config
+# Seller, AE and customer names come from settings (scripts/seller_config.py: a private file outside the repo,
+# synthetic defaults otherwise), so the checks carry no real company or people names.
+_CFG = seller_config.load()
+SELLER = _CFG["seller"]
+SELLER_LOW = SELLER.lower()
+_SELLER_RX = re.escape(SELLER_LOW)
+STYLE_A = _CFG["style_a_ae"]            # default AE style (short DM1, 15 minute ask)
+STYLE_B = _CFG["style_b_ae"]            # four-beat ISV style (two questions, 20 minute ask)
+STYLE_A_NAME = seller_config.first_name(STYLE_A)
+STYLE_B_NAME = seller_config.first_name(STYLE_B)
+B_CUSTOMER = _CFG["style_b_customer"]
+B_CUSTOMER_LABEL = _CFG["style_b_customer_label"]
+NEVER_NAME = _CFG["never_name"]
 sys.path.insert(0, HERE)
 
 BANNED = ["reason i reached out", "thought this might be relevant", "helping companies like yours", "wanted to introduce myself",
@@ -95,7 +110,7 @@ def corpus_rows():
 OFFER = re.compile(r"\b(send|share|pass along|forward)\b[^.?!]{0,40}\b(it|this|that|the|a|how|short|version|read|details|breakdown|map|notes|summary|over)\b|\bwant (it|a copy|the read)\b|\bmapped\b[^.?!]{0,60}\bwant\b", re.I)
 
 
-def _check_v1(pid, kind, text, structure="", vendor_line=False, rows=None, has_asset=False):
+def _check_v1(pid, kind, text, structure="", seller_line=False, rows=None, has_asset=False):
     flags = []
     t = text.strip()
     low = t.lower()
@@ -155,18 +170,18 @@ def _check_v1(pid, kind, text, structure="", vendor_line=False, rows=None, has_a
     lim = LIMIT.get(kind, 350)
     if len(t) > lim:
         flags.append("R10 over %d characters (%d)" % (lim, len(t)))
-    # ---- R3 product line in DM1 (Hark decision 1: default no Vendor line) ----
-    if kind == "dm1" and not vendor_line and re.search(r"\bthrandvex\b", low):
-        flags.append("R3 Vendor named in DM1 (default is no product line; the switch version carries it)")
-    if kind == "dm1" and vendor_line:
-        sl = [s for s in re.split(r"(?<=[.!?])\s+", t) if "vendor" in s.lower()]
+    # ---- R3 product line in DM1 (Hark decision 1: default no seller line) ----
+    if kind == "dm1" and not seller_line and re.search(r"\b%s\b" % _SELLER_RX, low):
+        flags.append("R3 %s named in DM1 (default is no product line; the switch version carries it)" % SELLER)
+    if kind == "dm1" and seller_line:
+        sl = [s for s in re.split(r"(?<=[.!?])\s+", t) if SELLER_LOW in s.lower()]
         if len(sl) > 1 or (sl and len(sl[0].split()) > 16):
-            flags.append("R3 Vendor line longer than one short line")
+            flags.append("R3 %s line longer than one short line" % SELLER)
     # ---- P1 capability pitch in a follow-up (Hark decision 5: DM2s stop re-pitching) ----
     if kind in ("dm2", "dm3"):
         for sent in re.split(r"(?<=[.!?])\s+", t):
             sl = sent.lower()
-            if "vendor" in sl and "working with a leading ai lab" not in sl and re.search(r"\bthrandvex('s)?\b[^.?!]{0,40}\b" + CAP_VERBS, sl):
+            if SELLER_LOW in sl and "working with a leading ai lab" not in sl and re.search(r"\b%s('s)?\b[^.?!]{0,40}\b" % _SELLER_RX + CAP_VERBS, sl):
                 flags.append("P1 capability pitch (use one Section 6 proof line as evidence, not a feature line)")
                 break
     # ---- R5 closer shape / stock closers ----
@@ -268,22 +283,21 @@ def _check_v1(pid, kind, text, structure="", vendor_line=False, rows=None, has_a
 
 # ---------------- AE style guide (Owner, Wed 21 Oct 2026 04:24 IST, option A) ----------------
 # plans/copy-lab/ae-styles.md (from Owner's work Claude) is now the canonical shape for connect notes, DM1 and DM2.
-# Style comes from the account's AE: Blake -> Blake style; Alex, Casey (Owner's call) and no AE -> Alex style.
-# The Copy Lab v1 checks that contradict the guide (no meeting ask, no Vendor line in DM1, stock closer
+# Style comes from the account's AE: the style B AE (seller_config style_b_ae) -> style B; every other AE (Owner's call)
+# and no AE -> style A.
+# The Copy Lab v1 checks that contradict the guide (no meeting ask, no seller line in DM1, stock closer
 # "worth a quick chat", closer reuse, opening share, character caps, S/F structure minimums) are dropped for
 # these kinds; every other floor (dashes, banned phrases, hedges, clarity, links, repeats) still runs.
 AE_STYLE_SINCE = "2026-10-21"
 STYLE_KINDS = ("note", "dm1", "dm2", "dm3")
-ALLOWED_CUSTOMERS = ["goodrx", "walmart", "visa", "flo health"]
-KNOWN_CUSTOMERS = ALLOWED_CUSTOMERS + ["hippocratic"]
-COMPETITORS = ["protegrity", "private ai", "tonic", "gretel", "incountry", "agentcloak", "very good security", "vgs",
-               "basis theory", "evervault", "bigid", "onetrust", "securiti", "nightfall", "cyera", "thales", "voltage",
-               "piiano", "immuta", "privacera", "tokenex", "vendor alternative"]
+ALLOWED_CUSTOMERS = list(_CFG["allowed_customers"])
+KNOWN_CUSTOMERS = ALLOWED_CUSTOMERS + [NEVER_NAME["match"]]
+COMPETITORS = list(_CFG["competitors"]) + [SELLER_LOW + " alternative"]
 STYLE_BANNED = ["i'd love to", "i would love to", "reason i'm reaching out", "reason i am reaching out", "unlock",
                 "revolutioniz", "transform your", "just following up"]
 GUIDE_FIXED = re.compile(r"(thanks for connecting, [^.]+\.|^\S+, last one from me\.|we built a data privacy layer that|"
-                         r"teams like visa use it\.|worth connecting\?|worth 15 minutes\?|worth a quick call\?|"
-                         r"worth 20 minutes with you and|worth 20 minutes\?|happy to show how|we talk to|on your 2027 list|did you see|one more angle|most )", re.I)
+                         r"teams like %s use it\.|worth connecting\?|worth 15 minutes\?|worth a quick call\?|"
+                         r"worth 20 minutes with you and|worth 20 minutes\?|happy to show how|we talk to|on your 2027 list|did you see|one more angle|most )" % re.escape(B_CUSTOMER), re.I)
 V1_DROP = ("M1", "R3", "P1", "R5", "R4", "R2", "R10", "S2 ", "S5 ", "S6 ", "F1 ")
 TRIGGER = re.compile(r"\b(saw|noticed|congrats|just (launched|announced|raised|hired)|announced|launched|raised|hired|joined as)\b", re.I)
 
@@ -310,7 +324,7 @@ def style_for(pid, rows=None):
             ae = (_accounts().get(me["account_id"]) or {}).get("ae") or ""
     except BaseException:
         pass
-    return ("blake" if "blake" in ae.lower() else "alex"), ae
+    return (STYLE_B if STYLE_B in ae.lower() else STYLE_A), ae
 
 
 def _hook_ok(pid, rows=None):
@@ -370,14 +384,14 @@ def style_flags(pid, kind, text, style, rows=None):
     if "{{" in t:
         f.append("G1 template placeholder left in")
     named = [c for c in KNOWN_CUSTOMERS if re.search(r"\b%s\b" % re.escape(c), low)]
-    if "hippocratic" in named:
-        f.append("G2 Hippocratic AI may never be named")
-    if style == "blake" and any(c != "visa" for c in named):
-        f.append("G2 Blake's accounts name Visa only")
-    if style == "blake":
+    if NEVER_NAME["match"] in named:
+        f.append("G2 %s may never be named" % NEVER_NAME["label"])
+    if style == STYLE_B and any(c != B_CUSTOMER for c in named):
+        f.append("G2 %s's accounts name %s only" % (STYLE_B_NAME, B_CUSTOMER_LABEL))
+    if style == STYLE_B:
         comp = [c for c in COMPETITORS if re.search(r"\b%s\b" % re.escape(c), low)]
         if comp:
-            f.append("G2 Blake's accounts never name a competitor ('%s')" % comp[0])
+            f.append("G2 %s's accounts never name a competitor ('%s')" % (STYLE_B_NAME, comp[0]))
     if TRIGGER.search(t) and not _hook_ok(pid, rows):
         f.append("G3 trigger line with no dated hook on file (drop it and use the plain problem)")
     if t.count("?") == 0 or not last.endswith("?"):
@@ -393,37 +407,37 @@ def style_flags(pid, kind, text, style, rows=None):
             f.append("G6 connect note says 'we built a data privacy layer that ...'")
         if not last.startswith("worth connecting"):
             f.append("G6 connect note ends 'Worth connecting?'")
-        if style == "blake" and "teams like visa use it" not in low:
-            f.append("G6 Blake connect note carries 'Teams like Visa use it.'")
-        if style == "alex" and not (named or re.search(r"\b\d+ of the top\b", low)):
-            f.append("G6 Alex connect note carries one proof line (a number or an allowed customer)")
+        if style == STYLE_B and ("teams like %s use it" % B_CUSTOMER) not in low:
+            f.append("G6 %s connect note carries 'Teams like %s use it.'" % (STYLE_B_NAME, B_CUSTOMER_LABEL))
+        if style == STYLE_A and not (named or re.search(r"\b\d+ of the top\b", low)):
+            f.append("G6 %s connect note carries one proof line (a number or an allowed customer)" % STYLE_A_NAME)
         if t.count("?") > 1:
             f.append("G4 one ask only")
         return f
-    lim = 65 if (kind == "dm1" and style == "blake") else 55
+    lim = 65 if (kind == "dm1" and style == STYLE_B) else 55
     if nw > lim:
         f.append("G5 over %d words (%d)" % (lim, nw))
     if kind == "dm1":
         if not low.startswith("thanks for connecting"):
             f.append("G6 DM1 opens 'Thanks for connecting, <First>.'")
-        if "we talk to" not in low and style == "blake":
-            f.append("G6 Blake beat 2: 'Most <peer group> we talk to ...'")
-        if style == "alex":
+        if "we talk to" not in low and style == STYLE_B:
+            f.append("G6 %s beat 2: 'Most <peer group> we talk to ...'" % STYLE_B_NAME)
+        if style == STYLE_A:
             if not re.search(r"worth 15 minutes\?$", last):
-                f.append("G6 Alex DM1 ends 'Worth 15 minutes?'")
+                f.append("G6 %s DM1 ends 'Worth 15 minutes?'" % STYLE_A_NAME)
             if t.count("?") > 1:
-                f.append("G4 Alex asks for the meeting only, no open question")
+                f.append("G4 %s asks for the meeting only, no open question" % STYLE_A_NAME)
             if re.search(r"\b(20|30|45) (min|mins|minutes)\b", low):
-                f.append("G6 Alex never asks past 15 minutes")
+                f.append("G6 %s never asks past 15 minutes" % STYLE_A_NAME)
             if re.search(r"\btokeni[sz]ation\b|\bencrypt|\bvault\b", low):
-                f.append("G7 Alex never explains how it works")
+                f.append("G7 %s never explains how it works" % STYLE_A_NAME)
         else:
             if t.count("?") != 2:
-                f.append("G6 Blake DM1 has two questions: beat 1 and the ask")
+                f.append("G6 %s DM1 has two questions: beat 1 and the ask" % STYLE_B_NAME)
             if not re.search(r"^worth 20 minutes with you and .+\?$", last):
-                f.append("G6 Blake DM1 ends 'Worth 20 minutes with you and <owner>?'")
-            if "vendor" not in low:
-                f.append("G6 Blake beat 3: one line on what Vendor does")
+                f.append("G6 %s DM1 ends 'Worth 20 minutes with you and <owner>?'" % STYLE_B_NAME)
+            if SELLER_LOW not in low:
+                f.append("G6 %s beat 3: one line on what %s does" % (STYLE_B_NAME, SELLER))
     if kind == "dm2":   # Owner Thu 22 Oct 2026 23:28 IST: DM2 is no longer the close; A/B arms "did you see" and "fresh reason"
         if "last one from me" in low:
             f.append("G6 DM2 is not the close any more ('last one from me' moved to DM3)")
@@ -431,7 +445,7 @@ def style_flags(pid, kind, text, style, rows=None):
             f.append("G3 'did you see' needs a real dated item on file (V notes 'DM2 item: yyyy-MM-dd <url>' or a dated hook)")
         if not (re.match(r"^\S+, did you see\b", low) or re.match(r"^\S+, one more angle\.", low)):
             f.append("G6 DM2 opens '<First>, did you see ...' (seen arm) or '<First>, one more angle.' (reason arm)")
-        want = "worth 20 minutes?" if style == "blake" else "worth 15 minutes?"
+        want = "worth 20 minutes?" if style == STYLE_B else "worth 15 minutes?"
         if not last.endswith(want):
             f.append("G6 DM2 ends '%s'" % want.capitalize())
         if t.count("?") > (2 if re.match(r"^\S+, did you see\b", low) else 1):
@@ -448,12 +462,12 @@ def style_flags(pid, kind, text, style, rows=None):
     return f
 
 
-def check(pid, kind, text, structure="", vendor_line=False, rows=None, has_asset=False):
+def check(pid, kind, text, structure="", seller_line=False, rows=None, has_asset=False):
     if kind == "exec":  # exec-track note: v1 note checks, minus closer reuse (its closer is fixed by Owner)
-        fl, notes = _check_v1(pid, "note", text, structure, vendor_line, rows, has_asset)
+        fl, notes = _check_v1(pid, "note", text, structure, seller_line, rows, has_asset)
         return [x for x in fl if not x.startswith("R4")], notes
     if kind not in STYLE_KINDS:
-        return _check_v1(pid, kind, text, structure, vendor_line, rows, has_asset)
+        return _check_v1(pid, kind, text, structure, seller_line, rows, has_asset)
     if rows is None:
         try:
             rows = corpus_rows()
@@ -464,7 +478,7 @@ def check(pid, kind, text, structure="", vendor_line=False, rows=None, has_asset
     core = GUIDE_FIXED.sub(" ", text)
     fl, notes = _check_v1(pid, kind, core, structure, True, rows, has_asset)
     fl = [x for x in fl if not x.startswith(V1_DROP)]
-    if style == "blake" and kind == "dm1":
+    if style == STYLE_B and kind == "dm1":
         fl = [x for x in fl if x != "R11 more than one question"]
     fl += style_flags(pid, kind, text, style, rows)
     return fl, notes
@@ -477,11 +491,11 @@ ISV_HINTS = re.compile(r"\b(mcp|agent|api|platform|isv|saas|connector|sdk|market
 def arm(pid):
     # Since Wed 21 Oct 2026 (Owner, option A): the AE style guide replaces the Copy Lab v1 arms.
     style, ae = style_for(pid)
-    name = "AE Blake style" if style == "blake" else "AE Alex style"
+    name = "AE %s style" % (STYLE_B_NAME if style == STYLE_B else STYLE_A_NAME)
     return {"arm": "ae_style", "pick": name, "style": style, "ae": ae or "none",
             "switch": "%s, other angle" % name,
             "why": "plans/copy-lab/ae-styles.md, %s shape. Pick = the trigger version when a real dated hook is on file, "
-                   "else the plain-problem version; switch = the other one, same style." % ("Blake four-beat" if style == "blake" else "Alex")}
+                   "else the plain-problem version; switch = the other one, same style." % ((STYLE_B_NAME + " four-beat") if style == STYLE_B else STYLE_A_NAME)}
 
 
 def _arm_v1(pid):
@@ -496,8 +510,8 @@ def _arm_v1(pid):
             ae = a.get("ae") or ""
     except BaseException:
         pass
-    blake = "blake" in ae.lower()
-    switch = "S11 Their buyer's question" if blake else "S6 Who owns this"
+    style_b = STYLE_B in ae.lower()
+    switch = "S11 Their buyer's question" if style_b else "S6 Who owns this"
     if h % 5 == 0:  # 20% challenger arm, split across S2, S5, S11 (Owner 17 Oct 15:08 IST added S11)
         pick = ["S2 Confirm or correct", "S5 The give", "S11 Their buyer's question"][(h // 5) % 3]
         if pick.startswith("S11"):
@@ -506,7 +520,7 @@ def _arm_v1(pid):
                 "why": "Copy Lab v1 challenger arm (20%% of DM1s split across S2, S5, S11, deterministic by person id). Switch: %s." % switch,
                 "s5_fallback": "S5 only when Ari can write the 3-line read now (asset rule). Otherwise use S11 for ISV and AI vendors, else S2, and say so in V notes."}
     return {"arm": "control", "pick": "X0 Current shape", "switch": switch,
-            "why": "Comparison arm (80%): a dated trigger, what it implies, one direct and specific question (open is fine if asked well), no Vendor line (decision 1)."}
+            "why": "Comparison arm (80%): a dated trigger, what it implies, one direct and specific question (open is fine if asked well), no %s line (decision 1)." % SELLER}
 
 
 # ---------------- DM2 regeneration list (Hark decision 5) ----------------
@@ -554,7 +568,7 @@ def main(a):
     cmd = a[0]
     if cmd == "check":
         if len(a) < 4:
-            print("usage: copy_check.py check <person_id> <kind> <draft.txt> [--structure S2] [--vendor-line]"); return 2
+            print("usage: copy_check.py check <person_id> <kind> <draft.txt> [--structure S2] [--seller-line]"); return 2
         st = a[a.index("--structure") + 1] if "--structure" in a else ""
         text = open(a[3]).read()
         ha = False
@@ -565,7 +579,8 @@ def main(a):
                 afl, _ = check(a[1], "asset", open(af).read(), rows=[])
                 if afl:
                     print("FLAG: asset file: " + "; ".join(afl)); return 1
-        fl, notes = check(a[1], a[2], text, st, "--vendor-line" in a, has_asset=ha)
+        seller_line = "--seller-line" in a or ("--%s-line" % SELLER_LOW) in a   # the older flag name still works
+        fl, notes = check(a[1], a[2], text, st, seller_line, has_asset=ha)
         for n in notes:
             print(n)
         if fl:

@@ -24,7 +24,7 @@ describe('mapHeaders', () => {
 
 describe('cleanLinkedIn', () => {
   it('adds https://www and refuses anything that is not a profile link', () => {
-    expect(cleanLinkedIn('linkedin.com/in/sana-fauxwell-example')).toBe('https://www.linkedin.com/in/sana-fauxwell-example');
+    expect(cleanLinkedIn('linkedin.com/in/suvi-fauxwell-example')).toBe('https://www.linkedin.com/in/suvi-fauxwell-example');
     expect(cleanLinkedIn('http://uk.linkedin.com/in/x-example')).toBe('https://uk.linkedin.com/in/x-example');
     expect(cleanLinkedIn('https://www.linkedin.com/company/ixterlane')).toBeUndefined();
     expect(cleanLinkedIn('https://example.com/in/x')).toBeUndefined();
@@ -40,7 +40,7 @@ describe('parseImportCsv', () => {
     expect(p.rows[0]).toEqual({ row: 1, name: 'Mira Fakerton', company: 'Norquiveth Pay', title: 'VP Data', location: 'Remote',
       linkedin_url: 'https://www.linkedin.com/in/mira-fakerton-example' });
     expect(p.rows[3]).toEqual({ row: 4, name: 'Tess Sampleton', company: 'Clovardine Labs', title: undefined, location: undefined, linkedin_url: undefined });
-    expect(p.rows[5]!.linkedin_url).toBe('https://www.linkedin.com/in/sana-fauxwell-example');
+    expect(p.rows[5]!.linkedin_url).toBe('https://www.linkedin.com/in/suvi-fauxwell-example');
   });
   it('joins first and last name, reads semicolon files, skips rows with no name or company', () => {
     const p = parseImportCsv('First name;Last name;Organisation\nNell;Vargample;Quellivarn\n;;Nameless Co\nOnly;Name;\n');

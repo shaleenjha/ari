@@ -11,7 +11,7 @@
 # brief.json keys: account_id, thesis, why_now[], data_flow[], committee[], angle, soft_angles[], quick_check[], sequences[], doc_url (optional)
 # Shapes (the app reads exactly these):
 #   why_now:     [{date:'YYYY-MM-DD'|'', kind:'trigger'|'context'|'read'|'bet', label:'Verified'|'Inference'|'Hypothesis', text, url}]
-#   data_flow:   [{step, where, data, vendor, here:true|false}]   (here = Vendor sits at this step)
+#   data_flow:   [{step, where, data, thrandvex, here:true|false}]   (here = Thrandvex sits at this step)
 #   committee:   [{team, who, moves, people:[{person_id, name, title, priority:'P1'|'P2'|'P3', role, objection, answer, why}]}]
 #   soft_angles: [{kind:'role_pain'|'peer_move'|'hiring'|'product_change', text, url?}]   (non-trigger angles, shown as softer)
 #   quick_check: 1 to 2 items [{id, kind:'choice'|'ack', q, options[], answer:<index>, why}]
@@ -54,7 +54,7 @@ elif cmd == 'account':
     co = ' '.join(sys.argv[2:]).strip()
     if not co: print('usage: brief_upsert.py account <company>'); sys.exit(2)
     q = urllib.parse.quote(co.replace('*', ''), safe='')
-    acc = request('GET', 'accounts?select=id,company,owner,stage,hook,hook_date,hook_url,why_vendor,domain,one_liner&deleted_at=is.null&company=ilike.' + q) or []
+    acc = request('GET', 'accounts?select=id,company,owner,stage,hook,hook_date,hook_url,why_thrandvex,domain,one_liner&deleted_at=is.null&company=ilike.' + q) or []
     if len(acc) != 1: print(json.dumps({'error': 'expected one account named %s, found %d' % (co, len(acc))})); sys.exit(1)
     a = acc[0]
     a['account_id'] = a.pop('id')

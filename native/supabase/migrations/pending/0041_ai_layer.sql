@@ -208,7 +208,7 @@ begin
       'research', left(p.research, 4000), 'context', left(p.context, 1500), 'dm', p.dm, 'dm2_text', p.dm2_text, 'dm3_text', p.dm3_text,
       'dm1_sent', p.dm1_sent, 'accepted', p.accepted, 'linkedin_url', p.linkedin_url, 'ai', p.extra->'ai') end,
     'account', case when a.id is null then null else jsonb_build_object('id', a.id, 'company', a.company, 'one_liner', a.one_liner,
-      'hook', a.hook, 'hook_date', a.hook_date, 'why_vendor', left(a.why_vendor, 1500), 'play', a.play, 'stage', a.stage) end,
+      'hook', a.hook, 'hook_date', a.hook_date, 'why_thrandvex', left(a.why_thrandvex, 1500), 'play', a.play, 'stage', a.stage) end,
     'research', coalesce((select jsonb_agg(jsonb_build_object('source_url', r.source_url, 'dated', r.dated, 'summary', left(r.summary, 600)) order by r.fetched_at desc)
        from (select * from research where (p.id is not null and person_id = p.id) or (acc is not null and account_id = acc)
              order by fetched_at desc limit 10) r), '[]'::jsonb),

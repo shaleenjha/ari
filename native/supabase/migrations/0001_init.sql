@@ -56,20 +56,20 @@ create table public.plays (
   created_at timestamptz not null default now()
 );
 insert into public.plays (name, description) values
-  ('AI Data Economy', 'Companies whose product is training/eval data or RL environments (e.g. DataCoA, DataCoB, DataCoC, DataCoD). Proposed split, awaiting Owner''s confirm.'),
+  ('AI Data Economy', 'Companies whose product is training/eval data or RL environments (e.g. Merquavel, Provannique, Luvrastine, Revaquorn). Proposed split, awaiting Owner''s confirm.'),
   ('AI Data Sanitization', 'Companies sanitizing their own sensitive data before training, inference or sharing. Proposed split, awaiting Owner''s confirm.');
 
 -- ---------- Sheet mirror: Accounts ----------
 create table public.accounts (
   id uuid primary key default gen_random_uuid(),
   company text not null,                         -- Sheet key (case-insensitive unique)
-  owner text,                                    -- AE full name, e.g. Blake Moreno
+  owner text,                                    -- AE full name, e.g. Idris Mockwright
   ae text generated always as (split_part(coalesce(owner, ''), ' ', 1)) stored,
   one_liner text,
   hook text,
   hook_date date,
   hook_url text,
-  why_vendor text,
+  why_thrandvex text,
   suggested_order text,
   status text,                                   -- Active | Hold | ...
   play text references public.plays(name) on update cascade,

@@ -85,7 +85,7 @@ language plpgsql stable security definer set search_path = public as $$
 declare a jsonb;
 begin
   select to_jsonb(r) into a from (
-    select b.account_id, a.company, a.owner, a.stage, a.hook, a.hook_date, a.hook_url, a.why_vendor, a.domain, b.status, b.requested_at
+    select b.account_id, a.company, a.owner, a.stage, a.hook, a.hook_date, a.hook_url, a.why_thrandvex, a.domain, b.status, b.requested_at
     from account_briefs b join accounts a on a.id = b.account_id
     where b.status in ('queued','building') and a.deleted_at is null
     order by (b.status = 'building') desc, coalesce(a.stage_changed_at, a.updated_at) desc nulls last limit 1) r;

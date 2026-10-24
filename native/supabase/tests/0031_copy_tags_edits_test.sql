@@ -30,7 +30,7 @@ begin
   r := r || jsonb_build_object('diff', 'ok');
 
   -- synthetic rows
-  insert into accounts(company, owner) values ('Zz Ixterlane Test', 'Blake Moreno') returning id into acc;
+  insert into accounts(company, owner) values ('Zz Ixterlane Test', 'Idris Mockwright') returning id into acc;
   insert into people(id, name, company, account_id, linkedin_url, accepted, dm, review) values
     ('PTEST31', 'Zz Synthetic Thirtyone', 'Zz Ixterlane Test', acc, 'https://www.linkedin.com/in/zz-31', now() - interval '1 day', orig, 'lead'),
     ('PTEST32', 'Zz Synthetic Thirtytwo', 'Zz Ixterlane Test', acc, 'https://www.linkedin.com/in/zz-32', now() - interval '1 day', 'Hi Yan, untagged draft here.', 'lead'),
@@ -62,7 +62,7 @@ begin
   perform set_config('ari.actor', 'app', true);
   update people set dm = ed1 where id = 'PTEST31';
   select * into de from draft_edits where person_id = 'PTEST31';
-  if de.id is null or de.original <> orig or de.edited <> ed1 or de.saves <> 1 or de.words_kept < 3 or de.ae <> 'Blake' then raise exception 'FAIL first edit %', to_jsonb(de); end if;
+  if de.id is null or de.original <> orig or de.edited <> ed1 or de.saves <> 1 or de.words_kept < 3 or de.ae <> 'Idris' then raise exception 'FAIL first edit %', to_jsonb(de); end if;
   update people set dm = ed2 where id = 'PTEST31';
   if (select count(*) from draft_edits where person_id = 'PTEST31') <> 1 then raise exception 'FAIL chain made a second row'; end if;
   select * into de from draft_edits where person_id = 'PTEST31';

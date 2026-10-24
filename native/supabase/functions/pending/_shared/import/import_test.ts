@@ -41,8 +41,8 @@ Deno.test('normalisers', () => {
   assertEquals(slugOf('https://example.com/in/x'), null);
   assertEquals(normCompany('Hartwell & Co., Inc.'), 'hartwell and');
   assertEquals(normCompany('Norquiveth Labs, Inc.'), normCompany('Norquiveth Labs'));
-  assertEquals(normName('Jose Marlow, PhD'), 'jose marlow');
-  assertEquals(normName('José  Marlow'), 'jose marlow');
+  assertEquals(normName('Jose Sampleton, PhD'), 'jose sampleton');
+  assertEquals(normName('José  Sampleton'), 'jose sampleton');
 });
 
 Deno.test('duplicates are found by code: same profile first, then same name + company', () => {
