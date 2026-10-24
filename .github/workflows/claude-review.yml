@@ -88,6 +88,10 @@ jobs:
         run: |
           [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || { echo "::error::CLAUDE_CODE_OAUTH_TOKEN secret is not set"; exit 1; }
           head -c 200000 /tmp/review_diff.txt > /tmp/review_diff_capped.txt
+          TRUNC=""
+          if [ "$(wc -c < /tmp/review_diff.txt)" -gt 200000 ]; then
+            TRUNC="The diff was TRUNCATED at 200 KB, so parts are unseen: the verdict can be FIX or BLOCK, never PASS."
+          fi
           cat > /tmp/review_prompt.txt <<PROMPT
           You are the outside security and platform reviewer for this repo (Ari: an outbound prep app on
           Supabase Postgres + Edge Functions + pg_cron, a React PWA, and Python jobs). Review ONLY the change
@@ -106,10 +110,12 @@ jobs:
           each: severity (high/med/low), file:line, what is wrong, the smallest fix. No praise, no summary
           of the diff. Never quote a secret, key, token, password, email address, phone number, person's
           name or profile URL: if you find one committed, say only file:line and its kind ("an API key").
-          Never read files outside the repo checkout or /tmp/review_*. Never mention or tag anyone.
+          Never read files outside the repo checkout or /tmp/review_*. Never mention or tag anyone, and no
+          links, images or HTML. $TRUNC
           PROMPT
           claude -p "$(cat /tmp/review_prompt.txt)" \
-            --allowedTools "Read,Grep,Glob,Edit(//tmp/review_body.md),Write(//tmp/review_body.md)" \
+            --allowedTools "Read(//home/runner/work/**),Read(//tmp/review_*),Grep(//home/runner/work/**),Glob(//home/runner/work/**),Edit(//tmp/review_body.md),Write(//tmp/review_body.md)" \
+            --disallowedTools "Read(//proc/**),Read(//home/runner/.claude/**),Read(//etc/**),Bash,WebFetch,WebSearch" \
             --max-turns 40
           [ -s /tmp/review_body.md ] || { echo "::error::Claude wrote no review"; exit 1; }
 
@@ -125,6 +131,13 @@ jobs:
             echo "::error::Review text matched the sensitive-data scan; not posting it."
             VERDICT="$(head -1 "$BODY" | grep -oE 'Verdict: (PASS|FIX|BLOCK)' || echo 'Verdict: FIX')"
             printf '%s\n\nThe full review was withheld because it matched the sensitive-data scan. See the workflow run log.\n' "$VERDICT" > "$BODY"
+          fi
+          # Defuse mentions, links, images and HTML so a steered review can't ping people or load URLs.
+          sed -i -E 's/@/@\xE2\x80\x8B/g; s#https?://#hxxp://#g; s/!\[/[/g; s/</\&lt;/g' "$BODY"
+          # The first line must be an exact verdict; otherwise treat it as FIX.
+          if ! head -1 "$BODY" | grep -qxE 'Verdict: (PASS|FIX|BLOCK)'; then
+            { echo 'Verdict: FIX'; echo; echo '(The reviewer did not give a clean verdict line.)'; echo; cat "$BODY"; } > /tmp/review_fixed.md
+            mv /tmp/review_fixed.md "$BODY"
           fi
           SHORT="$(echo "$HEAD" | cut -c1-7)"
           if [ "$EVENT_NAME" = "pull_request" ]; then
