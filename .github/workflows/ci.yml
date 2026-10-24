@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - name: check every PR commit title
         env: { BASE: "${{ github.event.pull_request.base.sha }}", HEAD: "${{ github.event.pull_request.head.sha }}" }
@@ -48,9 +48,9 @@ jobs:
       scripts: ${{ steps.f.outputs.scripts == 'true' || github.event_name == 'workflow_dispatch' }}
       functions: ${{ steps.f.outputs.functions == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: f
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         with:
           filters: |
             web: ['.github/workflows/ci.yml', 'app/web/**']
@@ -67,8 +67,8 @@ jobs:
     timeout-minutes: 25
     defaults: { run: { working-directory: app/web } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
@@ -84,8 +84,8 @@ jobs:
     timeout-minutes: 10
     defaults: { run: { working-directory: app/jobs } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm, cache-dependency-path: app/jobs/package-lock.json }
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
@@ -100,8 +100,8 @@ jobs:
     timeout-minutes: 10
     defaults: { run: { working-directory: app/jobs } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm, cache-dependency-path: app/jobs/package-lock.json }
       - run: npm ci
       - run: npm run eval:drafts
@@ -121,7 +121,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
     env: { PGHOST: localhost, PGPORT: 5432, PGUSER: postgres, PGPASSWORD: postgres }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash app/db/run_tests.sh
 
   sql-prod-shape:
@@ -140,7 +140,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
     env: { PGHOST: localhost, PGPORT: 5432, PGUSER: postgres, PGPASSWORD: postgres }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: postgresql-client-17 (pg_dump must match the server major)
         run: |
           sudo apt-get install -y postgresql-common
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: denoland/setup-deno@v2
         with: { deno-version: v2.9.7 }   # pinned; bump on purpose, not by drift
       # ari-push and ari-backup predate strict typing (plain-JS style, pre-existing errors); they are parse-checked only.
@@ -182,8 +182,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with: { python-version: '3.12' }
       - run: python3 scripts/test_hygiene_scan.py
       - run: python3 scripts/test_offsite_certs.py   # S1 R3: multi-recipient CMS, nightly recipient check, .cms restore (throwaway certs)
@@ -202,10 +202,10 @@ jobs:
     timeout-minutes: 3
     defaults: { run: { working-directory: app/web } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: { python-version: '3.12' }
       # S2 (v18.17.0): the design package checks (_build/verify.py) ported to scripts/tokens/verify.py: contrast from the
       # final tokens.css, tokens.css == gen(tokens.json), 4 px grid and radius set, no raw hex anywhere in src/.
@@ -220,14 +220,14 @@ jobs:
     timeout-minutes: 20
     defaults: { run: { working-directory: app/web } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run lint:design
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: { name: design-lint-report, path: app/web/test-results, retention-days: 7 }
 
   e2e:
@@ -238,14 +238,14 @@ jobs:
     timeout-minutes: 25
     defaults: { run: { working-directory: app/web } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run e2e
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: { name: playwright-report, path: app/web/test-results, retention-days: 7 }
       # verify-mobile (v18.15.0): skeleton + populated screenshots, CLS, LCP (Chromium throttled), console errors for Today,
       # Replies, Report on WebKit iPhone 14 + Chromium Pixel 7. Fixture data only. Reuses dist/ and the installed browsers.
@@ -258,7 +258,7 @@ jobs:
         name: verify-mobile summary (table to step summary + verify-mobile.json)
         run: npm run verify:summary
       - if: always() && steps.verify.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: { name: verify-mobile, path: app/web/test-results/verify-mobile, retention-days: 14, if-no-files-found: warn }
 
   failure-report:
