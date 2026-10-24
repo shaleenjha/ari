@@ -84,8 +84,8 @@ test('Sheets: Accounts search filters by person or company; Report compares week
   await expect(sheet).toBeVisible();
   await sheet.getByLabel('Search accounts and people').fill('kelvarrow');
   await expect(sheet.locator('.acct')).toHaveCount(1);
-  await page.keyboard.press('Escape'); // the first Escape clears the search field, the second closes the sheet
-  await expect(sheet.getByLabel('Search accounts and people')).toHaveValue('');
+  // Escape inside a search field clears it in Chromium but closes the dialog in WebKit, so leave the field first.
+  await sheet.getByRole('heading', { name: 'Accounts' }).focus();
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
   await page.getByRole('button', { name: 'Report' }).click();
