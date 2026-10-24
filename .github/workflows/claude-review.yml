@@ -21,6 +21,13 @@ on:
       - 'scripts/git_*'
       - 'scripts/seller_config.py'
       - '.github/workflows/**'
+  workflow_dispatch:
+    # Manual full review of chosen paths (e.g. a pending release); only repo writers can start it.
+    inputs:
+      paths:
+        description: 'Space-separated repo paths to review in full'
+        required: true
+        type: string
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
@@ -45,7 +52,7 @@ jobs:
   review:
     # PR runs use the PR's own copy of this file with the secret present, so only PRs Owner opens from
     # this repo run; everything else is reviewed after it lands on main.
-    if: github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'shaleenjha')
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'shaleenjha')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -65,6 +72,7 @@ jobs:
           PR_HEAD: ${{ github.event.pull_request.head.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
           PUSH_SHA: ${{ github.sha }}
+          REVIEW_PATHS: ${{ inputs.paths }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
             BASE="$PR_BASE"; HEAD="$PR_HEAD"
@@ -73,7 +81,15 @@ jobs:
           fi
           git cat-file -e "$BASE" 2>/dev/null || BASE="$(git rev-list --max-parents=0 HEAD | tail -1)"
           git diff --stat "$BASE" "$HEAD" > /tmp/review_stat.txt
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            printf '%s' "$REVIEW_PATHS" | grep -qE '^[A-Za-z0-9_./ -]+$' || { echo "::error::bad paths input"; exit 1; }
+            BASE="$(git hash-object -t tree /dev/null)"; HEAD="$PUSH_SHA"
+            read -r -a P <<< "$REVIEW_PATHS"
+            git diff --stat "$BASE" "$HEAD" -- "${P[@]}" > /tmp/review_stat.txt
+            git diff "$BASE" "$HEAD" -- "${P[@]}" > /tmp/review_diff.txt
+          else
           git diff "$BASE" "$HEAD" -- native/supabase app/db app/jobs '*auth*' '*sw.js' scripts .github/workflows > /tmp/review_diff.txt
+          fi
           echo "BASE=$BASE" >> "$GITHUB_ENV"; echo "HEAD=$HEAD" >> "$GITHUB_ENV"
 
       - name: Install Claude Code
@@ -151,6 +167,8 @@ jobs:
           SHORT="$(echo "$HEAD" | cut -c1-7)"
           if [ "$EVENT_NAME" = "pull_request" ]; then
             gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$BODY"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "Claude full review: $SHORT run $GITHUB_RUN_ID" --body-file "$BODY"
           elif gh issue list --repo "$GITHUB_REPOSITORY" --state all --search "in:title \"Claude review: $SHORT\"" --json number --jq '.[0].number' | grep -q .; then
             echo "Review issue for $SHORT already exists; skipping duplicate."
           else
