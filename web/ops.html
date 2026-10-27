@@ -65,6 +65,11 @@ function liIntent(u){u=liHttps(u);if(!u)return '';if(!ANDROID)return u;var rest=
   return 'intent://'+rest+'#Intent;scheme=https;package=com.linkedin.android;S.browser_fallback_url='+encodeURIComponent(u)+';end'}
 window.ariLI={https:liHttps,href:liIntent,android:ANDROID,inbox:function(){return liIntent('https://www.linkedin.com/messaging/')}};
 
+/* v18.13.2 (Owner Oct 28): one exec-track test for every queue, list and count in Owner's lane. Stage 'Founder', a route naming the exec,
+   or an exec lane puts a person on the exec track. ariIsExecId looks the person up in the live store first. */
+window.ariIsExec=function(p){if(!p)return false;return /founder/i.test(String(p.stage||''))||/founder/i.test(String(p.route||''))||/^(founder|exec)/i.test(String(p.lane||''))};
+window.ariIsExecId=function(id){if(id==null||id==='')return false;try{var S=window.ariV17&&window.ariV17.store,p=S&&S.people&&S.people.get&&S.people.get(id);
+  if(!p){var L=(window.ariDATA&&window.ariDATA.people)||[];for(var i=0;i<L.length;i++){if(L[i]&&String(L[i].id)===String(id)){p=L[i];break}}}return window.ariIsExec(p)}catch(e){return false}};
 /* ===== v16.2 prologue helpers: company match, effective stage (Founder / meeting hold), why-this-person ===== */
 function normCo(s){s=String(s||'').toLowerCase().replace(/\(.*?\)/g,' ').replace(/https?:\/\/(www\.)?/,'').replace(/\.(com|io|ai|co|health|inc)\b/g,' ').replace(/&/g,' and ').replace(/[^a-z0-9 ]+/g,' ');
   s=s.replace(/\b(inc|incorporated|llc|ltd|limited|corp|corporation|co|company|the|holdings|group|ai|technologies|technology|labs|hq)\b/g,' ').replace(/\s+/g,'').trim();return s}
@@ -107,7 +112,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
   var bookBy={};(d&&d.book||[]).forEach(function(r){var k=normCo(r[0]);if(k&&!bookBy[k])bookBy[k]=r});
   var meetCo={};(d&&d.accounts||[]).forEach(function(a){if(low(a.meeting_status)==='set')meetCo[normCo(a.company)]=a});
   var anQ={},brQ={};queue.forEach(function(q){var ac=low(q.action),t=String(q.target||'').trim();if(!t||/^blocked/i.test(q.status||''))return;if(ac==='send to founder'||ac==='take back from founder')anQ[t]={act:ac==='send to founder'?'send':'back',q:q};else if(ac==='brief aide')brQ[t]=q});
-  function effStage(p){var x=anQ[p.id],st=p.stage||'';if(x&&x.act==='send')return 'Founder';if(x&&x.act==='back')return /^founder$/i.test(st)?'':st;if(/founder/i.test(p.route||'')||/^founder$/i.test(st))return 'Founder';if(meetCo[normCo(p.company)]&&!dOnly(p.replied)&&!dOnly(p.meeting)&&!/^hold$/i.test(st))return 'Hold';return st}
+  function effStage(p){var x=anQ[p.id],st=p.stage||'';if(x&&x.act==='send')return 'Founder';if(x&&x.act==='back')return /^founder$/i.test(st)?'':st;if(window.ariIsExec(p))return 'Founder';if(meetCo[normCo(p.company)]&&!dOnly(p.replied)&&!dOnly(p.meeting)&&!/^hold$/i.test(st))return 'Hold';return st}
   var replyDraft={};queue.forEach(function(q){if(/draft reply/i.test(q.action)&&q.target&&q.status==='done'&&q.result)replyDraft[q.target]=q.result});
   var Q=[],FU=[],BG=[],PF={},ACC=[],WAIT=[],HOLD=[],COMING=[],PEND=[],FOUNDER=[],PERS=[];
   people.forEach(function(p){
@@ -7865,7 +7870,7 @@ async function sbHealthy(){try{const ctl=new AbortController();setTimeout(()=>ct
 V17.api=async function(fn,args,fallback){
   if(fn==='getData'){await V17.fetch('api');return build17()}
   const plan=mapOp(fn,args);if(!plan)return fallback();
-  try{const out=[];for(const s of plan)out.push(await rpc17(s[0],s[1],s[2],s[3],fn,args,s[4]));V17.via='supabase';V17.lastWrite={fn,ms:Date.now(),res:out.map(x=>({applied:x&&x.applied,duplicate:x&&x.duplicate,id:x&&x.row&&(x.row.id||x.row.key)}))};publish17('write',true);return build17()}
+  try{const out=[];for(const s of plan)out.push(await rpc17(s[0],s[1],s[2],s[3],fn,args,s[4]));V17.via='supabase';V17.lastWrite={fn,ms:Date.now(),res:out.map(x=>({applied:x&&x.applied,duplicate:x&&x.duplicate,id:x&&x.row&&(x.row.id||x.row.key)}))};publish17('write',true);if(fn!=='queueRun'){try{window.ariV18&&ariV18.kick&&ariV18.kick()}catch(_){}}return build17()}
   catch(e){
     if(e.sbAuth){trySbSignIn('write');try{if(!QA&&!window.ARI_ONB&&!locked17())authBanner()}catch(_){}const x=new Error('Failed to fetch');x.sbAuth=1;throw x}
     if(netErr(e))throw e;
@@ -8652,7 +8657,7 @@ function working(){const Q=queue().filter(openQ);
   const n=istNow();if(n.dow>=2&&n.dow<=6&&n.min>=270&&n.min<=315)return {k:'radar',t:'Scanning the AE books for signals',s:'New hooks land in Tasks with a person and a draft.'};
   return null}
 V175.working=working;
-function waitingOnAccepts(){return people().filter(p=>isLead(p)&&p.connect_sent&&!p.accepted&&!p.withdrawn&&!/^(hold|founder|withdrawn)$/i.test(p.stage||'')).length}
+function waitingOnAccepts(){return people().filter(p=>isLead(p)&&p.connect_sent&&!p.accepted&&!p.withdrawn&&!/^(hold|founder|withdrawn)$/i.test(p.stage||'')&&!window.ariIsExec(p)).length}
 
 /* ---------- Today: the now line + the Tasks door ---------- */
 let nowSig='';
@@ -9080,7 +9085,7 @@ function shell(){const rp=$('#report');if(!rp)return null;let w=$('#v18rep');if(
   const ta=$('#v18q');ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.min(120,ta.scrollHeight)+'px'});
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}});
   return w}
-function chrome(){const r=rangeOf(F.period);$('#v18rng').textContent=`${PL[F.period]} · ${fmtR(r)}${filtLabel()?' · '+filtLabel():''}`;
+function chrome(){const r=rangeOf(F.period);$('#v18rng').textContent=`${PL[F.period]} · ${fmtR(r)}${filtLabel()?' · '+filtLabel():''}${V18.at?' · Updated '+hm(V18.at):''}`;
   $('#v18per').innerHTML=PER.map(([k,l])=>`<span class="v163chip press ${F.period===k?'on':''}" data-v18per="${k}" role="tab" aria-selected="${F.period===k}">${k==='custom'&&F.period==='custom'?E8(fmtR(r)):l}</span>`).join('');
   const any=F.ae||F.play||F.stage;
   $('#v18flt').innerHTML=AES.map(a=>`<span class="v163chip press ${F.ae===a?'on':''}" data-v18fae="${a}" role="button" aria-pressed="${F.ae===a}">${a==='Unassigned'?'Unattributed':a}</span>`).join('')+'<i class="sep"></i>'+
@@ -9109,7 +9114,7 @@ function render(D,why){const c=$('#v18cards');if(!c||!D)return;
   if(why==='rt'||why==='refresh')chg.forEach(k=>{const el=c.querySelector(`[data-v18card="${k}"]`);if(!el)return;el.classList.add('v18chg');const cap=el.querySelector('.v18cap>span');if(cap&&!cap.querySelector('.v18tag.qup'))cap.insertAdjacentHTML('beforeend','<i class="v18tag qup">Updated</i>');setTimeout(()=>{el.classList.remove('v18chg');const t=el.querySelector('.v18tag.qup');if(t)t.remove()},3200)});
   V18.changed=chg;
   if(!D.partial&&!D.more)setTimeout(()=>{if(V18.D===D)fillLazy(D)},400);
-  const u=$('#v18rng');if(u)u.dataset.at=Date.now()}
+  if(!D.partial){V18.at=Date.now();try{chrome()}catch(e){}}const u=$('#v18rng');if(u)u.dataset.at=Date.now()}
 
 /* first view: cards animate in once; numbers count up from zero on first view, from the old value on change */
 const LIO='IntersectionObserver' in window?new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&V18.D&&!V18.D.partial)fillLazy(V18.D)},{rootMargin:'600px 0px'}):null;
@@ -9135,13 +9140,17 @@ async function refresh(why){if(!shell())return;chrome();skel();if(busy){again=wh
   catch(e){V18.errs.push('load '+String(e&&e.message||e).slice(0,140))}
   finally{busy=false;if(c)c.classList.remove('v18ld');if(again){const w=again;again=false;refresh(w===true?'refresh':w)}}}
 V18.refresh=refresh;V18.fillLazy=D=>fillLazy(D);
-V18.show=function(){if(!onReport())return;if(!V18.tm.show)V18.tm.show=performance.now();if(!shell())return;if(V18.D&&!V18.D.partial&&!$('#v18cards').querySelector('[data-v18card]')){chrome();render(V18.D,'first')}if(!V18.D||dirty||Date.now()-lastLoad>60e3)refresh(V18.D?'refresh':'first');else{renderAsks()}};
+V18.show=function(){if(!onReport())return;if(!V18.tm.show)V18.tm.show=performance.now();if(!shell())return;if(V18.D&&!V18.D.partial&&!$('#v18cards').querySelector('[data-v18card]')){chrome();render(V18.D,'first')}if(!V18.D||dirty||Date.now()-lastLoad>5e3){clearLive();refresh(V18.D?'refresh':'first')}else{renderAsks()}};
 let rtT=0;
 V18.rt=function(t){if(!/^(people|accounts|log_entries|queue|log)$/.test(t||''))return;V18.rtN++;if(t==='queue'){renderAsks();}
   if(t==='queue')return softRT(6000);softRT(2500)};
 function softRT(ms){clearTimeout(rtT);rtT=setTimeout(()=>{clearLive();if(onReport()&&!document.hidden)refresh('rt');else dirty=true},ms)}
 function clearLive(){for(const [k,v] of V18.cache)if(!v.slow||Date.now()-v.t>180e3)V18.cache.delete(k)}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&onReport()&&Date.now()-lastLoad>60e3){clearLive();refresh('refresh')}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(onReport()){clearLive();refresh('refresh')}else dirty=true});
+addEventListener('pageshow',e=>{if(e.persisted){dirty=true;if(onReport()){clearLive();refresh('refresh')}}});
+setInterval(()=>{if(!document.hidden&&onReport()&&!busy&&Date.now()-lastLoad>55e3){clearLive();refresh('rt')}},15e3);
+/* v18.13.2: a mark made in the app (connect, accept, DM, reply, meeting) refreshes the numbers at once, socket or not */
+V18.kick=function(){dirty=true;softRT(700)};
 
 /* ---------- drilldown: the exact rows behind a number, full screen ---------- */
 const ML={connect:'Connects',accept:'Accepts',dm1:'DM1s sent',dm2:'DM2s sent',dm3:'DM3s sent',dms:'DMs sent',reply:'Replies',meeting:'Meetings',opp:'Opportunities',withdrawn:'Withdrawn',
@@ -9657,7 +9666,7 @@ function teamOf(b,pid,name){for(const t of (b&&b.committee)||[])for(const x of t
 function cmOf(b,pid){for(const t of (b&&b.committee)||[])for(const x of t.people||[])if(x.person_id===pid)return Object.assign({team:t.team},x);return null}
 const sentOf=pid=>[...V182.sent.values()].filter(m=>m.person_id===pid).sort((a,b)=>String(a.sent_at).localeCompare(String(b.sent_at)));
 const pend=p=>!!(p.connect_sent&&!p.accepted&&!p.withdrawn);
-const isFounder=p=>/founder/i.test(p.stage||'')||/founder/i.test(p.route||'');
+const isFounder=p=>window.ariIsExec(p);
 const nextField=p=>p.dm2_sent?'dm3_text':p.dm1_sent?'dm2_text':'dm';
 const nextKind=p=>p.dm2_sent?'DM3':p.dm1_sent?'DM2':'DM1';
 const draftOf=p=>String(p[nextField(p)]||'').trim();
@@ -10015,9 +10024,9 @@ function feedHTML(){const L=(V182.act||[]).slice();if(!L.length)return '';
    ${nowG.map(row).join('')}${P.length?`<div class="v182fdh">Just found</div>${P.map(row).join('')}`:''}${past.length>4?`<span class="v182lk press" data-v182tdo="1">${tdOpen?'Show less':'Show '+(Math.min(14,past.length)-4)+' more'}</span>`:''}</div>`}
 function readHTML(){const R=[...V182.briefs.values()].filter(b=>ready(b)&&(!b.checked_at||!b.reviewed_at)).sort((a,b)=>String(b.built_at||'').localeCompare(String(a.built_at||'')));if(!R.length)return '';
   return `<div class="v171card v182read"><div class="cap v18111hd press" role="button" tabindex="0" data-v18111rd="${R.length>3?'all':E1(R[0].company)}"><span>Read before you send</span><span>${R.length>3?(window.__v18111rdAll?'Show fewer':'See all '+R.length):R.length}<i class="v18111ch" aria-hidden="true">›</i></span></div>${R.slice(0,window.__v18111rdAll?R.length:3).map(b=>`<div class="v182rd press" data-v182acc2="${E1(b.company)}">${logo(b.company,40)}<div class="qm"><b>${E1(b.company)}</b><span>${E1(b.checked_at?'Brief read. Review the drafts':'Brief ready. Read it, then a quick check')}</span></div><span class="v182lb ${b.checked_at?'l-i':'l-h'}">${b.checked_at?'Review copy':'Quick check'}</span></div>`).join('')}</div>`}
-function todayMoves(){const acc=new Map();(DATA().people||[]).filter(p=>pend(p)&&low(p.review)!=='personal'&&p.company).forEach(p=>acc.set(NC(p.company),p.company));
+function todayMoves(){const acc=new Map();(DATA().people||[]).filter(p=>pend(p)&&low(p.review)!=='personal'&&p.company&&!isFounder(p)).forEach(p=>acc.set(NC(p.company),p.company));
   const L=[];[...acc.values()].sort((a,b)=>(briefFor(b)?1:0)-(briefFor(a)?1:0)).slice(0,6).forEach(n=>{const {M}=movesFor(n,null);const m=M.find(x=>x.k!=='email'&&!mvDone(n,x.id));if(m)L.push([n,m])});return L.slice(0,3)}
-function waitHTML(){const L=todayMoves();if(!L.length)return '';const n=(DATA().people||[]).filter(p=>pend(p)&&low(p.review)!=='personal').length;
+function waitHTML(){const L=todayMoves();if(!L.length)return '';const n=(DATA().people||[]).filter(p=>pend(p)&&low(p.review)!=='personal'&&!isFounder(p)).length;
   return `<div class="v171card v182mv v182tdm"><div class="cap v18111hd press" role="button" tabindex="0" data-v18111wait="1"><span>While invites are pending</span><span>${n} waiting<i class="v18111ch" aria-hidden="true">›</i></span></div>${L.map(([acc,m])=>`<div class="v182mi k-${m.k} press" role="button" tabindex="0" data-v182mv="${E1(m.id)}" data-v182acc="${E1(acc)}">${logo(acc,28)}<div class="qm"><b>${E1(m.t.length>64?m.t.slice(0,62)+'…':m.t)}</b><span>${E1(acc)} · ${E1(m.s)}</span></div>${m.k==='soft'?'<span class="v182lb l-s">Softer</span>':''}</div>`).join('')}</div>`}
 let tdSig='';
 function paintToday(){const r=document.getElementById('ready');if(!r||locked())return;const anchor=document.getElementById('v181cold')||document.getElementById('v175tk');if(!anchor)return;
@@ -10207,6 +10216,7 @@ const firstN=n=>String(n||'').split(' ')[0];
 const _model=window.ariModel;
 window.ariModel=function(d,o){const m=_model(d,o);try{
   if(V184.top&&Array.isArray(V184.top.connects))m.Q=m.Q.filter(q=>q.tag!=='CONNECT');
+  m.Q=m.Q.filter(q=>!window.ariIsExec(q.p)&&!window.ariIsExecId(q.id));
   const cnt={},sp={},keep=[];
   m.Q.forEach(q=>{if(q.tag==='DM2'){const co=coOf(q),k=co.toLowerCase();cnt[k]=(cnt[k]||0)+1;if(cnt[k]>DM_CAP){(sp[k]=sp[k]||{company:co,n:0}).n++;return}}keep.push(q)});
   m.Q=keep;V184.spread=Object.values(sp);V184.qn=keep.length;
@@ -10255,7 +10265,7 @@ function hbAge(){try{const hb=window.ariV1712&&ariV1712.hb;const t=hb&&hb.last_s
 function ld(){try{return !!(window.ariV16&&ariV16.loading)}catch(e){return false}}
 function stHTML(){const on=navigator.onLine!==false,loaded=!!(V17().store&&V17().store.loaded),rt=!!(V17().RT&&V17().RT.state==='SUBSCRIBED'),a=hbAge(),fresh=a!=null&&a<=45*60e3;
   let cls,lab;if(!on){cls='off';lab='Offline'}else if(!loaded||ld()){cls='ld';lab='Loading'}else if(rt&&fresh){cls='live';lab='Live'}else{cls='ok';lab='Synced'}
-  const T=V184.top||{},rp=(T.replies||[]).length,qn=ld()?null:((window.ariM&&ariM.Q)||[]).filter(q=>q.tag!=='CONNECT').length,cn=Array.isArray(T.connects)?T.connects.length:null;
+  const T=V184.top||{},rp=(T.replies||[]).length,qn=ld()?null:((window.ariM&&ariM.Q)||[]).filter(q=>q.tag!=='CONNECT').length,cn=Array.isArray(T.connects)?T.connects.filter(r=>!window.ariIsExecId(r.person_id)).length:null;
   const bits=[lab];if(cls==='ld'&&!rp){bits.push('checking your queue')}else{if(rp)bits.push(rp+' '+(rp===1?'reply':'replies'));if(qn!=null)bits.push(qn+' to send');if(cn!=null)bits.push(cn+' connect'+(cn===1?'':'s'))}
   return `<span class="d ${cls}"></span>${E(bits.join(' · '))}`}
 const ago=m=>{m=Math.max(0,+m||0);return m<1?'just now':m<60?Math.round(m)+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
@@ -10290,7 +10300,7 @@ function qItems(){return ((window.ariM&&ariM.Q)||[]).filter(q=>KF[q.tag]).map(q=
 function repItems(){return ((V184.top&&V184.top.replies)||[]).map(r=>({k:'reply',id:r.id,pid:r.person_id,co:r.company||'',name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.snippet&&r.snippet_source!=='none'?'“'+r.snippet+'”':'They wrote back. Paste their words for a sharper draft, or answer with a safe opener.',drafts:Array.isArray(r.drafts)?r.drafts:[],url:r.thread_url||r.linkedin_url||'',snip:!!(r.snippet&&r.snippet_source!=='none')}))}
 function conNote(pid){try{const L=(window.ariV17&&ariV17.store&&ariV17.store.people&&ariV17.store.people.length?ariV17.store.people:(window.ariDATA&&ariDATA.people)||[]);const p=L.find(x=>x&&String(x.id)===String(pid));const m=p&&String(p.notes||'').match(/Connect note:\s*([\s\S]*?)(?:\s*\|\s|$)/);return m?m[1].trim():''}catch(x){return ''}}
 function conItems(){const T=V184.top||{},A={};((T.meta||{}).accounts_today||[]).forEach(a=>{A[String(a.account_id||a.company||'').toLowerCase()]=a});
-  return (T.connects||[]).map(r=>{const a=A[String(r.account_id||'').toLowerCase()]||A[String(r.company||'').toLowerCase()];return {k:'connect',note:conNote(r.person_id),pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.why||'',url:r.linkedin_url||'',company:r.company,full:a&&+a.cap_left===0,sentAcct:a&&a.sent_today}})}
+  return (T.connects||[]).filter(r=>!window.ariIsExecId(r.person_id)).map(r=>{const a=A[String(r.account_id||'').toLowerCase()]||A[String(r.company||'').toLowerCase()];return {k:'connect',note:conNote(r.person_id),pid:r.person_id,name:r.name,sub:[r.title,r.company].filter(Boolean).join(' · '),why:r.why||'',url:r.linkedin_url||'',company:r.company,full:a&&+a.cap_left===0,sentAcct:a&&a.sent_today}})}
 function openFocus(items,i,sel){if(!items.length)return;FX.items=items;FX.i=Math.max(0,Math.min(i||0,items.length-1));FX.sel=sel||0;FX.pending=false;FX.open=true;FX.done=0;
   let o=$('#v184fx');if(!o){o=document.createElement('div');o.id='v184fx';o.className='v184fx';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','One person at a time');document.body.appendChild(o);wireFx(o)}
   o.hidden=false;document.documentElement.classList.add('v184fxon');fxRender();buzz(6)}
@@ -11137,6 +11147,8 @@ function items(){const m=M();if(!m||!Array.isArray(m.Q))return [];const rr=new S
     /* v18.12.6 (Owner Oct 21): no 15 cap. Today's 15 first, then every other queued connect */const seen=new Set(),src=[...(Array.isArray(T.connects)?T.connects.map(r=>({id:r.person_id,n:r.name,c:r.company,url:r.linkedin_url})):[]),...m.Q.filter(q=>q.tag==='CONNECT').map(q=>({id:q.id,n:q.n,c:coOf(q),url:q.url||(q.p&&q.p.linkedin_url)}))].filter(r=>r.id!=null&&!seen.has(String(r.id))&&seen.add(String(r.id)));
     src.forEach(r=>{const p=pp(r.id),note=(String(p.notes||'').match(/Connect note:\s*([\s\S]*?)(?:\s*\|\s|$)/)||[])[1]||'',ev=P&&P.evOf?P.evOf(p):'';if(p.skipped||p.connect_sent)return;
       out.push({k:'connect',pid:r.id,p,name:r.n||p.name||'',co:r.c||p.company||'',tag:'Connect',why:(ev?'🎟 '+ev+'. ':'')+(note.trim()?'Connect with this note. It copies when you open the profile.':'Blank invite, no note on file.'),body:note.trim(),url:r.url||p.linkedin_url||'',grp:'c'})})}catch(e){V.errs.push('connects '+e)}
+  /* v18.13.2: exec-track people never sit in Owner's queue (relay replies stay: a reply in Owner's inbox is never hidden) */
+  for(let i=out.length-1;i>=0;i--){const x=out[i];if(x.k!=='relay'&&(window.ariIsExec(x.p)||window.ariIsExecId(x.pid)))out.splice(i,1)}
   /* replies first, then DMs by send window (open windows closing soonest first, then later windows, any time last), then old invites */
   const d=out.filter(x=>x.grp==='d'),zo=[...new Set(d.map(x=>x.z.key))].sort((a,b)=>d.find(x=>x.z.key===a).z.rank-d.find(x=>x.z.key===b).z.rank);
   return [...out.filter(x=>x.grp==='r'),...zo.flatMap(k=>d.filter(x=>x.z.key===k)),...out.filter(x=>x.grp==='c'),...out.filter(x=>x.grp==='w')]}
@@ -11234,7 +11246,7 @@ function mount(){const rd=$('#ready');if(!rd)return null;const top=$('#v184top')
     if(el.id==='v184t15'||el.id==='v184sp'||shown(el)){if(moveOK(el,el.id||el.className))mi.appendChild(el)}});
   return w}
 function moreSummary(){const T=(window.ariV184&&ariV184.top)||{},bits=[];
-  if(Array.isArray(T.connects)&&T.connects.length)bits.push(T.connects.length+' connect'+(T.connects.length===1?'':'s'));
+  {const tc=Array.isArray(T.connects)?T.connects.filter(r=>!window.ariIsExecId(r.person_id)).length:0;if(tc)bits.push(tc+' connect'+(tc===1?'':'s'))}
   const pend=((M()||{}).PEND||[]).length;if(pend)bits.push(pend+' to sort');
   if($('#v1812mi #v163pipe'))bits.push('pipeline');return bits.join(' · ')}
 let LAST='';
@@ -11610,7 +11622,7 @@ function todayIST(){return istDay(Date.now())}
 const pct=(a,b)=>b>0?Math.round(a*100/b):0;
 
 /* ---------- which rows count ---------- */
-function counts(p){if(!p||p.deleted_at)return false;const r=low(p.review);return r!=='personal'&&r!=='pending'}
+function counts(p){if(!p||p.deleted_at||window.ariIsExec(p))return false;const r=low(p.review);return r!=='personal'&&r!=='pending'}
 function AE(o){return /tamsin/i.test(o||'')?'Tamsin':/idris/i.test(o||'')?'Idris':/bram/i.test(o||'')?'Bram':''}
 
 /* ---------- the numbers ---------- */
@@ -11773,7 +11785,7 @@ function tagOf(p){const s=String(p.source||'');const m=s.match(/\b(wk\d+)\b[^(]*
 function evOf(p){const s=[p.title,p.next_action,p.notes].map(x=>String(x||'')).join(' | ');const m=s.match(/🎟\s*EVENT\s+([^·|\n]+)/);return m?m[1].trim():''}
 function noteOf(p){const m=String(p.notes||'').match(/Connect note:\s*([\s\S]*?)(?:\s*\|\s|$)/);return m?m[1].trim():''}
 const cleanTitle=t=>String(t||'').replace(/🎟\s*EVENT\s+[^·]+·\s*/,'').trim();
-function canConnect(p){return /^connect queued$/i.test(p.stage||'')&&!p.connect_sent&&!p.skipped&&!p.withdrawn&&String(p.linkedin_url||'').trim()&&!/founder/i.test((p.lane||'')+' '+(p.route||''))}
+function canConnect(p){return /^connect queued$/i.test(p.stage||'')&&!p.connect_sent&&!p.skipped&&!p.withdrawn&&String(p.linkedin_url||'').trim()&&!window.ariIsExec(p)}
 function stLab(p){if(p.skipped)return 'Removed';if(p.meeting)return 'Meeting';if(p.replied)return 'Replied';if(p.dm2_sent)return 'DM2 sent';if(p.dm1_sent)return 'DM1 sent';if(p.accepted)return 'Accepted';if(p.connect_sent)return 'Invited';
   if(/hold/i.test(p.stage||''))return 'Hold';if(canConnect(p))return 'To connect';return p.stage||'—'}
 function tags(L){const c={};L.forEach(p=>{const t=tagOf(p);if(t)c[t]=(c[t]||0)+1});return Object.entries(c).sort((a,b)=>b[0].localeCompare(a[0])||b[1]-a[1])}
@@ -11950,8 +11962,10 @@ html.v1813classic .v1813fc[data-v1813f="__classic"]{background:var(--ink);color:
 .v1813acct .ppl .v1813line{border-bottom:0;color:var(--acc);font-weight:600}
 
 /* Ari menu */
-#v1813menu{position:fixed;inset:0;z-index:2147483000}
-#v1813menu[hidden]{display:none}
+#v1813menu,#v1828menu{position:fixed;inset:0;z-index:2147483000}
+#v1813menu[hidden],#v1828menu[hidden]{display:none}
+#v1828nav{margin-left:auto;flex:none;display:grid;place-items:center}
+#v1828menu .v1813mi[aria-current=page] b{color:var(--acc)}
 .v1813scrim{position:absolute;inset:0;background:rgba(31,29,26,.32)}
 .v1813panel{position:absolute;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;max-height:86dvh;overflow:auto;overscroll-behavior:contain;background:var(--bg);border-radius:20px 20px 0 0;padding:8px 16px calc(env(safe-area-inset-bottom) + 16px);animation:v1813up .24s var(--ease)}
 .v1813grab{width:36px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 8px}
@@ -11976,6 +11990,23 @@ html.v1813classic .v1813fc[data-v1813f="__classic"]{background:var(--ink);color:
 .arif .ars,.arif .atg{animation-iteration-count:1!important}
 .arif[data-face=working],.arif[data-face=working] *,.v161rs *{animation-iteration-count:infinite!important}
 @media (prefers-reduced-motion:reduce){html.v1813 *{animation:none!important;transition:none!important}}
+
+/* v18.13.2 (Owner Oct 28): Report and account cards left over from retired themes now use this theme's tokens. No green: a goal hit or a
+   strong account reads in the indigo accent, cooling in the second ink, cold or overdue in the danger red. */
+.v182sbt.hit .v18n,.v182al.ok,.v182mt .m-moving b,.v182hch.b-strong,.v171chip.v181hc.b-strong,.v182ok svg,.v182mi.dn .ic,.v182qo span.on svg,.v182lb.l-v{color:var(--acc)}
+.v182lb.l-v{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)}
+.v182qo span.on{background:color-mix(in srgb,var(--acc) 14%,var(--fill));box-shadow:inset 0 0 0 1.5px var(--acc)}
+.v1821ps .sg i.s-done,.v181dist i.b-strong,.v181lg i.b-strong{background:var(--acc)}
+.v181hs.b-strong{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)}
+.v181hs.b-cooling{background:var(--fill);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line2)}
+.v182hch.b-cooling,.v171chip.v181hc.b-cooling,.v181cold .ic,.v182mi.k-soft .ic,.v182lb.l-h,.v182lb.l-s{color:var(--ink2)}
+.v182lb.l-h,.v182lb.l-s{box-shadow:inset 0 0 0 1px var(--line2)}
+.v182soft.v182prom{box-shadow:inset 0 0 0 1px var(--line2)}
+.v181dist i.b-cooling,.v181lg i.b-cooling{background:var(--line2)}
+.v181cold em{background:var(--bg3)!important;color:var(--ink)!important}
+.v182hch.b-cold,.v182mt .m-cold b,.v181red{color:var(--danger)}
+html.v1813 #report .chips .chip{font:600 13px/1 var(--sans);letter-spacing:0;text-transform:none;padding:0 14px;border-radius:10px;background:var(--fill);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2)}
+html.v1813 #report .chips .chip.on{background:var(--acc);color:var(--on-acc);box-shadow:none}
 </style>
 <script>/* ===== Ari v18.13.0 (Tony, Wed 21 Oct 2026, Owner go 01:32 IST): soft light, one theme, three tabs =====
    Presentation only. Every action below calls something that already exists:
@@ -12040,13 +12071,13 @@ function people(){try{const S=G.ariV17&&ariV17.store;if(S&&S.people&&S.people.si
   return ((G.ariDATA&&ariDATA.people)||[]).filter(p=>p&&p.name&&!p.deleted_at&&low(p.review)!=='personal')}catch(e){V.errs.push('ppl '+e);return []}}
 function queue(){const L=(G.ariV1812&&ariV1812.L)||[],m=new Map();L.forEach((it,i)=>{const k=String(it.pid!=null?it.pid:'');if(k&&!m.has(k))m.set(k,{it,i})});return {L,m}}
 const ACC=new Set(['Reply','DM1','DM2','DM3']);
-function stageOf(p,Q){const q=Q.m.get(String(p.id));if(q)return {k:q.it.tag,q,grp:'motion'};
+function stageOf(p,Q){if(G.ariIsExec(p))return {k:'Exec track',grp:'hold'};const q=Q.m.get(String(p.id));if(q)return {k:q.it.tag,q,grp:'motion'};
   if(p.meeting)return {k:'Meeting',grp:'done'};if(p.replied)return {k:'Replied',grp:'done'};if(p.withdrawn)return {k:'Withdrawn',grp:'done'};
   if(p.skipped||/hold/i.test(p.stage||''))return {k:'Hold',grp:'hold'};
   if(p.dm3_sent||p.dm2_sent||p.dm1_sent)return {k:p.dm3_sent?'DM3 sent':p.dm2_sent?'DM2 sent':'DM1 sent',grp:'wait'};
   if(p.accepted)return {k:'Accepted',grp:'wait'};if(p.connect_sent)return {k:'Invited',grp:'wait'};
   return {k:'Coming up',grp:'up'}}
-const ORD=['Reply','DM1','DM2','DM3','Connect','Withdraw','Invited','Accepted','DM1 sent','DM2 sent','DM3 sent','Coming up','Replied','Meeting','Withdrawn','Hold'];
+const ORD=['Reply','DM1','DM2','DM3','Connect','Withdraw','Invited','Accepted','DM1 sent','DM2 sent','DM3 sent','Coming up','Replied','Meeting','Withdrawn','Hold','Exec track'];
 function accounts(){const Q=queue(),by=new Map();
   people().forEach(p=>{const c=String(p.company||'').trim()||'No company';const k=low(c);let a=by.get(k);if(!a){a={n:c,k,ppl:[],best:1e9,grp:{}};by.set(k,a)}
     const s=stageOf(p,Q);a.ppl.push({p,s});a.grp[s.grp]=(a.grp[s.grp]||0)+1;if(s.q&&s.q.i<a.best){a.best=s.q.i;a.next=s}});
@@ -12099,6 +12130,58 @@ function onAcc(e){const t=e.target;
 function tickAll(){try{hdAri();title();render(false)}catch(e){V.errs.push('tick '+e)}}
 function boot(){tickAll();const tb=$('#tbar');if(tb)new MutationObserver(()=>{title();if(curTab()===2)render(true)}).observe(tb,{subtree:true,attributes:true,attributeFilter:['class']});
   setInterval(()=>{if(!document.hidden)tickAll()},3000)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script>
+<script>/* ===== Ari v18.13.2 (Owner, Wed 28 Oct 2026 01:30 IST): the three tabs are always reachable =====
+   Root cause: the bar hides while "typing" (v1711typing / v171kb) and behind full-screen pages (v175pgon / v18ddon). Copy buttons focus a
+   hidden read-only textarea and remove it; Safari sends no focusout for a removed element, so the typing flag stuck and the bar vanished
+   until something else took focus. Android's back gesture closes the keyboard without a blur, same result. Pages closed by a path that
+   skipped their close function left their flag behind too.
+   Fix: the bar hides only while an editable field has focus AND a keyboard is really on screen; page flags only while that page is open.
+   Checked on every focus change, viewport change, tap, resume and once a second. Plus a menu button in the header with the three tabs. */
+(function(){'use strict';
+const G=window,H=document.documentElement,$=s=>document.querySelector(s);
+const V=G.ariV18132={v:'v18.13.2',fixes:0,errs:[]};
+const editable=el=>!!el&&el.isConnected&&!el.readOnly&&!el.disabled&&(el.tagName==='TEXTAREA'||el.isContentEditable||(el.tagName==='INPUT'&&!/^(button|checkbox|radio|submit|range|color|file|reset|image)$/i.test(el.type||'')));
+let baseH=innerHeight,baseW=innerWidth;
+function kbUp(){const vv=G.visualViewport;if(innerWidth!==baseW){baseW=innerWidth;baseH=innerHeight}if(innerHeight>baseH)baseH=innerHeight;
+  const zoomed=vv&&vv.scale>1.05;const viaVV=vv&&!zoomed&&(innerHeight-vv.height)>140;const viaResize=(baseH-innerHeight)>140;return !!(viaVV||viaResize)}
+const PAGES={v175pgon:'.v175pg.on',v18ddon:'#v18dd.on'};
+function sync(){try{const typing=editable(document.activeElement)&&kbUp();
+    ['v1711typing','v171kb'].forEach(c=>{if(H.classList.contains(c)!==typing){H.classList.toggle(c,typing);if(!typing)V.fixes++}});
+    for(const c in PAGES){if(H.classList.contains(c)&&!document.querySelector(PAGES[c])){H.classList.remove(c);V.fixes++}}}
+  catch(e){V.errs.push('sync '+e)}}
+V.sync=sync;
+let t=0;const soon=ms=>{clearTimeout(t);t=setTimeout(sync,ms==null?250:ms)};
+['focusin','focusout'].forEach(e=>document.addEventListener(e,()=>soon(250),true));
+['pointerup','touchend','scroll'].forEach(e=>document.addEventListener(e,()=>soon(300),{capture:true,passive:true}));
+if(G.visualViewport){visualViewport.addEventListener('resize',()=>soon(120));visualViewport.addEventListener('scroll',()=>soon(120))}
+addEventListener('resize',()=>soon(120));addEventListener('pageshow',()=>soon(0));addEventListener('popstate',()=>soon(400));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){soon(0);setTimeout(sync,600)}});
+new MutationObserver(()=>soon(200)).observe(H,{attributes:true,attributeFilter:['class']});
+setInterval(()=>{if(!document.hidden)sync()},1000);
+
+/* ---------- header menu button: Today, Accounts, Report ---------- */
+const TABS=[[0,'Today','Your send queue'],[2,'Accounts','People by company'],[5,'Report','Your numbers']];
+const ICON='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+function cur(){const t=$('.tbi.on');return t?+t.dataset.i:0}
+function btn(){const r=$('.chrome .row1');if(!r||$('#v1828nav'))return;const b=document.createElement('button');b.type='button';b.id='v1828nav';b.className='v1813x';
+  b.setAttribute('aria-label','Menu: Today, Accounts, Report');b.setAttribute('aria-haspopup','dialog');b.innerHTML=ICON;r.appendChild(b)}
+function open(){let m=$('#v1828menu');if(!m){m=document.createElement('div');m.id='v1828menu';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Menu');document.body.appendChild(m);
+    m.addEventListener('click',onMenu);m.addEventListener('keydown',e=>{if(e.key==='Escape')close()})}
+  const c=cur();m.innerHTML=`<div class="v1813scrim" data-n="close"></div><div class="v1813panel" role="document"><div class="v1813grab" aria-hidden="true"></div>
+   <div class="v1813mh"><b>Go to</b><button type="button" class="v1813x" data-n="close" aria-label="Close">×</button></div>
+   ${TABS.map(([i,t,s])=>`<button type="button" class="v1813mi" data-n="${i}"${i===c?' aria-current="page"':''}><b>${t}</b><span>${i===c?'You are here':s}</span></button>`).join('')}</div>`;
+  m.hidden=false;try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}setTimeout(()=>{const b=m.querySelector('.v1813mi');b&&b.focus()},30)}
+function close(){const m=$('#v1828menu');if(m)m.hidden=true;const b=$('#v1828nav');try{b&&b.focus()}catch(e){}}
+function onMenu(e){const b=e.target.closest('[data-n]');if(!b)return;const k=b.dataset.n;close();if(k==='close')return;
+  try{/* a full-screen page or the Focus screen open under the menu would cover the tab: close them through their own back path */
+    if(H.classList.contains('v175pgon')||H.classList.contains('v18ddon')){try{history.back()}catch(x){}}
+    const i=+k;setTimeout(()=>{const t=$(`.tbi[data-i="${i}"]`);if(t&&!t.classList.contains('on'))t.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));else if(typeof G.goPage==='function'&&!t)G.goPage(i);sync()},H.classList.contains('v175pgon')||H.classList.contains('v18ddon')?350:0)}
+  catch(er){V.errs.push('menu '+er)}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#v1828nav');if(!b)return;e.preventDefault();e.stopPropagation();open()},true);
+function boot(){btn();sync();setInterval(()=>{if(!document.hidden)btn()},3000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
 </script>
