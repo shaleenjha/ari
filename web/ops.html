@@ -8885,6 +8885,10 @@ function rangeOf(p){const t=istD();
   if(p==='this_month'){const f=t.slice(0,8)+'01',d=pd(f);d.setUTCMonth(d.getUTCMonth()+1);d.setUTCDate(0);return {from:f,to:d.toISOString().slice(0,10)}}
   const a=F.from||t,b=F.to||a;return a<=b?{from:a,to:b}:{from:b,to:a}}
 function prevOf(p,r){const t=istD(),end=r.to<t?r.to:t,L=Math.max(1,diff(r.from,end)+1);
+  if(p==='custom'&&F.u==='day'&&r.from===r.to){const y=addD(r.from,-1);return {from:y,to:y,lbl:'vs '+fd(y)}}
+  if(p==='custom'&&F.u==='week'&&L===7){const f=addD(r.from,-7);return {from:f,to:addD(f,6),lbl:'vs the week before'}}
+  if(p==='custom'&&F.u==='month'){const d=pd(r.from);d.setUTCMonth(d.getUTCMonth()-1);const f=d.toISOString().slice(0,10);return {from:f,to:addD(r.from,-1),lbl:'vs '+MO[d.getUTCMonth()]}}
+  if(p==='this_week'){const f=addD(r.from,-7);return {from:f,to:addD(f,L-1),lbl:L<7?'vs same days last week':'vs last week'}}
   if(p==='this_month'){const d=pd(r.from);d.setUTCMonth(d.getUTCMonth()-1);const f=d.toISOString().slice(0,10),e=addD(r.from,-1),to=addD(f,L-1);return {from:f,to:to<e?to:e,lbl:L>=28?'vs last month':'vs same days last month'}}
   const to=addD(r.from,-1);return {from:addD(to,-(L-1)),to,lbl:({today:'vs yesterday',yesterday:'vs the day before',this_week:L<7?'vs same days last week':'vs last week',last_week:'vs the week before'})[p]||`vs the ${L} day${L>1?'s':''} before`}}
 function fargs(o){const a={};if(F.ae)a.p_ae=F.ae;if(F.play)a.p_play=F.play;if(F.stage&&!(o&&o.nostage))a.p_stage=F.stage;return a}
@@ -8958,14 +8962,33 @@ function heroHTML(D){const S=D.S,P=D.P,G=goals(D),W=D.W;
   const cG=G.connect,dSub=`<small class="v18split"><span class="press" ${tap('dm1')}>DM1 ${C(S,'dm1')}</span><span class="press" ${tap('dm2')}>DM2 ${C(S,'dm2')}</span><span class="press" ${tap('dm3')}>DM3 ${C(S,'dm3')}</span></small>`;
   const mV=G.day?C(W,'meeting'):C(S,'meeting'),oV=G.day?C(W,'opp'):C(S,'opp');if(G.day){G.meeting=[3,4];G.opp=[2,3]}
   const sm=(m,lbl,extra)=>`<div class="v18s press" ${tap(m)}>${num('h.'+m,C(S,m))}<span class="l">${lbl}</span>${delta(C(S,m),P?C(P,m):null)}${extra||''}</div>`;
-  return card('hero',`${E8(PL[D.p])} · ${E8(fmtR(D.r))}`,E8(D.pv.lbl),`
+  return card('hero',`${E8(stepLabel())} · ${E8(fmtR(D.r))}`,E8(D.pv.lbl),`
    <div class="v18big">${big('connect','Connects',bar(C(S,'connect'),cG,`${C(S,'connect')} of ${cG}`))}${big('dms','DMs',dSub)}${big('accept','Accepts',`<small class="v18rt">${S&&S.rates&&S.rates.accept_rate_period!=null?Math.round(S.rates.accept_rate_period)+'% of connects':'no connects'}</small>`)}</div>
    <div class="v18sml">${sm('reply','Replies')}${sm('meeting','Meetings',bar(mV,G.meeting[1],`${G.day?'week ':''}${mV} of ${rg(G.meeting)}`))}${sm('opp','Opps',bar(oV,G.opp[1],`${G.day?'week ':''}${oV} of ${rg(G.opp)}`))}${sm('accounts_worked','Accounts')}</div>`,'v18hero')}
+
+/* Oct 28 main report: every number is the selected period and AE (report_summary via report_dashboard S/P) */
+function mainHTML(D){const S=D.S,P=D.P,G=goals(D),R=(S&&S.rates)||{},day=D.r.from===D.r.to;
+  const pv=k=>P?C(P,k):null,v=k=>C(S,k);
+  const per=D.p==='today'?'today':D.p==='this_week'?'this week':D.p==='this_month'?'this month':day?'that day':unitOf()==='week'?'that week':unitOf()==='month'?'that month':'in range';
+  const bar=(x,g)=>`<div class="v18g" aria-hidden="true"><i style="--p:${Math.min(1,g?x/g:0).toFixed(3)}"></i></div>`;
+  const row=(m,l,sub,b)=>`<div class="v18mr press" ${tap(m)}><div class="ml"><span class="l">${l}</span>${sub?`<small>${sub}</small>`:''}</div><div class="mv">${num('m.'+m,v(m))}${delta(v(m),pv(m))}</div>${b||''}</div>`;
+  const mg=G.meeting,og=G.opp,hi=a=>Math.max(1,Math.round(a[1]));
+  const ar=R.accept_rate,rr=R.reply_rate,K=(S&&S.cohort)||{};
+  const dms=`DM1 ${v('dm1')} · DM2 ${v('dm2')} · DM3 ${v('dm3')}`;
+  const rows=[
+    row('connect','Connects',`Goal ${G.connect} ${per}`,bar(v('connect'),G.connect)),
+    row('accept','Accepts',ar!=null&&n0(K.connects)?`Accept rate ${Math.round(ar)}%`:`No invites sent ${per}`),
+    row('dms','DMs sent',dms),
+    row('reply','Replies',rr!=null&&n0(K.dm1s)?`Reply rate ${Math.round(rr)}%`:`No DM1s sent ${per}`),
+    row('meeting','Meetings',day?'Goal 3 to 4 a week':`Goal ${rg(mg)} ${per}`,day?'':bar(v('meeting'),hi(mg))),
+    row('opp','Opps',day?'Goal 2 to 3 a week':`Goal ${rg(og)} ${per}`,day?'':bar(v('opp'),hi(og))),
+    row('accounts_worked','Accounts worked','Any touch')].join('');
+  return card('main',`${E8(stepLabel())} · ${E8(AEL(D.F&&D.F.ae))}`,E8(D.pv.lbl),`<div class="v18mrs">${rows}</div><div class="v18hint">Rates: of the invites (or DM1s) sent ${per}, how many accepted (or replied) since. Tap a number for the people.</div>`,'v18main')}
 
 /* today / week / month table: the at-a-glance answers */
 function pulseHTML(D){const cols=[['T','today','Today'],['W','this_week','Week'],['M','this_month','Month']];
   const rows=[['accounts_worked','Accounts worked'],['connect','Connects'],['dms','DMs'],['accept','Accepts'],['reply','Replies'],['meeting','Meetings']];
-  return card('pulse','At a glance',filtLabel()?E8(filtLabel()):'Today, this week, this month',`<table class="v18pt"><thead><tr><th></th>${cols.map(c=>`<th>${c[2]}</th>`).join('')}</tr></thead><tbody>${rows.map(([m,l])=>`<tr><th>${l}</th>${cols.map(([k,p])=>`<td class="press" ${tap(m,{p})}>${num(`p.${m}.${k}`,C(D[k],m))}</td>`).join('')}</tr>`).join('')}</tbody></table>`)}
+  return card('pulse','At a glance','Always today, week, month',`<table class="v18pt"><thead><tr><th></th>${cols.map(c=>`<th>${c[2]}</th>`).join('')}</tr></thead><tbody>${rows.map(([m,l])=>`<tr><th>${l}</th>${cols.map(([k,p])=>`<td class="press" ${tap(m,{p})}>${num(`p.${m}.${k}`,C(D[k],m))}</td>`).join('')}</tr>`).join('')}</tbody></table>`)}
 
 /* Ari insight: one or two sentences computed from the data */
 function insight(D){const S=D.S,P=D.P,out=[];let spot='bars';if(!S)return {t:'',spot};
@@ -9003,7 +9026,7 @@ function sparks(D){const rows=[['wc','connect','Connects'],['wa','accept','Accep
     const pts=a.map((v,i)=>[i*st,H-3-(v/mx)*(H-8)]),line='M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L'),area=line+` L${W} ${H} L0 ${H} Z`,last=a[n-1],prev=a[n-2]||0,lp=pts[n-1];
     return `<div class="v18sp press" ${tap(m,{p:'last_8w'})}><span class="l">${l}</span><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path class="qar" d="${area}"/><path class="qln" pathLength="1" d="${line}" style="--i:${ri}"/></svg><span class="qdot" style="left:calc(${(lp[0]/W*100).toFixed(1)}% - 3px);top:${(lp[1]/H*100).toFixed(1)}%"></span>${num('w.'+m,last)}${delta(last,prev)}</div>`}).join('');
   const w=(D.wc||[])[0],w2=(D.wc||[]).slice(-1)[0];
-  return card('trend','8 weeks',w&&w2?`From ${fds(String(w.bucket_start).slice(0,10))} · week vs last`:'',body||empty('No trend yet.'))}
+  return card('trend','8 weeks','Always last 8 weeks',body||empty('No trend yet.'))}
 
 /* funnel: the contact ladder + account stages with time in stage */
 function funnelHTML(D){const S=D.S;const steps=[['connect','Connects'],['accept','Accepted'],['dm1','DM1 sent'],['reply','Replied'],['meeting','Meetings']];
@@ -9017,14 +9040,14 @@ function funnelHTML(D){const S=D.S;const steps=[['connect','Connects'],['accept'
   const PS=['Connect sent','Accepted','DM1 sent','DM2 sent','DM3 sent','Replied'];
   const pl=PS.map(s=>P.find(x=>x.stage===s)).filter(Boolean);
   const pr=pl.length?`<div class="v18pst">${pl.map(x=>`<span class="press" data-v18ps="${E8(x.stage)}" role="button" tabindex="0"><b>${n0(x.n)}</b>${E8(x.stage)}<em>${Math.round(n0(x.median_days))}d</em></span>`).join('')}</div>`:'';
-  return card('funnel','Funnel',E8(PL[D.p]),`<div class="v18sub">Contact ladder <span>% of the step before, same range</span></div>${lad}
+  return card('funnel','Funnel',E8(stepLabel()),`<div class="v18sub">Contact ladder <span>% of the step before, same range</span></div>${lad}
     <div class="v18sub">Account stages now <span>median days in stage · % that reached the next</span></div>${acc}
     ${pr?`<div class="v18sub">People by stage now <span>median days waiting</span></div>${pr}`:''}`)}
 
 /* rings: accept and reply rate */
 function ringsHTML(D){const S=D.S,R=S&&S.rates||{},K=S&&S.cohort||{};
   const ring=(m,lbl,v,sub,per,k)=>{const p=v==null?0:Math.round(v);return `<div class="v18rg press" ${tap(m)}><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="qbg" cx="32" cy="32" r="26"/>${p>0?`<circle class="qfg" cx="32" cy="32" r="26" pathLength="100" style="--o:${100-Math.min(100,p)}"/>`:''}</svg>${num('r.'+k,v==null?null:p,v==null?'':'%')}<span class="l">${lbl}</span><small>${sub}</small><small class="qpp">${per}</small></div>`};
-  return card('rates','Rates',E8(PL[D.p]),`<div class="v18rgs">${ring('accepted_from_connects','Accept rate',R.accept_rate,K.connects?`${n0(K.accepted)} of ${n0(K.connects)} invites`:'no invites in range',R.accept_rate_period!=null?`${Math.round(R.accept_rate_period)}% in-range accepts ÷ connects`:'',"acc")}${ring('replied_from_dm1','Reply rate',R.reply_rate,K.dm1s?`${n0(K.replied)} of ${n0(K.dm1s)} DM1s`:'no DM1s in range',R.reply_rate_period!=null?`${Math.round(R.reply_rate_period)}% in range`:'',"rep")}</div>
+  return card('rates','Rates',E8(stepLabel()),`<div class="v18rgs">${ring('accepted_from_connects','Accept rate',R.accept_rate,K.connects?`${n0(K.accepted)} of ${n0(K.connects)} invites`:'no invites in range',R.accept_rate_period!=null?`${Math.round(R.accept_rate_period)}% in-range accepts ÷ connects`:'',"acc")}${ring('replied_from_dm1','Reply rate',R.reply_rate,K.dm1s?`${n0(K.replied)} of ${n0(K.dm1s)} DM1s`:'no DM1s in range',R.reply_rate_period!=null?`${Math.round(R.reply_rate_period)}% in range`:'',"rep")}</div>
    <div class="v18hint">Rate = of the people invited (or DM1’d) in this range, how many accepted (or replied) since</div>`)}
 
 /* stacked bars by AE (and by play) */
@@ -9045,7 +9068,7 @@ function heatHTML(D){const m={};(D.hm||[]).forEach(x=>m[String(x.bucket_start).s
   for(let w=0;w<12;w++){const ws=addD(D.hf,w*7);const d1=pd(ws);if((w===0&&d1.getUTCDate()<=20)||(w>0&&d1.getUTCDate()<=7))mons+=`<span style="grid-column:${w+1}">${MO[d1.getUTCMonth()]}</span>`;
     for(let d=0;d<7;d++){const day=addD(ws,d),v=m[day]||0,fut=day>D.t;tot+=v;if(v)act++;const lv=fut?-1:v?Math.min(4,Math.ceil(v/mx*4)):0;
       cells+=`<i class="lv${lv} ${day===D.t?'td':''}" style="grid-column:${w+1};grid-row:${d+1};--i:${w}" ${fut?'':`data-v18m="touches" data-v18f="${day}" data-v18t="${day}" role="button" aria-label="${fd(day)}: ${v}"`}></i>`}}
-  return card('heat','Activity',`${act} active day${act===1?'':'s'} · 12 weeks${F.stage?' · '+E8(filtLabel()):''}`,`<div class="v18hm"><div class="mo">${mons}</div><div class="dw"><span>M</span><span></span><span>W</span><span></span><span>F</span><span></span><span>S</span></div><div class="gr">${cells}</div></div>
+  return card('heat','Activity',`Always 12 weeks · ${act} active`,`<div class="v18hm"><div class="mo">${mons}</div><div class="dw"><span>M</span><span></span><span>W</span><span></span><span>F</span><span></span><span>S</span></div><div class="gr">${cells}</div></div>
    <div class="v18hl"><span>People touched per day</span><span class="qsc">less<i class="lv0"></i><i class="lv1"></i><i class="lv2"></i><i class="lv3"></i><i class="lv4"></i>more</span></div>`)}
 
 /* accounts worked: logos + touches */
@@ -9053,7 +9076,7 @@ function awHTML(D){const L=(D.aw||[]).slice().sort((a,b)=>String(b.last_touch||'
   const tch=a=>['connect','accept','dm1','dm2','dm3','reply','meeting','opp'].reduce((t,k)=>t+n0(a[k]),0);
   const chip=(a,k,l)=>n0(a[k])?`<span>${n0(a[k])} ${l}</span>`:'';
   const rows=L.slice(0,8).map(a=>`<div class="v18aw"><span class="qlgw press" data-v18acct="${E8(a.account)}">${logo(a.account,40)}</span><div class="qm press" data-v18acct="${E8(a.account)}"><b>${E8(a.account)}</b><span>${E8([a.ae,a.stage].filter(Boolean).join(' · '))}</span><div class="qch">${chip(a,'connect','connect')}${chip(a,'accept','accept')}${chip(a,'dm1','DM1')}${chip(a,'dm2','DM2')}${chip(a,'dm3','DM3')}${chip(a,'reply','reply')}${chip(a,'meeting','meeting')}${chip(a,'opp','opp')}</div></div><div class="qtc press" ${tap('touches',{acc:a.account_key||a.account})}><b>${tch(a)}</b><span>touches</span></div></div>`).join('');
-  return card('aw','Accounts worked',`${E8(PL[D.p])} · ${n}`,(rows||empty('No accounts touched in this range yet.'))+(L.length>8||n>8?`<div class="v18more press" ${tap('accounts_worked')}>See all ${n}</div>`:''))}
+  return card('aw','Accounts worked',`${E8(stepLabel())} · ${n}`,(rows||empty('No accounts touched in this range yet.'))+(L.length>8||n>8?`<div class="v18more press" ${tap('accounts_worked')}>See all ${n}</div>`:''))}
 
 /* best hooks and DM angles */
 function hooksHTML(D){const H=D.hk||[],V=H.filter(x=>x.kind==='dm1_variant'&&!/^\(no/.test(x.label)),K=H.filter(x=>x.kind==='hook'&&!/^\(no/.test(x.label));
@@ -9061,12 +9084,12 @@ function hooksHTML(D){const H=D.hk||[],V=H.filter(x=>x.kind==='dm1_variant'&&!/^
   const vr=V.slice().sort((a,b)=>rep?(n0(b.reply_rate)-n0(a.reply_rate))||(n0(b.dm1_sent)-n0(a.dm1_sent)):n0(b.dm1_sent)-n0(a.dm1_sent)).slice(0,6).map((x,i)=>`<div class="v18hk"><span class="l">${E8(x.label)}</span><div class="qtr"><i style="--w:${(n0(x.dm1_sent)/mx).toFixed(3)};--i:${i}"></i></div><b>${n0(x.dm1_sent)}</b><em>${rep?Math.round(n0(x.reply_rate))+'%':''}</em></div>`).join('');
   const top=K.slice().sort((a,b)=>rep?n0(b.reply_rate)-n0(a.reply_rate):n0(b.dm1_sent)-n0(a.dm1_sent)).slice(0,3).map(x=>`<div class="v18hq"><p>${E8(x.label)}</p><span>${n0(x.dm1_sent)} DM1${n0(x.dm1_sent)===1?'':'s'} · ${n0(x.replied)} repl${n0(x.replied)===1?'y':'ies'}</span></div>`).join('');
   const head=rep?'':`<div class="v18emp">${af('think','s')}<p>No replies yet, so no winner. Here is what you have sent; I rank angles by reply rate the moment replies land.</p></div>`;
-  return card('hooks','Best hooks and DM angles','Last 8 weeks',head+(vr?`<div class="v18sub">DM1 angle <span>DM1s sent${rep?' · reply rate':''}</span></div>${vr}`:'')+(top?`<div class="v18sub">Account hooks used most</div>${top}`:'')||empty('No DM1s sent yet.'))}
+  return card('hooks','Best hooks and DM angles','Always last 8 weeks',head+(vr?`<div class="v18sub">DM1 angle <span>DM1s sent${rep?' · reply rate':''}</span></div>${vr}`:'')+(top?`<div class="v18sub">Account hooks used most</div>${top}`:'')||empty('No DM1s sent yet.'))}
 
 /* Ari's own work */
 function ariHTML(D){const S=D.S;const dr=C(S,'draft'),sg=C(S,'signal'),aa=C(S,'account_added'),pa=C(S,'person_added'),mins=dr*6+sg*8+pa*4+aa*10;
   const t=(m,v,l)=>`<div class="v18at press" ${tap(m)}>${num('a.'+m,v)}<span>${l}</span></div>`;
-  return card('ari','Ari’s work',E8(PL[D.p]),`<div class="v18ats">${t('draft',dr,`Drafts · ${C(S,'drafted_people')} people`)}${t('signal',sg,'Signals found')}${t('account_added',aa,'Accounts added')}${t('person_added',pa,'People found')}</div>
+  return card('ari','Ari’s work',E8(stepLabel()),`<div class="v18ats">${t('draft',dr,`Drafts · ${C(S,'drafted_people')} people`)}${t('signal',sg,'Signals found')}${t('account_added',aa,'Accounts added')}${t('person_added',pa,'People found')}</div>
    <div class="v18sv">${af('happy','s')}<p><b>About ${mins>=60?Math.floor(mins/60)+' h '+(mins%60?mins%60+' min':''):mins+' min'}</b> of your time saved<span>Estimate: 6 min a draft, 8 a signal, 4 a person, 10 an account. Real from Oct 16.</span></p></div>`)}
 
 /* ---------- the shell: period, filters, cards, ask ---------- */
@@ -9074,7 +9097,7 @@ let R=null;
 function shell(){const rp=$('#report');if(!rp)return null;let w=$('#v18rep');if(w)return w;
   w=document.createElement('div');w.id='v18rep';rp.insertBefore(w,rp.firstChild);
   w.innerHTML=`<div class="v18hd"><div><b>Report</b><span id="v18rng"></span></div><span class="v18askb press" data-v18jump="ask" role="button">Ask</span></div>
-   <div class="v18per v18x" role="tablist" aria-label="Period" id="v18per"></div>
+   <div class="v18per v18x" id="v18per"></div>
    <div class="v18flt v18x" id="v18flt"></div>
    <div id="v18cards" aria-live="polite"></div>
    <section class="v18c v18ask qin" data-v18card="ask" id="v18ask"><div class="v18cap"><span>Ask a report</span><span>Hark answers here</span></div>
@@ -9085,7 +9108,35 @@ function shell(){const rp=$('#report');if(!rp)return null;let w=$('#v18rep');if(
   const ta=$('#v18q');ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.min(120,ta.scrollHeight)+'px'});
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}});
   return w}
-function chrome(){const r=rangeOf(F.period);$('#v18rng').textContent=`${PL[F.period]} · ${fmtR(r)}${filtLabel()?' · '+filtLabel():''}${V18.at?' · Updated '+hm(V18.at):''}`;
+/* Oct 28 (Owner): one segmented period control, a stepper for any past day / week / month, one AE selector */
+const UNITS=[['day','Day'],['week','Week'],['month','Month'],['range','Range']];
+function unitOf(){const p=F.period;if(p==='today'||p==='yesterday')return 'day';if(p==='this_week'||p==='last_week')return 'week';if(p==='this_month')return 'month';
+  if(F.u&&F.u!=='range')return F.u;const r=rangeOf(p);return F.u==='range'||r.from!==r.to?'range':'day'}
+const AEL=a=>!a?'All AEs':a==='Unassigned'?'Unattributed':a;
+function stepLabel(){const u=unitOf(),p=F.period,r=rangeOf(p),t=istD();
+  if(u==='day')return p==='today'||r.from===t?'Today':p==='yesterday'||r.from===addD(t,-1)?'Yesterday':fd(r.from);
+  if(u==='week')return p==='this_week'?'This week':p==='last_week'?'Last week':fmtR(r);
+  if(u==='month'){if(p==='this_month')return 'This month';const d=pd(r.from);return MO[d.getUTCMonth()]+(d.getUTCFullYear()!==pd(t).getUTCFullYear()?' '+d.getUTCFullYear():'')}
+  return fmtR(r)}
+function atCurrent(){const u=unitOf(),r=rangeOf(F.period),t=istD();return u==='day'?r.from>=t:u==='week'?r.from>=mon(t):u==='month'?r.from.slice(0,7)>=t.slice(0,7):true}
+function setDay(d){const t=istD();if(!d||d>t)return;F.u='day';if(d===t)F.period='today';else if(d===addD(t,-1))F.period='yesterday';else{F.period='custom';F.from=d;F.to=d}}
+function step(n){const u=unitOf(),r=rangeOf(F.period),t=istD();
+  if(u==='day'){setDay(addD(r.from,n));return true}
+  if(u==='week'){const m=addD(mon(r.from),7*n),cm=mon(t);if(m>cm)return false;F.u='week';if(m===cm)F.period='this_week';else if(m===addD(cm,-7))F.period='last_week';else{F.period='custom';F.from=m;F.to=addD(m,6)}return true}
+  if(u==='month'){const d=pd(r.from.slice(0,8)+'01');d.setUTCMonth(d.getUTCMonth()+n);const f=d.toISOString().slice(0,10);if(f.slice(0,7)>t.slice(0,7))return false;F.u='month';
+    if(f.slice(0,7)===t.slice(0,7))F.period='this_month';else{const e=new Date(d);e.setUTCMonth(e.getUTCMonth()+1);e.setUTCDate(0);F.period='custom';F.from=f;F.to=e.toISOString().slice(0,10)}return true}
+  return false}
+V18.step=step;V18.setDay=setDay;V18.unitOf=unitOf;V18.label=()=>stepLabel()+' · '+AEL(F.ae);
+function chrome(){const r=rangeOf(F.period),u=unitOf(),t=istD(),cur=atCurrent();
+  $('#v18rng').textContent=`${fmtR(r)} · ${AEL(F.ae)}${V18.at?' · Updated '+hm(V18.at):''}`;
+  $('#v18per').innerHTML=`<div class="v18pseg" role="tablist" aria-label="Period">${UNITS.map(([k,l])=>`<button type="button" class="${u===k?'on':''}" data-v18u="${k}" role="tab" aria-selected="${u===k}">${l}</button>`).join('')}</div>`;
+  const ae=F.ae;
+  $('#v18flt').innerHTML=`<div class="v18stp">${u==='range'?'':`<button type="button" class="v18sb" data-v18step="-1" aria-label="Earlier"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>`}
+     <label class="v18sl${u==='range'?' rg':''}"${u==='range'?' data-v18rg="1" role="button" tabindex="0"':''}><span>${E8(stepLabel())}</span>${u==='day'?`<input type="date" id="v18day" value="${r.from}" max="${t}" aria-label="Pick a day">`:''}${u==='range'?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>':''}</label>
+     ${u==='range'?'':`<button type="button" class="v18sb" data-v18step="1" aria-label="Later"${cur?' disabled':''}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`}</div>
+   <button type="button" class="v18aeb${ae?' on':''}" data-v18aes="1" aria-haspopup="dialog"><span>${E8(AEL(ae))}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>`;
+  const di=$('#v18day');if(di){di.onchange=()=>{const v=di.value;if(!v)return;bz(6);setDay(v);saveF();refresh('filter')};di.onclick=()=>{try{di.showPicker&&di.showPicker()}catch(e){}}}
+  return;
   $('#v18per').innerHTML=PER.map(([k,l])=>`<span class="v163chip press ${F.period===k?'on':''}" data-v18per="${k}" role="tab" aria-selected="${F.period===k}">${k==='custom'&&F.period==='custom'?E8(fmtR(r)):l}</span>`).join('');
   const any=F.ae||F.play||F.stage;
   $('#v18flt').innerHTML=AES.map(a=>`<span class="v163chip press ${F.ae===a?'on':''}" data-v18fae="${a}" role="button" aria-pressed="${F.ae===a}">${a==='Unassigned'?'Unattributed':a}</span>`).join('')+'<i class="sep"></i>'+
@@ -9096,14 +9147,14 @@ function skel(){const c=$('#v18cards');if(c&&!c.firstChild)c.innerHTML='<div cla
 
 const ORDER=['bars','aw','stale','health','funnel','rates','trend','ae','heat','hooks','ari'],LAZY=new Set(['trend','heat','hooks','stale','health']);
 const R8={bars:barsHTML,aw:awHTML,funnel:funnelHTML,rates:ringsHTML,trend:sparks,ae:aeHTML,heat:heatHTML,hooks:hooksHTML,ari:ariHTML,stale:D=>window.ariV181?ariV181.staleCard(D,card,empty,tap):'',health:D=>window.ariV181?ariV181.healthCard(D,card,empty):''};
-const SIGK={hero:D=>[D.S&&D.S.counts,D.P&&D.P.counts],pulse:D=>[D.T&&D.T.counts,D.W&&D.W.counts,D.M&&D.M.counts],bars:D=>[D.dc,D.dd,D.da],aw:D=>D.aw,funnel:D=>[D.S&&D.S.counts,D.st],rates:D=>D.S&&D.S.rates,trend:D=>[D.wc,D.wa,D.wd,D.wr,D.wm],ae:D=>D.S&&[D.S.by_ae,D.S.by_play],heat:D=>D.hm,hooks:D=>D.hk,ari:D=>D.S&&D.S.counts,stale:D=>D.stale,health:D=>D.health};
+const SIGK={main:D=>[D.S&&D.S.counts,D.P&&D.P.counts],hero:D=>[D.S&&D.S.counts,D.P&&D.P.counts],pulse:D=>[D.T&&D.T.counts,D.W&&D.W.counts,D.M&&D.M.counts],bars:D=>[D.dc,D.dd,D.da],aw:D=>D.aw,funnel:D=>[D.S&&D.S.counts,D.st],rates:D=>D.S&&D.S.rates,trend:D=>[D.wc,D.wa,D.wd,D.wr,D.wm],ae:D=>D.S&&[D.S.by_ae,D.S.by_play],heat:D=>D.hm,hooks:D=>D.hk,ari:D=>D.S&&D.S.counts,stale:D=>D.stale,health:D=>D.health};
 function render(D,why){const c=$('#v18cards');if(!c||!D)return;
   /* v18.3: never paint numbers loaded for another filter (the filter changed while they were in flight) */
   if(D.F&&!D.partial&&JSON.stringify(D.F)!==JSON.stringify(F)){V18.staleSkip=(V18.staleSkip||0)+1;if(!busy)setTimeout(()=>refresh('filter'),0);return}V18.renders++;V18.D=D;if(!D.partial&&V18.tm.show&&!V18.tm.hero)V18.tm.hero=Math.round(performance.now()-V18.tm.show);
   if(!D.S){c.innerHTML=`<section class="v18c qin"><div class="v18emp">${af('concern','s')}<p>${D.fail.length&&/offline/.test(V18.errs.slice(-1)[0]||'')?'Report needs a live connection. It fills in the moment you are back online.':'Couldn’t load the numbers just now.'} <span class="v18more press" data-v18retry="1">Try again</span></p></div></section>`;return}
   const I=insight(D),fk=JSON.stringify(D.F)+D.p;const ord=ORDER.slice();const si=ord.indexOf(I.spot);if(si>0){ord.splice(si,1);ord.unshift(I.spot)}
   const prevSig=V18.sig,sameF=V18.sigF===fk,chg=[];V18.sig={};
-  const parts=[['hero',heroHTML(D)],['pulse',pulseHTML(D)],['ins',insightHTML(D,I)]].concat(D.partial?[['sk','<div class="v18sk"><i></i><i></i><i></i></div><div class="v18sk"><i></i><i></i></div>']]:ord.map(k=>{if(LAZY.has(k)&&!D.more)return [k,`<section class="v18c v18lazy" data-v18card="${k}" data-v18lazy="1"><div class="v18sk"><i></i><i></i><i></i></div></section>`];try{return [k,R8[k](D)]}catch(e){V18.errs.push('card '+k+' '+e);return [k,'']}}));
+  const parts=[['main',mainHTML(D)],['pulse',pulseHTML(D)],['ins',insightHTML(D,I)]].concat(D.partial?[['sk','<div class="v18sk"><i></i><i></i><i></i></div><div class="v18sk"><i></i><i></i></div>']]:ord.map(k=>{if(LAZY.has(k)&&!D.more)return [k,`<section class="v18c v18lazy" data-v18card="${k}" data-v18lazy="1"><div class="v18sk"><i></i><i></i><i></i></div></section>`];try{return [k,R8[k](D)]}catch(e){V18.errs.push('card '+k+' '+e);return [k,'']}}));
   if(!D.partial)parts.forEach(([k])=>{const f=SIGK[k];if(!f||(LAZY.has(k)&&!D.more)){if(f&&prevSig[k])V18.sig[k]=prevSig[k];return}const s=JSON.stringify(f(D));V18.sig[k]=s;if(sameF&&prevSig[k]&&prevSig[k]!==s)chg.push(k)});V18.sigF=fk;
   const pane=$('#report'),st=pane?pane.scrollTop:0;
   c.innerHTML=(window.ariV182&&!D.partial?ariV182.repTop(D):'')+parts.map(p=>p[1]).join('')+(window.ariV182&&!D.partial?ariV182.repEnd(D):'');try{window.ariV182&&ariV182.markMore()}catch(e){}
@@ -9194,7 +9245,7 @@ function ddFrom(el){const m=el.dataset.v18m,o={p:el.dataset.v18p||'',f:el.datase
   let args={p_metric:m};let rl;
   if(o.f){args.p_period='custom';args.p_from=o.f;args.p_to=o.t||o.f;rl=o.f===args.p_to?fd(o.f):fmtR({from:o.f,to:args.p_to})}
   else if(o.p){args.p_period=o.p;rl=o.p==='last_8w'?'Last 8 weeks':PL[o.p]||o.p}
-  else{const r=rangeOf(F.period);Object.assign(args,pargs(F.period,r));rl=`${PL[F.period]} · ${fmtR(r)}`}
+  else{const r=rangeOf(F.period);Object.assign(args,pargs(F.period,r));rl=fmtR(r)}
   Object.assign(args,fargs());if(o.ae)args.p_ae=o.ae;if(o.acc)args.p_account=o.acc;
   const fl=[o.ae?o.ae+'’s book':filtLabel(),o.acc?el.closest('.v18aw')?.querySelector('b')?.textContent||o.acc:''].filter(Boolean).join(' · ');
   ddOpen({m,args,title:ML[m]||m,sub:[rl,fl].filter(Boolean).join(' · '),unit:/^(meeting|opp|accounts_worked|stage_change|stage_manual|account_added)$/.test(m)?'account':''})}
@@ -9245,15 +9296,24 @@ V18.renderAsks=renderAsks;
 let SH=null;
 function pickRange(){bz(8);const r=rangeOf(F.period),t=istD();
   if(!SH){SH=document.createElement('div');SH.id='v18sh';document.body.appendChild(SH)}
-  SH.innerHTML=`<div class="scr" data-v18shx="1"></div><div class="sh" role="dialog" aria-modal="true" aria-label="Custom range"><i class="grab"></i><div class="qhd"><b>Custom range</b><span>Days are your calendar days, Monday to Sunday weeks.</span></div>
+  SH.innerHTML=`<div class="scr" data-v18shx="1"></div><div class="sh" role="dialog" aria-modal="true" aria-label="Custom range"><i class="grab"></i><div class="qhd"><b>Pick a range</b><span>Any span of days. Weeks run Monday to Sunday.</span></div>
    <div class="v18dates"><label><span>From</span><input type="date" id="v18df" value="${F.from||r.from}" max="${t}"></label><label><span>To</span><input type="date" id="v18dt" value="${F.to||(r.to>t?t:r.to)}" max="${t}"></label></div>
    <div class="v18qr">${[['Last 7 days',6],['Last 14 days',13],['Last 30 days',29],['Last 90 days',89]].map(([l,n])=>`<span class="v163chip press" data-v18qd="${n}">${l}</span>`).join('')}</div>
    <div class="v18shb"><span class="v18btn press" data-v18shx="1">Cancel</span><span class="v18btn pri press" data-v18apply="1">Show</span></div></div>`;
   requestAnimationFrame(()=>SH.classList.add('on'))}
 function closeRange(){if(SH)SH.classList.remove('on')}
+function pickAE(){bz(8);if(!SH){SH=document.createElement('div');SH.id='v18sh';document.body.appendChild(SH)}
+  SH.innerHTML=`<div class="scr" data-v18shx="1"></div><div class="sh" role="dialog" aria-modal="true" aria-label="Whose numbers"><i class="grab"></i><div class="qhd"><b>Whose numbers</b><span>Every number on this page follows this choice.</span></div>
+   <div class="v18aeo">${[['','All AEs','Everything you did'],['Tamsin','Tamsin','His book'],['Idris','Idris','His book'],['Bram','Bram','His book'],['Unassigned','Unattributed','People with no AE yet']].map(([k,l,s])=>`<button type="button" class="${F.ae===k?'on':''}" data-v18aeo="${k}" aria-pressed="${F.ae===k}"><span><b>${l}</b><small>${s}</small></span>${F.ae===k?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>':''}</button>`).join('')}</div></div>`;
+  requestAnimationFrame(()=>SH.classList.add('on'))}
 
 /* ---------- clicks ---------- */
 document.addEventListener('click',e=>{let b;const inRep=e.target.closest('#v18rep,#v18dd,#v18sh');if(!inRep)return;
+  if((b=e.target.closest('[data-v18u]'))){const k=b.dataset.v18u;if(k==='range'){pickRange();return}bz(6);const was=F.period;F.u=k;F.period=k==='day'?'today':k==='week'?'this_week':'this_month';if(was===F.period&&unitOf()===k){chrome();return}saveF();refresh('filter');return}
+  if((b=e.target.closest('[data-v18step]'))){if(b.disabled)return;bz(6);if(step(+b.dataset.v18step)){saveF();refresh('filter')}return}
+  if(e.target.closest('[data-v18rg]')){pickRange();return}
+  if(e.target.closest('[data-v18aes]')){pickAE();return}
+  if((b=e.target.closest('[data-v18aeo]'))){bz(6);F.ae=b.dataset.v18aeo;closeRange();saveF();refresh('filter');return}
   if((b=e.target.closest('[data-v18per]'))){const k=b.dataset.v18per;if(k==='custom'){pickRange();return}bz(6);if(F.period===k)return;F.period=k;saveF();refresh('filter');return}
   if((b=e.target.closest('[data-v18fae]'))){bz(6);F.ae=F.ae===b.dataset.v18fae?'':b.dataset.v18fae;saveF();refresh('filter');return}
   if((b=e.target.closest('[data-v18fst]'))){bz(6);F.stage=F.stage===b.dataset.v18fst?'':b.dataset.v18fst;saveF();refresh('filter');return}
@@ -9261,7 +9321,7 @@ document.addEventListener('click',e=>{let b;const inRep=e.target.closest('#v18re
   if(e.target.closest('[data-v18clr]')){bz(6);F.ae=F.play=F.stage='';saveF();refresh('filter');return}
   if(e.target.closest('[data-v18shx]')){closeRange();return}
   if((b=e.target.closest('[data-v18qd]'))){const t=istD();$('#v18df').value=addD(t,-+b.dataset.v18qd);$('#v18dt').value=t;return}
-  if(e.target.closest('[data-v18apply]')){const a=$('#v18df').value,z=$('#v18dt').value;if(!a||!z)return;F.period='custom';F.from=a<=z?a:z;F.to=a<=z?z:a;saveF();closeRange();refresh('filter');return}
+  if(e.target.closest('[data-v18apply]')){const a=$('#v18df').value,z=$('#v18dt').value;if(!a||!z)return;F.period='custom';F.u='range';F.from=a<=z?a:z;F.to=a<=z?z:a;saveF();closeRange();refresh('filter');return}
   if(e.target.closest('[data-v18retry]')){V18.cache.clear();refresh('first');return}
   if((b=e.target.closest('[data-v18by]'))){bz(6);byMode=b.dataset.v18by;const el=$('[data-v18card="ae"]');if(el&&V18.D){const tmp=document.createElement('div');tmp.innerHTML=aeHTML(V18.D);const n=tmp.firstElementChild;n.classList.add('qin');el.replaceWith(n)}return}
   if((b=e.target.closest('[data-v18jump]'))){bz(6);const a=$('#v18ask');if(a){a.scrollIntoView({block:'start',behavior:still()?'auto':'smooth'});setTimeout(()=>{const q=$('#v18q');q&&q.focus({preventScroll:true})},still()?0:450)}return}
@@ -9564,7 +9624,7 @@ new MutationObserver(()=>{const tk=document.getElementById('v175tk'),row=documen
 /* ---------- 7. Report cards (rendered by v18 from report_dashboard's health + stale) ---------- */
 V181.staleCard=function(D,card,empty,tap){const L=D.stale||[];const top=L.slice(0,5);
   const rows=top.map(x=>{const acc=!x.person_id;return `<div class="v181rc press" ${acc?`data-v181acc="${E1(x.account)}"`:`data-v181pf="${E1(x.name)}"`}><div class="qm"><b>${E1(acc?x.account:x.name)}</b><span>${E1(x.detail)}</span></div><i>${E1(x.next_step)}</i></div>`}).join('');
-  return card('stale','Going cold',L.length?`${L.length} · ${E1(sumLine(L))}`:'All warm',L.length?rows+(L.length>5?`<div class="v18more press" data-v181all="1">See all ${L.length}</div>`:`<div class="v18more press" data-v181all="1">Open the list</div>`):empty('Nothing is going cold. Every accept has its DM1 and every follow-up is on time.'))};
+  return card('stale','Going cold',L.length?`Right now · ${L.length}`:'Right now',L.length?rows+(L.length>5?`<div class="v18more press" data-v181all="1">See all ${L.length}</div>`:`<div class="v18more press" data-v181all="1">Open the list</div>`):empty('Nothing is going cold. Every accept has its DM1 and every follow-up is on time.'))};
 V181.healthCard=function(D,card,empty){let L=(D.health||[]).filter(h=>h.band!=='Parked');const F=D.F||{};if(F.stage)L=L.filter(h=>String(h.stage||'').toLowerCase().startsWith(F.stage.toLowerCase()));
   if(!L.length)return card('health','Account health','',empty('No accounts in this view yet.'));
   const B=['Strong','Steady','Cooling','Cold'],n=B.map(b=>L.filter(h=>h.band===b).length),tot=L.length,avg=Math.round(L.reduce((s,h)=>s+(+h.score||0),0)/tot);
@@ -10140,13 +10200,13 @@ function repTop(D){try{if(!D||!D.S)return '';const fae=D.F&&D.F.ae||'';const W=(
   const fn=`<div class="v182fn">${st.map((s,i)=>`<div class="v182fr press ${i>0&&leak===i-1?'leak':''}" data-v18m="${s[2]}" data-v18p="this_week" role="button" tabindex="0"><span class="l">${s[0]}</span><div class="fb182"><i style="--w:${(s[1]/mx).toFixed(3)}"></i></div><b>${s[1]}</b>${i>0?`<em>${conv[i-1]==null?'':Math.round(conv[i-1]*100)+'%'}</em>`:'<em></em>'}</div>`).join('')}</div>
    ${leak>=0?`<div class="v182lk2"><b>The leak: ${st[leak][0]} to ${st[leak+1][0]}</b><span>${conv[leak]==null?'':Math.round(conv[leak]*100)+'% this week, against about '+Math.round(BEN[leak]*100)+'%'}</span>${LA[leak][1]?`<span class="v182al press" data-v182al="${LA[leak][1]}">${E1(LA[leak][0])} ${AR_SVG}</span>`:`<p class="v182mut">${E1(LA[leak][0])}</p>`}</div>`:''}
    <p class="v18hint">This week, ${coh.connects!=null?'counted once per person':'each event once'}. Tap a step for the people.</p>`;
-  return `<section class="v18c v182keep v182o1 qin" data-v18card="v182sb"><div class="v18cap"><span>This week against goal${fae?' · '+E1(fae==='Unassigned'?'Unattributed':fae):''}</span><span>${E1(dLabel(D.W&&D.W.range&&D.W.range.from||''))} to ${E1(dLabel(D.W&&D.W.range&&D.W.range.to||''))}</span></div><div class="v182sbg">${tl}</div>${UA}</section>
-   <section class="v18c v182keep v182o2 qin" data-v18card="v182fn"><div class="v18cap"><span>Where it leaks</span><span>Invites to meetings</span></div>${fn}</section>`}catch(e){V182.errs.push('top '+e.message);return ''}}
+  return `<section class="v18c v182keep v182o1 qin" data-v18card="v182sb"><div class="v18cap"><span>This week against goal${fae?' · '+E1(fae==='Unassigned'?'Unattributed':fae):''}</span><span>Always this week</span></div><div class="v182sbg">${tl}</div>${UA}</section>
+   <section class="v18c v182keep v182o2 qin" data-v18card="v182fn"><div class="v18cap"><span>Where it leaks</span><span>Always this week</span></div>${fn}</section>`}catch(e){V182.errs.push('top '+e.message);return ''}}
 function momentum(D){try{const H=((D&&D.health)||(D&&D.F&&D.F.ae?[]:(window.ariV181&&ariV181.health))||[]).filter(h=>h.band!=='Parked'&&+h.people>0);if(!H.length)return '';
   const g={moving:[],stuck:[],cold:[]};H.forEach(h=>{const q=h.days_quiet==null?99:+h.days_quiet;if(h.band==='Cold'||q>=10)g.cold.push(h);else if(q<=3&&+h.score>=45&&(+h.accepted>0||+h.replied>0))g.moving.push(h);else g.stuck.push(h)});
   const cur=V182.mom||(g.moving.length?'moving':'stuck');const L=g[cur].slice().sort((a,b)=>cur==='moving'?b.score-a.score:a.score-b.score).slice(0,5);
   const NX={moving:'Keep the thread going: the next DM or a second person',stuck:'Touch someone new or send the email step',cold:'Withdraw stale invites, then a fresh angle'};
-  return `<section class="v18c v182keep v182o4 qin" data-v18card="v182mo"><div class="v18cap"><span>Account momentum</span><span>${H.length} accounts</span></div>
+  return `<section class="v18c v182keep v182o4 qin" data-v18card="v182mo"><div class="v18cap"><span>Account momentum</span><span>Right now · ${H.length}</span></div>
    <div class="v182mt" role="tablist">${[['moving','Moving'],['stuck','Stuck'],['cold','Cold']].map(([k,l])=>`<span class="press ${cur===k?'on':''} m-${k}" data-v182mo="${k}" role="tab" aria-selected="${cur===k}"><b>${g[k].length}</b>${l}</span>`).join('')}</div>
    <p class="v182mut">${E1(NX[cur])}</p>
    ${L.length?L.map(h=>`<div class="v181hr press" data-v181acc="${E1(h.account)}"><span class="v181hs b-${E1(low(h.band))}">${h.score}</span><div class="qm"><b>${E1(h.account)}</b><span>${E1([h.stage,h.days_quiet!=null?(h.days_quiet===0?'touched today':'quiet '+h.days_quiet+'d'):'',h.gap].filter(Boolean).join(' · '))}</span></div></div>`).join(''):'<p class="v18e">None here right now.</p>'}</section>`}catch(e){V182.errs.push('mom '+e.message);return ''}}
@@ -10480,7 +10540,7 @@ const pc=(a,b)=>b?Math.round(a/b*100)+'%':'–';
 function attHTML(A){if(!A)return `<div class="v18cap"><span>Where meetings come from</span></div><div class="v18sk"><i></i><i></i></div>`;
   const bs=A.by_source||{},mx=Math.max(1,...SRC.map(([k])=>+bs[k]||0));
   const rows=SRC.filter(([k])=>k!=='none'||+bs.none).map(([k,l])=>`<div class="v186row${k==='none'?' v186none press':''}"${k==='none'&&A.no_source&&A.no_source[0]?` data-v186fix="${E(A.no_source[0])}"`:''}><span>${l}</span><i style="--w:${Math.round((+bs[k]||0)/mx*100)}%"></i><b>${+bs[k]||0}</b></div>`).join('');
-  return `<div class="v18cap"><span>Where meetings come from</span><span>${E(window.ariV18&&ariV18.D&&ariV18.D.F&&ariV18.D.F.ae||'')}</span></div>
+  return `<div class="v18cap"><span>Where meetings come from</span><span>${E(window.ariV18&&ariV18.label?ariV18.label():'')}</span></div>
    <div class="v186tri"><div><b>${+A.sent||0}</b><span>DMs sent</span></div><div><b>${+A.replied||0}</b><span>Replied · ${pc(+A.replied||0,+A.sent||0)}</span></div><div><b>${+A.meetings||0}</b><span>Meetings · ${pc(+A.meetings||0,+A.replied||0)} of replies</span></div></div>
    ${+A.meetings?rows:'<p class="v18e">No meetings in this period yet.</p>'}
    ${+bs.none?`<p class="v186hint">Tap No source yet to say where ${+bs.none===1?'that meeting':'those meetings'} came from.</p>`:''}`}
@@ -10535,19 +10595,21 @@ const fmtH=h=>h==null?'not enough yet':h<1?Math.round(h*60)+' min':h<48?(Math.ro
 let busy=false,lastKey='',lastAt=0;
 async function paint(){const rep=document.getElementById('v18rep');if(!rep||busy)return;
   let box=document.getElementById('v1871ad');
-  if(!box){box=document.createElement('div');box.id='v1871ad';box.className='v1871ad';const flt=document.getElementById('v18flt');
-    if(flt&&flt.nextSibling)rep.insertBefore(box,flt.nextSibling);else rep.appendChild(box)}
+  if(!box){box=V.box||document.createElement('div');V.box=box;box.id='v1871ad';box.className='v1871ad'}
+  const cards=document.getElementById('v18cards');if(cards&&box.parentNode!==cards)cards.appendChild(box);else if(!cards&&!box.parentNode)rep.appendChild(box)
   const key=String(AE());if(key===lastKey&&Date.now()-lastAt<120000&&box.dataset.ok)return;
   busy=true;try{const c=window.ariV17&&await ariV17.ready();if(!c||!c.rpc){busy=false;return}
     const r=await c.rpc('report_accept_dm1',{p_ae:AE()});if(r&&r.error)throw new Error(r.error.message||'');const d=r&&r.data||{};
     const ex=d.exact_pairs||0,all=d.all_pairs||0,w=d.waiting||0;
-    box.innerHTML=`<div class="v1871h"><b>Accept to DM1</b><span>Goal: under 4 hours</span></div>
+    box.innerHTML=`<div class="v1871h"><b>Accept to DM1</b><span>All time · goal under 4 h</span></div>
       <div class="v1871n"><b>${ex?fmtH(d.exact_median_h):'Timing starts now'}</b><span>${ex?`typical wait, ${ex} ${ex===1?'DM':'DMs'} timed to the minute${d.under_4h?`, ${d.under_4h} under 4 hours`:''}`:'Mark accepts and DM1s as they happen and the hours show here'}</span></div>
       <div class="v1871s">${all>ex?`Earlier ones were logged by day only: about ${fmtH(d.all_median_h)} across all ${all}.`:''}${w?` ${w} ${w===1?'person is':'people are'} waiting on DM1.`:''}</div>`;
     box.dataset.ok='1';lastKey=key;lastAt=Date.now();V.shown++}
   catch(e){V.errs.push('ad '+(e&&e.message||e));box.remove()}busy=false}
 V.paint=paint;
 setInterval(()=>{if(document.getElementById('v18rep'))paint()},4000);
+/* Oct 28: Report repaints its cards; put the Accept to DM1 card straight back */
+(function w(){const c=document.getElementById('v18cards');if(!c)return setTimeout(w,1500);new MutationObserver(()=>{const b=V.box;if(b&&b.dataset.ok&&b.parentNode!==c)c.appendChild(b)}).observe(c,{childList:true})})();
 document.addEventListener('click',e=>{if(e.target.closest('#v18flt'))setTimeout(()=>{lastKey='';paint()},700)},true);
 })();
 </script>
@@ -12185,5 +12247,48 @@ function boot(){btn();sync();setInterval(()=>{if(!document.hidden)btn()},3000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
 </script>
+<style id="v18rep28">/* Oct 28 (Owner): Report filters + main report. Tokens only, no borders on controls (Accounts pattern) */
+#v18rep .v18per,#v18rep .v18flt{display:flex;overflow:visible;margin:12px 0 0;padding:0;gap:8px;flex-wrap:nowrap}
+.v18pseg{display:flex;width:100%;padding:2px;gap:2px;border-radius:26px;background:var(--bg2)}
+.v18pseg button{flex:1 1 0;min-width:0;min-height:48px;display:inline-flex!important;align-items:center;justify-content:center;text-align:center;padding:0 4px;border:0;border-radius:24px;background:none;color:var(--ink2);font:600 14px/20px var(--sans);cursor:pointer;touch-action:manipulation;white-space:nowrap}
+.v18pseg button.on{background:var(--ink);color:var(--bg)}
+.v18stp{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:0;padding:0;border-radius:24px;background:var(--bg2)}
+.v18sb{flex:none;width:48px;min-height:48px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:24px;background:none;color:var(--ink);cursor:pointer;touch-action:manipulation;padding:0}
+.v18sb:disabled{color:var(--line2);cursor:default}
+.v18sl{position:relative;flex:1 1 auto;min-width:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 15px/20px var(--sans);color:var(--ink);cursor:pointer}
+.v18sl span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v18sl.rg{padding:0 14px}
+.v18sl input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer;-webkit-appearance:none;appearance:none}
+#v18rep .v18aeb{flex:none;max-width:44%;min-height:52px!important;display:inline-flex;align-items:center;gap:6px;padding:0 16px;border:0;border-radius:24px;background:var(--bg2);color:var(--ink);font:600 14px/20px var(--sans);cursor:pointer;touch-action:manipulation}
+.v18aeb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v18aeb.on{background:var(--ink);color:var(--bg)}
+.v18pseg button:focus-visible,.v18sb:focus-visible,.v18aeb:focus-visible,.v18sl:focus-within{outline:2px solid var(--acc);outline-offset:2px}
+#v18rep .v18hd span#v18rng{font:500 13px/18px var(--sans);color:var(--ink2);margin-top:4px;white-space:normal}
+#v18cards>[data-v18card="main"]{order:0}
+#v18cards>#v1871ad{order:2;margin:0 0 12px}
+.v18main .v18cap>span:first-child{color:var(--ink)}
+.v18mrs{display:flex;flex-direction:column}
+.v18mr{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;min-height:56px;padding:8px 0;border-top:1px solid var(--line);cursor:pointer}
+.v18mr:first-child{border-top:0;padding-top:2px}
+.v18mr .ml{min-width:0}
+.v18mr .l{display:block;font:600 15px/20px var(--sans);color:var(--ink)}
+.v18mr small{display:block;font:400 13px/18px var(--sans);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v18mr .mv{display:flex;align-items:baseline;gap:8px;justify-content:flex-end}
+.v18mr .v18n{font:650 24px/28px var(--sans);letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.v18mr .v18d{font:600 11.5px/1 var(--sans);padding:4px 6px;min-width:44px;text-align:center}
+.v18mr .v18g{grid-column:1/-1;margin-top:4px}
+.v18aeo{display:flex;flex-direction:column;margin:0 0 6px}
+.v18aeo button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;padding:6px 2px;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.v18aeo button:first-child{border-top:0}
+.v18aeo b{display:block;font:600 16px/22px var(--sans)}
+.v18aeo small{display:block;font:400 13px/18px var(--sans);color:var(--ink2)}
+.v18aeo button.on{color:var(--acc)}
+.v18aeo button.on small{color:var(--ink2)}
+#v18cards>#v1871ad{background:var(--bg2);border:0;border-radius:18px;padding:14px 16px 16px;box-shadow:inset 0 0 0 1px var(--line)}
+#v1871ad .v1871h b{font:600 10.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+#v1871ad .v1871h span{font:500 11px/1.3 var(--sans);opacity:1;color:var(--ink3)}
+#v1871ad .v1871n b{font:650 22px/28px var(--sans);margin-top:4px}
+#v1871ad .v1871n span{opacity:1;color:var(--ink2)}
+</style>
 </body>
 </html>
