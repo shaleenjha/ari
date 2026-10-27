@@ -1,0 +1,110 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Design taste</title><link rel="stylesheet" href="den-fonts.css">
+<style>
+:root{--bg:#F5F5F3;--ink:#0E0E0F;--ink2:#64635F;--ink3:#A09F9A;--line:rgba(14,14,15,.08)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg)}
+body{font-family:Geist,system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#app{max-width:460px;margin:0 auto;min-height:100dvh;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 110px);position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;font-family:'Geist Mono',monospace;font-size:12px;color:var(--ink2)}
+.meter{height:2px;background:var(--line);margin-top:12px;border-radius:2px;overflow:hidden}
+.meter b{display:block;height:100%;background:var(--ink);width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.q{margin-top:34px}
+.q h2{font-size:30px;font-weight:600;letter-spacing:-.04em;line-height:1.1}
+.q p.sub{font-size:14.5px;color:var(--ink2);margin-top:8px}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+.opts.grid{display:grid;grid-template-columns:1fr 1fr}
+.o{background:#fff;border-radius:18px;padding:16px;cursor:pointer;position:relative;box-shadow:0 0 0 1px var(--line);transition:box-shadow .25s,transform .25s cubic-bezier(.2,.8,.2,1)}
+.o:active{transform:scale(.975)}
+.o.on{box-shadow:0 0 0 2px var(--ink)}
+.o .t{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.o .d{font-size:13.5px;color:var(--ink2);margin-top:3px;line-height:1.4}
+.o .tick{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;background:var(--ink);display:grid;place-items:center;transform:scale(0);transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.o.on .tick{transform:scale(1)}
+.pv{height:84px;border-radius:12px;margin-bottom:12px;overflow:hidden;position:relative}
+textarea{width:100%;min-height:130px;border:0;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--line);padding:16px;font:inherit;font-size:16px;margin-top:22px;resize:none;outline:none}
+textarea:focus{box-shadow:0 0 0 2px var(--ink)}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:14px 20px calc(env(safe-area-inset-bottom) + 14px);background:linear-gradient(transparent,var(--bg) 30%);display:flex;gap:10px;max-width:460px;margin:0 auto}
+.btn{height:54px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15.5px;cursor:pointer;letter-spacing:-.01em;border:0;font-family:inherit;transition:transform .2s,opacity .3s}
+.btn:active{transform:scale(.97)}
+.next{flex:1;background:var(--ink);color:#fff}
+.next[disabled]{opacity:.25}
+.back{width:54px;background:#fff;box-shadow:0 0 0 1px var(--line);color:var(--ink)}
+.stage{transition:opacity .28s,transform .45s cubic-bezier(.2,.8,.2,1)}
+.out{opacity:0;transform:translateX(-24px)}.in0{opacity:0;transform:translateX(24px)}
+.sum{background:#fff;border-radius:18px;padding:18px;margin-top:22px;box-shadow:0 0 0 1px var(--line);font-family:'Geist Mono',monospace;font-size:13px;line-height:1.7;white-space:pre-wrap}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translate(-50%,-90px);background:var(--ink);color:#fff;padding:11px 16px;border-radius:14px;font-size:14px;font-weight:500;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.toast.show{transform:translate(-50%,0)}
+/* motion demo */
+.mdot{position:absolute;top:30px;left:14px;width:24px;height:24px;border-radius:7px;background:var(--ink)}
+@keyframes m1{0%,100%{transform:translateX(0)}50%{transform:translateX(90px)}}
+</style></head><body><div id="app">
+<div class="top"><span>DESIGN TASTE</span><span id="cnt">01 / 13</span></div>
+<div class="meter"><b id="mt"></b></div>
+<div class="stage" id="stage"></div>
+</div>
+<div class="bar"><button class="btn back" id="bk">←</button><button class="btn next" id="nx">Next</button></div>
+<div class="toast" id="toast">Copied. Paste it in Hark</div>
+<script>
+const mono="'Geist Mono',monospace", serif="ui-serif,'New York',Georgia,serif";
+const prev={
+ light:`<div class="pv" style="background:#F5F5F3;box-shadow:inset 0 0 0 1px var(--line);padding:12px"><div style="height:8px;width:50%;background:#0E0E0F;border-radius:3px"></div><div style="height:6px;width:75%;background:#CFCFCB;border-radius:3px;margin-top:9px"></div><div style="height:6px;width:60%;background:#CFCFCB;border-radius:3px;margin-top:6px"></div></div>`,
+ dark:`<div class="pv" style="background:#0F0F10;padding:12px"><div style="height:8px;width:50%;background:#F2F2F0;border-radius:3px"></div><div style="height:6px;width:75%;background:#3A3A3C;border-radius:3px;margin-top:9px"></div><div style="height:6px;width:60%;background:#3A3A3C;border-radius:3px;margin-top:6px"></div></div>`,
+ auto:`<div class="pv" style="background:linear-gradient(90deg,#F5F5F3 50%,#0F0F10 50%);box-shadow:inset 0 0 0 1px var(--line)"><div style="position:absolute;left:12px;top:12px;font:500 11px ${mono};color:#64635F">09:00 BLR</div><div style="position:absolute;right:12px;top:12px;font:500 11px ${mono};color:#8a8a8a">21:00 BLR</div></div>`,
+};
+const T=(f,w,s,txt,ls='-.03em')=>`<div class="pv" style="background:#F5F5F3;display:flex;align-items:center;padding:0 12px"><div style="font-family:${f};font-weight:${w};font-size:${s}px;letter-spacing:${ls};line-height:1.1">${txt}</div></div>`;
+const SW=c=>`<div class="pv" style="display:flex">${c.map(x=>`<div style="flex:1;background:${x}"></div>`).join('')}</div>`;
+const Q=[
+ {k:1,h:'Overall feel',o:[['a','Calm and precise','Like Linear or Things 3'],['b','Dense and serious','Like a Bloomberg terminal'],['c','Clean and numeric','Like Apple Stocks or Fitness'],['d','Sharp and fast','Like Raycast or Arc']]},
+ {k:2,h:'Theme',grid:1,o:[['a','Light','',prev.light],['b','Dark','',prev.dark],['c','Follows your hours','Light by day, dark in US hours',prev.auto]]},
+ {k:3,h:'When you open it',sub:'How much should the Ready screen show?',o:[['a','One thing at a time','Just the next action'],['b','The full list','Everything ready, ranked'],['c','Numbers, then list','A summary strip up top, list below']]},
+ {k:4,h:'Type',o:[['a','Neutral sans','',T('Geist',600,26,'9 ready · 14 min')],['b','Editorial','Serif headlines, sans body',T(serif,500,28,'9 ready, 14 minutes','-.01em')],['c','Technical','Monospace-heavy',T(mono,500,21,'9 READY / 14 MIN','0')]]},
+ {k:5,h:'Colour',grid:1,o:[['a','Mono + one accent','',SW(['#0E0E0F','#F5F5F3','#F5F5F3','#2F6BFF'])],['b','Mono + status','Green, amber, red',SW(['#0E0E0F','#F5F5F3','#1F9D55','#E0A100','#D83A34'])],['c','A signature colour','Tell me which in 13',SW(['#E5F43C','#FF5A1F','#5B45A8','#0B7A75'])]]},
+ {k:6,h:'Reports style',o:[['a','Few big numbers','Minimal charts'],['b','Charts for everything','Trends at a glance'],['c','Tables first','Charts second']]},
+ {k:7,h:'Reports you’d actually open',sub:'Pick all that apply.',multi:1,o:[['a','Daily','Today in one view'],['b','Weekly vs target','3 to 4 meetings, 2 to 3 opps'],['c','Per AE','Tamsin, Idris, Bram'],['d','Per account','Coverage and status'],['e','Hook performance','Which angles get replies'],['f','Follow-up health','Due, overdue, on time']]},
+ {k:8,h:'The Log',o:[['a','Timeline feed','Grouped by day'],['b','Spreadsheet table','Filter and sort'],['c','Both','With a toggle']]},
+ {k:9,h:'How the system talks',o:[['a','Terse and factual','“Priya accepted. DM ready.”'],['b','Terse, dry wit','“Kevin replied at 2am his time. Keen.”'],['c','No words','Just data']]},
+ {k:10,h:'Motion',o:[['a','Barely there','',`<div class="pv" style="background:#F5F5F3"><div class="mdot" style="animation:m1 3.4s ease-in-out infinite;opacity:.9;transform:scale(.8)"></div></div>`],['b','What you saw in Ari','',`<div class="pv" style="background:#F5F5F3"><div class="mdot" style="animation:m1 1.6s cubic-bezier(.3,1.5,.5,1) infinite"></div></div>`],['c','More than that','',`<div class="pv" style="background:#F5F5F3"><div class="mdot" style="animation:m1 .9s cubic-bezier(.3,2,.4,.9) infinite"></div></div>`]]},
+ {k:11,h:'Navigation',o:[['a','Bottom tabs','Ready, Reports, Log'],['b','One long screen','Scroll through everything'],['c','Gestures','Minimal chrome']]},
+ {k:12,h:'Apps whose feel you love',sub:'Any apps, not just work ones. What about them?',text:1},
+ {k:13,h:'Anything you hate',sub:'Beyond cute, swipe cards, stories and boxy dashboards.',text:1},
+];
+const A={};let i=0;
+const $=s=>document.querySelector(s);
+function draw(dir=1){
+ const st=$('#stage');st.classList.add('out');
+ setTimeout(()=>{
+  if(i>=Q.length){summary();return}
+  const q=Q[i];
+  $('#cnt').textContent=String(i+1).padStart(2,'0')+' / '+Q.length;
+  $('#mt').style.width=((i)/Q.length*100)+'%';
+  let h=`<div class="q"><h2>${q.h}</h2>${q.sub?`<p class="sub">${q.sub}</p>`:''}`;
+  if(q.text)h+=`<textarea id="ta" placeholder="Type here">${A[q.k]||''}</textarea>`;
+  else h+=`<div class="opts ${q.grid?'grid':''}">${q.o.map(o=>`<div class="o ${sel(q,o[0])?'on':''}" data-v="${o[0]}">${o[3]||''}<div class="t">${o[1]}</div>${o[2]?`<div class="d">${o[2]}</div>`:''}<div class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg></div></div>`).join('')}</div>`;
+  st.innerHTML=h+'</div>';
+  st.classList.remove('out');st.classList.add('in0');st.offsetHeight;st.classList.remove('in0');
+  st.querySelectorAll('.o').forEach(el=>el.onclick=()=>pick(q,el));
+  const ta=$('#ta');if(ta)ta.oninput=()=>{A[q.k]=ta.value;btn()};
+  $('#bk').style.visibility=i?'visible':'hidden';btn();scrollTo(0,0);
+ },220);
+}
+const sel=(q,v)=>q.multi?(A[q.k]||[]).includes(v):A[q.k]===v;
+function pick(q,el){
+ const v=el.dataset.v;try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}
+ if(q.multi){const s=new Set(A[q.k]||[]);s.has(v)?s.delete(v):s.add(v);A[q.k]=[...s];el.classList.toggle('on');btn()}
+ else{A[q.k]=v;document.querySelectorAll('.o').forEach(o=>o.classList.toggle('on',o===el));btn();setTimeout(()=>{i++;draw()},380)}
+}
+function btn(){const q=Q[i];const nx=$('#nx');if(!q){nx.textContent='Copy answers';nx.disabled=false;return}
+ nx.textContent=q.text?(i===Q.length-1?'Finish':'Next'):'Next';
+ nx.disabled=!q.text&&!(q.multi?(A[q.k]||[]).length:A[q.k]);}
+function line(){return Q.filter(q=>!q.text).map(q=>q.k+(q.multi?(A[q.k]||[]).join(''):(A[q.k]||'-'))).join(' ')+'\n12: '+(A[12]||'-')+'\n13: '+(A[13]||'-')}
+function summary(){
+ $('#cnt').textContent='DONE';$('#mt').style.width='100%';
+ const st=$('#stage');st.innerHTML=`<div class="q"><h2>That’s everything.</h2><p class="sub">Copy this and paste it back to Hark.</p><div class="sum">${line().replace(/</g,'&lt;')}</div></div>`;
+ st.classList.remove('out');$('#bk').style.visibility='visible';btn();
+}
+$('#nx').onclick=()=>{if(i>=Q.length){const show=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)};(navigator.clipboard?navigator.clipboard.writeText(line()):Promise.reject()).then(()=>show('Copied. Paste it in Hark'),()=>{const r=document.createRange();r.selectNodeContents($('.sum'));getSelection().removeAllRanges();getSelection().addRange(r);show('Selected. Tap Copy')});return}i++;draw()};
+$('#bk').onclick=()=>{if(i>0){i--;draw()}};
+document.fonts.ready.then(()=>draw());
+</script></body></html>

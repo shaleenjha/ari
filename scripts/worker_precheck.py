@@ -137,8 +137,9 @@ def main():
             tiers[(r.get("company") or "").strip().lower()] = ((r.get("tier") or "").strip(), (r.get("flag") or "").strip())
     except Exception:
         pass
-    # Follow-up drafts that live in Queue rows (worker step 4 fallback while People has no dm3_text column):
-    # a done "Draft DM 2" / "Draft DM 3" row with a result counts as the draft (27 Oct 2026, the "sticky DM3 flag").
+    # Follow-up drafts that live in Queue rows: People has a dm3_text column since 27 Oct 2026 (new DM3s go there and
+    # this loop reads it as txt), but older drafts only exist as a done "Draft DM 2" / "Draft DM 3" row with a result,
+    # which still counts as the draft (27 Oct 2026, the "sticky DM3 flag").
     queued_drafts = set()
     for r in s["Queue"]:
         act = re.sub(r"\s+", "", g(r, "action").lower())

@@ -103,7 +103,22 @@ def closer_shape(s):
 
 def corpus_rows():
     import ari_db
-    rows = ari_db.get("people?select=id,account_id,company,name,notes,dm,dm2_text,dm3_text,connect_sent,accepted,dm1_sent,dm2_sent,dm3_sent,dm2_due,stage,route,review,research,replied,updated_at&deleted_at=is.null")
+    rows = ari_db.get("people?select=id,account_id,company,name,notes,dm,dm2_text,dm3_text,connect_sent,accepted,dm1_sent,dm2_sent,dm3_sent,dm2_due,dm3_due,stage,route,review,research,replied,updated_at&deleted_at=is.null")
+    # 27 Oct 2026: DM3 drafts live in People dm3_text. Older ones were written only to a done Queue "Draft DM 3" row
+    # (result = the draft); fall back to the latest such row when dm3_text is empty so check/regen still see them.
+    try:
+        q = ari_db.get("queue?select=target,action,status,result,created_at")
+        latest = {}
+        for r in sorted(q, key=lambda r: str(r.get("created_at") or "")):
+            if re.sub(r"\s+", "", (r.get("action") or "").lower()) == "draftdm3" and (r.get("status") or "").lower() == "done" \
+                    and (r.get("result") or "").strip():
+                latest[(r.get("target") or "").strip().upper()] = r["result"].strip()
+        for r in rows:
+            if not (r.get("dm3_text") or "").strip() and (r.get("id") or "").upper() in latest:
+                r["dm3_text"] = latest[r["id"].upper()]
+                r["_dm3_from_queue"] = True
+    except BaseException:
+        pass
     return rows
 
 
