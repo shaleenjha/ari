@@ -297,7 +297,41 @@ STYLE_BANNED = ["i'd love to", "i would love to", "reason i'm reaching out", "re
                 "revolutioniz", "transform your", "just following up"]
 GUIDE_FIXED = re.compile(r"(thanks for connecting, [^.]+\.|^\S+, last one from me\.|we built a data privacy layer that|"
                          r"teams like %s use it\.|worth connecting\?|worth 15 minutes\?|worth a quick call\?|"
-                         r"worth 20 minutes with you and|worth 20 minutes\?|happy to show how|we talk to|on your 2027 list|did you see|one more angle|most )" % re.escape(B_CUSTOMER), re.I)
+                         r"worth 20 minutes with you and|worth 20 minutes\?|happy to show how|we talk to|on your 2027 list|did you see|one more angle|most |"
+                         r"^\S+, quick one\.|^\S+, following up on|^\S+, last one from me on|we keep them out\.)" % re.escape(B_CUSTOMER), re.I)
+
+# Point-first rules (Owner, Tue 27 Oct 2026 17:19 IST): "not direct, waving above the point, open-ended questions,
+# follow-ups don't feel like follow-ups." Every DM states the concrete problem as a statement, says what we do,
+# and ends on ONE closed ask; the only question mark is the ask. DM2 and DM3 pick up the thread of what was sent.
+POINT_SINCE = "2026-10-27"
+WAVE = ["curious", "wondering", "would love your take", "love your take", "swap notes", "trade notes", "compare notes",
+        "thoughts?", "resonate", "on your radar", "on your roadmap", "how are you handling", "how is your team",
+        "the reason i asked", "reason i asked", "i'm assuming", "i am assuming", "i'm guessing", "happy to share how other",
+        "no worries if", "timing is off", "timing may be off", "is that coming up", "does that ring", "open to a quick chat"]
+PEER_FILLER = re.compile(r"\bmost [\w ,'-]{2,60} we (talk|speak) (to|with)\b", re.I)
+OPEN_ASK = re.compile(r"^(how|what|which|where|who|why|when|is |are |does |do |did |would |could |should |any )", re.I)
+CONCRETE = re.compile(r"\b(phi|pii|pci|ssn|ssns|social security|card numbers?|card data|account numbers?|member ids?|patient|patients|"
+                      r"medical records?|health records?|ehr|clinical|claims?|transcripts?|recordings?|call data|bank details|bank|payment|"
+                      r"dates? of birth|addresses|names|identifiers?|policyholder|member data|employee data|pay data|payroll|candidate|"
+                      r"tickets?|customer data|personal data|financial data|training data|records|identity data|voice data|prompts?|logs)\b", re.I)
+STOP = set("about after again against their there these those which while would could should where every other being "
+           "your yours with from into that this what when have will once than then them they ever only just more most also "
+           "thanks connecting quick following last minutes worth happy show call teams team data".split())
+
+
+def _content(t):
+    return {w for w in re.findall(r"[a-z][a-z'-]{4,}", (t or "").lower()) if w not in STOP}
+
+
+def _sent_before(pid, kind, rows):
+    me = next((r for r in (rows or []) if r.get("id") == pid), None) or {}
+    out = []
+    if kind in ("dm2", "dm3") and me.get("dm1_sent"):
+        out.append(me.get("dm") or "")
+    if kind == "dm3" and me.get("dm2_sent"):
+        out.append(me.get("dm2_text") or "")
+    return [x for x in out if x.strip()]
+
 V1_DROP = ("M1", "R3", "P1", "R5", "R4", "R2", "R10", "S2 ", "S5 ", "S6 ", "F1 ")
 TRIGGER = re.compile(r"\b(saw|noticed|congrats|just (launched|announced|raised|hired)|announced|launched|raised|hired|joined as)\b", re.I)
 
@@ -364,8 +398,9 @@ def dm2_arm(pid):
     h = int(hashlib.md5(("dm2-ab-v1:" + pid).encode()).hexdigest(), 16)
     a = "seen" if h % 2 == 0 else "reason"
     return {"arm": a, "variant": "arm=dm2_" + a,
-            "pick": "Did you see this?" if a == "seen" else "One more angle",
-            "fallback": "No real dated item you can name in one line: write the reason arm and tag arm=dm2_reason;fb=1." if a == "seen" else ""}
+            "pick": "Following up: a real dated item" if a == "seen" else "Following up: one new consequence or proof",
+            "fallback": "No real dated item on file: write the reason arm and tag arm=dm2_reason;fb=1." if a == "seen" else "",
+            "shape": "<First>, following up on <DM1 point>. <one NEW concrete thing: %s>. <ask>" % ("the dated item and what it means for their data" if a == "seen" else "a new consequence or an allowed proof")}
 
 
 def style_flags(pid, kind, text, style, rows=None):
@@ -414,51 +449,57 @@ def style_flags(pid, kind, text, style, rows=None):
         if t.count("?") > 1:
             f.append("G4 one ask only")
         return f
-    lim = 65 if (kind == "dm1" and style == STYLE_B) else 55
+    # ---- DMs: point-first rules (Owner, 27 Oct 2026) ----
+    lim = {"dm1": 50 if style == STYLE_B else 45, "dm2": 40, "dm3": 35}.get(kind, 45)
     if nw > lim:
-        f.append("G5 over %d words (%d)" % (lim, nw))
+        f.append("G5 over %d words (%d): cut to the point" % (lim, nw))
+    body = " ".join(sents[:-1])
+    if "?" in body:
+        f.append("G9 question before the ask: say it as a statement; the only question is the closing ask")
+    if OPEN_ASK.match(last) and not last.startswith(("worth ",)):
+        f.append("G9 the ask is an open question: end on the closed ask")
+    w = [x for x in WAVE if x in low]
+    if w:
+        f.append("G10 hovering line ('%s'): name the problem and the ask plainly" % w[0])
+    if PEER_FILLER.search(t):
+        f.append("G10 'Most <peers> we talk to' is filler: say what happens at THEIR company")
+    if not CONCRETE.search(t):
+        f.append("G8 name the concrete data (PHI, card numbers, transcripts, claims ...) and where it bites")
+    ask15, ask20 = "worth 15 minutes?", "worth 20 minutes?"
     if kind == "dm1":
-        if not low.startswith("thanks for connecting"):
-            f.append("G6 DM1 opens 'Thanks for connecting, <First>.'")
-        if "we talk to" not in low and style == STYLE_B:
-            f.append("G6 %s beat 2: 'Most <peer group> we talk to ...'" % STYLE_B_NAME)
+        if not (low.startswith("thanks for connecting") or re.match(r"^\S+, quick one\.", low)):
+            f.append("G6 DM1 opens 'Thanks for connecting, <First>.' or '<First>, quick one.'")
         if style == STYLE_A:
-            if not re.search(r"worth 15 minutes\?$", last):
+            if not last.endswith(ask15):
                 f.append("G6 %s DM1 ends 'Worth 15 minutes?'" % STYLE_A_NAME)
-            if t.count("?") > 1:
-                f.append("G4 %s asks for the meeting only, no open question" % STYLE_A_NAME)
             if re.search(r"\b(20|30|45) (min|mins|minutes)\b", low):
                 f.append("G6 %s never asks past 15 minutes" % STYLE_A_NAME)
             if re.search(r"\btokeni[sz]ation\b|\bencrypt|\bvault\b", low):
                 f.append("G7 %s never explains how it works" % STYLE_A_NAME)
         else:
-            if t.count("?") != 2:
-                f.append("G6 %s DM1 has two questions: beat 1 and the ask" % STYLE_B_NAME)
-            if not re.search(r"^worth 20 minutes with you and .+\?$", last):
-                f.append("G6 %s DM1 ends 'Worth 20 minutes with you and <owner>?'" % STYLE_B_NAME)
-            if SELLER_LOW not in low:
-                f.append("G6 %s beat 3: one line on what %s does" % (STYLE_B_NAME, SELLER))
-    if kind == "dm2":   # Owner Thu 22 Oct 2026 23:28 IST: DM2 is no longer the close; A/B arms "did you see" and "fresh reason"
+            if not (last.endswith(ask20) or re.search(r"^worth 20 minutes with you and .+\?$", last)):
+                f.append("G6 %s DM1 ends 'Worth 20 minutes?'" % STYLE_B_NAME)
+    if kind == "dm2":
         if "last one from me" in low:
-            f.append("G6 DM2 is not the close any more ('last one from me' moved to DM3)")
-        if re.match(r"^\S+, did you see\b", low) and not _seen_ok(pid, rows):
-            f.append("G3 'did you see' needs a real dated item on file (V notes 'DM2 item: yyyy-MM-dd <url>' or a dated hook)")
-        if not (re.match(r"^\S+, did you see\b", low) or re.match(r"^\S+, one more angle\.", low)):
-            f.append("G6 DM2 opens '<First>, did you see ...' (seen arm) or '<First>, one more angle.' (reason arm)")
-        want = "worth 20 minutes?" if style == STYLE_B else "worth 15 minutes?"
+            f.append("G6 DM2 is not the close ('last one from me' is DM3)")
+        if not re.match(r"^\S+, following up on [^.?!]{3,60}\.", low):
+            f.append("G6 DM2 opens '<First>, following up on <the DM1 point in a few words>.'")
+        want = ask20 if style == STYLE_B else ask15
         if not last.endswith(want):
             f.append("G6 DM2 ends '%s'" % want.capitalize())
-        if t.count("?") > (2 if re.match(r"^\S+, did you see\b", low) else 1):
-            f.append("G4 one ask only")
-    if kind == "dm3":   # the close (old DM2 shape), a week after DM2
-        if not re.match(r"^\S+, last one from me\.", low):
-            f.append("G6 DM3 opens '<First>, last one from me.'")
+    if kind == "dm3":
+        if not re.match(r"^\S+, last one from me on [^.?!]{3,60}\.", low):
+            f.append("G6 DM3 opens '<First>, last one from me on <the thread's point>.'")
         if "happy to show how" not in low:
             f.append("G6 DM3 carries 'happy to show how ...'")
         if not last.startswith("worth a quick call"):
             f.append("G6 DM3 ends 'Worth a quick call?'")
-        if t.count("?") > 1:
-            f.append("G4 one ask only")
+    if kind in ("dm2", "dm3"):
+        prev = _sent_before(pid, kind, rows)
+        if prev and not (_content(t) & set().union(*[_content(x) for x in prev])):
+            f.append("G11 not a follow-up: pick up a concrete word from what was already sent (%s)" % ("DM1" if kind == "dm2" else "DM1/DM2"))
+    if t.count("?") > 1:
+        f.append("G4 one ask only")
     return f
 
 
@@ -548,6 +589,9 @@ def regen(limit=200):
                 continue
             # Oct 22 2026: DM2/DM3 drafts are redrafted only once the step before went out (lazy, saves tokens)
             if (kind == "dm2" and not r.get("dm1_sent")) or (kind == "dm3" and not r.get("dm2_sent")):
+                continue
+            # Oct 27 2026: DM1s are redrafted only once the person accepted (the rest get the new shape when they accept)
+            if kind == "dm1" and not r.get("accepted"):
                 continue
             fl, _ = check(r["id"], kind, txt, rows=rows)
             # Repeat-only flags (R6/R7) do not trigger a redraft: Owner's own sheet copy reuses the guide's
