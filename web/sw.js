@@ -1,5 +1,5 @@
-/* Ari service worker (v18.4). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
-const V='ari-v18.12.1',LOGOS='ari-logos-1',ACKS='ari-acks';
+/* Ari service worker (v18.4; v18.13.4: app shell fetched with no-store, cache renamed so every phone drops old copies). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
+const V='ari-v18.13.4',LOGOS='ari-logos-1',ACKS='ari-acks';
 const SHELL=['/ops','/ari-supabase.js?v17','/ari-fonts.css','/ari-geist.woff2','/ari-geistmono.woff2','/ari-192.png','/ari-512.png','/ari.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==LOGOS&&k!==ACKS).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -7,7 +7,7 @@ const isAri=p=>p==='/ops'||p==='/ops.html';
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
   /* app shell: network first, cached copy when offline (the app then shows its last data from local storage) */
   if(u.origin===location.origin&&isAri(u.pathname)){
-    e.respondWith(fetch(r).then(res=>{if(res.ok){const cp=res.clone();caches.open(V).then(c=>c.put('/ops',cp))}return res}).catch(()=>caches.match('/ops',{ignoreSearch:true}).then(m=>m||new Response('<!doctype html><meta name=viewport content="width=device-width"><body style="font:16px system-ui;padding:40px;background:#1C2F9E;color:#F4EFE6">Ari is offline and has nothing cached yet. Open it once with a connection.</body>',{headers:{'Content-Type':'text/html'}}))));return}
+    e.respondWith(fetch(r.url,{cache:'no-store',credentials:'same-origin'}).then(res=>{if(res.redirected)return Response.redirect(res.url,302);if(res.ok){const cp=res.clone();caches.open(V).then(c=>c.put('/ops',cp))}return res}).catch(()=>caches.match('/ops',{ignoreSearch:true}).then(m=>m||new Response('<!doctype html><meta name=viewport content="width=device-width"><body style="font:16px system-ui;padding:40px;background:#1C2F9E;color:#F4EFE6">Ari is offline and has nothing cached yet. Open it once with a connection.</body>',{headers:{'Content-Type':'text/html'}}))));return}
   /* Ari's static files: cache first */
   if(u.origin===location.origin&&/^\/(ari[-.][^/]*)$/.test(u.pathname)){e.respondWith(caches.match(r).then(m=>m||fetch(r).then(res=>{if(res.ok){const cp=res.clone();caches.open(V).then(c=>c.put(r,cp))}return res})));return}
   /* company logos (favicon service): cache first, kept across builds, capped */

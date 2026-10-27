@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.13.3"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.13.4"><meta name="ari-rev" content="05ae22f947">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -5830,9 +5830,11 @@ const _sn14=stkNext;stkNext=function(dir,ax,v){_sn14(dir,ax,v);const h=q1($('#hd
     d=rub(Math.max(0,dy));paint(d);const a=ari();
     if(!armed&&d>=TH){armed=true;buzz(M.haptic.swipe);a.dataset.face='listen';lab.textContent='Let go';kf(lab,[{transform:'scale(.9)'},{transform:'none'}],SPR(POP))}
     else if(armed&&d<TH){armed=false;a.dataset.face='idle';lab.textContent='Pull for fresh accepts'}
+    {const deep=armed&&dy>=230;if(deep!==!!st.deep){st.deep=deep;buzz(M.haptic.swipe);lab.textContent=deep?'Let go to search':'Let go';a.dataset.face=deep?'focus':'listen'}}
     return true}
   function settle(to,done){springRun(d,to,0,x=>{d=x;paint(x)},()=>{d=to;paint(to);done&&done()},300,26)}
-  function end(){if(!st)return;const was=st.lock;st=null;pane.classList.remove('pulling');if(!was)return;
+  function end(){if(!st)return;const was=st.lock,deep=st.deep;st=null;pane.classList.remove('pulling');if(!was)return;
+    if(deep){armed=false;const a=ari();a.dataset.face='idle';lab.textContent='Pull for fresh accepts';settle(0);try{window.ariV18133&&ariV18133.open(null)}catch(e){}return}
     if(!armed){settle(0);return}armed=false;busy=true;const a=ari(),r=ring();if(r)r.style.strokeDasharray='';const sv=svgOf(a);if(sv)sv.style.transform='';
     a.dataset.face='focus';lab.textContent='Reading LinkedIn';settle(64);
     const q=$('#queue');const sk=[0,1].map(()=>{const e=document.createElement('div');e.className='skel';e.innerHTML='<i class="sa2"></i><i class="sh2"></i>';q.prepend(e);
@@ -6045,7 +6047,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.13.3';
+const M=MOTION,APP=$('#app'),BUILD=((document.querySelector('meta[name=ari-build]')||{}).content||'v18.13.4');
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -6189,6 +6191,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.13.4',d:'Oct 28',items:['Search sits in the bottom bar, and a long pull down from the top of any screen opens it too. Type a question and it goes straight to chat','People and accounts open the same way now: who they are, why now, one main button, then signals, conversation and history','Tap any company to open its account, and any person to open their file. Back takes you exactly where you were','Company tiles carry one clean letter, tinted by AE','When nothing is waiting to send, Today shows what I found instead of a zero','A shorter menu, one style of switch, back button and button across the app, and no internal codes on screen','Updates arrive on their own: the app checks for a new version every time you come back to it']},
  {v:'v18.13.3',d:'Oct 28',items:['Find anyone fast: the search button at the top (or / and Ctrl K on a computer) opens a person or an account in one tap','The tabs at the bottom stay on screen everywhere. Only the phone keyboard hides them','Headers stay sharp when a file opens or you scroll','On a computer Ari sits in a wider centred column and runs lighter','Accounts search looks across every filter and never shows a negative count','About tells my story again: what I do, what I never do and how I was made']},
  {v:'v18.13.0',d:'Oct 21',items:['One calm light look with an indigo accent. The theme switch is gone','Today shows how many are left, the next person with one Start button, anything that needs your call, then everyone else as tiles','Accounts groups people by company with what is next for each. Tap a company to see its people','Ask Ari, Settings, Sync, Find people and Activity are behind Ari at the top. The round Ari button is gone','Lighter and quieter: no web fonts, fewer timers, Ari stops moving after a few breaths, and you can zoom']},
  {v:'v18.12.1',d:'Oct 17',items:['If you edit a draft or switch to Ari’s version, a draft that arrives later never replaces your words. It waits under the draft: tap to swap, and Undo if you change your mind', 'The top line now says when signal scans are off. Tap it to see what is paused and what is still running']},
@@ -7980,7 +7983,7 @@ function domMap(){const d=DATA||{};if(DOMAT===d&&DOM171)return DOM171;const m=ne
   DOM171=m;DOMAT=d;return m}
 const domOf=co=>co?domMap().get(nc171(co))||'':'';V171.domOf=domOf;
 const mono171=co=>E((String(co||'?').replace(/[^A-Za-z0-9]/g,'')[0]||'?').toUpperCase());
-function logo171(co,sz){const d=domOf(co);const cls='v171lg s'+(sz||16);
+function logo171(co,sz){if(window.ariMono)return ariMono(co,sz||16,'v171lg s'+(sz||16)+' mono');const d=domOf(co);const cls='v171lg s'+(sz||16);
   if(!d)return `<span class="${cls} mono" aria-hidden="true">${mono171(co)}</span>`;
   const px=sz>=40?128:64;
   return `<span class="${cls}" data-mono="${mono171(co)}" aria-hidden="true"><img loading="lazy" decoding="async" alt="" src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=${px}" onload="ariV171.lgOk(this)" onerror="ariV171.lgBad(this)"></span>`}
@@ -8314,8 +8317,9 @@ document.addEventListener('change',e=>{if(e.target&&e.target.id==='v162tag'){AF2
     try{const r=await fetch('/build.json?t='+now,{cache:'no-store',credentials:'omit'});if(!r.ok)return;const j=await r.json();V1711.upd={live:j.build,rev:j.rev,me:BUILD1711,myrev:REV1711,at:new Date().toISOString(),why};
       const want=j.build+(j.rev?'@'+j.rev:'');if(!j.build||(j.build===BUILD1711&&(!j.rev||!REV1711||j.rev===REV1711)))return;
       let tried='';try{tried=sessionStorage.getItem(key(want))||''}catch(e){}
-      if(tried&&now-(+tried)<10*60e3)return;/* tried in the last 10 min: never loop */
-      try{sessionStorage.setItem(key(want),String(now))}catch(e){}
+      /* v18.13.4: up to 3 tries per build, a minute apart (one stale answer used to block updates for 10 min) */let tn=0;try{tn=+(sessionStorage.getItem(key(want)+'-n')||0)}catch(e){}
+      if(tn>=3||(tried&&now-(+tried)<60e3))return;
+      try{sessionStorage.setItem(key(want),String(now));sessionStorage.setItem(key(want)+'-n',String(tn+1))}catch(e){}
       const go=async()=>{const V=window.ariV162||{};if(V.cer&&V.cer()){setTimeout(go,1200);return}
         /* locked: hold the Unlock button until the new build is up (no prompt now, one prompt after). unlocked + in front: carry the unlock across our own reload */
         if(V.locked&&V.locked()){V.updating=1;setTimeout(()=>{V.updating=0},9000)}
@@ -8323,15 +8327,15 @@ document.addEventListener('change',e=>{if(e.target&&e.target.id==='v162tag'){AF2
         try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg){await reg.update().catch(()=>{});const w=reg.installing||reg.waiting;if(w)await new Promise(res=>{const tm=setTimeout(res,2500);w.addEventListener('statechange',()=>{if(w.state==='activated'){clearTimeout(tm);res()}})})}}catch(e){}
         try{const c=await caches.keys();await Promise.all(c.filter(k=>/^ari-v/.test(k)).map(k=>caches.open(k).then(x=>x.delete('/ops'))))}catch(e){}
         if(V.locked&&!V.locked()&&!document.hidden){try{sessionStorage.setItem('ari-uh',JSON.stringify({t:Date.now(),to:want}))}catch(e){}}else{try{sessionStorage.removeItem('ari-uh')}catch(e){}}
-        V.reloading=1;location.replace('/ops'+(location.search.includes('open=')?location.search:'?source=update'))};
+        V.reloading=1;location.replace('/ops'+(location.search.includes('open=')?location.search+'&b='+encodeURIComponent(j.build):'?source=update&b='+encodeURIComponent(j.build)))};
       /* never yank a half-typed draft: wait until the field loses focus */
       const busyTyping=()=>{const a=document.activeElement;return a&&/^(TEXTAREA|INPUT)$/.test(a.tagName)&&String(a.value||'').length>0};
       if(busyTyping()){const w=()=>{if(!busyTyping()){document.removeEventListener('focusout',w);go()}};document.addEventListener('focusout',w)}else go()}
     catch(e){V1711.errs.push('upd '+e)}finally{busy=false}}
   V1711.checkUpdate=check;
   setTimeout(()=>check('boot'),window.ariV162&&ariV162.locked&&ariV162.locked()?400:2500);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)check('visible')});
-  addEventListener('pageshow',e=>{if(e.persisted)check('bfcache')});addEventListener('focus',()=>check('focus'));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){last=0;check('visible')}});
+  addEventListener('pageshow',e=>{last=0;check(e.persisted?'bfcache':'pageshow')});addEventListener('focus',()=>check('focus'));
   if('serviceWorker' in navigator){let had=!!navigator.serviceWorker.controller,done=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had){had=true;return}if(done)return;done=true;
     const a=document.activeElement;if(a&&/^(TEXTAREA|INPUT)$/.test(a.tagName)&&a.value)return;try{if(sessionStorage.getItem('ari-cc-'+BUILD1711))return;sessionStorage.setItem('ari-cc-'+BUILD1711,'1')}catch(e){}
     /* v18.2.2: a new worker taking over is not a reason to reload a page that is already the live build (that reload asked for Face ID a second time) */
@@ -8895,7 +8899,7 @@ function prevOf(p,r){const t=istD(),end=r.to<t?r.to:t,L=Math.max(1,diff(r.from,e
 function fargs(o){const a={};if(F.ae)a.p_ae=F.ae;if(F.play)a.p_play=F.play;if(F.stage&&!(o&&o.nostage))a.p_stage=F.stage;return a}
 const pargs=(p,r)=>p==='custom'?{p_period:'custom',p_from:r.from,p_to:r.to}:{p_period:p};
 function barRange(r){const L=diff(r.from,r.to)+1;if(L>=2&&L<=31)return r;if(L===1){const m=mon(r.from);return {from:m,to:addD(m,6)}}return {from:addD(r.to,-30),to:r.to}}
-const filtLabel=()=>[F.ae&&(F.ae==='Unassigned'?'Unattributed (no AE)':F.ae+'’s book'),F.play&&(PLAYS.find(x=>x[0]===F.play)||[,''])[1],F.stage&&(STG.find(x=>x[0]===F.stage)||[,''])[1]].filter(Boolean).join(' · ');
+const filtLabel=()=>[F.ae&&(F.ae==='Unassigned'?'No AE':F.ae+'’s book'),F.play&&(PLAYS.find(x=>x[0]===F.play)||[,''])[1],F.stage&&(STG.find(x=>x[0]===F.stage)||[,''])[1]].filter(Boolean).join(' · ');
 
 /* ---------- data: one cached call per argument set (in-flight shared), invalidated by realtime ---------- */
 /* at most 4 calls in flight: the free database answers 4 at a time faster than 16 at once */
@@ -9056,7 +9060,7 @@ let byMode='ae';
 function aeHTML(D){const S=D.S;const L=(byMode==='ae'?S&&S.by_ae:S&&S.by_play)||[];const K=[['connect','c','Connects'],['accept','a','Accepts'],['dms','d','DMs'],['reply','r','Replies']];
   const mx=Math.max(1,...L.map(x=>K.reduce((t,k)=>t+n0(x[k[0]]),0)));
   const rows=L.length?L.map((x,i)=>{const nm=byMode==='ae'?x.ae:x.play,tot=K.reduce((t,k)=>t+n0(x[k[0]]),0),o=byMode==='ae'?{ae:nm}:{};
-    return `<div class="v18ae"><div class="qhd press" ${tap('touches',o)}><b>${E8(nm==='Unassigned'?'Unattributed':nm)}</b><span>${n0(x.accounts_worked)} account${n0(x.accounts_worked)===1?'':'s'} · ${n0(x.meeting)} meeting${n0(x.meeting)===1?'':'s'}</span></div>
+    return `<div class="v18ae"><div class="qhd press" ${tap('touches',o)}><b>${E8(nm==='Unassigned'?'No AE':nm)}</b><span>${n0(x.accounts_worked)} account${n0(x.accounts_worked)===1?'':'s'} · ${n0(x.meeting)} meeting${n0(x.meeting)===1?'':'s'}</span></div>
      <div class="qsb" style="--w:${(tot/mx).toFixed(3)};--i:${i}">${K.map(k=>n0(x[k[0]])?`<i class="s-${k[1]} press" style="flex:${n0(x[k[0]])}" ${tap(k[0],o)} aria-label="${k[2]} ${n0(x[k[0]])}"></i>`:'').join('')}</div>
      <div class="nums">${K.map(k=>`<span class="press" ${tap(k[0],o)}><i class="s-${k[1]}"></i>${n0(x[k[0]])}</span>`).join('')}</div></div>`}).join(''):empty('Nothing in this range.');
   const noplay=byMode==='play'&&L.length===1&&/unassigned/i.test(L[0].play||'');
@@ -9113,7 +9117,7 @@ function shell(){const rp=$('#report');if(!rp)return null;let w=$('#v18rep');if(
 const UNITS=[['day','Day'],['week','Week'],['month','Month'],['range','Range']];
 function unitOf(){const p=F.period;if(p==='today'||p==='yesterday')return 'day';if(p==='this_week'||p==='last_week')return 'week';if(p==='this_month')return 'month';
   if(F.u&&F.u!=='range')return F.u;const r=rangeOf(p);return F.u==='range'||r.from!==r.to?'range':'day'}
-const AEL=a=>!a?'All AEs':a==='Unassigned'?'Unattributed':a;
+const AEL=a=>!a?'All AEs':a==='Unassigned'?'No AE':a;
 function stepLabel(){const u=unitOf(),p=F.period,r=rangeOf(p),t=istD();
   if(u==='day')return p==='today'||r.from===t?'Today':p==='yesterday'||r.from===addD(t,-1)?'Yesterday':fd(r.from);
   if(u==='week')return p==='this_week'?'This week':p==='last_week'?'Last week':fmtR(r);
@@ -9140,7 +9144,7 @@ function chrome(){const r=rangeOf(F.period),u=unitOf(),t=istD(),cur=atCurrent();
   return;
   $('#v18per').innerHTML=PER.map(([k,l])=>`<span class="v163chip press ${F.period===k?'on':''}" data-v18per="${k}" role="tab" aria-selected="${F.period===k}">${k==='custom'&&F.period==='custom'?E8(fmtR(r)):l}</span>`).join('');
   const any=F.ae||F.play||F.stage;
-  $('#v18flt').innerHTML=AES.map(a=>`<span class="v163chip press ${F.ae===a?'on':''}" data-v18fae="${a}" role="button" aria-pressed="${F.ae===a}">${a==='Unassigned'?'Unattributed':a}</span>`).join('')+'<i class="sep"></i>'+
+  $('#v18flt').innerHTML=AES.map(a=>`<span class="v163chip press ${F.ae===a?'on':''}" data-v18fae="${a}" role="button" aria-pressed="${F.ae===a}">${a==='Unassigned'?'No AE':a}</span>`).join('')+'<i class="sep"></i>'+
     STG.map(([k,l])=>`<span class="v163chip press ${F.stage===k?'on':''}" data-v18fst="${k}" role="button" aria-pressed="${F.stage===k}">${l}</span>`).join('')+'<i class="sep"></i>'+
     PLAYS.map(([k,l])=>`<span class="v163chip press ${F.play===k?'on':''}" data-v18fpl="${k}" role="button" aria-pressed="${F.play===k}">${l}</span>`).join('')+
     `<span class="v1711clr press ${any?'on':''}" data-v18clr="1" role="button">Clear</span>`}
@@ -9305,7 +9309,7 @@ function pickRange(){bz(8);const r=rangeOf(F.period),t=istD();
 function closeRange(){if(SH)SH.classList.remove('on')}
 function pickAE(){bz(8);if(!SH){SH=document.createElement('div');SH.id='v18sh';document.body.appendChild(SH)}
   SH.innerHTML=`<div class="scr" data-v18shx="1"></div><div class="sh" role="dialog" aria-modal="true" aria-label="Whose numbers"><i class="grab"></i><div class="qhd"><b>Whose numbers</b><span>Every number on this page follows this choice.</span></div>
-   <div class="v18aeo">${[['','All AEs','Everything you did'],['Tamsin','Tamsin','His book'],['Idris','Idris','His book'],['Bram','Bram','His book'],['Unassigned','Unattributed','People with no AE yet']].map(([k,l,s])=>`<button type="button" class="${F.ae===k?'on':''}" data-v18aeo="${k}" aria-pressed="${F.ae===k}"><span><b>${l}</b><small>${s}</small></span>${F.ae===k?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>':''}</button>`).join('')}</div></div>`;
+   <div class="v18aeo">${[['','All AEs','Everything you did'],['Tamsin','Tamsin','His book'],['Idris','Idris','His book'],['Bram','Bram','His book'],['Unassigned','No AE','People with no AE yet']].map(([k,l,s])=>`<button type="button" class="${F.ae===k?'on':''}" data-v18aeo="${k}" aria-pressed="${F.ae===k}"><span><b>${l}</b><small>${s}</small></span>${F.ae===k?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>':''}</button>`).join('')}</div></div>`;
   requestAnimationFrame(()=>SH.classList.add('on'))}
 
 /* ---------- clicks ---------- */
@@ -10187,7 +10191,7 @@ function repTop(D){try{if(!D||!D.S)return '';const fae=D.F&&D.F.ae||'';const W=(
    ['meeting','Meetings',c('meeting'),W_GOAL.meeting[1],'goal 3 to 4',X.rep.length?[`${X.rep.length} replied, no meeting yet`,'rep']:X.eng.length?[`${X.eng.length} engaged accounts, no meeting`,'eng']:null],
    ['opp','Opps',c('opp'),W_GOAL.opp[1],'goal 2 to 3',X.held.length?[`${X.held.length} meetings held, no opp yet`,'held']:null]];
   const ua=!fae?((D.W&&D.W.by_ae)||[]).find(x=>x.ae==='Unassigned'):null,uaL=ua?[[+ua.connect,'connect'],[+ua.accept,'accept'],[+ua.dms,'DM'],[+ua.reply,'reply'],[+ua.meeting,'meeting']].filter(x=>x[0]>0).map(x=>x[0]+' '+x[1]+(x[0]===1?'':'s')):[];
-  const UA=uaL.length?`<p class="v18hint">Includes ${E1(uaL.join(', '))} with no AE yet (Unattributed). Each AE’s own numbers leave these out.</p>`:'';
+  const UA=uaL.length?`<p class="v18hint">Includes ${E1(uaL.join(', '))} with no AE yet. Each AE’s own numbers leave these out.</p>`:'';
   const tl=tiles.map(([m,l,v,g,sub,a])=>{const p=Math.min(1,g?v/g:0),hit=m==='meeting'?v>=3:m==='opp'?v>=2:v>=g;return `<div class="v182sbt ${hit?'hit':''}"><div class="press" data-v18m="${m}" data-v18p="this_week" role="button" tabindex="0"><b class="v18n">${v}</b><span class="l">${l}</span><div class="v18g"><i style="--p:${p.toFixed(3)}"></i></div><small>${E1(sub)}</small></div>${a?`<span class="v182al press" data-v182al="${a[1]}">${E1(a[0])} ${AR_SVG}</span>`:hit?`<span class="v182al ok">${OK_SVG} On track</span>`:`<span class="v182al mu">${m==='opp'?'Comes from meetings held':m==='meeting'?'Comes from replies':'Nothing to act on yet'}</span>`}</div>`}).join('');
   /* the funnel and its leak (this week, people once) */
   const coh=(D.W&&D.W.cohort)||{};const st=[['Invites',c('connect'),'connect'],['Accepted',acc,'accept'],['DM1',dm1,'dm1'],['Replied',c('reply'),'reply'],['Meetings',c('meeting'),'meeting']];
@@ -10201,7 +10205,7 @@ function repTop(D){try{if(!D||!D.S)return '';const fae=D.F&&D.F.ae||'';const W=(
   const fn=`<div class="v182fn">${st.map((s,i)=>`<div class="v182fr press ${i>0&&leak===i-1?'leak':''}" data-v18m="${s[2]}" data-v18p="this_week" role="button" tabindex="0"><span class="l">${s[0]}</span><div class="fb182"><i style="--w:${(s[1]/mx).toFixed(3)}"></i></div><b>${s[1]}</b>${i>0?`<em>${conv[i-1]==null?'':Math.round(conv[i-1]*100)+'%'}</em>`:'<em></em>'}</div>`).join('')}</div>
    ${leak>=0?`<div class="v182lk2"><b>The leak: ${st[leak][0]} to ${st[leak+1][0]}</b><span>${conv[leak]==null?'':Math.round(conv[leak]*100)+'% this week, against about '+Math.round(BEN[leak]*100)+'%'}</span>${LA[leak][1]?`<span class="v182al press" data-v182al="${LA[leak][1]}">${E1(LA[leak][0])} ${AR_SVG}</span>`:`<p class="v182mut">${E1(LA[leak][0])}</p>`}</div>`:''}
    <p class="v18hint">This week, ${coh.connects!=null?'counted once per person':'each event once'}. Tap a step for the people.</p>`;
-  return `<section class="v18c v182keep v182o1 qin" data-v18card="v182sb"><div class="v18cap"><span>This week against goal${fae?' · '+E1(fae==='Unassigned'?'Unattributed':fae):''}</span><span>Always this week</span></div><div class="v182sbg">${tl}</div>${UA}</section>
+  return `<section class="v18c v182keep v182o1 qin" data-v18card="v182sb"><div class="v18cap"><span>This week against goal${fae?' · '+E1(fae==='Unassigned'?'No AE':fae):''}</span><span>Always this week</span></div><div class="v182sbg">${tl}</div>${UA}</section>
    <section class="v18c v182keep v182o2 qin" data-v18card="v182fn"><div class="v18cap"><span>Where it leaks</span><span>Always this week</span></div>${fn}</section>`}catch(e){V182.errs.push('top '+e.message);return ''}}
 function momentum(D){try{const H=((D&&D.health)||(D&&D.F&&D.F.ae?[]:(window.ariV181&&ariV181.health))||[]).filter(h=>h.band!=='Parked'&&+h.people>0);if(!H.length)return '';
   const g={moving:[],stuck:[],cold:[]};H.forEach(h=>{const q=h.days_quiet==null?99:+h.days_quiet;if(h.band==='Cold'||q>=10)g.cold.push(h);else if(q<=3&&+h.score>=45&&(+h.accepted>0||+h.replied>0))g.moving.push(h);else g.stuck.push(h)});
@@ -12105,10 +12109,7 @@ function menuHTML(){const sc=scansLabel(),sy=($('#v163sync')||{}).textContent||'
   const it=(k,t,s)=>`<button type="button" class="v1813mi" data-m="${k}"><b>${E(t)}</b>${s?`<span>${E(s)}</span>`:''}</button>`;
   return `<div class="v1813scrim" data-m="close"></div><div class="v1813panel" role="document"><div class="v1813grab" aria-hidden="true"></div>
   <div class="v1813mh"><b>Ari</b><button type="button" class="v1813x" data-m="close" aria-label="Close">×</button></div>
-  ${it('ask','Ask Ari','Questions about your queue and accounts')}${it('settings','Settings','Motion, pings, lock, account, About')}
-  ${it('sync','Sync now',sy.trim())}${sc?it('scans',sc,'Tap for details'):''}
-  ${it('find','Find people','Imports, events and search')}${it('more','Exec track, pipeline and Today’s 15','Shows them under Done today')}
-  ${it('log','Activity','What you and Ari did')}${it('classic','All account filters','AE, status and plays')}${it('meet','Meet Ari','')}</div>`}
+  ${it('ask','Ask','Questions about your queue and accounts')}${it('find','Find people','Imports, events and search')}${it('settings','Settings','Sync, activity, pings, lock, account, About')}</div>`}
 function openMenu(from){let m=$('#v1813menu');if(!m){m=document.createElement('div');m.id='v1813menu';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Ari');document.body.appendChild(m);
     m.addEventListener('click',onMenu);m.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();return}if(e.key!=='Tab')return;const f=[...m.querySelectorAll('button')];if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}})}
   m.innerHTML=menuHTML();m.hidden=false;H.classList.add('v1813mopen');V.menu++;buzz(6);V.from=from||null;setTimeout(()=>{const b=m.querySelector('.v1813mi');b&&b.focus()},30)}
@@ -12155,9 +12156,9 @@ function cardHTML(a){const cnt={};a.ppl.forEach(({s})=>cnt[s.k]=(cnt[s.k]||0)+1)
   const nx=a.next?`Next: <em>${E(a.next.k==='Connect'?'Connect with '+first(a.next.q.it.name):a.next.k==='Withdraw'?'Withdraw '+first(a.next.q.it.name):a.next.k+' to '+first(a.next.q.it.name))}</em>`:a.grp.wait?`Waiting on ${a.grp.wait}`:'';
   const sub=[a.ppl.length+(a.ppl.length===1?' person':' people'),(a.ppl.find(x=>x.p.owner)||{p:{}}).p.owner].filter(Boolean).join(' · ');
   return `<div class="v1813acct${open?' open':''}" data-k="${E(a.k)}"><button type="button" class="ah" aria-expanded="${open}" aria-controls="${id}" data-v1813a="${E(a.k)}">
-   <span class="top"><span class="lg" aria-hidden="true">${E(ini(a.n))}</span><span class="nm"><b>${E(a.n)}</b><span>${E(sub)}</span></span><svg class="chev" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+   <span class="top">${G.ariMono?ariMono(a.n,40,'lg'):`<span class="lg" aria-hidden="true">${E(ini(a.n))}</span>`}<span class="nm"><b>${E(a.n)}</b><span>${E(sub)}</span></span><svg class="chev" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
    <span class="stages">${ks.map(k=>chip(k,cnt[k])).join('')}</span>${nx?`<span class="nx">${nx}</span>`:''}</button>
-   <ul class="ppl" id="${id}"${open?'':' hidden'}>${open?a.ppl.map(({p,s})=>`<li><button type="button" class="item" data-v1813pid="${E(p.id)}" data-v1813pn="${E(p.name)}"><span class="av" aria-hidden="true">${E(ini(p.name))}</span><span class="m"><b>${E(p.name)}</b><span>${E(p.title||'')}</span></span>${chip(s.k)}</button></li>`).join('')+`<li><button type="button" class="v1813line" data-acc171="${E(a.n)}">Open account<span aria-hidden="true">›</span></button></li>`:''}</ul></div>`}
+   <ul class="ppl" id="${id}"${open?'':' hidden'}>${open?a.ppl.map(({p,s})=>`<li><button type="button" class="item" data-v1813pid="${E(p.id)}" data-v1813pn="${E(p.name)}"><span class="av v18134av" aria-hidden="true">${E(ini(p.name))}</span><span class="m"><b>${E(p.name)}</b><span>${E(p.title||'')}</span></span>${chip(s.k)}</button></li>`).join('')+`<li><button type="button" class="v1813line" data-acc171="${E(a.n)}">Open account<span aria-hidden="true">›</span></button></li>`:''}</ul></div>`}
 function shell(){const pane=$('#prospect');if(!pane||!pane.querySelector('#v162al'))return null;let w=$('#v1813acc');
   if(!w||w.parentNode!==pane){w=w||document.createElement('div');w.id='v1813acc';
     w.innerHTML=`<p class="v1813cnt" id="v1813ac"></p><label class="v1813search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="v1813q" type="search" placeholder="Search accounts or people" aria-label="Search accounts or people" autocomplete="off" enterkeyhint="search"></label>
@@ -12466,13 +12467,13 @@ V.provider=provider;V.providers=PROVIDERS;
 const RK='ari-qf-recent';
 function recents(){try{return (JSON.parse(localStorage.getItem(RK)||'[]')||[]).filter(r=>r&&r.k&&r.n).slice(0,6)}catch(e){return []}}
 function remember(r){try{const L=recents().filter(x=>!(x.k===r.k&&x.n===r.n));L.unshift({k:r.k,n:r.n,sub:r.sub||''});localStorage.setItem(RK,JSON.stringify(L.slice(0,6)))}catch(e){}}
-function results(q){q=low(q).trim();if(!q)return [];const ctx={people:people()};
+function results(q){const raw=String(q==null?'':q).trim();q=low(q).trim();if(!q)return [];const ctx={people:people(),raw};
   return PROVIDERS.map(pv=>{let it=[];try{it=pv.search(q,ctx)||[]}catch(e){V.errs.push('pv '+pv.id+' '+e)}return {pv,items:it.slice(0,pv.limit||6),top:it.length?it[0].s:0}}).filter(g=>g.items.length).sort((a,b)=>b.top-a.top)}
 let QF={sel:0,rows:[],from:null};
-function rowHTML(r,i){return `<button type="button" class="qr" role="option" id="v18133r${i}" data-qf="${i}"><span class="lg" aria-hidden="true">${E(ini(r.title||r.n))}</span><span class="tx"><b>${E(r.title||r.n)}</b><small>${E(r.sub||'')}</small></span>${r.tag?`<em class="${r.tagc||''}">${E(r.tag)}</em>`:''}</button>`}
+function rowHTML(r,i){return `<button type="button" class="qr" role="option" id="v18133r${i}" data-qf="${i}">${r.icon?`<span class="lg ic" aria-hidden="true">${r.icon}</span>`:r.k==='a'&&G.ariMono?ariMono(r.n,36,'lg'):`<span class="lg pp" aria-hidden="true">${E(ini(r.title||r.n))}</span>`}<span class="tx"><b>${E(r.title||r.n)}</b><small>${E(r.sub||'')}</small></span>${r.tag?`<em class="${r.tagc||''}">${E(r.tag)}</em>`:''}</button>`}
 function paint(){const box=$('#v18133qf');if(!box)return;const q=box.querySelector('input').value;const L=box.querySelector('.ql');QF.rows=[];let h='';
   if(!q.trim()){const R=recents();if(R.length){h=`<p class="qs">Recent</p>`+R.map(r=>{const i=QF.rows.push({k:r.k,n:r.n,title:r.n,sub:r.sub})-1;return rowHTML(QF.rows[i],i)}).join('')}
-    else h=`<p class="qe">Type a name, company or title.</p>`}
+    else h=`<p class="qe">Type a name, company or title. End with a question mark to ask.</p>`}
   else{const G2=results(q);
     if(!G2.length)h=`<p class="qe">No one matches “${E(q.trim())}”.</p>`;
     else h=G2.map(g=>`<p class="qs">${E(g.pv.label)}</p>`+g.items.map(r=>{const i=QF.rows.push(r)-1;return rowHTML(r,i)}).join('')).join('')}
@@ -12481,7 +12482,7 @@ function mark(){const box=$('#v18133qf');if(!box)return;box.querySelectorAll('.q
   if(r&&QF.rows.length){r.classList.add('on');inp.setAttribute('aria-activedescendant',r.id);try{r.scrollIntoView({block:'nearest'})}catch(e){}}else inp.removeAttribute('aria-activedescendant')}
 function openQF(from){let m=$('#v18133qf');
   if(!m){m=document.createElement('div');m.id='v18133qf';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Find a person or account');
-    m.innerHTML=`<div class="qscr" data-qx="1"></div><div class="qp"><div class="qh"><label>${SVG}<input type="search" placeholder="Find a person or account" aria-label="Find a person or account" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="true" aria-controls="v18133ql"></label><button type="button" class="qx" data-qx="1">Cancel</button></div><div class="ql" id="v18133ql" role="listbox" aria-label="Results"></div><p class="qk">↑ ↓ to move · Enter to open · Esc to close</p></div>`;
+    m.innerHTML=`<div class="qscr" data-qx="1"></div><div class="qp"><div class="qh"><label>${SVG}<input type="search" placeholder="Find a person or account, or ask" aria-label="Find a person or account, or ask a question" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="true" aria-controls="v18133ql"></label><button type="button" class="qx" data-qx="1">Cancel</button></div><div class="ql" id="v18133ql" role="listbox" aria-label="Results"></div><p class="qk">↑ ↓ to move · Enter to open · Esc to close</p></div>`;
     document.body.appendChild(m);const inp=m.querySelector('input');let t=0;
     inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{QF.sel=0;paint()},80)});
     m.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeQF();return}
@@ -12530,6 +12531,461 @@ function build(){try{fetch('/build.json',{cache:'no-store'}).then(r=>r.ok?r.json
 function boot(){btn();geo();about(true);build();
   if(G.ariPage&&ariPage.open&&!ariPage.open.v18133){const _o=ariPage.open;ariPage.open=function(...a){const r=_o.apply(this,a);try{about(false)}catch(e){}return r};ariPage.open.v18133=1}
   setInterval(()=>{if(!document.hidden){btn();about(false)}},3000)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script>
+<style id="v18134css">/* ===== v18.13.4 (Owner, Wed 28 Oct 2026): enterprise polish batch 2. Tokens only, no gradients, no glows, no green. =====
+   One kit: primary = filled indigo (.v1813pri), secondary = quiet bg2, tertiary = indigo text. One chip, one segmented switch, one back button. */
+:root{--v4mg-m:#CDD5E3;--v4mg-n:#E4D5B9;--v4mg-k:#E5CFC7;--v4mg-x:#D9D3C8}
+
+/* ---------- company monograms (option C): rounded square, one letter, tinted by AE. People stay circles. ---------- */
+.v18134mg{--s:40px;display:inline-grid!important;place-items:center;flex:none;width:var(--s)!important;height:var(--s)!important;min-width:var(--s);border-radius:calc(var(--s)*.28)!important;background:var(--v4mg-x)!important;color:var(--ink)!important;box-shadow:none!important;overflow:hidden;
+  font:600 calc(var(--s)*.46)/1 var(--sans)!important;letter-spacing:0!important;text-transform:none!important;font-variant-numeric:lining-nums;text-box:trim-both cap alphabetic;vertical-align:middle;padding:0!important;margin:0}
+.v18134mg>i{font-style:normal;display:block;line-height:1;transform:translateY(.02em)}
+@supports (text-box:trim-both cap alphabetic){.v18134mg>i{transform:none;text-box:trim-both cap alphabetic}}
+.v18134mg.t-m{background:var(--v4mg-m)!important}.v18134mg.t-n{background:var(--v4mg-n)!important}.v18134mg.t-k{background:var(--v4mg-k)!important}
+.v18134mg[data-s="16"]{font-weight:700!important}
+.v18134av{display:inline-grid;place-items:center;flex:none;width:40px;height:40px;border-radius:50%!important;background:var(--bg3)!important;color:var(--ink)!important;font:600 14px/1 var(--sans)!important;letter-spacing:0;box-shadow:none!important}
+.v18134av.l{width:56px;height:56px;font-size:19px!important}
+#v1813acc .v1813acct .lg.v18134mg{--s:40px}
+#v18133qf .qr .lg.pp{border-radius:50%}
+#v18133qf .qr .lg.ic{background:var(--tint);color:var(--acc)}
+
+/* ---------- one back button: plain chevron, 48 px target, no ring ---------- */
+.ovt .bk,#ovBack,.v171pg .ph .bk,.v175pg .ph .bk,.v18dd .ph .bk,.apg .apbk,#apBk{width:48px!important;height:48px!important;min-width:48px;border-radius:24px!important;box-shadow:none!important;border:0!important;background:none!important;display:grid!important;place-items:center;color:var(--ink)!important;margin-left:-12px}
+.ovt .bk:hover,.v171pg .ph .bk:hover,.apg .apbk:hover{background:var(--fill)!important}
+/* one header: back, a quiet centred label, actions on the right; same height on the person file and the account page */
+.ovt{height:auto!important;min-height:56px;padding-top:calc(env(safe-area-inset-top) + 4px)!important;padding-bottom:4px!important}
+#ovCap{font:600 15px/20px var(--sans)!important;letter-spacing:0!important;text-transform:none!important;color:var(--ink2)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52%}
+.v171pg .ph{min-height:56px;padding-top:calc(env(safe-area-inset-top) + 4px)!important;padding-bottom:4px!important;gap:8px!important;border-bottom:1px solid var(--line)}
+.v171pg.v18134on .ph .tt{flex:1;min-width:0;text-align:center;margin-right:36px}
+.v171pg.v18134on .ph .tt b{font:600 15px/20px var(--sans)!important;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.v171pg.v18134on .ph .tt span{display:none!important}
+/* the version tag stays tappable (5 taps opens diagnostics) but is not shown; the number lives in About */
+.apg .apver{color:transparent!important;min-width:48px;min-height:48px}
+
+/* ---------- one segmented switch (the Report one): bg2 track, ink fill on the chosen item ---------- */
+.apseg,#apSeg,.v162seg,.v1821tb,#qseg{display:flex!important;padding:2px!important;gap:2px!important;border-radius:26px!important;background:var(--bg2)!important;box-shadow:none!important;border:0!important}
+#apSeg>i,.v162seg>i,#qseg>i{display:none!important}
+#apSeg>span,.v162seg>span,.v1821tb>button,#qseg>span{flex:1 1 0;min-width:0;min-height:44px;display:inline-flex!important;align-items:center;justify-content:center;gap:4px;padding:0 12px!important;border:0!important;border-radius:24px!important;background:none!important;color:var(--ink2)!important;font:600 14px/20px var(--sans)!important;letter-spacing:0!important;text-transform:none!important;box-shadow:none!important}
+#apSeg>span.on,.v162seg>span.on,.v1821tb>button.on,#qseg>span.on{background:var(--ink)!important;color:var(--bg)!important}
+.v162seg{display:inline-flex!important;min-width:220px}
+
+/* ---------- one chip: 24 px, 8 px radius, 12/16 semibold; accent variant in indigo on tint ---------- */
+.v1813st,.v1813tg,.v162st,.v182lb,.v171chip,.v1810st,#v18133qf .qr em,.v18134chip{display:inline-flex!important;align-items:center;min-height:24px;padding:0 8px!important;border-radius:8px!important;border:0!important;box-shadow:none!important;background:var(--bg3)!important;color:var(--ink2)!important;font:600 12px/16px var(--sans)!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap}
+.v1813st.acc,.v1813tg.acc,#v18133qf .qr em.acc,.v18134chip.acc{background:var(--tint)!important;color:var(--acc)!important}
+.v1813hero .v1813tg{background:none!important;padding:0!important;font-size:13px!important}
+
+/* ---------- one button hierarchy ---------- */
+#ovBar .pfbar .b.pri,#ovBar .pfbar #pfCopy{background:var(--acc)!important;color:var(--on-acc)!important;border:0!important;box-shadow:none!important}
+#ovBar .pfbar .b.sec2,#ovBar .pfbar .b:not(.pri){background:var(--bg2)!important;color:var(--ink)!important;border:0!important;box-shadow:none!important}
+#ovBar .pfbar .b{min-height:48px;border-radius:14px!important;font:650 16px/20px var(--sans)!important}
+.v163btn.sec,.v163btn.ghost,.v171btn,.v1813two button,.v161rb .b.sec2,.v163btn.sm{background:var(--bg2)!important;color:var(--ink)!important;border:0!important;box-shadow:none!important;min-height:48px;border-radius:14px!important;font:600 15px/20px var(--sans)!important;padding:0 16px!important;cursor:pointer;-webkit-appearance:none;appearance:none}
+.v1813two button[data-rv=lead],.v161rb .b.pri{background:var(--acc)!important;color:var(--on-acc)!important}
+#ovb .v163nx .v163btn.ok{background:var(--bg2)!important;color:var(--ink)!important;box-shadow:none!important;border:0!important}
+#ovb .v163nx .v163btn.ok svg{color:var(--acc)}
+
+/* ---------- sentence-case section labels (13 px, second ink), instead of letter-spaced capitals ---------- */
+.v1813sec b,.v182read>.cap span:first-child,.v182tdm>.cap span:first-child,.v182feed>.cap span:first-child,#ovb .cap,.v171pg .cap,.fxin .cap,.v18134 .v4h b{font:650 13px/18px var(--sans)!important;letter-spacing:0!important;text-transform:none!important;color:var(--ink2)!important}
+
+/* ---------- Today: the old cards wear the same card as the rest; no chip walls ---------- */
+.v182read,.v182tdm,.v182feed{background:var(--bg2)!important;border:0!important;box-shadow:none!important;border-radius:16px!important}
+.v182read .v182lb{display:none!important}
+.v182read .v182rd,.v182tdm .v182mi{min-height:56px;gap:12px}
+.v182read .v182rd:after,.v182tdm .v182mi:after{content:"›";margin-left:auto;color:var(--ink2);font:400 22px/1 var(--sans);padding-left:8px}
+.v1813grid .v1813tile{min-height:104px;align-content:start}
+.v1813hero .r2{align-items:baseline}
+#v18134more{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:56px;margin:16px 0 8px;padding:0 16px;border:0;border-radius:16px;background:var(--bg2);color:var(--ink);font:600 15px/20px var(--sans);text-align:left;cursor:pointer}
+#v18134more span{color:var(--ink2);font-weight:400;font-size:22px}
+html.v1813x #v18134more{display:none}
+/* Today with nothing to send: what I found */
+html.v18134empty #v1812st{display:none!important}
+#v18134found{display:none}
+html.v18134empty #v18134found{display:block}
+#v18134found h1{font:700 30px/36px var(--sans);margin:8px 0 4px;color:var(--ink)}
+#v18134found .sub{display:flex;gap:10px;align-items:flex-start;color:var(--ink2);font:400 16px/22px var(--sans);margin:0 0 8px}
+#v18134found .sub .arif{flex:none;margin-top:-2px}
+
+/* ---------- the depth model: hero, why now, one action, then quiet sections ---------- */
+.v18134hero{padding-top:8px}
+.v18134hero .v18134id{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.v18134hero .v18134id>div{min-width:0;flex:1}
+.v18134hero .pfn,.v18134 .nm1{font:700 28px/34px var(--sans)!important;color:var(--ink);margin:0!important;overflow-wrap:anywhere}
+.v18134hero .pfr,.v18134 .sb1{font:400 16px/22px var(--sans)!important;color:var(--ink2);margin-top:2px!important}
+.v18134lk{display:inline;border:0;background:none;padding:0;margin:0;color:var(--acc);font:inherit;font-weight:600;cursor:pointer;text-decoration:none;min-height:0}
+.v18134lk:hover{text-decoration:underline}
+.v18134hero .v18134lk{padding:12px 0;margin:-12px 0}
+#ovR .v171ib{width:48px!important;height:48px!important;display:grid!important;place-items:center;box-shadow:none!important;background:none!important;border:0!important}
+#ovR .v171hic{gap:0!important}
+.v18134why{display:flex;gap:10px;align-items:flex-start;margin:16px 0 4px;padding:12px 14px;border-radius:14px;background:var(--bg2)}
+.v18134why .arif{flex:none;margin-top:1px}
+.v18134why p{margin:0;font:400 16px/22px var(--sans);color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.v18134act{margin-top:12px}
+.v18134sec{margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.v18134sec>.v4h{display:flex;align-items:center;justify-content:space-between;min-height:24px;margin-bottom:8px}
+.v18134sec>.v4h b{font:650 13px/18px var(--sans);color:var(--ink2)}
+.v18134all{min-height:48px;margin:-12px -12px -12px 0;padding:0 12px;border:0;background:none;color:var(--acc);font:600 14px/20px var(--sans);cursor:pointer;border-radius:12px}
+.v18134all:hover{background:var(--fill)}
+.v18134sec:not(.open)>.v4r{display:none!important}
+.v18134sec:not(.open) .v18134cl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.v18134sec:not(.open) .v18134rows>*:nth-child(n+3){display:none!important}
+.v18134sec:not(.open) .tl>.tle:nth-child(n+3){display:none!important}
+.v18134sec:not(.open) .fd~.fd{display:none!important}
+.v18134sec .pfs{margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
+.v18134sec .v4r>*{margin-top:16px!important}
+.v18134sec .h1cap,.v18134sec .tl~.cap{display:none}
+.v18134row{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:6px 8px;margin:0 -8px;width:calc(100% + 16px);border:0;border-radius:12px;background:none;color:var(--ink);text-align:left;font:inherit;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.v18134row:hover{background:var(--fill)}
+.v18134row .tx{flex:1;min-width:0}
+.v18134row b{display:block;font:600 16px/22px var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v18134row small{display:block;font:400 14px/20px var(--sans);color:var(--ink2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.v18134row .ch{flex:none;color:var(--ink2);font:400 22px/1 var(--sans)}
+.v18134row .dt{flex:none;width:44px;color:var(--ink2);font:600 12px/16px var(--sans)}
+.v18134row.sig .dt{align-self:flex-start;padding-top:4px}
+.v18134row:focus-visible,.v18134all:focus-visible,.v18134lk:focus-visible,#v18134sb:focus-visible,#v18134more:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.v18134empty{color:var(--ink2);font:400 15px/22px var(--sans);margin:0}
+.v18134 .v18134mg{--s:56px}
+/* person file: the pieces Ari no longer shows (internal id, empty chips, status chips that argue with the progress bar, the repeated "Next") */
+#ovb .v18134gone{display:none!important}
+#ovb .v162ps .row:has(.v162st){display:none!important}
+/* the account page skeleton; the classic brief, email and file views sit one tap below it */
+.v171pg.v18134on .pb>*:not(#v18134ap){display:none!important}
+.v171pg.v18134on.v18134full .pb>*:not(#v18134ap){display:block!important}
+#v18134ap{padding:20px var(--g,20px) 24px}
+#v18134ap .v18134id{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+#v18134ap .v18134id>div{min-width:0;flex:1}
+.v18134fullb{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:56px;margin-top:24px;padding:0 16px;border:0;border-radius:16px;background:var(--bg2);color:var(--ink);font:600 15px/20px var(--sans);text-align:left;cursor:pointer}
+.v18134fullb span{color:var(--ink2);font-size:22px;font-weight:400}
+
+/* ---------- DM focus: person first, company under; the draft sits up top; context fills the rest ---------- */
+.v1812fx .fxwho b{font:700 24px/30px var(--sans)!important}
+.v1812fx .fxwho span{font:400 15px/20px var(--sans)!important;color:var(--ink2)}
+.v1812fx .v1812mid{flex:1;overflow:auto}
+.v1812fx .v163row{display:flex;gap:8px;margin-top:12px}
+.v1812fx .v163row .v163btn{flex:1}
+.v18134fxc{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.v18134fxc .v4h b{display:block;font:650 13px/18px var(--sans);color:var(--ink2);margin-bottom:4px}
+.v1812fx .fxwhy{margin:4px 0 12px!important;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- bottom bar: Search is the fourth item ---------- */
+#v18134sb{flex:1 1 0;min-width:0;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:none;color:var(--ink2);cursor:pointer;padding:0;touch-action:manipulation;font:inherit}
+#v18134sb .v163tl{display:block!important;font:600 12px/16px var(--sans)!important;color:inherit!important;opacity:1!important}
+#v18134sb:active{color:var(--ink)}
+/* pull down on a list at the top: a quiet pill that says what letting go will do */
+#v18134pull{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 64px);z-index:40;transform:translate(-50%,-80px);opacity:0;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border-radius:20px;background:var(--bg2);color:var(--ink2);font:600 14px/20px var(--sans);box-shadow:0 0 0 1px var(--line);pointer-events:none}
+#v18134pull.go{color:var(--acc)}
+/* Settings: the rows that left the menu */
+.v18134set .aprow{min-height:56px}
+.v18134set .aprow b{font-size:16px}
+.v18134set .aprow span{font-size:14px}
+html.v18134empty .v1812done{display:none!important}
+.v1813card .v1813two button:not([data-rv=lead]),.v1813card .v161rb .b.sec2{background:var(--bg)!important}
+.v182read>.cap span,.v182tdm>.cap span,.v182feed>.cap span,#v18133qf .qs,#ovb .fd .dd b,#ovb .fd .src,#ovb .ladl span{letter-spacing:0!important;text-transform:none!important}
+.v182read>.cap span,.v182tdm>.cap span,.v182feed>.cap span,#v18133qf .qs{font:600 13px/18px var(--sans)!important;color:var(--ink2)!important}
+#ovb .v18134nx{display:flex;gap:8px;margin-top:12px!important}
+#ovb .v18134nx .v163btn{flex:1 1 auto;min-width:0;padding:0 12px!important;white-space:nowrap}
+#ovb .v18134nx .v163btn.ok{flex:1.6 1 auto}
+#ovb .v18134nx .v163btn span{overflow:visible!important;text-overflow:clip!important}
+html.v1813 #ascrim{bottom:var(--v18133tb,65px)!important}
+#v1813menu .v1813mi:focus-visible,.aprow:focus-visible{outline:2px solid var(--acc)!important;outline-offset:-2px;border-radius:12px}
+#v18133qf .qh label{min-width:0}
+#v18133qf .qh input::placeholder{text-overflow:ellipsis}
+.v18134row,.v18134all,.v18134lk,#v18134more,.v18134fullb,#v18134sb{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:reduce){#v18134pull{transition:none}}
+</style>
+<script>/* ===== v18.13.4 (Owner, Wed 28 Oct 2026): enterprise polish batch 2 =====
+   - person file and account page share one skeleton: who, a one-line why now, one main action, then Signals, Conversation,
+     Account/People, History, two lines each with See all. Every company opens its account, every person their file; back returns exactly.
+   - company tiles: one letter, tinted by AE (ariMono). People stay circles.
+   - Search in the bottom bar and a pull down at the top of a list; question-shaped text becomes an Ask row (a quick find provider).
+   - a three-row menu; Sync, Activity and the intro move to Settings, the exec track and pipeline to the foot of Today.
+   - Today never says "0 to send": it shows what was found instead, from data already on the phone.
+   No new reads or writes: every action calls something that already exists. */
+(function(){'use strict';
+const G=window,H=document.documentElement,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const V=G.ariV18134={v:'v18.13.4',errs:[],pf:0,ap:0,found:0,stack:[]};
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const low=s=>String(s==null?'':s).toLowerCase().trim();
+const nc=s=>low(s).replace(/[^a-z0-9]/g,'');
+const first=n=>String(n||'').split(/\s+/)[0]||'';
+const ini=s=>String(s||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n||6)}catch(e){}};
+const err=(k,e)=>{if(V.errs.length<40)V.errs.push(k+' '+String(e&&e.message||e).slice(0,140))};
+const CH='<span class="ch" aria-hidden="true">›</span>';
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dshort(d){const s=String(d||'');const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return (+m[3])+' '+MON[+m[2]-1];return s.slice(0,8)}
+function dnum(d){const t=Date.parse(String(d||'').slice(0,10));return isNaN(t)?0:t}
+function ago(d){const t=dnum(d);if(!t)return '';const n=Math.round((Date.now()-t)/864e5);return n<=0?'today':n===1?'yesterday':n+' days ago'}
+
+/* ---------- data already on the phone ---------- */
+function people(){try{const S=G.ariV17&&ariV17.store;const L=S&&S.people&&S.people.size?[...S.people.values()]:((G.ariDATA&&ariDATA.people)||[]);
+  return L.filter(p=>p&&p.name&&!p.deleted_at&&low(p.review)!=='personal')}catch(e){err('ppl',e);return []}}
+function accts(){try{const S=G.ariV17&&ariV17.store;const L=S&&S.accounts&&S.accounts.size?[...S.accounts.values()]:((G.ariDATA&&ariDATA.accounts)||[]);return L.filter(a=>a&&a.company)}catch(e){return []}}
+let AEM=null,AEAT=0;
+function aeMap(){const now=Date.now();if(AEM&&now-AEAT<4000)return AEM;const m=new Map();
+  try{people().forEach(p=>{const k=nc(p.company);if(k&&p.owner&&!m.has(k))m.set(k,p.owner)});accts().forEach(a=>{const k=nc(a.company);const o=a.owner||a.ae;if(k&&o)m.set(k,o)})}catch(e){}
+  AEM=m;AEAT=now;return m}
+function aeOf(co){return aeMap().get(nc(co))||''}
+const TINT={tamsin:'m',idris:'n',bram:'k'};
+/* the one company tile: a rounded square with one letter, tinted by the account's AE (no AE: neutral) */
+function mono(co,sz,cls){sz=+sz||16;const L=(String(co||'?').replace(/[^A-Za-z0-9]/g,'')[0]||'?').toUpperCase();const t=TINT[low(first(aeOf(co)))]||'x';
+  return `<span class="${cls?E(cls)+' ':''}v18134mg t-${t}" data-s="${sz}" style="--s:${sz}px" aria-hidden="true"><i>${E(L)}</i></span>`}
+G.ariMono=mono;V.aeOf=aeOf;
+function personByName(n){return people().find(p=>p.name===n)||((G.ariDATA&&ariDATA.people)||[]).find(p=>p&&p.name===n)||null}
+function queueL(){return ((G.ariV1812&&ariV1812.L)||[]).filter(x=>x&&x.k!=='relay')}
+function stageOf(p){try{if(G.ariIsExec&&ariIsExec(p))return ['Exec track',''];}catch(e){}
+  const it=queueL().find(x=>String(x.pid)===String(p.id));if(it)return [it.tag||'Up next','acc'];
+  if(p.meeting)return ['Meeting',''];if(p.replied)return ['Replied',''];if(p.withdrawn)return ['Withdrawn',''];if(p.dm3_sent)return ['DM3 sent',''];if(p.dm2_sent)return ['DM2 sent',''];if(p.dm1_sent)return ['DM1 sent',''];if(p.accepted)return ['Accepted',''];if(p.connect_sent)return ['Invited',''];return ['Coming up','']}
+function briefFor(co){try{const B=G.ariV182&&ariV182.briefs;let b=null;if(B instanceof Map)b=B.get(co)||[...B.values()].find(x=>x&&nc(x.company)===nc(co));else if(Array.isArray(B))b=B.find(x=>x&&nc(x.company)===nc(co));else if(B&&typeof B==='object')b=B[co]||Object.values(B).find(x=>x&&nc(x.company)===nc(co));return b||null}catch(e){return null}}
+/* signals for an account: its hook, the brief's why-now items (with their source), and what was found on each person */
+function signalsFor(co,ppl){const out=[],seen=new Set();const add=(d,src,t,url,who)=>{const k=low(t).slice(0,80);if(!t||seen.has(k))return;seen.add(k);out.push({d,src,t:String(t),url:url||'',who:who||''})};
+  try{const b=briefFor(co);(b&&b.why_now||[]).forEach(w=>add(w.date,'News',w.text||w.title,w.url))}catch(e){}
+  try{const a=accts().find(x=>nc(x.company)===nc(co));if(a&&a.hook)add(a.hook_date,'Account hook',a.hook,a.hook_url||'')}catch(e){}
+  try{(ppl||[]).forEach(p=>{const f=(G.ariPF||{})[p.name];(f&&f.found||[]).forEach(x=>add(x[0]&&/\d{4}-/.test(x[0])?x[0]:x[0],x[1],x[2],x[4]||'',p.name))})}catch(e){}
+  return out.sort((x,y)=>(dnum(y.d)||0)-(dnum(x.d)||0))}
+function eventsFor(ppl){const ev=[];ppl.forEach(p=>{const f=first(p.name);
+  [['meeting','Meeting booked with '+p.name],['replied',p.name+' replied'],['dm3_sent','DM3 to '+f],['dm2_sent','DM2 to '+f],['dm1_sent','DM1 to '+f],['accepted',p.name+' accepted'],['connect_sent','You invited '+p.name],['withdrawn','Invite to '+f+' withdrawn']].forEach(([k,t])=>{const v=p[k];if(v&&/^\d{4}-/.test(String(v)))ev.push({d:v,t,n:p.name})})});
+  return ev.sort((a,b)=>dnum(b.d)-dnum(a.d))}
+
+/* ---------- section kit ---------- */
+function section(id,title,headHTML,restHTML,count){const more=restHTML||count>2;
+  return `<section class="v18134sec" data-v18134s="${id}"><div class="v4h"><b>${E(title)}</b>${more?`<button type="button" class="v18134all" aria-expanded="false">See all${count>2?' '+count:''}</button>`:''}</div>${headHTML}${restHTML?`<div class="v4r">${restHTML}</div>`:''}</section>`}
+function secEl(id,title,count){const s=document.createElement('section');s.className='v18134sec';s.dataset.v18134s=id;
+  s.innerHTML=`<div class="v4h"><b>${E(title)}</b><button type="button" class="v18134all" aria-expanded="false" hidden>See all${count>2?' '+count:''}</button></div><div class="v4b"></div><div class="v4r"></div>`;return s}
+function finishSec(s){const r=s.querySelector(':scope>.v4r'),b=s.querySelector(':scope>.v4b');const clamped=!!(b&&(b.querySelector('.tl>.tle:nth-child(3),.fd~.fd,.v18134cl,.v18134rows>*:nth-child(3)')));
+  const has=r&&r.children.length;if(r&&!has)r.remove();const btn=s.querySelector('.v18134all');if(btn)btn.hidden=!(has||clamped);if(b&&!b.children.length&&!has)s.remove()}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.v18134all');if(!b)return;e.preventDefault();e.stopPropagation();const s=b.closest('.v18134sec');if(!b.dataset.lbl)b.dataset.lbl=b.textContent;const on=!s.classList.contains('open');s.classList.toggle('open',on);b.setAttribute('aria-expanded',String(on));b.textContent=on?'Show less':b.dataset.lbl;buzz(4)},true);
+
+/* ---------- links between entities; back returns exactly where you were ---------- */
+const ovIsOn=()=>typeof ovOn!=='undefined'&&ovOn;
+const pgOn=()=>H.classList.contains('v171pgon');
+function lift(){try{const pg=$('#v171acc');if(!pg)return;if(pgOn()&&ovIsOn()&&H.dataset.v18134top==='acct')pg.style.zIndex='31';else pg.style.removeProperty('z-index')}catch(e){}}
+function openAcctFrom(co){if(!co||!(G.ariV171&&ariV171.openAcct))return;buzz(6);H.dataset.v18134top='acct';try{ariV171.openAcct(co)}catch(e){err('acct',e)}setTimeout(lift,0);setTimeout(lift,120)}
+function openPersonFrom(n){if(!n||typeof G.openFile!=='function')return;buzz(6);
+  /* the person file is one sheet: when another person's file is underneath the account page, remember it so Back comes back to it */
+  try{const cur=ovIsOn()&&($('#ovb')||{}).dataset;if(cur&&cur.v18134n&&cur.v18134n!==n&&pgOn())V.stack.push({n:cur.v18134n,y:($('#ovb')||{}).scrollTop||0})}catch(e){}
+  H.dataset.v18134top='file';lift();try{G.openFile(n,null)}catch(e){err('file',e)}}
+V.openAcct=openAcctFrom;V.openPerson=openPersonFrom;
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+  const a=t.closest('[data-v18134acct]');if(a){e.preventDefault();e.stopPropagation();openAcctFrom(a.dataset.v18134acct);return}
+  const p=t.closest('[data-v18134pf]');if(p){e.preventDefault();e.stopPropagation();openPersonFrom(p.dataset.v18134pf);return}
+  const f=t.closest('[data-v18134full]');if(f){e.preventDefault();const pg=$('#v171acc');if(pg){const on=!pg.classList.contains('v18134full');pg.classList.toggle('v18134full',on);f.setAttribute('aria-expanded',String(on));if(on)setTimeout(()=>{const w=pg.querySelector('#v182wr');try{w&&w.scrollIntoView({block:'start',behavior:'smooth'})}catch(x){}},60)}return}
+  /* the old header tile on the person file opens the account above the file too */
+  if(t.closest('#ovR [data-acc171]')){H.dataset.v18134top='acct';setTimeout(lift,0);setTimeout(lift,150)}},true);
+/* a tab tap or a search jump starts fresh: nothing to come back to */
+['pointerdown','click'].forEach(ev=>document.addEventListener(ev,e=>{if(e.target&&e.target.closest&&e.target.closest('#tbar'))V.stack.length=0},true));
+
+/* ---------- person file ---------- */
+function capOf(el){const c=el&&el.querySelector(':scope>.cap');return c?low(c.textContent):''}
+function whyNow(f,p){const it=f.item||{};if(it.why)return String(it.why);const fd=(f.found||[])[0];const nx=f.next?String(f.next).replace(/\.$/,''):'';
+  const sig=fd?`Latest signal ${fd[0]}: ${fd[2]}`:'';if(nx&&sig)return `${nx}. ${sig}.`;if(nx)return nx+'.';if(sig)return sig+'.';
+  const st=stageOf(p)[0];return st&&st!=='Coming up'?st+'.':''}
+function decoPF(){const ovb=$('#ovb');if(!ovb||!ovIsOn())return;if(ovb.querySelector(':scope>#v18134pfm'))return;
+  const top=ovb.firstElementChild;if(!top||!top.querySelector('.pfn'))return;
+  try{const n=top.querySelector('.pfn').textContent.trim();const f=(G.ariPF||{})[n]||{};const p=f.p||personByName(n)||{name:n};const co=String(p.company||f.acct||'').trim();
+    ovb.dataset.v18134n=n;V.pf++;
+    /* machinery out: internal id, chips with no words */
+    const id=top.querySelector(':scope>.cap');if(id&&/^[A-Z]{1,5}\d{2,}$/.test(id.textContent.trim()))id.classList.add('v18134gone');
+    top.querySelectorAll('.chips').forEach(c=>{[...c.children].forEach(x=>{if(!x.textContent.trim())x.remove()});if(!c.children.length)c.classList.add('v18134gone')});
+    /* who */
+    top.classList.add('v18134hero');const nm=top.querySelector('.pfn'),pr=top.querySelector('.pfr');
+    const idw=document.createElement('div');idw.className='v18134id';idw.innerHTML=`<span class="v18134av l" aria-hidden="true">${E(ini(n))}</span><div></div>`;nm.parentNode.insertBefore(idw,nm);idw.lastChild.appendChild(nm);
+    if(pr){idw.lastChild.appendChild(pr);const title=p.title||f.role||'';pr.innerHTML=[title?E(title):'',co?`<button type="button" class="v18134lk" data-v18134acct="${E(co)}">${E(co)}</button>`:''].filter(Boolean).join(' · ')}
+    /* why now, in Ari's words, once */
+    const w=whyNow(f,p);if(w){top.insertAdjacentHTML('beforeend',`<div class="v18134why"><span class="arif xs" data-face="idle" aria-hidden="true"></span><p>${E(w)}</p></div>`);try{G.ariFill&&ariFill(top.querySelector('.v18134why'))}catch(e){}}
+    /* sort the blocks */
+    const kids=[...ovb.children].slice(1);const pick=fn=>kids.find(fn);
+    const status=pick(x=>x.classList.contains('v162ps'));const next=pick(x=>capOf(x)==='next');const draft=pick(x=>x.querySelector&&x.querySelector('.v163draft'));
+    const li=pick(x=>x.classList.contains('v171li'));const ctx=pick(x=>x.classList.contains('v163ctx'));const why=pick(x=>capOf(x)==='why this person');
+    const found=pick(x=>capOf(x).startsWith('what we found'));const marks=pick(x=>x.querySelector&&x.querySelector('.v16marks'));const hist=pick(x=>capOf(x)==='history');
+    const stamp=pick(x=>x.classList.contains('pfs')&&x.classList.contains('cap'));const thread=pick(x=>/^v182pf-/.test(x.id||''));
+    if(next)next.classList.add('v18134gone');
+    const nx=status&&status.querySelector('.v163nx');
+    const used=new Set([status,next,draft,li,ctx,why,found,marks,hist,stamp,thread].filter(Boolean));
+    const frag=document.createDocumentFragment();
+    /* Signals */
+    {const s=secEl('sig','Signals',(f.found||[]).length+(why?1:0));const b=s.querySelector('.v4b'),r=s.querySelector('.v4r');
+      if(found){const c=found.querySelector(':scope>.cap');if(c)c.classList.add('h1cap');b.appendChild(found);if(why){why.querySelector('.pfp')&&why.querySelector('.pfp').classList.add('v18134cl');r.appendChild(why)}}
+      else if(why){const pp=why.querySelector('.pfp');if(pp)pp.classList.add('v18134cl');const c=why.querySelector(':scope>.cap');if(c)c.classList.add('h1cap');b.appendChild(why)}
+      frag.appendChild(s);finishSec(s)}
+    /* Conversation: the message and its buttons first, the thread and LinkedIn marks below */
+    {const s=secEl('conv','Conversation',0);const b=s.querySelector('.v4b'),r=s.querySelector('.v4r');
+      if(draft)b.appendChild(draft);if(nx){nx.classList.add('v18134nx');b.appendChild(nx)}
+      if(thread){if(b.children.length)r.appendChild(thread);else b.appendChild(thread)}
+      if(marks)r.appendChild(marks);if(!b.children.length&&r.children.length)b.appendChild(r.firstElementChild);
+      frag.appendChild(s);finishSec(s)}
+    /* Account */
+    {const s=secEl('acct','Account',0);const b=s.querySelector('.v4b'),r=s.querySelector('.v4r');
+      if(co){const ppl=people().filter(x=>nc(x.company)===nc(co));const ae=first(aeOf(co));
+        b.insertAdjacentHTML('beforeend',`<button type="button" class="v18134row" data-v18134acct="${E(co)}">${mono(co,40)}<span class="tx"><b>${E(co)}</b><small>${E([ae?ae+'’s book':'No AE',ppl.length+(ppl.length===1?' person':' people')].join(' · '))}</small></span>${CH}</button>`)}
+      if(li)r.appendChild(li);if(ctx)r.appendChild(ctx);
+      if(status){status.classList.remove('v162ps');const c=status.querySelector(':scope>.cap');if(c)c.textContent='Lead or personal';r.appendChild(status)}
+      if(!b.children.length&&r.children.length)b.appendChild(r.firstElementChild);
+      frag.appendChild(s);finishSec(s)}
+    /* History */
+    {const s=secEl('hist','History',hist?hist.querySelectorAll('.tle').length:0);const b=s.querySelector('.v4b'),r=s.querySelector('.v4r');
+      if(hist){const c=hist.querySelector(':scope>.cap');if(c)c.classList.add('h1cap');b.appendChild(hist)}if(stamp)r.appendChild(stamp);
+      frag.appendChild(s);finishSec(s)}
+    const mk=document.createElement('i');mk.id='v18134pfm';mk.hidden=true;
+    const after=[...ovb.children].slice(1).filter(x=>!used.has(x));
+    ovb.insertBefore(mk,top.nextSibling);ovb.insertBefore(frag,mk.nextSibling);after.forEach(x=>ovb.appendChild(x));
+    if(status&&!status.querySelector('.v162seg,.v16chips'))status.classList.add('v18134gone');
+  }catch(e){err('pf',e)}}
+V.decoPF=decoPF;
+
+/* ---------- account page, on the same skeleton ---------- */
+function apHTML(co){const ppl=people().filter(p=>nc(p.company)===nc(co));const ae=first(aeOf(co));const Q=queueL().filter(x=>nc(x.co||(x.p&&x.p.company))===nc(co));
+  const sig=signalsFor(co,ppl);const ev=eventsFor(ppl);const nxt=Q[0];
+  const sub=[ae?ae+'’s book':'No AE',ppl.length+(ppl.length===1?' person':' people')].join(' · ');
+  const s0=sig[0];const sigTxt=s0?`Latest signal${s0.d?' '+dshort(s0.d):''}: ${s0.t}`:'';
+  let why='';if(nxt)why=`${nxt.tag||'A move'} for ${first(nxt.name)} is ready.${sigTxt?' '+sigTxt+'.':''}`;
+  else if(sigTxt)why=sigTxt+'.'+(ppl.length?` ${ppl.length} ${ppl.length===1?'person':'people'} here, nothing due right now.`:'');
+  else why=ppl.length?`${ppl.length} ${ppl.length===1?'person':'people'} here, nothing due right now.`:'No one here yet.';
+  const act=nxt?`<button type="button" class="v1813pri v18134act" data-v18134pf="${E(nxt.name)}">Open ${E(nxt.tag||'next move')} for ${E(first(nxt.name))}</button>`
+    :!ppl.length?`<button type="button" class="v1813pri v18134act" data-v18134find="1">Find people here</button>`
+    :`<button type="button" class="v1813pri v18134act" data-v18134full="1" aria-expanded="false">Read the brief</button>`;
+  const sigRow=x=>{const inner=`<span class="dt">${E(dshort(x.d)||'')}</span><span class="tx"><b>${E(x.t)}</b><small>${E([x.src,x.who].filter(Boolean).join(' · '))}</small></span>`;
+    return x.url?`<a class="v18134row sig" href="${E(x.url)}" target="_blank" rel="noopener">${inner}${CH}</a>`:x.who?`<button type="button" class="v18134row sig" data-v18134pf="${E(x.who)}">${inner}${CH}</button>`:`<div class="v18134row sig">${inner}</div>`};
+  const pRow=(p,small)=>`<button type="button" class="v18134row" data-v18134pf="${E(p.name)}"><span class="v18134av" aria-hidden="true">${E(ini(p.name))}</span><span class="tx"><b>${E(p.name)}</b><small>${E(small)}</small></span>${CH}</button>`;
+  const rows=a=>`<div class="v18134rows">${a.join('')}</div>`;
+  const moves=Q.map(x=>{const p=x.p||personByName(x.name)||{name:x.name};return pRow(p,[x.tag,x.why].filter(Boolean).join(' · '))});
+  const waiting=ppl.filter(p=>p.connect_sent&&!p.accepted&&!p.withdrawn).length;
+  return `<div class="v18134">
+    <div class="v18134id">${mono(co,56)}<div><div class="nm1">${E(co)}</div><div class="sb1">${E(sub)}</div></div></div>
+    <div class="v18134why"><span class="arif xs" data-face="idle" aria-hidden="true"></span><p>${E(why)}</p></div>${act}
+    ${section('sig','Signals',sig.length?rows(sig.map(sigRow)):`<p class="v18134empty">No signals yet. A re-scan looks for fresh ones.</p>`,'',sig.length)}
+    ${section('conv','Conversation',moves.length?rows(moves):`<p class="v18134empty">${waiting?`Nothing to send here. ${waiting} waiting on an accept.`:'Nothing to send here right now.'}</p>`,'',moves.length)}
+    ${section('ppl','People',ppl.length?rows(ppl.map(p=>pRow(p,[p.title,stageOf(p)[0]].filter(Boolean).join(' · ')))):`<p class="v18134empty">No one here yet.</p>`,'',ppl.length)}
+    ${section('hist','History',ev.length?rows(ev.map(x=>`<button type="button" class="v18134row" data-v18134pf="${E(x.n)}"><span class="dt">${E(dshort(x.d))}</span><span class="tx"><b>${E(x.t)}</b></span>${CH}</button>`)):`<p class="v18134empty">Nothing yet.</p>`,'',ev.length)}
+    <button type="button" class="v18134fullb" data-v18134full="1" aria-expanded="false">Brief, email tracks and account file<span aria-hidden="true">›</span></button></div>`}
+function decoAP(){const pg=$('#v171acc');if(!pg||!pgOn()||!pg.classList.contains('on'))return;
+  try{const pb=pg.querySelector('.pb');if(!pb)return;const wr=pb.querySelector('#v182wr');const co=(wr&&wr.dataset.acc)||((pg.querySelector('.ph .tt b')||{}).textContent||'').trim();if(!co)return;
+    let ap=pb.querySelector(':scope>#v18134ap');const sig=co+'|'+queueL().length+'|'+people().length;
+    if(ap&&ap.dataset.sig===sig){if(pb.firstElementChild!==ap)pb.insertBefore(ap,pb.firstChild);return}
+    const wasOpen=ap?[...ap.querySelectorAll('.v18134sec.open')].map(s=>s.dataset.v18134s):[];
+    if(!ap){ap=document.createElement('div');ap.id='v18134ap'}if(ap.dataset.co!==co)pg.classList.remove('v18134full');
+    ap.dataset.co=co;ap.dataset.sig=sig;ap.innerHTML=apHTML(co);wasOpen.forEach(k=>{const s=ap.querySelector(`.v18134sec[data-v18134s="${k}"]`);if(s){s.classList.add('open');const b=s.querySelector('.v18134all');if(b){b.dataset.lbl=b.textContent;b.textContent='Show less';b.setAttribute('aria-expanded','true')}}});
+    pb.insertBefore(ap,pb.firstChild);pg.classList.add('v18134on');V.ap++;try{G.ariFill&&ariFill(ap)}catch(e){}}
+  catch(e){err('ap',e)}}
+V.decoAP=decoAP;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-v18134find]');if(!b)return;e.preventDefault();const p=$('#pplent [data-pe]');if(p)p.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))},true);
+
+/* ---------- DM focus: person first, then company; context under the draft ---------- */
+function decoFX(){$$('.v1812fx').forEach(fx=>{if(fx.hidden||getComputedStyle(fx).display==='none')return;try{
+  const who=fx.querySelector('.fxwho');if(!who)return;const b=who.querySelector('b'),s=who.querySelector('span');if(!b||!s)return;
+  const sig=b.textContent+'|'+s.textContent;if(who.dataset.v18134===sig)return;
+  const parts=s.textContent.split(' · ');const co0=b.textContent.trim();const pn=parts[0]||'';
+  if(pn&&personByName(pn)&&!who.dataset.v18134sw){b.textContent=pn;s.textContent=[co0,parts.slice(1).join(' · ')].filter(Boolean).join(' · ');}
+  who.dataset.v18134=b.textContent+'|'+s.textContent;who.dataset.v18134sw='1';
+  /* context fills the empty half: the signal and the account, both one tap away */
+  const mid=fx.querySelector('.v1812mid');if(!mid)return;let c=mid.querySelector('.v18134fxc');if(c)c.remove();
+  const p=personByName(b.textContent.trim());if(!p)return;const co=String(p.company||'').trim();const f=(G.ariPF||{})[p.name]||{};
+  const fd=(f.found||[]).slice(0,2);const ppl=people().filter(x=>nc(x.company)===nc(co));const ae=first(aeOf(co));
+  c=document.createElement('div');c.className='v18134fxc';
+  c.innerHTML=`${fd.length?`<div class="v4h"><b>Signals</b></div>${fd.map(x=>`<div class="v18134row sig"><span class="dt">${E(x[0])}</span><span class="tx"><b>${E(x[2])}</b><small>${E(x[1])}</small></span></div>`).join('')}`:''}
+    ${co?`<div class="v4h" style="margin-top:12px"><b>Account</b></div><div class="v18134row">${mono(co,40)}<span class="tx"><b>${E(co)}</b><small>${E([ae?ae+'’s book':'No AE',ppl.length+(ppl.length===1?' person':' people')].join(' · '))}</small></span></div>`:''}`;
+  mid.appendChild(c)}catch(e){err('fx',e)}})}
+
+/* ---------- Today: "What I found" instead of a dead zero ---------- */
+function foundHTML(){const ppl=people();const nb=(($('.v1812done span')||{}).textContent||'').trim();const A=accts().filter(a=>a.hook).sort((x,y)=>dnum(y.hook_date)-dnum(x.hook_date)).slice(0,3);
+  const warm=ppl.filter(p=>(p.replied&&!p.meeting)||(p.accepted&&dnum(p.accepted)>Date.now()-10*864e5)).sort((x,y)=>dnum(y.replied||y.accepted)-dnum(x.replied||x.accepted)).slice(0,3);
+  const act=((G.ariV182&&ariV182.act)||[]).filter(x=>x&&/person_added|brief_ready|signal/.test(x.kind||'')).slice(0,3);
+  const card=(t,h)=>`<div class="v1813card"><div class="v1813sec" style="margin:0 0 4px"><b>${E(t)}</b></div>${h}</div>`;
+  let h='';
+  if(A.length)h+=card('New signals',A.map(a=>`<button type="button" class="v18134row" data-v18134acct="${E(a.company)}">${mono(a.company,40)}<span class="tx"><b>${E(a.company)}</b><small>${E(a.hook)}${a.hook_date?' · '+E(dshort(a.hook_date)):''}</small></span>${CH}</button>`).join(''));
+  if(warm.length)h+=card('Warming up',warm.map(p=>`<button type="button" class="v18134row" data-v18134pf="${E(p.name)}"><span class="v18134av" aria-hidden="true">${E(ini(p.name))}</span><span class="tx"><b>${E(p.name)}</b><small>${E([p.replied&&!p.meeting?'Replied '+ago(p.replied):'Accepted '+ago(p.accepted),p.company].filter(Boolean).join(' · '))}</small></span>${CH}</button>`).join(''));
+  if(act.length)h+=card('New finds',act.map(x=>{const pp=x.person_id&&ppl.find(p=>String(p.id)===String(x.person_id));const attr=pp?`data-v18134pf="${E(pp.name)}"`:x.account?`data-v18134acct="${E(x.account)}"`:'';
+    return `<button type="button" class="v18134row" ${attr}>${x.account?mono(x.account,40):`<span class="v18134av" aria-hidden="true">${E(ini(pp?pp.name:x.title))}</span>`}<span class="tx"><b>${E(x.title||'')}</b></span>${attr?CH:''}</button>`}).join(''));
+  if(!h)h=`<div class="v1813card"><b>Quiet for now.</b><span>Nothing new since you last looked. The next scan brings fresh signals.</span></div>`;
+  return `<h1>What I found</h1><p class="sub"><span class="arif xs" data-face="happy" aria-hidden="true"></span><span>Nothing waiting to send.${nb?' '+E(nb):''} Here is what moved.</span></p>${h}
+    <button type="button" class="v1813pri" data-v18134find="1">Find more people</button>`}
+let FSIG='';
+function found(){try{const top=$('#v184top'),st=$('#v1812');if(!top||!st)return;const empty=G.ariV1812&&Array.isArray(ariV1812.L)&&queueL().length===0&&people().length>0;
+  if(H.classList.contains('v18134empty')!==empty)H.classList.toggle('v18134empty',empty);if(!empty)return;
+  let el=$('#v18134found');if(!el){el=document.createElement('div');el.id='v18134found'}if(el.parentNode!==st)st.insertBefore(el,st.firstChild);
+  const sig=[people().length,accts().length,((G.ariV182&&ariV182.act)||[]).length,(($('.v1812done span')||{}).textContent||'')].join('|');if(sig===FSIG&&el.children.length)return;FSIG=sig;el.innerHTML=foundHTML();V.found++;try{G.ariFill&&ariFill(el)}catch(e){}}
+  catch(e){err('found',e)}}
+/* the exec track, pipeline and today's 15 now live at the foot of Today */
+function moreRow(){try{const host=$('#ready');if(!host)return;{const m=$('#v18134more');if(m){if(m.parentNode!==host||host.lastElementChild!==m)host.appendChild(m);return}}const b=document.createElement('button');b.type='button';b.id='v18134more';
+  b.innerHTML='Exec track, pipeline and today’s 15<span aria-hidden="true">›</span>';host.appendChild(b);
+  b.addEventListener('click',()=>{buzz(6);H.classList.add('v1813x');setTimeout(()=>{const x=$('#v18111ex')||$('#v1812more');if(x)try{x.scrollIntoView({behavior:'smooth',block:'start'})}catch(er){}},120)})}catch(e){err('more',e)}}
+
+/* ---------- Settings: Sync, Activity and the intro (out of the menu) ---------- */
+function settingsRows(){try{const sec=$('#apPanes .app[data-s="1"]');if(!sec)return;{const w0=sec.querySelector('.v18134set');if(w0){place(sec,w0);return}}const sy=(($('#v163sync')||{}).textContent||'').trim();
+  const w=document.createElement('div');w.className='v18134set';
+  w.innerHTML=`<div class="apcap"><span class="cap">General</span></div>
+   <div class="aprow press" data-v18134set="sync" role="button" tabindex="0"><div><b>Sync now</b><span id="v18134sy">${E(sy||'Pulls the latest from LinkedIn and your sheet')}</span></div><span class="v181ch" aria-hidden="true">›</span></div>
+   <div class="aprow press" data-v18134set="log" role="button" tabindex="0"><div><b>Activity</b><span>What you and I did, day by day</span></div><span class="v181ch" aria-hidden="true">›</span></div>
+   <div class="aprow press" data-v18134set="scans" role="button" tabindex="0" hidden><div><b>Signal scans</b><span id="v18134sc"></span></div><span class="v181ch" aria-hidden="true">›</span></div>
+   <div class="aprow press" data-v18134set="meet" role="button" tabindex="0"><div><b>Say hello</b><span>The short intro from the first day</span></div><span class="v181ch" aria-hidden="true">›</span></div>`;
+  place(sec,w);scanRow()}catch(e){err('set',e)}}
+function place(sec,w){const host=sec.querySelector(':scope>#v171set')||sec;if(w.parentNode!==host||host.firstElementChild!==w)host.insertBefore(w,host.firstChild)}
+function scanRow(){const r=$('[data-v18134set="scans"]');if(!r)return;const b=$('#v18121sc');const on=!!(b&&!b.hidden&&getComputedStyle(b).display!=='none'&&b.textContent.trim());r.hidden=!on;if(on)$('#v18134sc').textContent=b.textContent.trim()||'Tap for details'}
+function clickEl(el){if(!el)return;try{el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))}catch(e){}}
+document.addEventListener('click',e=>{const r=e.target.closest&&e.target.closest('[data-v18134set]');if(!r)return;e.preventDefault();e.stopPropagation();buzz(8);const k=r.dataset.v18134set;
+  if(k==='sync'){clickEl($('#hSync'));setTimeout(()=>{const s=$('#v18134sy');if(s)s.textContent=(($('#v163sync')||{}).textContent||'Syncing').trim()},900);return}
+  if(k==='scans'){clickEl($('#v18121sc'));return}
+  const close=()=>{try{G.ariPage&&ariPage.close&&ariPage.close()}catch(x){}};
+  if(k==='log'){close();setTimeout(()=>clickEl($('#v1812st')),380);return}
+  if(k==='meet'){close();setTimeout(()=>{if(typeof G.openMeet==='function')G.openMeet()},380)}},true);
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.dataset&&e.target.dataset.v18134set){e.preventDefault();clickEl(e.target)}});
+
+/* ---------- About: the version that is running, and whether a newer one is out ---------- */
+function verRow(){try{const s=$('#v18133ver');if(!s||s.dataset.v18134)return;s.dataset.v18134='1';const me=(($('meta[name=ari-build]')||{}).content)||'';
+  s.textContent='Ari '+me;fetch('/build.json?t='+Date.now(),{cache:'no-store',credentials:'omit'}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.build)return;
+    if(j.build!==me){s.innerHTML=`Ari ${E(me)} · <button type="button" class="v18134lk" data-v18134upd="1">Update to ${E(j.build)}</button>`}else s.textContent=`Ari ${me} · up to date`}).catch(()=>{})}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-v18134upd]');if(!b)return;e.preventDefault();
+  try{caches.keys().then(ks=>Promise.all(ks.filter(k=>/^ari-v/.test(k)).map(k=>caches.delete(k)))).finally(()=>location.replace('/ops?source=update&b='+Date.now()))}catch(x){location.reload()}},true);
+
+/* ---------- search: the fourth item in the bar, a long pull at the top of a list, and "Ask" for questions ---------- */
+const SVG='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>';
+const ASKI='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z"/></svg>';
+function openSearch(from){try{G.ariV18133&&ariV18133.open(from||null)}catch(e){err('qf',e)}}
+function barBtn(){const tb=$('#tbar');if(!tb||$('#v18134sb'))return;const b=document.createElement('button');b.type='button';b.id='v18134sb';b.setAttribute('aria-label','Search people and accounts, or ask');b.setAttribute('aria-haspopup','dialog');
+  b.innerHTML=SVG+'<span class="v163tl">Search</span>';tb.appendChild(b)}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#v18134sb');if(!b)return;e.preventDefault();e.stopPropagation();buzz(6);openSearch(b)},true);
+const QW=/^(who|what|how|when|why|which|show|list|where|is|are|did|do|does|can|should)\b/i;
+const isQ=t=>{t=String(t||'').trim();return t.length>=3&&(t.endsWith('?')||(QW.test(t)&&t.split(/\s+/).length>=2))};
+V.isQ=isQ;
+function askChat(text){try{const a=document.getElementById('ari');if(a&&typeof a.onclick==='function')a.onclick();else clickEl(a)}catch(e){err('ask',e)}
+  let n=0;const put=()=>{const i=$('#in');const open=typeof chatOpen!=='undefined'?chatOpen:true;if(!i||!open){if(++n<20)setTimeout(put,120);return}
+    i.value=text;i.dispatchEvent(new Event('input',{bubbles:true}));setTimeout(()=>{const s=$('#act');if(s)clickEl(s);else i.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}))},60)};setTimeout(put,450)}
+V.ask=askChat;
+function provAsk(){const P=G.ariV18133&&ariV18133.provider;if(!P||V.askOn)return;V.askOn=1;
+  P({id:'ask',label:'Ask',limit:1,search(q,ctx){const raw=(ctx&&ctx.raw)||q;if(!isQ(raw))return [];return [{k:'ask',n:raw,title:'Ask: '+raw,sub:'Opens the chat with this question',icon:ASKI,s:1000}]},open(r){try{const L=JSON.parse(localStorage.getItem('ari-qf-recent')||'[]').filter(x=>x&&x.k!=='ask');localStorage.setItem('ari-qf-recent',JSON.stringify(L))}catch(e){}askChat(r.n)}})}
+/* pull down at the top of Accounts or Report (Today has its own pull: short refreshes, long searches) */
+function pullInit(){if(V.pullOn)return;V.pullOn=1;const pill=document.createElement('div');pill.id='v18134pull';pill.setAttribute('aria-hidden','true');pill.innerHTML=SVG+'<span>Pull to search</span>';document.body.appendChild(pill);
+  const TH=96;let st=null;
+  const scroller=t=>{const p=t&&t.closest&&t.closest('#prospect,#report');return p};
+  document.addEventListener('touchstart',e=>{st=null;if(e.touches.length!==1)return;const t=e.target;const sc=scroller(t);if(!sc||sc.scrollTop>0)return;
+    if(t.closest('input,textarea,select,[contenteditable],.v1813filters,.v18pseg,.chips,#v18133qf'))return;if(H.classList.contains('v18133qfon')||(typeof ovOn!=='undefined'&&ovOn)||H.classList.contains('v171pgon'))return;
+    const p=e.touches[0];st={x:p.clientX,y:p.clientY,sc,lock:null,d:0}},{passive:true,capture:true});
+  document.addEventListener('touchmove',e=>{if(!st)return;const p=e.touches[0];const dx=p.clientX-st.x,dy=p.clientY-st.y;
+    if(!st.lock){if(Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)){st=null;return}if(dy>10&&st.sc.scrollTop<=0)st.lock='y';else if(dy<-6){st=null;return}else return}
+    const d=Math.max(0,dy);st.d=d;const r=Math.min(1,d/TH);const go=d>=TH;
+    pill.style.transform=`translate(-50%,${Math.round(-80+Math.min(d,TH)*0.9)}px)`;pill.style.opacity=String(r);if(go!==pill.classList.contains('go')){pill.classList.toggle('go',go);pill.lastChild.textContent=go?'Let go to search':'Pull to search';if(go)buzz(8)}
+    if(e.cancelable)e.preventDefault()},{passive:false,capture:true});
+  const end=()=>{if(!st)return;const go=st.lock&&st.d>=TH;st=null;pill.style.transform='translate(-50%,-80px)';pill.style.opacity='0';pill.classList.remove('go');pill.lastChild.textContent='Pull to search';if(go)openSearch(null)};
+  document.addEventListener('touchend',end,{capture:true});document.addEventListener('touchcancel',end,{capture:true})}
+
+/* ---------- watchers: decorate when the person file, account page or focus changes ---------- */
+let qd=0;const soon=()=>{if(qd)return;qd=requestAnimationFrame(()=>{qd=0;decoPF();decoAP();decoFX();lift()})};
+function watch(){const ovb=$('#ovb');if(ovb&&!ovb.dataset.v18134w){ovb.dataset.v18134w='1';new MutationObserver(soon).observe(ovb,{childList:true})}
+  const pg=$('#v171acc');if(pg&&!pg.dataset.v18134w){pg.dataset.v18134w='1';new MutationObserver(soon).observe(pg,{childList:true,subtree:false,attributes:true,attributeFilter:['class','data-v1821k']});const pb=pg.querySelector('.pb');if(pb)new MutationObserver(soon).observe(pb,{childList:true})}
+  $$('.v1812fx').forEach(fx=>{if(fx.dataset.v18134w)return;fx.dataset.v18134w='1';new MutationObserver(soon).observe(fx,{childList:true,subtree:true,characterData:true})})}
+new MutationObserver(()=>{soon();
+  /* the account page closed and a person file was left underneath another one: bring that one back */
+  if(!pgOn()&&!ovIsOn()&&V.stack.length){const s=V.stack.pop();setTimeout(()=>{try{if(!ovIsOn()&&!pgOn()){G.openFile(s.n,null);setTimeout(()=>{const b=$('#ovb');if(b)b.scrollTop=s.y},420)}}catch(e){err('stack',e)}},360)}
+  if(!pgOn())delete H.dataset.v18134top}).observe(H,{attributes:true,attributeFilter:['class']});
+/* openFile while the account page is open: the file goes on top */
+function wrapOpen(){if(typeof G.openFile!=='function'||G.openFile.v18134)return;const _o=G.openFile;G.openFile=function(n,el){if(pgOn())H.dataset.v18134top='file';lift();const r=_o.apply(this,arguments);soon();return r};G.openFile.v18134=1;try{openFile=G.openFile}catch(e){}}
+
+/* the chat's own close is private: give the "close what is on top" step (tab taps, search jumps) a way to close it */
+if(typeof G.closeAri!=='function')G.closeAri=function(){try{const x=$('#chatOv .x');if(x)clickEl(x)}catch(e){}};
+function wrapPage(){const P=G.ariPage;if(!P||!P.open||P.open.v18134)return;const _o=P.open;P.open=function(){const r=_o.apply(this,arguments);setTimeout(()=>{settingsRows();scanRow();verRow()},0);setTimeout(()=>{settingsRows();verRow()},250);return r};P.open.v18134=1}
+function tick(){try{watch();wrapPage();found();moreRow();barBtn();provAsk();settingsRows();scanRow();verRow();wrapOpen()}catch(e){err('tick',e)}}
+function boot(){tick();pullInit();setInterval(()=>{if(!document.hidden)tick()},1500);
+  const r=$('#v1812');if(r)new MutationObserver(()=>{found()}).observe(r,{childList:true,subtree:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
 </script>
