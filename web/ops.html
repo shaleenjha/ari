@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.13.1"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.13.3"><meta name="ari-rev" content="05ae22f947">
 <title>Ari</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -499,7 +499,7 @@ input[type=file]{display:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:none}
 /* ===== overlay (file + task) ===== */
-.ov{position:absolute;inset:0;z-index:24;background:var(--bg);display:none;flex-direction:column;will-change:clip-path}
+.ov{position:absolute;inset:0;z-index:24;background:var(--bg);display:none;flex-direction:column}
 .ov .ovt{display:flex;align-items:center;justify-content:space-between;height:56px;padding:calc(env(safe-area-inset-top) + var(--s2)) var(--s4) 0;flex:none}
 .ov .bk{width:40px;height:40px;border-radius:var(--r2);display:grid;place-items:center;color:var(--ink);cursor:pointer}
 .ov .ovb{flex:1;overflow-y:auto;padding:var(--s2) var(--s5) 120px;scrollbar-width:none}
@@ -4433,7 +4433,7 @@ function lookAt(x,y,ms=1400){clearTimeout(lookT);
 let idleT;function wake(){clearTimeout(idleT);if(face==='sleepy')setFace('happy',900);idleT=setTimeout(()=>{if(!chatOpen)setFace('sleepy')},60000)}
 addEventListener('pointerdown',e=>{wake();if(!e.target.closest('#ari'))lookAt(e.clientX,e.clientY)},{capture:true});wake();
 /* one blink, shared by every Ari, sometimes twice */
-(function bl(){setTimeout(()=>{const go=()=>$$('.arif').forEach(a=>{const f=a.dataset.face;if(f==='sleepy'||f==='happy')return;if(f==='listen'&&Math.random()<.5)return;a.classList.add('blink');setTimeout(()=>a.classList.remove('blink'),230)});
+(function bl(){setTimeout(()=>{const go=()=>$$('.arif').forEach(a=>{const f=a.dataset.face;{const r=a.getBoundingClientRect();if(!r.width||r.bottom<0||r.top>innerHeight||r.right<0||r.left>innerWidth)return}if(f==='sleepy'||f==='happy')return;if(f==='listen'&&Math.random()<.5)return;a.classList.add('blink');setTimeout(()=>a.classList.remove('blink'),230)});
   go();if(Math.random()<.18)setTimeout(go,520);bl()},3000+Math.random()*3000)})();
 function hop(dir=0){if(RM)return;A(ariHead,[{transform:'none'},{transform:`translate(${dir*3}px,-6px) scale(.95,1.06)`,offset:.35},{transform:'translateY(0) scale(1.06,.94)',offset:.72},{transform:'none'}],{d:560,e:'cubic-bezier(.3,.7,.4,1)'})}
 (function(){let last=0,t;$('#ready').addEventListener('scroll',e=>{const y=e.target.scrollTop,d=y-last;last=y;if(Math.abs(d)<2)return;const g=ariHead.querySelector('.gz');if(!g)return;
@@ -6045,7 +6045,7 @@ MOTION.mouth={morph:520,ease:'over',talk:150,talkFlaps:6,purse:2600,wobble:1600,
 MOTION.color={tongue:'#E9735F',tongueCrease:'#B9483A',mouth:'#3A1A15'};
 MOTION.spring.tongue=[460,16];
 (function(){
-const M=MOTION,APP=$('#app'),BUILD='v18.13.1';
+const M=MOTION,APP=$('#app'),BUILD='v18.13.3';
 const q1=el=>!el?null:el.classList&&el.classList.contains('arif')?el:el.querySelector&&el.querySelector('.arif');
 const vis=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect();return r.width>=14&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth};
 const SPR=s=>({duration:LIN?s.d:520,easing:LIN?s.e:M.ease.out});
@@ -6189,6 +6189,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.13.3',d:'Oct 28',items:['Find anyone fast: the search button at the top (or / and Ctrl K on a computer) opens a person or an account in one tap','The tabs at the bottom stay on screen everywhere. Only the phone keyboard hides them','Headers stay sharp when a file opens or you scroll','On a computer Ari sits in a wider centred column and runs lighter','Accounts search looks across every filter and never shows a negative count','About tells my story again: what I do, what I never do and how I was made']},
  {v:'v18.13.0',d:'Oct 21',items:['One calm light look with an indigo accent. The theme switch is gone','Today shows how many are left, the next person with one Start button, anything that needs your call, then everyone else as tiles','Accounts groups people by company with what is next for each. Tap a company to see its people','Ask Ari, Settings, Sync, Find people and Activity are behind Ari at the top. The round Ari button is gone','Lighter and quieter: no web fonts, fewer timers, Ari stops moving after a few breaths, and you can zoom']},
  {v:'v18.12.1',d:'Oct 17',items:['If you edit a draft or switch to Ari’s version, a draft that arrives later never replaces your words. It waits under the draft: tap to swap, and Undo if you change your mind', 'The top line now says when signal scans are off. Tap it to see what is paused and what is still running']},
  {v:'v18.12',d:'Oct 17',items:['Today opens on who to message: one status line, then replies, then DMs grouped by send window, one line each', 'Start, or tap anyone, and you get one person at a time with the full draft, Ari’s pick and the switch, and one button to copy and open LinkedIn', 'When you come back, tap Sent, Edited or Not yet and the next person is already up. Long-press anyone to copy their draft', 'When the list is clear, Ari tells you what comes next and when', 'Ari’s notes, the big ready line and the activity line now sit in Report, and the rest of Today folds into More', 'Redraft asks once per person, and a redraft that arrives after you edited never replaces your words']},
@@ -11287,7 +11288,7 @@ const shown=el=>{try{return el&&!el.hidden&&getComputedStyle(el).display!=='none
 function mount(){const rd=$('#ready');if(!rd)return null;const top=$('#v184top');if(!top)return null;
   let w=$('#v1812');if(!w){w=document.createElement('div');w.id='v1812';w.innerHTML='<div class="v1812st" id="v1812st" aria-live="polite"></div><div id="v1812q"></div>';}
   if(w.parentNode!==top||top.firstElementChild!==w)top.insertBefore(w,top.firstElementChild);
-  document.documentElement.classList.add('v1812on');
+  if(!document.documentElement.classList.contains('v1812on'))document.documentElement.classList.add('v1812on');
   let more=$('#v1812more');if(!more){more=document.createElement('details');more.id='v1812more';more.innerHTML='<summary class="press"><b>More</b><span id="v1812ms"></span></summary><div class="in" id="v1812mi"></div>';
     more.addEventListener('toggle',()=>{buzz(6)})}
   const want=[...TAIL.map(id=>document.getElementById(id)).filter(el=>el&&(el.parentNode===rd||el.closest('#v1812mi,#v1812rpi'))),more];
@@ -11761,8 +11762,8 @@ function build(){const el=document.createElement('section');el.id='skc';el.setAt
   wire(el);return el}
 function mount(){const host=document.getElementById('v1812rp')||document.getElementById('v184top');if(!host)return null;
   let el=document.getElementById('skc');if(!el)el=build();
-  if(host.id==='v1812'){const q=document.getElementById('v1812q');if(el.parentNode!==host||(q&&el.previousElementSibling!==q))host.appendChild(el);document.documentElement.classList.add('skcon')}
-  else{if(el.parentNode!==host)host.appendChild(el);document.documentElement.classList.remove('skcon')}
+  if(host.id==='v1812'){const q=document.getElementById('v1812q');if(el.parentNode!==host||(q&&el.previousElementSibling!==q))host.appendChild(el);if(!document.documentElement.classList.contains('skcon'))document.documentElement.classList.add('skcon')}
+  else{if(el.parentNode!==host)host.appendChild(el);if(document.documentElement.classList.contains('skcon'))document.documentElement.classList.remove('skcon')}
   return el}
 let LASTSIG='',D=null;
 function render(force){try{const el=mount();if(!el)return;const L=people();
@@ -12146,7 +12147,7 @@ function accounts(){const Q=queue(),by=new Map();
   const A=[...by.values()];A.forEach(a=>a.ppl.sort((x,y)=>(x.s.q?x.s.q.i:1e9)-(y.s.q?y.s.q.i:1e9)||ORD.indexOf(x.s.k)-ORD.indexOf(y.s.k)||String(x.p.name).localeCompare(String(y.p.name))));
   return A.sort((x,y)=>x.best-y.best||(y.grp.wait||0)-(x.grp.wait||0)||x.n.localeCompare(y.n))}
 const FILTERS=[['motion','In motion'],['wait','Waiting'],['up','Coming up'],['done','Done'],['','All']];
-function match(a){if(F.f&&!a.grp[F.f])return false;const q=low(F.q);if(!q)return true;
+function match(a){const q=low(F.q).trim();if(F.f&&!q&&!a.grp[F.f])return false;if(!q)return true;
   return low(a.n).includes(q)||a.ppl.some(({p})=>low(p.name).includes(q)||low(p.title).includes(q))}
 function chip(k,n){return `<span class="v1813st${ACC.has(k)?' acc':''}">${E(k)}${n?' '+n:''}</span>`}
 function cardHTML(a){const cnt={};a.ppl.forEach(({s})=>cnt[s.k]=(cnt[s.k]||0)+1);const ks=ORD.filter(k=>cnt[k]).concat(Object.keys(cnt).filter(k=>!ORD.includes(k)));
@@ -12175,7 +12176,7 @@ function render(force){try{if(curTab()!==2&&!force)return;const w=shell();if(!w)
   $('#v1813ac').textContent=`${A.length} account${A.length===1?'':'s'} · ${nP} people`;
   $('#v1813f').innerHTML=FILTERS.map(([k,t])=>`<button type="button" class="v1813fc${F.f===k?' on':''}" aria-pressed="${F.f===k}" data-v1813f="${k}">${E(t)} ${cnt[k]}</button>`).join('')+`<button type="button" class="v1813fc" data-v1813f="__classic">More filters</button>`;
   $('#v1813al').innerHTML=L.length?L.slice(0,F.lim).map(cardHTML).join(''):`<div class="v1813card"><b>No accounts here.</b><span class="v1813dim">${F.q?'Nothing matches that search.':'Try another filter.'}</span></div>`;
-  const lm=$('#v1813lm');lm.hidden=L.length<=F.lim;lm.textContent=`Show ${Math.min(30,L.length-F.lim)} more`}
+  const lm=$('#v1813lm'),left=Math.max(0,L.length-F.lim);lm.hidden=left<=0;lm.textContent=left>0?`Show ${Math.min(30,left)} more`:''}
   catch(e){V.errs.push('render '+String(e&&e.message||e).slice(0,140))}}
 V.render=render;
 function onAcc(e){const t=e.target;
@@ -12290,5 +12291,247 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #v1871ad .v1871n b{font:650 22px/28px var(--sans);margin-top:4px}
 #v1871ad .v1871n span{opacity:1;color:var(--ink2)}
 </style>
+<style id="v18133css">/* ===== Ari v18.13.3 (Owner, Wed 28 Oct 2026): flaws batch 1. Crisp headers, the bar always there, quick find, desktop column, About restored. Tokens only. ===== */
+/* 1. "Show more" on Accounts: the button's display:flex beat [hidden] */
+.v1813more[hidden]{display:none!important}
+
+/* 2. headers: solid, crisp, never mid-animation. Faded/blurred tops came from composited layers left behind by fill:both animations
+   (pager scale/opacity, the overlay's clip-path) and will-change layers, plus a half-pixel column on desktop. */
+html.v1813 .chrome,.ov .ovt,.v171pg .ph,.v175pg .ph,.v18dd .ph{background:var(--bg)!important;opacity:1!important;filter:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;transform:none!important;animation:none!important;-webkit-mask-image:none!important;mask-image:none!important}
+.ov .ovt{border-bottom:1px solid transparent;transition:border-color .2s}
+.ov.v18133lift .ovt{border-bottom-color:var(--line)}
+.ov,.v171pg.on,.v175pg.on,.v18dd.on{will-change:auto!important}
+#ovR .ask .arif{opacity:1!important}
+/* the person-file action bar: a solid strip with a hairline, not a translucent smudge over the draft */
+html.v1813 #ovBar .pfbar{left:0!important;right:0!important;bottom:0!important;margin:0!important;padding:12px 16px!important;border-radius:0!important;background:var(--bg)!important;box-shadow:none!important;border-top:1px solid var(--line)}
+/* sticky segment tabs were 5% see-through: lists showed through them */
+.v171tabs{background:color-mix(in srgb,var(--ink) 5%,var(--bg))!important}
+/* no glows (theme rule): Settings and first-run backgrounds are flat */
+.apg .apbg:before,.onbbg::after{display:none!important}
+
+/* 3. the bar: always on screen, on every tab and page. It hides only while a real on-screen keyboard is up (v18133kb, set below; never on desktop). */
+html.v1813 #tbar{bottom:0!important;z-index:35!important;padding-left:8px!important;padding-right:8px!important}
+html.v1813.v1802short #tbar{padding-bottom:0!important}
+html.v1813 .tbar,html.v1813.v175pgon .tbar,html.v1813.v18ddon .tbar,html.v1813.v1711typing .tbar,html.v1813.v171kb .tbar{visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+html.v1813.v18133kb .tbar{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+/* full-screen pages end where the bar starts, so nothing covers it and their own buttons sit right above it */
+html.v1813 .ov,html.v1813 .v171pg,html.v1813 .v175pg,html.v1813 .v18dd,html.v1813 .apg,html.v1813 .chatOv{bottom:var(--v18133tb,65px)!important}
+html.v1813.v18133kb .ov,html.v1813.v18133kb .v171pg,html.v1813.v18133kb .v175pg,html.v1813.v18133kb .v18dd,html.v1813.v18133kb .apg,html.v1813.v18133kb .chatOv{bottom:0!important}
+html.v1813 .ov .ovb{padding-bottom:96px!important}
+html.v1813 .v184fx,html.v1813 #pplx{bottom:var(--v18133tb,65px)!important;left:var(--v18133l,0px)!important;right:auto!important;width:var(--v18133w,100%)!important;padding-bottom:0!important}
+html.v1813.v18133kb .v184fx,html.v1813.v18133kb #pplx{bottom:0!important}
+
+/* 5. desktop: one centred column, wider than a phone, whole-pixel aligned */
+@media (min-width:900px) and (hover:hover) and (pointer:fine){
+  html.v1813 #app{max-width:640px!important;box-shadow:inset 1px 0 0 var(--line),inset -1px 0 0 var(--line)}
+  html.v1813 body{background:var(--bg3)!important}
+}
+/* idle work: static skeletons (no shimmer gradient) */
+.v18sk i{animation:none!important;background:var(--fill)!important}
+
+/* 4. quick find */
+#v18133qfb{width:48px;height:48px;min-width:48px;display:grid;place-items:center;border:0;border-radius:24px;background:none;color:var(--ink);cursor:pointer;margin-left:auto;touch-action:manipulation}
+#v18133qfb+#v1828nav{margin-left:0!important}
+#v18133qfb:hover{background:var(--fill)}
+#v18133qf{position:fixed;inset:0;z-index:2147483001}
+#v18133qf[hidden]{display:none!important}
+#v18133qf .qp{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:calc(var(--v18133l,0px) + 12px);width:calc(var(--v18133w,100vw) - 24px);max-height:min(72dvh,calc(100dvh - env(safe-area-inset-top) - 24px));display:flex;flex-direction:column;background:var(--bg);padding:8px 16px;border-radius:16px;box-shadow:0 0 0 1px var(--line),0 12px 32px -12px rgba(31,29,26,.35)}
+@media (hover:hover) and (pointer:fine){#v18133qf .qp{top:12vh;left:50%;width:min(560px,calc(100vw - 48px));transform:translateX(-50%);max-height:64vh}#v18133qf .qx{display:none}}
+#v18133qf .qh{display:flex;align-items:center;gap:8px}
+#v18133qf .qh label{flex:1;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;border-radius:12px;background:var(--bg2);color:var(--ink2)}
+#v18133qf .qh input{flex:1;min-width:0;min-height:46px;border:0;background:none;color:var(--ink);font:16px/22px var(--sans);outline:none}
+#v18133qf .qh input::-webkit-search-cancel-button{display:none}
+#v18133qf .qx{flex:none;min-height:48px;padding:0 4px 0 8px;border:0;background:none;color:var(--acc);font:600 15px/20px var(--sans);cursor:pointer}
+#v18133qf .ql{overflow-y:auto;overscroll-behavior:contain;margin:8px -16px 0;padding:0 16px 4px}
+#v18133qf .qs{font:600 12px/16px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:12px 0 4px}
+#v18133qf .qr{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:6px 8px;margin:0 -8px;width:calc(100% + 16px);border:0;border-radius:12px;background:none;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+#v18133qf .qr.on,#v18133qf .qr:hover{background:var(--bg2)}
+#v18133qf .qr .lg{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--bg3);color:var(--ink2);font:650 13px/1 var(--sans)}
+#v18133qf .qr .tx{flex:1;min-width:0}
+#v18133qf .qr b{display:block;font:600 16px/22px var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v18133qf .qr small{display:block;font:400 13px/18px var(--sans);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v18133qf .qr em{flex:none;font:600 12px/16px var(--sans);font-style:normal;color:var(--ink2);padding:4px 8px;border-radius:8px;background:var(--bg3)}
+#v18133qf .qr em.acc{color:var(--acc);background:var(--tint)}
+#v18133qf .qe{padding:16px 0 20px;color:var(--ink2);font:15px/22px var(--sans)}
+#v18133qf .qk{display:none;color:var(--ink2);font:13px/18px var(--sans);padding:8px 0 4px;border-top:1px solid var(--line);margin-top:8px}
+@media (hover:hover) and (pointer:fine){#v18133qf .qk{display:block}}
+#v18133qf .qh input:focus,#v18133qf .qh input:focus-visible,.v1813search input:focus,.v1813search input:focus-visible{outline:none!important}
+#v18133qf .qh label:focus-within,.v1813search:focus-within{box-shadow:inset 0 0 0 2px var(--acc)}
+#v18133qf .qscr{position:absolute;inset:0;background:rgba(31,29,26,.32)}
+#v18133qf .qr:focus-visible,#v18133qfb:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+
+/* 6. About: Ari's own story back, in the current theme */
+.v181ab .apcap{display:flex;justify-content:space-between;align-items:baseline;margin:24px 0 8px}
+.v181ab .apcap .cap{font:650 13px/18px var(--sans)!important;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.v181ab p{font-size:16px;line-height:24px;color:var(--ink);margin:0 0 8px}
+.v181ab .aploop .lnf{transform:none!important}
+.v181ab .aploop .st3 b{font-size:16px}
+.v181ab .aploop .st3 span{font-size:15px;line-height:22px}
+.v181ab .apnever{background:var(--bg2);box-shadow:none!important;border-radius:16px;padding:16px;font-size:16px;line-height:24px}
+.v181ab .v16mi b{font-size:15px;line-height:22px}
+.v181ab .v16mi span{font-size:15px;line-height:22px}
+.v181ab .v16mi i{margin-top:7px}
+.v181ab .v18133note{background:var(--bg2);border-radius:16px;padding:16px;font-size:15px;line-height:22px;color:var(--ink2);margin-top:16px}
+.v181ab .v18133note b{display:block;color:var(--ink);font-size:16px;line-height:24px}
+.v181ab .v181sig{margin-top:24px;color:var(--ink2);font-size:15px}
+</style>
+<script>/* ===== Ari v18.13.3 (Owner, Wed 28 Oct 2026): flaws batch 1 =====
+   - the tab bar is on screen everywhere; only a real phone keyboard hides it, never a desktop
+   - overlays and pages end above the bar; tapping a tab closes whatever is open on top first
+   - finished open/close animations are cleared so headers and lists are not left on half-faded layers
+   - quick find in the header (also "/" and Cmd/Ctrl+K): any person or account, one tap to the file or the account page
+   - desktop: centred 640 px column on whole pixels
+   - About: Ari's own words and the "How I was made" timeline back */
+(function(){'use strict';
+const G=window,H=document.documentElement,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const V=G.ariV18133={v:'v18.13.3',errs:[],opens:0,cleaned:0};
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const low=s=>String(s==null?'':s).toLowerCase();
+const coarse=()=>{try{return matchMedia('(pointer:coarse)').matches||(!matchMedia('(hover:hover)').matches&&'ontouchstart' in G)}catch(e){return false}};
+const editable=el=>!!el&&el.isConnected&&!el.readOnly&&!el.disabled&&(el.tagName==='TEXTAREA'||el.isContentEditable||(el.tagName==='INPUT'&&!/^(button|checkbox|radio|submit|range|color|file|reset|image)$/i.test(el.type||'')));
+
+/* ---------- geometry: bar height, desktop column on whole pixels ---------- */
+let baseH=innerHeight,baseW=innerWidth;
+function kbUp(){if(!coarse())return false;const vv=G.visualViewport;if(innerWidth!==baseW){baseW=innerWidth;baseH=innerHeight}if(innerHeight>baseH)baseH=innerHeight;
+  const zoomed=vv&&vv.scale>1.05;return !!((vv&&!zoomed&&(innerHeight-vv.height)>140)||(baseH-innerHeight)>140)}
+function geo(){try{const app=$('#app');if(app){const wide=innerWidth>=900&&!coarse();
+      if(wide){const w=Math.min(640,innerWidth);const l=Math.floor((innerWidth-w)/2);app.style.setProperty('left',l+'px','important');app.style.setProperty('right','auto','important');app.style.setProperty('width',w+'px','important');app.style.setProperty('margin','0','important')}
+      else{['left','right','width','margin'].forEach(p=>app.style.removeProperty(p))}
+      const r=app.getBoundingClientRect();H.style.setProperty('--v18133l',Math.round(r.left)+'px');H.style.setProperty('--v18133w',Math.round(r.width)+'px')}
+    const kb=editable(document.activeElement)&&kbUp();if(H.classList.contains('v18133kb')!==kb)H.classList.toggle('v18133kb',kb);
+    const b=$('#tbar');if(b&&!kb){const h=Math.round(b.getBoundingClientRect().height);if(h>40){const v=h+'px';if(H.style.getPropertyValue('--v18133tb')!==v)H.style.setProperty('--v18133tb',v)}}}
+  catch(e){V.errs.push('geo '+e)}}
+V.geo=geo;
+let gt=0;const soon=ms=>{clearTimeout(gt);gt=setTimeout(geo,ms==null?150:ms)};
+['focusin','focusout'].forEach(e=>document.addEventListener(e,()=>soon(200),true));
+addEventListener('resize',()=>soon(60));if(G.visualViewport)visualViewport.addEventListener('resize',()=>soon(100));
+addEventListener('pageshow',()=>soon(0));document.addEventListener('visibilitychange',()=>{if(!document.hidden)soon(0)});
+
+/* ---------- clear finished animations that leave layers behind (faded / soft headers) ---------- */
+const ident=a=>{try{const k=a.effect.getKeyframes();const z=k[k.length-1]||{};return (z.opacity==null||+z.opacity===1)&&(!z.transform||/^(none|scale\(1\)|translate[XY]?\(0(px)?\))$/.test(z.transform.trim()))&&(!z.clipPath||/inset\(0px 0px 0px 0px/.test(z.clipPath))&&!z.filter}catch(e){return false}};
+function clean(){try{const ovOpen=typeof ovOn!=='undefined'&&ovOn;
+    const els=[$('#pager'),$('#ov'),$('#ari')].concat($$('.ov .rv'));
+    els.forEach(el=>{if(!el)return;if(el.id==='pager'&&ovOpen)return;el.getAnimations().forEach(a=>{if(a.playState==='finished'&&ident(a)){try{if(el.classList&&el.classList.contains('rv'))a.commitStyles()}catch(e){}a.cancel();V.cleaned++}})})}
+  catch(e){V.errs.push('clean '+e)}}
+V.clean=clean;
+setInterval(()=>{if(!document.hidden){clean();geo()}},1000);
+/* a hairline under the person-file header once its body scrolls */
+document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.id==='ovb'){const o=$('#ov');if(o)o.classList.toggle('v18133lift',t.scrollTop>4)}},{capture:true,passive:true});
+
+/* ---------- whatever is open on top closes before a tab switch ---------- */
+function vis(el){return !!el&&!el.hidden&&getComputedStyle(el).display!=='none'}
+function apgOpen(){return vis($('#ariPage'))}
+function fxOpen(){return $$('#v1812fx,#v184fx').find(vis)}
+function busy(){return !!((typeof ovOn!=='undefined'&&ovOn)||(typeof chatOpen!=='undefined'&&chatOpen)||apgOpen()||fxOpen()||vis($('#pplx'))||H.classList.contains('v171pgon')||H.classList.contains('v175pgon')||H.classList.contains('v18ddon'))}
+function closeTop(){let waited=false;
+  try{const fx=fxOpen();if(fx){const c=fx.querySelector('[data-fx="close"]');if(c)c.click();else fx.hidden=true}}catch(e){V.errs.push('fx '+e)}
+  try{const x=$('#pplx');if(vis(x)){const c=x.querySelector('.x');if(c)c.click();else x.hidden=true}}catch(e){V.errs.push('pplx '+e)}
+  try{if(typeof chatOpen!=='undefined'&&chatOpen&&typeof closeAri==='function')closeAri()}catch(e){V.errs.push('chat '+e)}
+  try{if(apgOpen()&&G.ariPage&&ariPage.close)ariPage.close()}catch(e){V.errs.push('apg '+e)}
+  try{if(typeof ovOn!=='undefined'&&ovOn&&typeof closeOv==='function')closeOv()}catch(e){V.errs.push('ov '+e)}
+  try{if(H.classList.contains('v171pgon')&&G.ariV171&&ariV171.closeAcct){ariV171.closeAcct();waited=true}}catch(e){V.errs.push('acct '+e)}
+  try{if(H.classList.contains('v175pgon')||H.classList.contains('v18ddon')){history.back();waited=true}}catch(e){}
+  return waited}
+V.closeTop=closeTop;V.busy=busy;
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#tbar .tbi');if(!t||!e.isTrusted)return;
+  if(!busy())return;e.preventDefault();e.stopPropagation();const waited=closeTop();
+  setTimeout(()=>{if(!t.classList.contains('on'))t.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));geo()},waited?380:60)},true);
+
+/* ---------- quick find ---------- */
+const SVG='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>';
+function people(){try{const S=G.ariV17&&ariV17.store;const L=S&&S.people&&S.people.size?[...S.people.values()]:((G.ariDATA&&ariDATA.people)||[]);
+    return L.filter(p=>p&&p.name&&!p.deleted_at&&low(p.review)!=='personal')}catch(e){V.errs.push('ppl '+e);return []}}
+function btn(){const r=$('.chrome .row1');if(!r||$('#v18133qfb'))return;const b=document.createElement('button');b.type='button';b.id='v18133qfb';
+  b.setAttribute('aria-label','Find a person or account');b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-keyshortcuts','/ Control+K Meta+K');b.title='Find (/ or Ctrl K)';b.innerHTML=SVG;
+  const nav=$('#v1828nav');if(nav&&nav.parentNode===r)r.insertBefore(b,nav);else r.appendChild(b)}
+const ini=s=>String(s||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+function score(hay,q){const h=low(hay);if(!h||!q)return 0;if(h===q)return 100;if(h.startsWith(q))return 80;if(h.split(/[\s.,·&()-]+/).some(w=>w.startsWith(q)))return 60;if(h.includes(q))return 30;return 0}
+function stage(p){try{if(G.ariIsExec&&ariIsExec(p))return ['Exec track',''];}catch(e){}
+  const L=(G.ariV1812&&ariV1812.L)||[];const it=L.find(x=>String(x.pid)===String(p.id));if(it)return [it.tag||'Up next','acc'];
+  if(p.meeting)return ['Meeting',''];if(p.replied)return ['Replied',''];if(p.dm3_sent)return ['DM3 sent',''];if(p.dm2_sent)return ['DM2 sent',''];if(p.dm1_sent)return ['DM1 sent',''];if(p.accepted)return ['Accepted',''];if(p.connect_sent)return ['Invited',''];return ['',''];}
+/* Command palette. Result groups are providers: {id,label,search(q,ctx)->[{k,n,title,sub,tag,tagc,s}],open(item)}.
+   Add a group (motions, actions) by pushing a provider; a chat intent ("ask Ari ...") can later be one more provider. */
+const PROVIDERS=[];
+function provider(pv){PROVIDERS.push(pv);return pv}
+provider({id:'p',label:'People',limit:8,
+  search(q,ctx){const out=[];ctx.people.forEach(p=>{const s=Math.max(score(p.name,q)*1.2,score(p.company,q)*.9,score(p.title,q)*.7);if(s>0){const [st,c]=stage(p);out.push({k:'p',n:p.name,title:p.name,sub:[p.title,p.company].filter(Boolean).join(' · ')||'No title',tag:st,tagc:c,s})}});
+    return out.sort((a,b)=>b.s-a.s||String(a.n).localeCompare(String(b.n)))},
+  open(r){if(typeof G.openFile==='function')G.openFile(r.n,null)}});
+provider({id:'a',label:'Accounts',limit:5,
+  search(q,ctx){const acc=new Map();ctx.people.forEach(p=>{const c=String(p.company||'').trim();if(!c)return;const sc=score(c,q);if(!sc)return;const k=low(c);const a=acc.get(k)||{k:'a',n:c,title:c,s:sc,c:0};a.c++;acc.set(k,a)});
+    return [...acc.values()].map(a=>Object.assign(a,{sub:a.c+(a.c===1?' person':' people')+' · account page',s:a.s*1.25})).sort((a,b)=>b.s-a.s||b.c-a.c||a.n.localeCompare(b.n))},
+  open(r){if(G.ariV171&&ariV171.openAcct)ariV171.openAcct(r.n)}});
+V.provider=provider;V.providers=PROVIDERS;
+/* recents: the last few things opened from the palette, on this device only (name and kind) */
+const RK='ari-qf-recent';
+function recents(){try{return (JSON.parse(localStorage.getItem(RK)||'[]')||[]).filter(r=>r&&r.k&&r.n).slice(0,6)}catch(e){return []}}
+function remember(r){try{const L=recents().filter(x=>!(x.k===r.k&&x.n===r.n));L.unshift({k:r.k,n:r.n,sub:r.sub||''});localStorage.setItem(RK,JSON.stringify(L.slice(0,6)))}catch(e){}}
+function results(q){q=low(q).trim();if(!q)return [];const ctx={people:people()};
+  return PROVIDERS.map(pv=>{let it=[];try{it=pv.search(q,ctx)||[]}catch(e){V.errs.push('pv '+pv.id+' '+e)}return {pv,items:it.slice(0,pv.limit||6),top:it.length?it[0].s:0}}).filter(g=>g.items.length).sort((a,b)=>b.top-a.top)}
+let QF={sel:0,rows:[],from:null};
+function rowHTML(r,i){return `<button type="button" class="qr" role="option" id="v18133r${i}" data-qf="${i}"><span class="lg" aria-hidden="true">${E(ini(r.title||r.n))}</span><span class="tx"><b>${E(r.title||r.n)}</b><small>${E(r.sub||'')}</small></span>${r.tag?`<em class="${r.tagc||''}">${E(r.tag)}</em>`:''}</button>`}
+function paint(){const box=$('#v18133qf');if(!box)return;const q=box.querySelector('input').value;const L=box.querySelector('.ql');QF.rows=[];let h='';
+  if(!q.trim()){const R=recents();if(R.length){h=`<p class="qs">Recent</p>`+R.map(r=>{const i=QF.rows.push({k:r.k,n:r.n,title:r.n,sub:r.sub})-1;return rowHTML(QF.rows[i],i)}).join('')}
+    else h=`<p class="qe">Type a name, company or title.</p>`}
+  else{const G2=results(q);
+    if(!G2.length)h=`<p class="qe">No one matches “${E(q.trim())}”.</p>`;
+    else h=G2.map(g=>`<p class="qs">${E(g.pv.label)}</p>`+g.items.map(r=>{const i=QF.rows.push(r)-1;return rowHTML(r,i)}).join('')).join('')}
+  L.innerHTML=h;QF.sel=Math.min(QF.sel,Math.max(0,QF.rows.length-1));mark()}
+function mark(){const box=$('#v18133qf');if(!box)return;box.querySelectorAll('.qr').forEach(r=>r.classList.remove('on'));const r=box.querySelector('#v18133r'+QF.sel);const inp=box.querySelector('input');
+  if(r&&QF.rows.length){r.classList.add('on');inp.setAttribute('aria-activedescendant',r.id);try{r.scrollIntoView({block:'nearest'})}catch(e){}}else inp.removeAttribute('aria-activedescendant')}
+function openQF(from){let m=$('#v18133qf');
+  if(!m){m=document.createElement('div');m.id='v18133qf';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Find a person or account');
+    m.innerHTML=`<div class="qscr" data-qx="1"></div><div class="qp"><div class="qh"><label>${SVG}<input type="search" placeholder="Find a person or account" aria-label="Find a person or account" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="true" aria-controls="v18133ql"></label><button type="button" class="qx" data-qx="1">Cancel</button></div><div class="ql" id="v18133ql" role="listbox" aria-label="Results"></div><p class="qk">↑ ↓ to move · Enter to open · Esc to close</p></div>`;
+    document.body.appendChild(m);const inp=m.querySelector('input');let t=0;
+    inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{QF.sel=0;paint()},80)});
+    m.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeQF();return}
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!QF.rows.length)return;QF.sel=(QF.sel+(e.key==='ArrowDown'?1:-1)+QF.rows.length)%QF.rows.length;mark();return}
+      if(e.key==='Enter'&&e.target===inp){e.preventDefault();if(QF.rows[QF.sel])go(QF.rows[QF.sel]);return}
+      if(e.key==='Tab'){const f=[inp,...m.querySelectorAll('button')];const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
+    m.addEventListener('click',e=>{if(e.target.closest('[data-qx]')){closeQF();return}const r=e.target.closest('[data-qf]');if(!r)return;const i=+r.dataset.qf;if(QF.rows[i])go(QF.rows[i])})}
+  QF.from=from||document.activeElement;QF.sel=0;m.hidden=false;H.classList.add('v18133qfon');geo();const inp=m.querySelector('input');inp.value='';paint();V.opens++;
+  try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}setTimeout(()=>{try{inp.focus({preventScroll:true})}catch(e){inp.focus()}},20)}
+function closeQF(back){const m=$('#v18133qf');if(!m||m.hidden)return;m.hidden=true;H.classList.remove('v18133qfon');try{const a=document.activeElement;if(a&&m.contains(a))a.blur()}catch(e){}
+  if(back!==false){try{QF.from&&QF.from.focus&&QF.from.focus({preventScroll:true})}catch(e){}}soon(150)}
+V.open=openQF;V.close=closeQF;V.results=results;
+function go(r){closeQF(false);remember(r);const pv=PROVIDERS.find(x=>x.id===r.k);const waited=closeTop();
+  setTimeout(()=>{try{pv&&pv.open(r)}catch(e){V.errs.push('go '+e)}},waited?380:30)}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#v18133qfb');if(!b)return;e.preventDefault();e.stopPropagation();openQF(b)},true);
+document.addEventListener('keydown',e=>{const qfOn=H.classList.contains('v18133qfon');if(qfOn)return;
+  const k=(e.key||'').toLowerCase();const combo=(e.metaKey||e.ctrlKey)&&!e.altKey&&k==='k';const slash=k==='/'&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!editable(document.activeElement);
+  if(combo||slash){e.preventDefault();e.stopPropagation();openQF($('#v18133qfb'));return}
+  /* desktop: Esc closes the person file when nothing else is on top */
+  if(e.key==='Escape'&&!editable(document.activeElement)&&typeof ovOn!=='undefined'&&ovOn&&!H.classList.contains('v1813mopen')&&!$$('[role=dialog]:not([hidden])').some(d=>d.id&&/v1813menu|v1828menu|v18133qf/.test(d.id)&&getComputedStyle(d).display!=='none')){try{closeOv()}catch(x){}}},true);
+
+/* ---------- About: Ari's own story (restored from v16 to v18.0), current theme ---------- */
+const LOOP=[['Find','I source people with fresh signals from Tamsin’s and Idris’s books.'],['Connect','About fifteen invites a weekday, each queued with its own reason.'],['Accepts','When someone accepts, their first message is already written.'],['Follow up','The second message at four days, the third a week after that, and I suggest withdrawing at fourteen.'],['Replies','A reply jumps the queue, with an answer drafted in a line or two.'],['Momentum','I keep score, so you only have to keep going.']];
+let BUILD='';
+function aboutHTML(){const T=(G.ARI_MEM&&ARI_MEM.timeline)||[];
+  return `<div class="v181ab v18133ab">
+  <div class="apcap"><span class="cap">What I am</span></div>
+  <p>I’m Ari, Hark in your pocket. I look after your LinkedIn outbound from the first search to the last follow-up, and I keep your hours.</p>
+  <div class="apcap"><span class="cap">What I do</span><span class="cap">The loop</span></div>
+  <div class="aploop"><i class="lnf"></i>${LOOP.map(l=>`<div class="st3"><b>${E(l[0])}</b><span>${E(l[1])}</span></div>`).join('')}</div>
+  <div class="apcap"><span class="cap">What I never do</span></div>
+  <div class="apnever">I never press send. I find the people, write the notes and queue them, and you send each one from LinkedIn yourself. <b>Your name, your thumb.</b></div>
+  <div class="apcap"><span class="cap">How I talk</span></div>
+  <p>Short, dry, and on your side. I’ll push back once, and after that it’s your call.</p>
+  <div class="apcap"><span class="cap">How I was made</span><span class="cap">Ari’s memory</span></div>
+  <div class="v16mem">${T.map(x=>`<div class="v16mi"><i></i><div><b>${E(x[0])}</b><span>${E(x[1])}</span></div></div>`).join('')}</div>
+  <div class="v18133note"><b>Want something changed?</b>App changes are handled in Hark, not here. In here I stick to your outreach.</div>
+  <div class="apcap"><span class="cap">Help and changes</span></div>
+  <div class="aprow press" data-s171="wn"><div><b>What’s new</b><span>Everything that changed, build by build</span></div><span class="v181ch" aria-hidden="true">›</span></div>
+  <div class="aprow"><div><b>Version</b><span id="v18133ver">${BUILD?E(BUILD):'Ari'}</span></div></div>
+  <p class="v181sig">I prepare, you send.</p></div>`}
+function about(force){try{const sec=$('#apPanes .app[data-s="2"]');if(!sec)return;if(!force&&sec.querySelector('.v18133ab'))return;sec.innerHTML=aboutHTML();try{G.ariFill&&ariFill(sec)}catch(e){}}catch(e){V.errs.push('about '+e)}}
+V.about=about;
+function build(){try{fetch('/build.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.build)return;BUILD='Ari '+j.build+(j.commit?' · '+String(j.commit).slice(0,7):'');const s=$('#v18133ver');if(s)s.textContent=BUILD}).catch(()=>{})}catch(e){}}
+
+function boot(){btn();geo();about(true);build();
+  if(G.ariPage&&ariPage.open&&!ariPage.open.v18133){const _o=ariPage.open;ariPage.open=function(...a){const r=_o.apply(this,a);try{about(false)}catch(e){}return r};ariPage.open.v18133=1}
+  setInterval(()=>{if(!document.hidden){btn();about(false)}},3000)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script>
 </body>
 </html>
