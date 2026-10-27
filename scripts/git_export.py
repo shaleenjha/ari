@@ -53,6 +53,8 @@ INCLUDE = [
     'repo/REPO_MAP.md:REPO_MAP.md', 'archive/**',
     # Oct 24 2026 (scrub build): seller settings (private values stay outside the repo) and the repo leak-scan gate
     'scripts/seller_config.py', 'scripts/repo_scan.py', 'scripts/test_repo_scan.py',
+    # Oct 27 2026: ingest labels step 1 (spec docs/specs/09-ingest-labels.md): code labelers + dry-run backfill, and their tests
+    'scripts/ingest_labels.py', 'scripts/test_ingest_labels.py',
     # Oct 24 2026: archive/ui/, old /ops versions and design mockups, scrubbed onto the synthetic data at export time.
     # Left out on purpose (real prospect data that cannot be scrubbed reliably): web/_archive/proto*.html,
     # mockup.html, dossier.html, index.html, ari.html, app.js, and every screenshot (.png).

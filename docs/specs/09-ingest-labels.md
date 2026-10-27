@@ -1,6 +1,8 @@
-# 05 Ingest labels (spec, Oct 27 2026)
+# 09 Ingest labels (spec, Oct 27 2026)
 
-Status: SPEC ONLY. No code, no migration, no deploy. Owner said "Go on" Oct 27 2026 20:40 IST to speccing this first.
+Status: STEP 1 BUILT (Oct 27 2026): labelers, dry-run backfill and the pending 0044 files; nothing applied, nothing deployed,
+no worker prompt change. Owner said "Go on" Oct 27 2026 20:40 IST to speccing this first and picked A, A, A at 20:57 IST
+(see Decisions below). Renumbered from 05 to 09 on Oct 27 2026 (05 is docs/specs/05_log_history_repair.md).
 Idea: label every outreach event once, when it comes in, so later readers (the outcome loop, a shared agent harness, a
 read-only MCP for Owner's work Claude "Wren") read small labels instead of re-reading raw rows and message text
 (plans/competitors/airspeed.md).
@@ -63,8 +65,9 @@ app.events (workspace_id uuid, id bigint identity, event_type text check (8 valu
   keys and any string over 40 characters.
 - `person_id` is the current text id (P-id). The rebuild maps it with the same legacy map as people (migration-map.md).
 - Hot keys get expression indexes only when a report needs them (`labels->>'structure'`, `labels->>'intent'`).
-- Rebuild file: `app/db/migrations/0006_events.sql`. Prod file: `native/supabase/migrations/pending/0044_event_labels.sql`
-  plus rollback and `test/checks_after_0044.sql` (0039 to 0041 are still pending; 0044 does not depend on them).
+- Rebuild file: `app/db/migrations/0006_events.sql` (not written yet). Prod file: `native/supabase/migrations/pending/0044_event_labels.sql`
+  plus `0044_event_labels_rollback.sql` and `test/checks_after_0044.sql` (0039 to 0041 are still pending; 0044 does not depend
+  on them). Written in step 1; rehearsal on the throwaway database and staging is step 2.
 
 ## 5. Idempotency and backfill
 - `dedupe_key` is the source's natural key: Gmail message id (accept, reply), `sent_messages.id` (dm_sent),
@@ -100,8 +103,9 @@ $0.10 a month. Backfill of past replies with text: under $0.10 once. Worker labe
 reply to a run that already reads it. Storage: a few thousand rows a year.
 
 ## 9. Rollout (each step stops for Owner where marked)
-1. Label code as pure Python functions (`scripts/event_labels.py`) with tests on synthetic data, and the backfill in
-   `--dry` mode printing counts per event_type and per fault. No writes. **Owner's go to build.**
+1. Label code as pure Python functions (`scripts/ingest_labels.py`, tests `scripts/test_ingest_labels.py`) with tests on
+   synthetic data, and the backfill in `backfill --dry-run` mode writing `work/ingest_labels/dryrun.jsonl` + `summary.json`
+   (counts per event_type and per fault). No writes. **Done Oct 27 2026** (results in "Step 1 results" below).
 2. Migration 0044 + rollback + checks, rehearsed on the throwaway database and staging. **Prod needs a short-lived token
    (PAT) from Owner**, a fresh verified backup, then: stop the worker, migrate, run checks, start the worker.
 3. Writers: each ingest script calls the event RPC after its existing write. Backfill for real. Reconcile job on.
@@ -110,7 +114,42 @@ reply to a run that already reads it. Storage: a few thousand rows a year.
 5. `event_outcomes` view (a second small migration, same PAT routine) and the copy read switched over after a parity check.
 6. Later: 0041 Haiku takes over reply labels; MCP spec.
 
-## 10. Decisions for Owner
+## 10. Decisions for Owner (asked Oct 27 2026; answered below)
 1. Reply labels before 0041 is live: worker labels them now (recommended) or wait for the Haiku path.
 2. Table home: `app.events` in prod now so the rebuild inherits it (recommended) or a `public` table moved later.
 3. Backfill depth: all history, older rows marked approx (recommended) or only from Oct 16 2026 when Gmail ingest started.
+
+## Decisions (Owner, 27 Oct 2026)
+Owner picked option A on all three at 20:57 IST, Oct 27 2026.
+1. **Reply labels before 0041 is live: the worker labels them.** In the same run where it reads a reply to write the three reply
+   drafts, it also writes intent, objection_type, sentiment and next_step (same vocabulary as section 2, `labeled_by = 'worker'`)
+   until the AI layer (0041, Haiku `triage_reply`) is live; then 0041 takes over with the same fields and no second call.
+2. **Table home: `app.events` in the app2 (`app`) schema of the live database**, so the rebuild inherits it with no copy step.
+3. **Backfill depth: all history.** Rows dated before 2026-10-16 00:00 IST (when Gmail ingest started) are marked `approx = true`,
+   on top of the usual approx rules (date-only time, `people.ts_approx`, two sources more than an hour apart).
+
+## Step 1 results (Oct 27 2026)
+- `scripts/ingest_labels.py`: one labeler per event type, idempotent `dedupe_key`s, the label checker (vocabulary, types, 40-char
+  cap, no emails / links / long digit runs / known person, company or AE names), `backfill --dry-run` (reads Supabase as
+  ari_worker plus `signals/log.csv` and the profile scan state; the Sheet only for a Log row-count parity line). Reply judged
+  labels stay unset with `needs_review = true`; no model call. Without `--dry-run` it refuses (exit 2).
+- Keys: `P<id>:<type>` for one-per-person events, `P<id>:dm_sent:<step>` for DMs (not the sent_messages id, so the people field,
+  the Log and sent_messages collapse to one row; the sent_messages id goes into `source_ref`), `P<id>:reply:first` for the first
+  reply until a Gmail id exists (step 3: reply_ingest must reuse it for a person's first reply), `acct-<uuid>:meeting_booked`,
+  `signal_found:<md5 of company|url, 16 hex>`.
+- `structure` keeps only the structure code (`f1`, `ae2`): the draft_tags text can carry an AE's first name.
+- `draft_tag_id` / `note_tag_id` / `credited_tag_id` are null in the backfill: the worker cannot read draft_tags, and
+  `ari_worker_copy_stats` returns tags without their id or the person id (DMs are matched on step + exact sent time + company).
+  Step 3 can fill them through a small read RPC if the outcome loop needs the id.
+- 0044 (pending, not applied): `app.events`, `app.event_label_vocab()` (the same JSON as `ingest_labels.py vocab --sql`; a test
+  fails on drift), `app.event_labels_check()`, `public.ari_worker_event_record(...)` (ari_worker + service_role only; refuses
+  `labeled_by = 'shal'`, code-set judged labels and any label fault; Owner-set judged labels are never overwritten; a code re-label
+  keeps judged labels). Syntax-checked with the Postgres parser only; not run on any database yet.
+- Dry run, Oct 27 2026 ~21:30 IST (prod data, read-only): 631 would-be rows. connect_sent 353, dm_sent 154, accept 85,
+  signal_found 21, withdraw 13, reply 4, meeting_booked 1, profile_scan_done 0 (no scan state yet; the feature started today).
+  36.8% approx (connect_sent 134, accept 64, dm_sent 12, all 21 signals, the 1 meeting). 0.6% needs_review (the 4 replies).
+  0 label faults, 0 duplicate keys. Not labeled by design: 14 personal or deleted people. Could not label: 5 signals whose company
+  has no account. Data notes: 48 accepts have no connect_sent on record (accepts back to Oct 1, connects only from Oct 13),
+  109 connects have no tier (company name not found in the Book), 8 sent DMs share a bulk timestamp and could not be tied to one
+  person (their people rows still give the dm_sent event), all 13 withdrawals are from today, no reply text is stored for any of the 4.
+  Sheet Log tab = 861 rows = log_entries.

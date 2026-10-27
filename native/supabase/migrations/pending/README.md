@@ -27,6 +27,21 @@
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
 
+## 0044 event labels (Oct 27 2026): WRITTEN, NOT APPLIED ANYWHERE
+Spec docs/specs/09-ingest-labels.md (step 1; Owner A/A/A Oct 27 2026 20:57 IST). Files: `0044_event_labels.sql`,
+`0044_event_labels_rollback.sql` (refuses to drop a non-empty `app.events` unless `set ari.allow_drop_events = 'yes'`),
+`test/checks_after_0044.sql` (one statement, synthetic P999999901 rows, deliberate raise: `ALL 0044 CHECKS PASSED` = pass).
+Needs 0033 + 0035 only; independent of 0039 to 0041. New objects only (no lock on an existing table). The VOCAB block is
+generated: `python3 scripts/ingest_labels.py vocab --sql`; `scripts/test_ingest_labels.py` fails if the two drift.
+Only syntax-checked (pglast, the Postgres parser). Step 2 = throwaway database rehearsal, then staging with a short-lived PAT,
+then prod after a fresh verified backup. Proposed `run_local.sh` lines (unverified, same pattern as 0042):
+```bash
+api "$PEND/0044_event_labels.sql"; echo "applied 0044"
+out=$($P -f "$HERE/checks_after_0044.sql" 2>&1 || true); grep -q "ALL 0044 CHECKS PASSED" <<<"$out" || { echo "FAIL 0044: $out"; exit 1; }; echo "0044 CHECKS PASSED"
+api "$PEND/0044_event_labels.sql"; api "$PEND/0044_event_labels_rollback.sql"; api "$PEND/0044_event_labels_rollback.sql"; echo "0044 re-applied, rolled back twice"
+api "$PEND/0044_event_labels.sql"; echo "applied 0044 again"
+```
+
 ## 0042 + 0043 on prod (Oct 24 2026, Owner "B" 11:45 IST)
 Evidence: work/security/prod-0042-0043/README.md. Fresh verified backup first (backup_runs id 12, ari_20261024T0622Z, 48 tables,
 5,326 rows, 0 mismatches, offsite ok). Prod ACL fingerprints before = staging's. After 0042: rel/fn ACL fingerprints unchanged,
