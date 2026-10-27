@@ -30,6 +30,22 @@ else:
     f = iso(r.get('finished_at'))
     if not f or (now - f).total_seconds() > 26 * 3600 or r.get('verified') is not True or r.get('error'):
         problems['backup'] = 'nightly backup did not finish cleanly'
+# Stall alarm (Owner, 27 Oct 2026): worker_precheck.py records each run's line in work/state/precheck_history.json.
+# The same WORK line (unchanged counts) on the last 3+ worker runs spanning 20+ min means the worker is not doing
+# the work it is woken for. Raised once (re-armed when the line changes or goes IDLE, else at most every 12 h).
+try:
+    _h = json.load(open(os.path.join(os.path.dirname(STATE), '..', 'state', 'precheck_history.json')))
+    _last = _h[-1]['line'] if _h else ''
+    _same = 0
+    for _e in reversed(_h):
+        if _e['line'] != _last: break
+        _same += 1
+    if _last.startswith('WORK') and _same >= 3:
+        _span = (now - iso(_h[-_same]['at'])).total_seconds() / 60
+        if _span >= 20:
+            problems['stall'] = 'worker stalled: the same work has been pending for %d runs (%d min), %s' % (_same, _span, _last[6:][:160])
+except Exception as e:
+    print('stall check skipped: %s' % str(e)[:120], file=sys.stderr)
 try: state = json.load(open(STATE))
 except Exception: state = {}
 fire = [k for k in problems if k not in state or (now - iso(state[k])).total_seconds() > 12 * 3600]

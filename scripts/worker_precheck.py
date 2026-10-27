@@ -54,6 +54,25 @@ def g(row, *names):
     return ""
 
 
+HISTORY = os.path.join(ROOT, "work", "state", "precheck_history.json")
+
+
+def record(line):
+    """Keep the last 12 precheck lines so health_check.py can spot a stalled worker (same WORK, 3+ runs)."""
+    try:
+        try:
+            h = json.load(open(HISTORY))
+        except Exception:
+            h = []
+        h = (h + [{"at": dt.datetime.now(dt.timezone.utc).isoformat(), "line": line}])[-12:]
+        os.makedirs(os.path.dirname(HISTORY), exist_ok=True)
+        tmp = HISTORY + ".tmp"
+        json.dump(h, open(tmp, "w"))
+        os.replace(tmp, HISTORY)
+    except Exception:
+        pass
+
+
 def main():
     reasons, detail = [], []
     now = dt.datetime.now(IST)
@@ -118,6 +137,13 @@ def main():
             tiers[(r.get("company") or "").strip().lower()] = ((r.get("tier") or "").strip(), (r.get("flag") or "").strip())
     except Exception:
         pass
+    # Follow-up drafts that live in Queue rows (worker step 4 fallback while People has no dm3_text column):
+    # a done "Draft DM 2" / "Draft DM 3" row with a result counts as the draft (27 Oct 2026, the "sticky DM3 flag").
+    queued_drafts = set()
+    for r in s["Queue"]:
+        act = re.sub(r"\s+", "", g(r, "action").lower())
+        if act in ("draftdm2", "draftdm3") and g(r, "status").lower() == "done" and g(r, "result"):
+            queued_drafts.add((g(r, "target").strip().upper(), "dm" + act[-1]))
     hits = {"research": [], "accepted_no_dm": [], "no_why": [], "followup_due": [], "exec_suggest": []}
     for p in s["People"]:
         pid = g(p, "id")
@@ -138,9 +164,16 @@ def main():
             hits["accepted_no_dm"].append(pid)
         if not g(p, "why"):
             hits["no_why"].append(pid)
-        for due, sent, txt in (("dm2_due", "dm2_sent", "dm2_text"), ("dm3_due", "dm3_sent", "dm3_text")):
-            if g(p, due)[:10] and g(p, due)[:10] <= soon and not g(p, sent) and not g(p, txt) and not g(p, "replied"):   # due by tomorrow (Oct 22: DM3 drafted ahead)
-                hits["followup_due"].append(pid)
+        for kind, due, sent, txt in (("dm2", "dm2_due", "dm2_sent", "dm2_text"), ("dm3", "dm3_due", "dm3_sent", "dm3_text")):
+            if kind == "dm3" and not g(p, "dm2_sent"):
+                continue   # worker step 4: DM3 is drafted only once DM2 went out
+            if kind == "dm2" and not g(p, "dm1_sent"):
+                continue
+            if (g(p, due)[:10] and g(p, due)[:10] <= soon and not g(p, sent) and not g(p, txt) and not g(p, "replied")
+                    and not settled and review != "personal" and not g(p, "withdrawn")
+                    and (pid.upper(), kind) not in queued_drafts):   # due by tomorrow (Oct 22: DM3 drafted ahead)
+                if pid not in hits["followup_due"]:
+                    hits["followup_due"].append(pid)
         tier, flag = tiers.get(g(p, "company").lower(), ("", ""))
         if (lead and review == "lead" and CSUITE.search(g(p, "title")) and "founder" not in route.lower()
                 and not g(p, "connect_sent") and stage != "Hold" and not flag
@@ -171,8 +204,11 @@ def main():
     if rg.strip().isdigit() and int(rg) > 0:
         reasons.append("style regen %s" % rg.strip())  # AE style guide, 21 Oct 2026: unsent DM1s + DM2s
 
+    line = ("WORK: " + "; ".join(reasons)) if reasons else "IDLE"
+    if not WHY:
+        record(line)
     if reasons:
-        print("WORK: " + "; ".join(reasons))
+        print(line)
         if WHY:
             print("\n".join(detail))
     else:

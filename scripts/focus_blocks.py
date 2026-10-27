@@ -18,6 +18,7 @@ items drop off. Blocks keep their time once created. Queue logic mirrors model()
 Needs shell credentials provider google, email owner@example.com. Never fails the worker: errors print
 one line and exit 0.
 """
+WITHDRAW_PAUSED = True  # Owner Oct 27 19:40 IST: hold withdrawals for now
 import datetime as dt, hashlib, json, re, subprocess, sys
 
 SHEET = "SHEET_ID_PLACEHOLDER"
@@ -117,8 +118,12 @@ def build(sd):
             if d2due <= sd:
                 out["follow"].append(dict(who, tag="DM2", due=d2due, msg=p.get("dm2_text", "")))
         elif ac:
+            if low(p.get("review")) in ("pending", "personal"):
+                continue  # Owner picks Lead or Personal first (Oct 27)
             out["follow"].append(dict(who, tag="DM1", due=ac, msg=p.get("dm", "")))
         elif cs:
+            if WITHDRAW_PAUSED:
+                continue
             age = (dt.date.fromisoformat(sd) - dt.date.fromisoformat(cs)).days
             if age >= 14:
                 out["follow"].append(dict(who, tag="Withdraw", due=cs, msg=""))
