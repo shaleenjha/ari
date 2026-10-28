@@ -9,6 +9,10 @@
 #   python3 scripts/copy_check.py check <person_id> <kind> <draft.txt> [--structure S2] [--seller-line] [--asset asset.txt]
 #        kind: dm1 | dm2 | dm3 | note.  Prints "PASS" or "FLAG: R3 product line in DM1; R5 ..." (exit 0 / 1).
 #        --seller-line (older name --<seller>-line): this text is the "add one short what-we-do line" switch version (R3 not applied).
+#   G12 draft assumptions (Oct 28 2026, scripts/assumptions.py; opt-in, never changes PASS/FLAG or the exit code):
+#        add --g12 [--assumptions drafter.json] [--store] to check. Prints "ASSUMPTIONS <n>: [...]" (facts with no written
+#        source, the drafter's list unioned with G12's) before the PASS/FLAG line. --store writes them to the draft's queue
+#        row AS:<person_id>:<kind> only when ARI_ASSUMPTIONS_STORE=1 (staging until Owner turns it on).
 #   python3 scripts/copy_check.py arm <person_id>      -> JSON {arm, pick, switch, why}: which DM1 structure Ari uses
 #   python3 scripts/copy_check.py arm2 <person_id>     -> JSON {arm, variant, pick, fallback}: the person's DM2 A/B arm (Oct 22)
 #   python3 scripts/copy_check.py regen [limit]        -> JSON list of unsent DM1s and DM2s that fail the AE style guide (since 21 Oct 2026)
@@ -621,6 +625,20 @@ def regen(limit=200):
     return out[:limit]
 
 
+def g12_report(a, text):
+    """G12 (opt-in): list the draft's facts with no written source. Never raises and never changes PASS/FLAG."""
+    try:
+        import assumptions
+        dp = a[a.index("--assumptions") + 1] if "--assumptions" in a and a.index("--assumptions") + 1 < len(a) else None
+        items, msg = assumptions.run(a[1], a[2], text, drafter_path=dp, do_store="--store" in a)
+        opens = [{"text": i["text"], "kind": i["kind"], "source": i["source"]} for i in items if i.get("status") == "open"]
+        print("ASSUMPTIONS %d: %s" % (len(opens), json.dumps(opens)))
+        if msg:
+            print("NOTE assumptions " + msg)
+    except BaseException as e:
+        print("NOTE G12 skipped (%s)" % str(e)[:160])
+
+
 def main(a):
     if not a:
         print(__doc__ or "usage: copy_check.py check|arm|regen"); return 2
@@ -642,6 +660,8 @@ def main(a):
         fl, notes = check(a[1], a[2], text, st, seller_line, has_asset=ha)
         for n in notes:
             print(n)
+        if "--g12" in a or "--assumptions" in a or "--store" in a:
+            g12_report(a, text)
         if fl:
             print("FLAG: " + "; ".join(fl)); return 1
         print("PASS"); return 0

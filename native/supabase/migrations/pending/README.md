@@ -27,6 +27,17 @@
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
 
+## 0046 draft assumptions (Oct 28 2026): STAGING ONLY, not on prod
+Spec plans/assumptions-to-confirm.md (Owner option C, 13:32 IST); runbook docs/runbooks/draft-assumptions.md. Files:
+`0046_draft_assumptions.sql`, `0046_draft_assumptions_rollback.sql` (refuses while confirmed/struck items exist unless
+`set ari.allow_drop_assumptions = 'yes'`), `test/checks_after_0046.sql` (one statement, synthetic rows, deliberate raise:
+`ALL 0046 CHECKS PASSED` = pass). Adds `queue.assumptions jsonb not null default '[]'` + check constraint (array, at most 60),
+explicit column grants (select/insert/update to authenticated and ari_worker, none to anon/public), no policy change (queue stays
+owner-private as 0045 left it; asserted). Needs 0045. Staging (Oct 28): apply, checks 0046/0045/0042/0043 PASS, rollback x2,
+fingerprint + column ACLs byte-identical to before, 0046 checks FAIL 1 after rollback (negative control), re-apply x2, guard
+refuses with a confirmed item, final checks PASS x4. Flag row `app_config.assumptions_ui = true` seeded on staging only.
+Evidence: work/oct28/assumptions/. Prod: waits on Owner + a fresh PAT + a verified backup.
+
 ## 0044 event labels (Oct 27 2026): WRITTEN, NOT APPLIED ANYWHERE
 Spec docs/specs/09-ingest-labels.md (step 1; Owner A/A/A Oct 27 2026 20:57 IST). Files: `0044_event_labels.sql`,
 `0044_event_labels_rollback.sql` (refuses to drop a non-empty `app.events` unless `set ari.allow_drop_events = 'yes'`),

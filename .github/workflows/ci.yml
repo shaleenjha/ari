@@ -194,6 +194,7 @@ jobs:
       - run: python3 scripts/test_git_push_branch.py   # S1 job fencing PR: review-branch push, never main, never deletes (mocked GitHub API)
       - run: python3 scripts/test_ari_token.py   # S1 R7: worker broker token fetch, cache, 401 re-fetch; off by default (mocked)
       - run: python3 scripts/test_ingest_labels.py   # spec 09 step 1: event labels idempotent, no PII, approx flag, 0044 vocab parity
+      - run: python3 scripts/test_assumptions.py   # G12 draft assumptions: extraction, sources, union, store off by default, copy_check unchanged without --g12
 
   anti-slop-static:
     needs: changes

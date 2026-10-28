@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.13.7"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.13.8"><meta name="ari-rev" content="05ae22f947">
 <title>Kelvarrow by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -6233,6 +6233,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.13.8',d:'Oct 28',items:['Under a draft, a short list of facts Kelvarrow could not find written down: names, numbers, dates, customers. Tap it to confirm, edit or strike each one','Copy waits while a number or a customer name is still unconfirmed']},
  {v:'v18.13.7',d:'Oct 28',items:['Plain words everywhere: First message, Follow-up and Last note, Invite and Invite pending, Exec outreach, and weeks read as this week or week of a date','A new mark: the kelvarrow replaces the old face in the app, on your Home Screen and in notifications','Today stays quiet: the sync line only shows up when something is wrong, and the top card is a name, one reason and one button']},
  {v:'v18.13.6',d:'Oct 28',items:['The send screen opens with your message right under the name, and nothing slides sideways any more','Signals read as plain sentences with a tappable source, and my own draft notes stay out of them','Every way into a person opens the same clean file, and the stage bar shows where they really are','Search keeps its results above the keyboard, and the People list reads like a normal list with clear labels']},
  {v:'v18.13.5',d:'Oct 28',items:['New name: Kelvarrow by Thrandvex. Same app, same data, one name for the app and for me','Search lives in the bottom bar, in a long pull down from the top, and behind / or Ctrl K on a computer. The magnifier at the top is gone']},
@@ -7769,7 +7770,7 @@ V17.tsParse=tsParse;V17.istDT=istDT;V17.put=put;V17.onRow=(t,p)=>onRow17(t,p);
 const KEY17={people:'id',accounts:'id',queue:'id',brief:'key',log:'id'};
 const TBL17={people:'people',accounts:'accounts',queue:'queue',brief:'brief',log_entries:'log'};
 function bump(t,r){const v=tsParse(t==='log'?r.created_at||r.ts:r.updated_at);if(!isNaN(v)&&v>(S17.since[t]||0))S17.since[t]=v;if(t==='log'&&r.id>(S17.since.logId||0))S17.since.logId=r.id}
-function put(t,r){if(!r)return;const k=r[KEY17[t]];if(k==null)return;const cur=S17[t].get(k);
+function put(t,r){if(!r)return;const k=r[KEY17[t]];if(k==null)return;if(t==='queue'&&/^AS:/.test(String(k)))return; /* v18.13.8: draft assumption rows are not tasks */const cur=S17[t].get(k);
   if(t==='people'&&window.ariDraftGuard){try{r=window.ariDraftGuard(r,cur)||r}catch(e){}}
   /* never let an older copy (a late fetch page) overwrite a newer realtime row */
   if(cur&&cur.updated_at&&r.updated_at&&tsParse(cur.updated_at)>tsParse(r.updated_at))return;
@@ -13182,6 +13183,158 @@ function walk(r){if(!r)return;if(r.nodeType===3)return txt(r);if(r.nodeType!==1|
   r.querySelectorAll('[aria-label],[title],[placeholder]').forEach(attrs)}
 function run(ms){for(const m of ms){try{if(m.type==='characterData')txt(m.target);else if(m.type==='attributes')attrs(m.target);else m.addedNodes.forEach(walk)}catch(e){err('mo',e)}}}
 try{walk(document.body);new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTR})}catch(e){err('init',e)}
+})();
+</script>
+<style id="v18138css">/* ===== v18.13.8 assumptions to confirm (Owner option C, Oct 28). Kelvarrow tokens; coral is a dot only, never text. ===== */
+.v18138{--k-mid:#1B1B2E;--k-night:#403E6B;--k-tint:#F4F4FA;--k-coral:#F7866D;--k-line:#CFCCE0;margin:10px 0 2px;color:var(--k-mid)}
+.v18138 .a18ln{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;border:0;border-radius:14px;background:var(--k-tint);color:var(--k-mid);font:inherit;font-size:14px;line-height:20px;text-align:left;cursor:pointer}
+.v18138 .a18ln .a18dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--k-coral)}
+.v18138 .a18ln b{font-weight:600}
+.v18138 .a18ln .a18sub{color:var(--k-night);margin-left:auto;font-size:13px;white-space:nowrap}
+.v18138 .a18ln svg{flex:0 0 auto;width:18px;height:18px;color:var(--k-night);transition:transform .2s}
+.v18138 .a18ln[aria-expanded=true] svg{transform:rotate(180deg)}
+.v18138 .a18chips{display:grid;gap:8px;margin-top:8px}
+.v18138 .a18chips[hidden]{display:none}
+.v18138 .a18chip{display:block;height:auto;text-transform:none;letter-spacing:0;background:var(--k-tint);border-radius:14px;padding:10px 12px 6px;box-shadow:inset 0 0 0 1px var(--k-line);min-width:0}
+.v18138 .a18chip .a18k{display:block;font-size:12px;line-height:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--k-night)}
+.v18138 .a18chip .a18k i{font-style:normal;text-transform:none;letter-spacing:0}
+.v18138 .a18chip .a18q{display:block;margin:2px 0 4px;font-size:15px;line-height:22px;color:var(--k-mid);overflow-wrap:anywhere;text-transform:none;letter-spacing:0;font-weight:400}
+.v18138 .a18acts{display:flex;flex-wrap:wrap;gap:4px;margin:0 -6px}
+.v18138 .a18acts button{height:auto;text-transform:none;letter-spacing:0;box-shadow:none;display:inline-flex;align-items:center;gap:6px;min-height:48px;min-width:48px;padding:0 10px;border:0;border-radius:12px;background:transparent;color:var(--k-mid);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.v18138 .a18acts button svg{width:18px;height:18px;color:var(--k-night)}
+.v18138 .a18acts button:active{background:rgba(64,62,107,.10)}
+.v18138 .a18gate{display:flex;gap:8px;align-items:flex-start;margin:6px 2px 0;font-size:13px;line-height:18px;color:var(--k-night)}
+.v18138 .a18gate svg{flex:0 0 auto;width:16px;height:16px;margin-top:1px}
+.v18138off{opacity:.38!important;pointer-events:none!important}
+</style>
+<script>/* =====================================================================
+   v18.13.8 (Wed Oct 28): assumptions to confirm (spec plans/assumptions-to-confirm.md, Owner chose option C 13:32 IST).
+   - Under every DM draft block (.v163draft dm / dm2_text / dm3_text, Today card and person file) one line
+     "N to confirm" with a coral dot, only when N > 0. Tap opens one chip per fact with no written source:
+     Confirm (stored as confirmed; the checker counts it as a source next time), Edit (cursor on the phrase in the
+     draft field), Strike (removes the phrase, saves the draft through the normal edit path, re-runs the in-app checks).
+   - Option C: Copy (the block's Copy, the card's Copy & open, the person file's Copy & open, focus mode) is off
+     while an open number or customer item remains. Names, titles, dates, events and claims only count.
+   - Data: queue rows 'AS:<person_id>:<kind>' (column queue.assumptions, migration 0046), written by the worker's
+     copy_check --g12 --store and here through apply_op 'set'. These rows never show as tasks (S17 put filter).
+   - Flag: app_config key assumptions_ui = 'true'. Missing, anything else, or a read error = everything hidden.
+   Nothing here writes prospect text of its own: Strike only removes a phrase Kelvarrow wrote.
+   ===================================================================== */
+(function(){
+const V=window.ariV18138={v:'v18.13.8',on:false,flagAt:0,rows:new Map(),errs:[],loads:0,writes:0,decos:0,open:new Set(),seen:new Set(),last:{}};
+const FIELDS=/^(dm|dm2_text|dm3_text)$/,KIND={dm:'dm1',dm2_text:'dm2',dm3_text:'dm3'},HARD=new Set(['number','customer']);
+const LABEL={name:'Name',title:'Title',number:'Number',date:'Date',event:'Event',customer:'Customer',claim:'Claim'};
+const esc=s=>{try{return ariEsc(String(s==null?'':s))}catch(e){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}};
+const say=h=>{try{toast(h)}catch(e){}};
+const bz=p=>{try{buzz(p)}catch(e){}};
+const locked=()=>!!(window.ariV162&&ariV162.locked&&ariV162.locked());
+const signed=()=>!!(window.ariV17&&ariV17.signed&&ariV17.signed());
+const norm=s=>String(s==null?'':s).toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/\s+/g,' ').trim();
+const pById=id=>(((window.ariDATA||{}).people)||[]).find(p=>p.id===id)||null;
+/* Phosphor regular (256 grid, 16 stroke) */
+const PH=(d)=>`<svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I={check:PH('<polyline points="40 144 96 200 224 72"/>'),
+  pencil:PH('<path d="M92.69,216H48a8,8,0,0,1-8-8V163.31a8,8,0,0,1,2.34-5.65L165.66,34.34a8,8,0,0,1,11.31,0L221.66,79a8,8,0,0,1,0,11.31L98.34,213.66A8,8,0,0,1,92.69,216Z"/><line x1="136" y1="64" x2="192" y2="120"/>'),
+  strike:PH('<line x1="40" y1="128" x2="216" y2="128"/><path d="M76.33,96a25.71,25.71,0,0,1-1.13-8C75.2,63.7,98.6,48,128,48c22.4,0,41.13,9.29,48,24"/><path d="M72,168c0,22.09,25.07,40,56,40s56-17.91,56-40c0-23.77-21.62-33-45.6-40"/>'),
+  caret:PH('<polyline points="208 96 128 176 48 96"/>'),
+  lock:PH('<rect x="40" y="88" width="176" height="128" rx="8"/><path d="M92,88V52a36,36,0,0,1,72,0V88"/>')};
+const rowId=(pid,k)=>'AS:'+pid+':'+k;
+
+/* ---------- data ---------- */
+let fP=null,lP=null;
+function flag(force){if(fP)return fP;if(!force&&V.flagAt&&Date.now()-V.flagAt<120e3)return Promise.resolve(V.on);
+  if(!signed()||locked()||!window.ariV17||!ariV17.ready)return Promise.resolve(false);
+  fP=ariV17.ready().then(c=>{if(!c)throw new Error('offline');return c.from('app_config').select('key,value').eq('key','assumptions_ui').maybeSingle()})
+    .then(({data,error})=>{if(error)throw error;V.on=!!(data&&/^(true|on|1|yes)$/i.test(String(data.value||'').trim()));V.flagAt=Date.now();return V.on})
+    .catch(e=>{V.errs.push('flag '+String(e&&e.message||e).slice(0,100));V.on=false;V.flagAt=Date.now();return false})
+    .finally(()=>{fP=null});return fP}
+function load(){if(lP)return lP;
+  lP=flag().then(on=>{if(!on){V.rows.clear();return}
+      return ariV17.ready().then(c=>c.from('queue').select('id,target,details,assumptions,updated_at').like('id','AS:%').limit(2000))
+        .then(({data,error})=>{if(error)throw error;const m=new Map();(data||[]).forEach(r=>{if(Array.isArray(r.assumptions))m.set(r.id,r)});
+          V.rows.forEach((r,k)=>{if(r._local&&!m.has(k))m.set(k,r)});V.rows=m;V.loads++})})
+    .catch(e=>{V.errs.push('load '+String(e&&e.message||e).slice(0,100))})
+    .finally(()=>{lP=null;all()});return lP}
+V.load=load;
+function rowFor(pid,f){const k=KIND[f];return V.rows.get(rowId(pid,k))||(k==='dm1'?(V.rows.get(rowId(pid,'exec'))||V.rows.get(rowId(pid,'note'))):null)||null}
+function device(){const u=navigator.userAgent||'';return /iPhone|iPad/.test(u)?'iphone':/Android/.test(u)?'android':'web'}
+function uid(){try{return crypto.randomUUID()}catch(e){return 'a18-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}}
+function persist(row,list){const prev=row.assumptions;row.assumptions=list;V.rows.set(row.id,row);all();
+  if(!window.ariV17||!ariV17.ready)return Promise.resolve(false);
+  return ariV17.ready().then(c=>{if(!c)throw new Error('offline');return c.rpc('apply_op',{p_op_id:uid(),p_kind:'set',p_table:'queue',p_id:row.id,p_patch:{assumptions:list},p_client_ts:new Date().toISOString(),p_device:device()})})
+    .then(({error})=>{if(error)throw error;V.writes++;return true})
+    .catch(e=>{V.errs.push('save '+String(e&&e.message||e).slice(0,120));row.assumptions=prev;V.rows.set(row.id,row);all();say('Not saved. Check your connection and tap it again.');return false})}
+
+/* ---------- what is open in this draft ---------- */
+function curText(box){const ta=box.querySelector('textarea.v18101ta');if(ta)return ta.dataset.saved||ta.value||'';const m=box.querySelector('[data-msg]');return m?m.textContent||'':''}
+function liveText(box){const ta=box.querySelector('textarea.v18101ta');return ta?ta.value:curText(box)}
+function opens(row,text){const t=norm(text);return (row&&row.assumptions||[]).filter(i=>i&&i.status==='open'&&(t.includes(norm(i.text))||(i.source==='drafter'&&!V.seen.has(row.id+'|'+i.id))))}
+/* an open phrase that was in the draft and is gone now was edited out: store it as edited (once) */
+function settle(box,row,text){if(!row)return;const t=norm(text);let ch=false;const list=(row.assumptions||[]).map(i=>{if(!i||i.status!=='open')return i;const k=row.id+'|'+i.id,here=t.includes(norm(i.text));
+    if(here){V.seen.add(k);return i}if(V.seen.has(k)){ch=true;V.seen.delete(k);return Object.assign({},i,{status:V.last[k]==='strike'?'struck':'edited'})}return i});
+  if(ch)persist(row,list)}
+
+/* ---------- the line, the chips, the gate ---------- */
+function lineHTML(row,items,box){const n=items.length,h=items.filter(i=>HARD.has(i.kind)).length,key=row.id,ex=V.open.has(key);
+  const t=liveText(box);
+  const chips=items.map(i=>{const found=norm(t).includes(norm(i.text));return `<div class="a18chip" data-aid="${esc(i.id)}"><span class="a18k">${esc(LABEL[i.kind]||'Claim')}${HARD.has(i.kind)?' <i>· needed to copy</i>':''}</span><span class="a18q">“${esc(i.text)}”</span><div class="a18acts">`+
+    `<button type="button" class="press" data-a18="ok" aria-label="Confirm ${esc(i.text)}">${I.check}Confirm</button>`+
+    `<button type="button" class="press" data-a18="ed" aria-label="Edit ${esc(i.text)} in the draft">${I.pencil}Edit</button>`+
+    (found?`<button type="button" class="press" data-a18="st" aria-label="Strike ${esc(i.text)} from the draft">${I.strike}Strike</button>`:'')+`</div></div>`}).join('');
+  return `<div class="v18138" data-row="${esc(key)}"><button type="button" class="a18ln press" aria-expanded="${ex}" data-a18="tog"><span class="a18dot" aria-hidden="true"></span><span><b>${n}</b> to confirm</span>${h?`<span class="a18sub">Copy waits on ${h}</span>`:''}${I.caret}</button>`+
+    `<div class="a18chips"${ex?'':' hidden'}>${chips}</div>`+
+    (h?`<div class="a18gate" role="note">${I.lock}<span>Confirm or strike ${h===1?'the number or customer name':'the numbers and customer names'} to turn Copy back on.</span></div>`:'')+`</div>`}
+function gate(box,off){const scope=box.closest('.q')||box.closest('#ov')||box.closest('#v1812fx')||box;
+  const bs=[...box.querySelectorAll('[data-dr=copy]'),...(scope!==box?scope.querySelectorAll('[data-a=copy],#pfCopy,[data-v1812open]'):[])];
+  bs.forEach(b=>{if(off){b.classList.add('v18138off');b.setAttribute('aria-disabled','true');b.dataset.a18off='1';if(b.tagName==='BUTTON')b.disabled=true;if(b.tagName!=='BUTTON'){if(!b.dataset.a18tab)b.dataset.a18tab=b.getAttribute('tabindex')||'_';b.setAttribute('tabindex','-1')}}
+    else if(b.dataset.a18off){b.classList.remove('v18138off');delete b.dataset.a18off;if(!b.classList.contains('v1811off')){b.removeAttribute('aria-disabled');if(b.tagName==='BUTTON')b.disabled=false}
+      if(b.dataset.a18tab){b.dataset.a18tab==='_'?b.removeAttribute('tabindex'):b.setAttribute('tabindex',b.dataset.a18tab);delete b.dataset.a18tab}}})}
+function decorate(box){const f=box.dataset.field,pid=box.dataset.pid;if(!FIELDS.test(f||''))return;
+  const row=V.on?rowFor(pid,f):null,text=curText(box);if(row)settle(box,row,text);
+  const items=row?opens(row,text):[];
+  const sig=V.on+'|'+(row?JSON.stringify(row.assumptions):'')+'|'+norm(liveText(box))+'|'+(row&&V.open.has(row.id));
+  if(box.dataset.a18===sig&&(!items.length||box.querySelector(':scope>.v18138')))return;box.dataset.a18=sig;V.decos++;
+  box.querySelectorAll(':scope>.v18138').forEach(x=>x.remove());
+  if(items.length){const html=lineHTML(row,items,box);const rowEl=box.querySelector(':scope>.v163row');if(rowEl)rowEl.insertAdjacentHTML('beforebegin',html);else{const ed=box.querySelector(':scope>.v18101ed');ed?ed.insertAdjacentHTML('afterend',html):box.insertAdjacentHTML('beforeend',html)}}
+  gate(box,items.some(i=>HARD.has(i.kind)))}
+function all(){if(locked())return;document.querySelectorAll('.v163draft[data-field][data-pid]').forEach(b=>{try{decorate(b)}catch(e){V.errs.push('dec '+String(e&&e.message||e).slice(0,100))}})}
+V.all=all;
+let dT=0;const soon=()=>{if(dT)return;dT=requestAnimationFrame(()=>{dT=0;all()})};
+new MutationObserver(ms=>{for(const m of ms){if(m.target&&m.target.closest&&m.target.closest('.v18138'))continue;soon();return}}).observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener('input',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('v18101ta'))soon()},true);
+
+/* ---------- in-app checks after a strike (the full copy_check runs on Kelvarrow's next check of this draft) ---------- */
+function quick(t){const out=[];if(/[\u2013\u2014]|\s-\s/.test(t))out.push('a dash');if((t.match(/\?/g)||[]).length>1)out.push('more than one question');if(!/\?\s*$/.test(t.trim()))out.push('no closing ask');
+  if(/\(\s*\)|\s[,.]|,\s*[.?]|\.\s*\./.test(t))out.push('loose punctuation');return out}
+function strikeText(t,phrase){const i=t.toLowerCase().indexOf(phrase.toLowerCase());if(i<0)return null;
+  let a=i,b=i+phrase.length;
+  const pre=t.slice(0,a),post=t.slice(b);
+  /* a parenthetical that only held the phrase goes with it: "(Ixterlane handles it)" */
+  const po=pre.lastIndexOf('('),pc=post.indexOf(')');if(po>=0&&pc>=0&&!/[)]/.test(pre.slice(po))&&post.slice(0,pc).split(/\s+/).filter(Boolean).length<=3){a=po;b=b+pc+1}
+  let s=(t.slice(0,a)+t.slice(b)).replace(/[ \t]{2,}/g,' ').replace(/\s+([,.?!])/g,'$1').replace(/,\s*([.?!])/g,'$1').replace(/([.?!])\s*,/g,'$1').replace(/^\s*[,.]\s*/,'').replace(/\(\s*\)/g,'').replace(/\s{2,}/g,' ').trim();
+  s=s.replace(/([.?!]\s+)([a-z])/g,(m,p,c)=>p+c.toUpperCase());return s}
+
+/* ---------- taps ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-a18]');if(!b)return;e.preventDefault();e.stopPropagation();
+  const wrap=b.closest('.v18138'),box=wrap&&wrap.closest('.v163draft');if(!wrap||!box)return;const row=V.rows.get(wrap.dataset.row);if(!row)return;const a=b.dataset.a18;
+  if(a==='tog'){bz(6);V.open.has(row.id)?V.open.delete(row.id):V.open.add(row.id);delete box.dataset.a18;decorate(box);return}
+  const chip=b.closest('.a18chip'),id=chip&&chip.dataset.aid,it=(row.assumptions||[]).find(x=>x.id===id);if(!it)return;
+  const ta=box.querySelector('textarea.v18101ta');
+  if(a==='ok'){bz(10);persist(row,row.assumptions.map(x=>x.id===id?Object.assign({},x,{status:'confirmed'}):x)).then(ok=>{if(ok)say('Confirmed. Kelvarrow treats it as a source from now on.')});return}
+  if(a==='ed'){bz(6);if(!ta){const eb=box.querySelector('[data-dr=edit]');if(eb)eb.click();return}
+    const i=ta.value.toLowerCase().indexOf(String(it.text).toLowerCase());ta.focus({preventScroll:true});if(i>=0)ta.setSelectionRange(i,i+String(it.text).length);
+    try{ta.scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}return}
+  if(a==='st'){if(!ta||!window.ariV18101||!ariV18101.save)return;const nt=strikeText(ta.value,String(it.text));if(nt==null||!nt.trim()){say('That phrase is not in the draft any more.');return}
+    bz([8,30,10]);ta.value=nt;try{ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight+2,480)+'px'}catch(x){}
+    V.last[row.id+'|'+id]='strike';V.seen.delete(row.id+'|'+id);
+    const list=row.assumptions.map(x=>x.id===id?Object.assign({},x,{status:'struck'}):x);
+    Promise.resolve(ariV18101.save(ta,'strike')).then(saved=>{persist(row,list);const q=quick(nt);
+      say(q.length?`Struck. Check the draft: ${q.join(', ')}.`:'Struck. The draft still passes the quick checks.')});return}},true);
+
+/* ---------- refresh ---------- */
+function tick(){if(document.hidden||locked()||!signed())return;load()}
+setTimeout(tick,1500);setInterval(tick,60e3);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(tick,500)});
 })();
 </script>
 </body>

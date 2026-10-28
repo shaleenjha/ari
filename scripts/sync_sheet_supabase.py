@@ -404,6 +404,8 @@ def sync_two_way(tab, sheet, args, actor, grid):
     header, rows = sheet[tab]
     db_cols = sb_columns(table)
     db_rows = sb_all(table)
+    if tab == "Queue":  # 0046: 'AS:<pid>:<kind>' rows only hold a draft's assumptions list; DB-only, never mirrored to the Sheet
+        db_rows = [r for r in db_rows if not str(r.get("id") or "").startswith("AS:")]
     base = state_get("base:" + tab)
     plan = plan_table(cfg, header, rows, db_rows, base, db_cols)
     n = dict(insert=len(plan["db_insert"]), patch=len(plan["db_patch"]), cells=len(plan["sheet_cells"]),
