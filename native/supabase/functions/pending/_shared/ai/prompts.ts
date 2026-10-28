@@ -45,7 +45,7 @@ someone accepts his connection request. Goal: a relevant, specific opener that e
 ${HOUSE}
 ${DATA_RULE}
 ${DRAFT_SHAPE}`,
-    user: `${packContext(ctx)}\nWrite DM1 for the person in the context.`,
+    user: `${packContext(ctx)}\n${ctx?.brief ? 'Ground the opener in the account brief (its angle or one why_now item) and the research. ' : ''}Write DM1 for the person in the context.`,
   };
 }
 
@@ -112,15 +112,33 @@ Reply with JSON only: {"drafts": [{"key": "book|answer|soft", "label": "<2-3 wor
 
 export function quickResearchPrompt(ctx: Ctx, focus?: string): { system: string; user: string } {
   return {
-    system: `You research one prospect and their company for Owner's outreach, using web search. Prefer the last 90 days.
-Find concrete, citable facts (launches, funding, hiring, compliance or data-privacy news, the person's own posts or talks).
-Every finding needs a real source URL from your search results. No speculation.
-${DATA_RULE}
-Reply with JSON only: {"summary": "<3 sentences>", "findings": [{"fact": "...", "source_url": "https://...", "dated": "YYYY-MM-DD"}],
- "angles": ["<opener angle grounded in a finding>"], "confidence": 0..1}`,
+    system: `You research one prospect's company (and the person, if public) for Owner's outreach, using web search. Prefer the
+last 90 days. Find concrete, citable facts (launches, funding, hiring, compliance or data-privacy news, the person's own posts
+or talks). Every finding needs a real source URL from your search results. No speculation.
+Use at most 3 searches, then answer by calling the save_research tool exactly once. Do not answer in plain text.
+In save_research: summary is 3 short sentences; at most 8 findings; dated is YYYY-MM-DD when the source gives a date, else "";
+at most 3 angles, each grounded in a finding; confidence 0 to 1.
+${DATA_RULE}`,
     user: `${packContext(ctx)}\n${focus ? `Focus: ${focus.slice(0, MAX_INSTRUCTION)}` : 'Research the person and account in the context.'}`,
   };
 }
+
+/** Strict output tool for quick_research. Same shape as ResearchOut (schema.ts re-checks lengths and counts, which strict
+ *  schemas cannot express). Every property is required and additionalProperties is false, as strict tools need. */
+export const SAVE_RESEARCH = {
+  name: 'save_research',
+  description: 'Save the research result. Call once, after searching. Only facts with a source url from your search results.',
+  input_schema: {
+    type: 'object', additionalProperties: false, required: ['summary', 'findings', 'angles', 'confidence'],
+    properties: {
+      summary: { type: 'string' },
+      findings: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['fact', 'source_url', 'dated'],
+        properties: { fact: { type: 'string' }, source_url: { type: 'string' }, dated: { type: 'string' } } } },
+      angles: { type: 'array', items: { type: 'string' } },
+      confidence: { type: 'number' },
+    },
+  },
+};
 
 // ---------------- deep research: Opus orchestrates, Grok searches ----------------
 export const DEEP_TOOLS = [

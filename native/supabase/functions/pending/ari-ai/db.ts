@@ -9,6 +9,9 @@ export const SERVICE_RPCS = [
   'ari_ai_save_draft', 'ari_ai_save_triage', 'ari_ai_save_reply_draft', 'ari_ai_save_research', 'ari_ai_job_enqueue',
   'ari_ai_job_claim', 'ari_ai_job_update', 'ari_ai_job_event', 'ari_ai_job_events', 'ari_ai_trigger_claim', 'ari_ai_trigger_done', 'ari_ai_pending_events',
   'ari_ai_notify_dm_ready', 'ari_ai_import_book',
+  // 0047 pipeline job line
+  'ari_pipeline_enqueue', 'ari_pipeline_read', 'ari_pipeline_start', 'ari_pipeline_finish', 'ari_pipeline_brief_context',
+  'ari_pipeline_brief_write', 'ari_pipeline_save_checks', 'ari_pipeline_fact_get', 'ari_pipeline_fact_put',
 ] as const;
 export type ServiceRpc = typeof SERVICE_RPCS[number];
 

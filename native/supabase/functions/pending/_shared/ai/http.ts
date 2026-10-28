@@ -8,7 +8,8 @@ export const PROVIDER_HOSTS = ['api.anthropic.com', 'api.x.ai', 'api.openai.com'
 const GOOGLE_HOSTS = ['gmail.googleapis.com', 'oauth2.googleapis.com', 'www.googleapis.com'];
 // Lookups for import fixes: a licensed people-data vendor and a search-engine API. Never LinkedIn itself (a search engine
 // returns public result titles and URLs; no request ever reaches linkedin.com).
-export const DATA_HOSTS = ['api.lemlist.com', 'api.search.brave.com'] as const;
+// Fact check (Oct 28 2026): Parallel Decisions API, sent only public company-level claims (see factcheck.ts).
+export const DATA_HOSTS = ['api.lemlist.com', 'api.search.brave.com', 'api.parallel.ai'] as const;
 
 export function allowedHost(url: string, supabaseUrl = safeEnv('SUPABASE_URL')): boolean {
   let h: string;

@@ -42,8 +42,11 @@ Deno.test('draft_dm1 writes only the DM slot, returns the validated draft, never
   assertEquals(r.status, 200); assertEquals(j.saved, true); assertEquals(st.people.get('P1').dm, GOOD);
   assertEquals(seen[0].model, 'claude-opus-5-5');
   st.people.get('P1').dm = 'Owner wrote this himself.';
+  // 0047: an Accepted tap only queues research (DM1 comes after research + brief); a repeat tap is a no-op
   const r2 = await (await handle(post({ action: 'draft_dm1', person_id: 'P1', source: 'accepted_tap' }), env)).json();
-  assertEquals(r2.status, 'skipped'); assertEquals(st.people.get('P1').dm, 'Owner wrote this himself.');
+  assertEquals(r2.status, 'queued'); assertEquals(r2.existing, false); assertEquals(st.people.get('P1').dm, 'Owner wrote this himself.');
+  assertEquals((await (await handle(post({ action: 'draft_dm1', person_id: 'P1', source: 'accepted_tap' }), env)).json()).existing, true);
+  assertEquals(st.pjobs.map((j) => j.stage), ['research']); assertEquals(seen.length, 1);
 });
 
 Deno.test('rewrite with a chip streams over SSE and saves only if the draft did not change underneath', async () => {
@@ -83,14 +86,43 @@ Deno.test('triage_reply: Haiku classifies, Opus drafts book / answer / soft; sav
   assertEquals((await handle(post({ action: 'triage_reply', reply_id: 7 }), env)).status, 502);   // duplicate keys refused
 });
 
-Deno.test('quick_research keeps only findings whose URL the search actually cited', async () => {
-  const out = { summary: 's', confidence: 0.9, angles: ['a'], findings: [
-    { fact: 'Raised a round', source_url: 'https://example.com/news/1' }, { fact: 'Invented', source_url: 'https://made-up.example/x' }] };
-  const { p, seen } = scripted('anthropic', [JSON.stringify(out)], ['https://example.com/news/1?utm=1']);
+/** Sonnet stand-in for quick_research: returns a save_research tool call (or a bad stop) like the Messages API does. */
+function researcher(input: Record<string, unknown> | null, opts: { stop?: string; searched?: string[] } = {}) {
+  const seen: AiRequest[] = [];
+  const p: Provider = { name: 'anthropic', complete(req) {
+    seen.push(structuredClone(req));
+    return Promise.resolve({ provider: 'anthropic', model: req.model, text: input ? '' : 'Here is what I found: {"summary": "cut', tokensIn: 3000,
+      tokensOut: 900, toolCalls: 2, citations: [], searchUrls: opts.searched ?? [],
+      toolUses: input ? [{ id: 'tu1', name: 'save_research', input }] : [], stopReason: opts.stop ?? (input ? 'tool_use' : 'end_turn') });
+  } };
+  return { p, seen };
+}
+const RESEARCH = { summary: 's', confidence: 0.9, angles: ['a'], findings: [
+  { fact: 'Raised a round', source_url: 'https://example.com/news/1', dated: '2026-09-01' },
+  { fact: 'Invented', source_url: 'https://made-up.example/x', dated: '' }] };
+
+Deno.test('quick_research: answer comes from the strict save_research tool; only urls the search returned are kept', async () => {
+  const { p, seen } = researcher(RESEARCH, { searched: ['https://example.com/news/1?utm=1'] });
   const { env, st } = mkEnv({ anthropic: p });
   const j = await (await handle(post({ action: 'quick_research', person_id: 'P1' }), env)).json();
-  assertEquals(j.research.findings.length, 1); assertEquals(st.research.length, 1);
+  assertEquals(j.research.findings.length, 1); assertEquals(st.research.length, 1); assertEquals(j.research.findings[0].dated, '2026-09-01');
   assertEquals(seen[0].tools, ['web_search']); assert(j.research.confidence <= 0.6);
+  assertEquals(seen[0].clientTools?.[0].name, 'save_research'); assertEquals(seen[0].clientTools?.[0].strict, true);
+  assertEquals([seen[0].thinking, seen[0].effort, seen[0].maxTokens, seen[0].retries], ['between_tools', 'low', 4000, 0]);
+  assertEquals(st.calls[0].status, 'ok');
+});
+
+Deno.test('quick_research: max_tokens / refusal / no tool call -> invalid, cost booked, nothing saved, one call only', async () => {
+  for (const [input, stop] of [[RESEARCH, 'max_tokens'], [RESEARCH, 'refusal'], [null, 'end_turn']] as const) {
+    const { p, seen } = researcher(input as Record<string, unknown> | null, { stop });
+    const { env, st } = mkEnv({ anthropic: p });
+    const r = await handle(post({ action: 'quick_research', person_id: 'P1' }), env);
+    assertEquals(r.status, 502); assertEquals(st.research.length, 0); assertEquals(seen.length, 1);
+    assertEquals(st.calls[0].status, 'invalid'); assert(st.calls[0].cost > 0);     // the spend is recorded, never hidden
+  }
+  const { p } = researcher({ ...RESEARCH, confidence: 'high' });                       // wrong type -> invalid, not coerced
+  const { env, st } = mkEnv({ anthropic: p });
+  assertEquals((await handle(post({ action: 'quick_research', person_id: 'P1' }), env)).status, 502); assertEquals(st.research.length, 0);
 });
 
 /** Opus orchestrator stand-in: replays a fixed tool-call script, one assistant turn per call. */
@@ -178,7 +210,7 @@ Deno.test('budget: over the cap the app gets spend_limit and no provider is call
 });
 
 // ---------------- event path idempotency ----------------
-Deno.test('event path: a redelivered accept or an overlapping run drafts once and pushes once', async () => {
+Deno.test('event path: a redelivered accept or an overlapping run queues research once and never drafts DM1 itself', async () => {
   const cls = JSON.stringify({ is_accept: true, person_id: 'P1', confidence: 0.95, reason: 'vanity match' });
   const { p, seen } = scripted('anthropic', [(req) => (req.model === 'claude-haiku-5-5' ? cls : draftReply(GOOD))]);
   const { env, st } = mkEnv({ anthropic: p });
@@ -187,11 +219,10 @@ Deno.test('event path: a redelivered accept or an overlapping run drafts once an
   st.pending.dm1_needed.push('P1');
   const a = await processPending(env.db, env.deps);
   const b = await processPending(env.db, env.deps);
-  assertEquals(a.accept_matched, 1); assertEquals(a.dm1_done, 1);
-  assertEquals(Object.keys(b).length, 0, JSON.stringify(b));
-  assertEquals(seen.length, 2);                              // one classify + one draft, across both runs
-  assertEquals(st.pushes.filter((x) => x === 'dm1:P1').length, 1);
-  assertEquals(st.people.get('P1').dm, GOOD);
+  assertEquals(a.accept_matched, 1); assertEquals(a.pipeline_queued, 1);
+  assertEquals(b.pipeline_existing, 1, JSON.stringify(b));          // dm1_needed again: same job key, nothing new
+  assertEquals(seen.length, 1);                                    // one classify; no draft call on the event path
+  assertEquals(st.pjobs.length, 1); assertEquals(st.pjobs[0].stage, 'research'); assertEquals(st.people.get('P1').dm, null);
 });
 
 Deno.test('event path: classify must agree with the deterministic match, else needs_review and no draft', async () => {

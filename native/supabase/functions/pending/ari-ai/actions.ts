@@ -2,8 +2,8 @@
 // validates the output and writes ONLY to that person's draft / research fields or that reply's drafts. Nothing here sends a
 // message anywhere: there is no LinkedIn client, and the host allowlist in _shared/ai/http.ts refuses linkedin.com.
 import { ClassifyOut, cleanFindings, Infer, ReplyDraftsOut, ResearchOut, TriageClassOut, triageKeysOk } from '../_shared/ai/schema.ts';
-import { classifyAcceptPrompt, CHIPS, Ctx, draftDm1Prompt, quickResearchPrompt, replyDraftsPrompt, rewritePrompt, triagePrompt } from '../_shared/ai/prompts.ts';
-import { Deps, Draft, InvalidOutput, runDraft, runDraftStream, runTask } from '../_shared/ai/run.ts';
+import { classifyAcceptPrompt, CHIPS, Ctx, draftDm1Prompt, quickResearchPrompt, replyDraftsPrompt, rewritePrompt, SAVE_RESEARCH, triagePrompt } from '../_shared/ai/prompts.ts';
+import { Deps, Draft, InvalidOutput, runDraft, runDraftStream, runTask, runToolTask } from '../_shared/ai/run.ts';
 import { Db } from './db.ts';
 import { BookPerson, ImportRow, resolveImport } from '../_shared/import/resolve.ts';
 import { defaultLookup } from '../_shared/import/brave.ts';
@@ -63,26 +63,41 @@ export async function rewrite(db: Db, deps: Deps, body: Record<string, unknown>,
 }
 
 // ---------------- draft_dm1 (app tap, manual "Accepted" mark, or the event path) ----------------
-export async function draftDm1(db: Db, deps: Deps, person: string, mode: 'dm1_auto' | 'manual', onDelta?: (t: string) => Promise<void>) {
-  const ctx = await db.rpc<Ctx>('ari_ai_context', { p_person: person, p_account: null });
+export async function draftDm1(db: Db, deps: Deps, person: string, mode: 'dm1_auto' | 'manual', onDelta?: (t: string) => Promise<void>,
+  brief?: Record<string, unknown>) {
+  const base = await db.rpc<Ctx>('ari_ai_context', { p_person: person, p_account: null });
+  const ctx: Ctx = brief ? { ...base, brief } : base;           // pipeline: the server brief rides along as data
   if (ctx?.person?.dm1_sent) return { draft: null, saved: false, reason: 'already_sent' };
   const p = draftDm1Prompt(ctx);
   const d = { ...deps, refs: { personId: person, accountId: ctx?.account?.id ?? null, requestKey: `dm1:${person}` } };
   const out = onDelta ? await runDraftStream('draft', p, d, onDelta, nameCtx(ctx)) : await runDraft('draft', p, d, nameCtx(ctx));
   const saved = await db.rpc<{ saved: boolean; reason?: string }>('ari_ai_save_draft', { p_person: person, p_slot: 'dm',
     p_text: out.value.text, p_meta: metaOf(out.value, { call_id: out.callId }), p_expect: ctx?.person?.dm ?? null, p_mode: mode });
-  return { draft: out.value, saved: !!saved?.saved, reason: saved?.reason ?? null };
+  return { draft: out.value, saved: !!saved?.saved, reason: saved?.reason ?? null, call_id: out.callId };
 }
 
-// ---------------- quick_research (inline, ~15 s) ----------------
+// ---------------- quick_research (inline; Sonnet + web search, answer through the strict save_research tool) ----------------
 export async function quickResearch(db: Db, deps: Deps, person: string, focus?: string) {
   const ctx = await db.rpc<Ctx>('ari_ai_context', { p_person: person, p_account: null });
   const d = { ...deps, refs: { personId: person, accountId: ctx?.account?.id ?? null } };
-  const { value, resp } = await runTask('quick_research', quickResearchPrompt(ctx, focus), ResearchOut, d);
-  const r = groundFindings(value, resp.citations.map((c) => c.url));
+  const { value, resp, callId } = await runToolTask('quick_research', quickResearchPrompt(ctx, focus), SAVE_RESEARCH, ResearchOut, d, trimResearch);
+  const r = groundFindings(value, [...resp.citations.map((c) => c.url), ...(resp.searchUrls ?? [])]);
   const saved = await db.rpc<{ inserted: number }>('ari_ai_save_research', { p_person: person, p_account: null, p_findings: r.findings,
-    p_brief: { kind: 'quick', summary: r.summary, angles: r.angles, confidence: r.confidence } });
-  return { research: r, inserted: saved?.inserted ?? 0 };
+    p_brief: { kind: 'quick', summary: r.summary, angles: r.angles, confidence: r.confidence, call_id: callId } });
+  return { research: r, inserted: saved?.inserted ?? 0, call_id: callId };
+}
+
+/** Cut over-long strings and lists to the ResearchOut limits instead of failing a paid answer on length alone. Types are not
+ *  coerced: a wrong type still fails validation. */
+// deno-lint-ignore no-explicit-any
+export function trimResearch(x: any): unknown {
+  if (!x || typeof x !== 'object') return x;
+  const cut = (v: unknown, n: number) => typeof v === 'string' ? v.trim().slice(0, n) : v;
+  return { ...x, summary: cut(x.summary, 1500),
+    findings: Array.isArray(x.findings) ? x.findings.slice(0, 12).map((f: Record<string, unknown>) => f && typeof f === 'object'
+      ? { ...f, fact: cut(f.fact, 500), dated: typeof f.dated === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(f.dated.trim()) ? f.dated.trim() : undefined } : f)
+      : x.findings,
+    angles: Array.isArray(x.angles) ? x.angles.slice(0, 5).map((a: unknown) => cut(a, 300)) : x.angles };
 }
 
 /** Keep only findings whose URL the provider actually returned as a citation (when it returned any); otherwise cap confidence. */

@@ -3,7 +3,7 @@
 // platform.claude.com/docs/en/build-with-claude/prompt-caching (USD per million tokens; tool = USD per 1k web searches).
 // grok-4.7 is still a PLACEHOLDER: confirm on x.ai before deploy. The spend guard reserves the
 // worst case (max_tokens out) before a call and books the real usage after, so a wrong price skews the cap, never skips it.
-import { ProviderName, Task, Tool } from './types.ts';
+import { Effort, ProviderName, Task, Thinking, Tool } from './types.ts';
 
 export interface Route {
   provider: ProviderName;
@@ -14,7 +14,9 @@ export interface Route {
   maxToolUses?: number;
   temperature?: number;      // xAI only. Anthropic 5.5 models refuse it (400 "temperature is deprecated", live check Oct 23 2026)
   stream?: boolean;          // the endpoint may stream this task over SSE
-  thinking?: 'off';          // short JSON answers: no thinking, so max_tokens all goes to the answer
+  thinking?: Thinking;       // 'off' (Haiku): no thinking; 'between_tools' (Sonnet 5.5): no up-front thinking
+  effort?: Effort;
+  retries?: number;          // provider retries (default 1); 0 where a timed-out call may already be billed
 }
 
 export const ROUTES: Record<Task, Route> = {
@@ -28,8 +30,10 @@ export const ROUTES: Record<Task, Route> = {
   rewrite: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 900, timeoutMs: 45_000, stream: true },
   reply_draft: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 1000, timeoutMs: 45_000 },
   // Sonnet + Anthropic web search: inline quick research
-  quick_research: { provider: 'anthropic', model: 'claude-sonnet-5-5', maxTokens: 1500, timeoutMs: 25_000, tools: ['web_search'],
-    maxToolUses: 3 },
+  // Oct 28 2026 fix (staging e2e: 1,675 out tokens > 1500 cap, reply cut before the JSON, $0.11 lost): no up-front thinking,
+  // low effort, 4000 tokens of headroom (billed on use, not on the cap), answer through the strict save_research tool, no retry.
+  quick_research: { provider: 'anthropic', model: 'claude-sonnet-5-5', maxTokens: 4000, timeoutMs: 90_000, tools: ['web_search'],
+    maxToolUses: 3, thinking: 'between_tools', effort: 'low', retries: 0 },
   // Opus orchestrates deep research (one turn per call, client tool grok_search); Grok runs each search with X / web tools
   deep_research: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 2000, timeoutMs: 60_000 },
   signal_search: { provider: 'xai', model: 'grok-4.7', maxTokens: 1500, timeoutMs: 45_000, tools: ['x_search', 'web_search'],

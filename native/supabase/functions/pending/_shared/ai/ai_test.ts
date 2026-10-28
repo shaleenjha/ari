@@ -184,7 +184,8 @@ Deno.test('caching: usage fields are read and billed at their own rates', () => 
 // ---------- thinking off on short JSON tasks (live check Oct 23: Haiku 5.5 spent a 20-token budget thinking) ----------
 Deno.test('thinking: Haiku JSON routes send thinking disabled; drafts and research leave the model default', () => {
   for (const t of ['classify', 'triage', 'match_profile'] as const) assertEquals(ROUTES[t].thinking, 'off');
-  for (const t of ['draft', 'rewrite', 'reply_draft', 'quick_research', 'deep_research'] as const) assertEquals(ROUTES[t].thinking, undefined);
+  for (const t of ['draft', 'rewrite', 'reply_draft', 'deep_research'] as const) assertEquals(ROUTES[t].thinking, undefined);
+  assertEquals(ROUTES.quick_research.thinking, 'between_tools');   // Sonnet 5.5 refuses 'disabled'; between_tools = no up-front thinking
   const base = { model: 'claude-haiku-5-5', system: 'S', messages: [{ role: 'user' as const, content: 'U' }], maxTokens: 10, timeoutMs: 1000 };
   assertEquals(JSON.parse(anthropicBody({ ...base, thinking: 'off' }, false)).thinking, { type: 'disabled' });
   assertEquals(JSON.parse(anthropicBody(base, false)).thinking, undefined);
@@ -196,4 +197,16 @@ Deno.test('anthropic body never carries temperature (5.5 models answer 400 to it
     timeoutMs: 1000, temperature: 0.7 }, false));
   assertEquals(b.temperature, undefined);
   for (const r of Object.values(ROUTES)) if (r.thinking === 'off') assertEquals(r.model, 'claude-haiku-5-5');   // only Haiku accepts disabled
+});
+
+// ---------- quick_research fix (Oct 28 2026 staging e2e: reply cut at max_tokens before the JSON) ----------
+Deno.test('quick_research route: between_tools thinking, low effort, 4000 tokens, no retry; body carries them and a strict tool', () => {
+  const r = ROUTES.quick_research;
+  assertEquals([r.model, r.maxTokens, r.thinking, r.effort, r.retries], ['claude-sonnet-5-5', 4000, 'between_tools', 'low', 0]);
+  const b = JSON.parse(anthropicBody({ model: r.model, system: 'S', messages: [{ role: 'user', content: 'U' }], maxTokens: r.maxTokens,
+    timeoutMs: 1000, tools: ['web_search'], maxToolUses: 3, thinking: r.thinking, effort: r.effort,
+    clientTools: [{ name: 'save_research', description: 'd', input_schema: { type: 'object' }, strict: true }] }, false));
+  assertEquals(b.thinking, { type: 'between_tools' }); assertEquals(b.output_config, { effort: 'low' }); assertEquals(b.max_tokens, 4000);
+  assertEquals(b.tools.map((t: { name: string }) => t.name), ['web_search', 'save_research']); assertEquals(b.tools[1].strict, true);
+  assertEquals(b.tool_choice, undefined);            // forced tool_choice is a 400 on Sonnet 5.5: auto + strict tool instead
 });

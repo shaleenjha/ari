@@ -7,6 +7,9 @@ import { META, splitDraft } from './prompts.ts';
 import { scoreDraft } from './style.ts';
 import { AiMessage, AiResponse, ClientTool, Provider, Task, Tool } from './types.ts';
 
+/** stop reasons that mean the answer is not complete or not an answer: never parsed, never saved, never retried blindly */
+export const BAD_STOPS = ['max_tokens', 'refusal', 'model_context_window_exceeded'];
+
 export interface Refs { personId?: string | null; accountId?: string | null; jobId?: string | null; requestKey?: string | null }
 export interface Ledger {
   reserve(a: { task: Task; provider: string; model: string; estUsd: number } & Refs): Promise<{ ok: boolean; callId?: number; reason?: string }>;
@@ -64,6 +67,38 @@ export async function runTask<T>(task: Task, prompt: Prompt, schema: Schema<T>, 
   }
   await deps.ledger.finish(callId, { status: 'ok', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut, costUsd: cost });
   return { value: v.value, resp, callId };
+}
+
+/** Structured task through a STRICT client tool (Oct 28 2026). The model may use its server tools (web search) first, then
+ *  must answer by calling `tool` once; its input is the answer. Order of checks, so a bad reply costs one call and nothing else:
+ *  1. stop_reason max_tokens / refusal / context window -> invalid (cost booked, nothing saved, no retry);
+ *  2. no call to `tool` -> invalid; 3. the input fails `schema` -> invalid. Only a clean, validated input is returned. */
+export async function runToolTask<T>(task: Task, prompt: Prompt, tool: ClientTool, schema: Schema<T>, deps: Deps,
+  normalize: (x: unknown) => unknown = (x) => x):
+  Promise<{ value: T; resp: AiResponse; callId: number }> {
+  const r = route(task);
+  const callId = await reserve(task, prompt.system.length + prompt.user.length + JSON.stringify(tool).length, deps);
+  let resp: AiResponse;
+  try {
+    resp = await provider(deps, task).complete({ model: r.model, system: prompt.system, messages: [{ role: 'user', content: prompt.user }],
+      maxTokens: r.maxTokens, tools: deps.tools ?? r.tools, maxToolUses: r.maxToolUses, clientTools: [{ ...tool, strict: true }],
+      timeoutMs: r.timeoutMs, thinking: r.thinking, effort: r.effort, retries: r.retries, cache: 'system' });
+  } catch (e) {
+    await deps.ledger.finish(callId, { status: 'error', tokensIn: 0, tokensOut: 0, costUsd: 0, error: errText(e) });
+    throw e;
+  }
+  const cost = costUsd(r.model, resp.tokensIn, resp.tokensOut, resp.toolCalls, resp.cacheRead, resp.cacheWrite);
+  const bad = async (why: string): Promise<never> => {
+    await deps.ledger.finish(callId, { status: 'invalid', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut, costUsd: cost, error: why });
+    throw new InvalidOutput(`${task}: ${why}`);
+  };
+  if (resp.stopReason && BAD_STOPS.includes(resp.stopReason)) await bad(`stop_reason ${resp.stopReason}`);
+  const use = (resp.toolUses ?? []).find((u) => u.name === tool.name);
+  if (!use) await bad(`no ${tool.name} call (stop_reason ${resp.stopReason ?? 'unknown'})`);
+  const v = schema.parse(normalize(use!.input));
+  if (!v.ok) await bad(v.error);
+  await deps.ledger.finish(callId, { status: 'ok', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut, costUsd: cost });
+  return { value: (v as { ok: true; value: T }).value, resp, callId };
 }
 
 /** House-style gate: a draft that breaks a hard rule is never presented as ready. */

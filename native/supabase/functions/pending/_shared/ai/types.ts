@@ -11,7 +11,7 @@ export type Tool = 'web_search' | 'x_search';
 export type Block = Record<string, any>;                  // Anthropic content block (text, tool_use, tool_result)
 export interface AiMessage { role: 'user' | 'assistant'; content: string | Block[] }
 /** A client-side tool the model may call (Anthropic custom tool). The caller executes it and replies with tool_result. */
-export interface ClientTool { name: string; description: string; input_schema: Record<string, unknown> }
+export interface ClientTool { name: string; description: string; input_schema: Record<string, unknown>; strict?: boolean }
 export interface ToolUse { id: string; name: string; input: Record<string, unknown> }
 export interface AiRequest {
   model: string;
@@ -29,8 +29,16 @@ export interface AiRequest {
   cache?: 'system' | 'conversation';
   /** 'off' sends thinking {type: 'disabled'} (Anthropic). Live check Oct 23 2026: Haiku 5.5 can spend a small max_tokens budget on
    *  thinking and return no text, so short JSON tasks turn it off. */
-  thinking?: 'off';
+  thinking?: Thinking;
+  /** Anthropic output_config.effort. Lower effort = fewer tokens (thinking included) and a faster answer. */
+  effort?: Effort;
+  /** Retries on a network error / 429 / 5xx (guardedFetch default 1). 0 for calls that may have been billed already. */
+  retries?: number;
 }
+/** 'off' -> thinking {type: 'disabled'} (Haiku 5.5 only). 'between_tools' -> the lowest setting Sonnet 5.5 accepts: no up-front
+ *  thinking, only short progress notes between tool calls (docs: build-with-claude/thinking, checked Oct 28 2026). */
+export type Thinking = 'off' | 'between_tools';
+export type Effort = 'low' | 'medium' | 'high';
 export interface Citation { url: string; title?: string }
 export interface AiResponse {
   provider: ProviderName;
@@ -45,6 +53,7 @@ export interface AiResponse {
   toolUses?: ToolUse[];          // client tool calls the model asked for (stop_reason tool_use)
   content?: Block[];             // raw assistant content, replayed on the next turn of a tool loop
   stopReason?: string;
+  searchUrls?: string[];         // urls the server web_search tool actually returned (web_search_tool_result blocks)
 }
 export type StreamEvent =
   | { type: 'delta'; text: string }

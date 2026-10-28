@@ -11,6 +11,7 @@
 //     job_stream     {job_id, since?}                SSE live feed of a deep research job: `progress` per event
 //                                                    (query / read / finding / status / error), then `done`; `reconnect` {since}
 //   Internal (x-ari-hook = vault ari_ai_hook_secret): {internal: "process"} from the 10-min cron and ari-gmail-push;
+//     {internal: "pipeline"} from the 0047 enqueue kick and the 1-min cron: drains the pgmq job line (pipeline.ts);
 //     {internal: "run_job", job_id} to continue a deep research job.
 // Writes go only to draft / research fields and the ai_* tables, through an RPC allowlist (db.ts). Nothing is ever sent to
 // LinkedIn or anyone else; there is no endpoint that reads or changes app config, and errors never name infrastructure.
@@ -20,8 +21,9 @@ export { safeEq };
 import { BadRequest, draftDm1, importResolve, personId, quickResearch, rewrite, triageReply } from './actions.ts';
 import type { PeopleLookup } from '../_shared/import/lemlist.ts';
 import { Db, RpcError } from './db.ts';
-import { dm1ForPerson, processPending } from './events.ts';
+import { processPending } from './events.ts';
 import { enqueueDeep, runJob } from './jobs.ts';
+import { enqueueResearch, runPipeline } from './pipeline.ts';
 
 export const ACTIONS = ['rewrite', 'draft_dm1', 'quick_research', 'deep_research', 'triage_reply', 'import_resolve', 'job_stream'] as const;
 const STREAMABLE = new Set(['rewrite', 'draft_dm1']);
@@ -37,6 +39,7 @@ export interface Env {
   sleep?: (ms: number) => Promise<void>;
   streamMs?: number;
   lookup?: PeopleLookup;     // tests only; production uses defaultLookup (Brave, then lemlist)
+  pipeline?: import('./pipeline.ts').PipelineOpts;   // tests only (fake Parallel transport, clock)
 }
 
 function cors(req: Request, origins: string[]): Record<string, string> {
@@ -79,6 +82,13 @@ export async function handle(req: Request, env: Env): Promise<Response> {
       })());
       return json({ ok: true, accepted: 'process' }, 202, {});
     }
+    if (body.internal === 'pipeline') {
+      env.background((async () => {
+        const r = await runPipeline(env.db, env.deps, env.pipeline);
+        if (r.more) await env.kick({ internal: 'pipeline' });
+      })());
+      return json({ ok: true, accepted: 'pipeline' }, 202, {});
+    }
     if (body.internal === 'run_job') {
       const id = typeof body.job_id === 'string' && /^[0-9a-f-]{36}$/i.test(body.job_id) ? body.job_id : null;
       env.background((async () => {
@@ -100,7 +110,8 @@ export async function handle(req: Request, env: Env): Promise<Response> {
       case 'rewrite': return rewrite(env.db, env.deps, body, onDelta);
       case 'draft_dm1': {
         const pid = personId(body.person_id);
-        if (body.source === 'accepted_tap' && !onDelta) return dm1ForPerson(env.db, env.deps, pid, 'dm1_auto').then((status) => ({ status }));
+        // 0047: an "Accepted" tap starts the pipeline (research -> brief -> dm1); it never drafts before research
+        if (body.source === 'accepted_tap' && !onDelta) return enqueueResearch(env.db, pid).then((j) => ({ status: 'queued', job_id: j.job_id, existing: j.existing }));
         return draftDm1(env.db, env.deps, pid, 'manual', onDelta);
       }
       case 'quick_research': return quickResearch(env.db, env.deps, personId(body.person_id),

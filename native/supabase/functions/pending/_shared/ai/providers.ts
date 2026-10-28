@@ -10,6 +10,9 @@ const ANTHROPIC_VERSION = '2023-06-01';
 // ---------------- Anthropic ----------------
 // Live check Oct 23 2026 (key ari-edge): the 5.5 models answer 400 to any `temperature`, so it is never sent here. Only Haiku
 // accepts thinking {type: 'disabled'} (Sonnet wants 'between_tools', Opus 'adaptive' + effort), so only Haiku routes set thinking 'off'.
+// Oct 28 2026: Sonnet routes may set 'between_tools' (no up-front thinking) and effort ('low' | 'medium' | 'high'; between_tools
+// is refused above 'high'). Forced tool_choice ('any' / 'tool') is a 400 on Opus 5.5 and Sonnet 5.5, so structured answers use a
+// STRICT client tool with tool_choice auto; output_config.format cannot be used with web_search (its citations are always on).
 export function anthropicBody(req: AiRequest, stream: boolean) {
   const server = (req.tools ?? []).includes('web_search')
     ? [{ type: 'web_search_20250305', name: 'web_search', max_uses: req.maxToolUses ?? 5 }] : [];
@@ -18,8 +21,10 @@ export function anthropicBody(req: AiRequest, stream: boolean) {
   // on changing content writes a new entry every call and never reads one.
   const system = req.cache ? [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }] : req.system;
   const auto = req.cache === 'conversation' ? { cache_control: { type: 'ephemeral' } } : {};
-  return JSON.stringify({ model: req.model, max_tokens: req.maxTokens, system, messages: req.messages, ...auto,
-    ...(req.thinking === 'off' ? { thinking: { type: 'disabled' } } : {}), ...(tools.length ? { tools } : {}), ...(stream ? { stream: true } : {}) });
+  const thinking = req.thinking === 'off' ? { thinking: { type: 'disabled' } }
+    : req.thinking === 'between_tools' ? { thinking: { type: 'between_tools' } } : {};
+  return JSON.stringify({ model: req.model, max_tokens: req.maxTokens, system, messages: req.messages, ...auto, ...thinking,
+    ...(req.effort ? { output_config: { effort: req.effort } } : {}), ...(tools.length ? { tools } : {}), ...(stream ? { stream: true } : {}) });
 }
 function anthropicHeaders(): Record<string, string> {
   const key = env('ANTHROPIC_API_KEY');
@@ -31,8 +36,12 @@ export function parseAnthropic(j: any, model: string): AiResponse {
   const blocks = Array.isArray(j?.content) ? j.content : [];
   const cites: Citation[] = [];
   const toolUses: { id: string; name: string; input: Record<string, unknown> }[] = [];
+  const searched: string[] = [];
   let text = '';
   for (const b of blocks) {
+    if (b?.type === 'web_search_tool_result' && Array.isArray(b.content)) {
+      for (const r of b.content) if (typeof r?.url === 'string') searched.push(r.url);
+    }
     if (b?.type === 'tool_use' && typeof b.id === 'string') toolUses.push({ id: b.id, name: String(b.name), input: b.input ?? {} });
     if (b?.type !== 'text' || typeof b.text !== 'string') continue;
     text += b.text;
@@ -41,13 +50,13 @@ export function parseAnthropic(j: any, model: string): AiResponse {
   return { provider: 'anthropic', model: j?.model ?? model, text, tokensIn: Number(j?.usage?.input_tokens ?? 0),
     tokensOut: Number(j?.usage?.output_tokens ?? 0), toolCalls: Number(j?.usage?.server_tool_use?.web_search_requests ?? 0),
     cacheRead: Number(j?.usage?.cache_read_input_tokens ?? 0), cacheWrite: Number(j?.usage?.cache_creation_input_tokens ?? 0),
-    citations: dedupeCites(cites), toolUses, content: blocks, stopReason: j?.stop_reason };
+    citations: dedupeCites(cites), toolUses, content: blocks, stopReason: j?.stop_reason, searchUrls: [...new Set(searched)].slice(0, 50) };
 }
 export const anthropic: Provider = {
   name: 'anthropic',
   async complete(req) {
     const r = await guardedFetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: anthropicHeaders(),
-      body: anthropicBody(req, false) }, { timeoutMs: req.timeoutMs });
+      body: anthropicBody(req, false) }, { timeoutMs: req.timeoutMs, retries: req.retries });
     return parseAnthropic(await r.json(), req.model);
   },
   async *stream(req) {
