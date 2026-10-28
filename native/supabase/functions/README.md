@@ -69,14 +69,16 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
   research rows, `ai_*` tables, generic pushes. No send path, no config endpoint, errors carry no infrastructure words.
 - `pending/ari-gmail-push/`: Pub/Sub push target. Verifies Google's OIDC token (RS256, audience, push service account, expiry),
   acks 204 at once, then runs `ari-gmail-ingest` immediately and `ari-ai {internal: process}`: classify (Haiku confirms the
-  accept and the person; must agree with the deterministic vanity / name match) -> draft_dm1 (Sonnet; only into an empty DM slot
+  accept and the person; must agree with the deterministic vanity / name match) -> draft_dm1 (Opus, `draft` route; only into an empty DM slot
   or over Ari's own unedited text) -> `ari_notify('draft_due', 'draft:dm1:ai:<person>')` = generic "DM1 ready" push.
   Daily watch renewal via cron. The manual "Accepted" tap calls `ari-ai {action: draft_dm1, person_id, source: accepted_tap}`.
 - Idempotency: `ai_triggers` (accept by Gmail msg id, dm1 by person id) claimed in the database before any model call; ingest
   already dedupes by msg id; pushes dedupe by key. The 10-minute cron (`ari-ai-events`) is the fallback and also picks up
   manual accepts and stale deep-research jobs. The Hark 10-min worker keeps running unchanged as the outer fallback.
 - Migration `../migrations/pending/0041_ai_layer.sql` (+ `_rollback`), tested by `../migrations/pending/test/checks_after_0041.sql`
-  in `run_local.sh` (CI sql-prod-shape). Spend guard: `ai_budget` (OFF by default, $50 / month, $5 / day), worst-case
+  in `run_local.sh` (CI sql-prod-shape). Staging/prod-safe check (one statement, deliberate raise): `../migrations/pending/test/checks_after_0041_staging.sql`.
+  Oct 28 2026: rehearsed locally in staging's real order (0041 after 0045/0046): applies, checks pass, rollback x2 clean, 0045/0046 checks unaffected.
+  Staging deploy plan: work/ai-layer/staging_deploy_plan.md (not in the repo). Spend guard: `ai_budget` (OFF by default, $50 / month, $5 / day), worst-case
   reservation under an advisory lock before every call, real cost booked after; refusals logged; one generic alert per cap.
 - Offline tests: `deno test --allow-env --allow-read pending/_shared/ai/ai_test.ts pending/ari-ai/ari_ai_test.ts
   pending/ari-gmail-push/push_test.ts` (list the files explicitly; directory discovery missed two of them here).
