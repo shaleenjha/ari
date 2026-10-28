@@ -19,6 +19,7 @@ export interface Decision { item: string; decision: string }
 export interface Claim { claim: string; hash: string; source: string }
 
 const MAX_CLAIMS = 3;
+const CHECKED = new Set(['true', 'false', 'unverifiable']);
 export const normClaim = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').replace(/[^\w %$.,:/-]/g, '').trim();
 export async function claimHash(s: string): Promise<string> {
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normClaim(s)));
@@ -29,20 +30,44 @@ export function domainOk(d: string): string | null {
   return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(x) ? x : null;
 }
 
+// Name matching is Unicode-aware (review #50): "Müller" / "José" must be caught whether a claim writes the accented form,
+// the plain form ("Muller", "Jose") or the German transliteration ("Mueller"). Each side is compared in every form.
+const MARKS = /\p{M}/gu;
+/** Accent-folded, case-folded form: NFKD, drop combining marks, lower case, a few full case folds JS lacks. */
+export const fold = (s: string) => s.normalize('NFKD').replace(MARKS, '').toLowerCase().replace(/ß/g, 'ss').replace(/ı/g, 'i').normalize('NFC');
+const translit = (s: string) => s.normalize('NFC').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+/** All forms a text may be compared in: raw lower case, folded, transliterated (deduped). */
+export const forms = (s: string) => [...new Set([s.normalize('NFC').toLowerCase(), fold(s), fold(translit(s))])];
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** true when `part` appears as a whole word (Unicode letter/number boundaries) in any form of `text`. */
+export function mentions(text: string, part: string): boolean {
+  const texts = forms(text);
+  return forms(part).some((p) => p && texts.some((t) => new RegExp(`(?<![\\p{L}\\p{N}])${esc(p)}(?![\\p{L}\\p{N}])`, 'u').test(t)));
+}
+/** Name parts worth matching: whole name, and each part of 2+ letters (split on spaces, hyphens, apostrophes, dots). */
+export function nameParts(name: string): { parts: string[]; unfoldable: boolean } {
+  const n = name.trim(); if (!n) return { parts: [], unfoldable: false };
+  const raw = [n, ...n.split(/[\s\-\u2010\u2011'\u2019.,]+/)].filter((p) => p.trim().length > 0);
+  // a part that folds to nothing (only marks / symbols) cannot be matched safely, so every claim is blocked
+  const unfoldable = raw.some((p) => fold(p).replace(/[^\p{L}\p{N}]/gu, '') === '');
+  return { parts: [...new Set(raw.filter((p) => fold(p).replace(/[^\p{L}\p{N}]/gu, '').length >= 2))], unfoldable };
+}
+
 /** Pick the claims that MAY be sent. Pure; every item gets a logged decision. */
 export function selectClaims(f: FactInput): { eligible: { claim: string; source: string }[]; decisions: Decision[] } {
   const decisions: Decision[] = [], eligible: { claim: string; source: string }[] = [];
-  const nameParts = (f.contact.name ?? '').split(/\s+/).filter((p) => p.length >= 3).map((p) => p.toLowerCase());
-  const title = (f.contact.title ?? '').toLowerCase().trim();
-  const seller = (f.seller ?? 'Thrandvex').toLowerCase();
+  const { parts, unfoldable } = nameParts(f.contact.name ?? '');
+  const title = (f.contact.title ?? '').trim();
+  const seller = f.seller ?? 'Thrandvex';
   for (const sf of f.source_facts ?? []) {
-    const c = String(sf.fact ?? '').trim(), low = c.toLowerCase(), src = String(sf.source ?? '');
+    const c = String(sf.fact ?? '').trim(), low = fold(c), src = String(sf.source ?? '');
     const why = !c ? 'empty'
       : !/^https:\/\//i.test(src) ? 'blocked: not from public web research (record field or no url)'
-      : nameParts.some((p) => new RegExp(`\\b${p.replace(/[^a-z]/g, '')}\\b`).test(low)) ? 'blocked: mentions the contact'
-      : title && low.includes(title) ? 'blocked: mentions the contact title'
-      : low.includes(seller) ? 'blocked: seller pitch'
-      : /\b(ae|account executive|deal|opportunity|pipeline|crm|crm|meeting with us|our call)\b/.test(low) ? 'blocked: sales or CRM data'
+      : unfoldable ? 'blocked: contact name cannot be matched safely'
+      : parts.some((p) => mentions(c, p)) ? 'blocked: mentions the contact'
+      : title && forms(c).some((t) => forms(title).some((x) => t.includes(x))) ? 'blocked: mentions the contact title'
+      : mentions(c, seller) ? 'blocked: seller pitch'
+      : /(?<![\p{L}\p{N}])(ae|account executive|deal|opportunity|pipeline|crm|crm|meeting with us|our call)(?![\p{L}\p{N}])/u.test(low) ? 'blocked: sales or CRM data'
       : c.length > 400 ? 'blocked: too long to be one claim'
       : eligible.length >= MAX_CLAIMS ? 'skipped: claim cap'
       : null;
@@ -69,7 +94,7 @@ export function decisionBody(company: string, domain: string, claim: string) {
 export function readVerdict(j: any): { verdict: string; confidence: number | null; citations: string[] } {
   const a = j?.answers?.verdict;
   if (!a || a.type === 'refusal') return { verdict: 'refusal', confidence: null, citations: [] };
-  return { verdict: String(a.choice ?? 'unverifiable'), confidence: typeof a.confidence === 'number' ? Math.round(a.confidence * 1000) / 1000 : null,
+  return { verdict: a.choice == null ? 'refusal' : String(a.choice), confidence: typeof a.confidence === 'number' ? Math.round(a.confidence * 1000) / 1000 : null,
     citations: (Array.isArray(j?.citations) ? j.citations : []).map((c: { url?: string }) => c?.url).filter((u: unknown) => typeof u === 'string').slice(0, 5) };
 }
 
@@ -96,13 +121,21 @@ export async function factCheck(f: FactInput, d: FactDeps) {
     return await r.json();
   });
   const payloads = todo.map((c) => decisionBody(f.company, domain, c.claim));
-  // claims are independent: check them in parallel
+  // claims are independent: check them in parallel. Only real answers (true / false / unverifiable) are cached: an error or a
+  // refusal is NOT a check, so it is never cached and never reads as clean (review #50).
   const fresh = await Promise.all(todo.map(async (c, i) => {
-    try { const v = readVerdict(await post(payloads[i])); await d.cachePut(domain, c.hash, c.claim, v); return [c.hash, v] as const; }
-    catch (e) { return [c.hash, { verdict: 'error', confidence: null, citations: [], error: String((e as Error)?.message ?? e).slice(0, 120) }] as const; }
+    try {
+      const v = readVerdict(await post(payloads[i]));
+      if (CHECKED.has(v.verdict)) await d.cachePut(domain, c.hash, c.claim, v);
+      return [c.hash, v] as const;
+    } catch (e) { return [c.hash, { verdict: 'error', confidence: null, citations: [], error: String((e as Error)?.message ?? e).slice(0, 120) }] as const; }
   }));
   const all: Record<string, unknown> = { ...cached, ...Object.fromEntries(fresh) };
   const verdicts = claims.map((c) => ({ claim: c.claim, source: c.source, claim_hash: c.hash, cached: !!cached[c.hash], ...(all[c.hash] as object) }));
-  const flagged = verdicts.some((v) => (v as { verdict?: string }).verdict === 'false');
-  return { status: 'done', decisions, payloads, verdicts, calls: todo.length, flagged, ms: Date.now() - t0 };
+  const vs = verdicts.map((v) => String((v as { verdict?: string }).verdict ?? ''));
+  const unchecked = vs.filter((v) => !CHECKED.has(v)).length;          // error, refusal or anything unexpected
+  const errors = vs.filter((v) => v === 'error').length;
+  // flagged = a human must look: a false claim OR any claim we could not check
+  const flagged = vs.includes('false') || unchecked > 0;
+  return { status: unchecked ? 'unchecked' : 'done', decisions, payloads, verdicts, calls: todo.length, flagged, unchecked, errors, ms: Date.now() - t0 };
 }

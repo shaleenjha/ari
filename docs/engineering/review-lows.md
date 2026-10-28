@@ -11,5 +11,7 @@ Priority: 1 = could break a backup, deploy or rollback, or hides a failure; 2 = 
 - [open] 2 | #24 | native/supabase/migrations/pending/test/run_local.sh | archive grant check does not cover every future custom role | (mostly covered by the non-owner grants check added in 84e255a; confirm and close)
 - [open] 3 | #27 | native/supabase/functions/pending/ari-backup/index.ts | drift log line is emitted per request; a cron retry loop could flood logs | log once per cold start
 - [open] 3 | #29 | native/supabase/functions/pending/DEPLOY_SECRETS.md:7 | smoke-check cell is a run-on | split into pass and fail criteria
+- [open] 1 | #50 | native/supabase/migrations/pending/0047_pipeline_jobs.sql (ari_pipeline_enqueue) | low (backlog): the Accepted tap can be blocked if the worker kick fails, because `perform ari_pipeline_kick()` runs inside the user's people write | wrap the kick in `begin ... exception when others then null; end;` (the 1-minute cron re-kicks)
+- [open] 2 | #50 | native/supabase/migrations/pending/0047_pipeline_jobs.sql (ari_pipeline_brief_write) | low (backlog): the SQL brief check lacks brief_upsert.py's location words and "P.S." rule, though the comment says the rules match | add `Bengaluru|Bangalore|India| IST|P\.S\.` to the SQL check (same contract both sides)
 
 ## Fixed

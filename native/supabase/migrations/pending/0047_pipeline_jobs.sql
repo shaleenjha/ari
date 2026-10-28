@@ -46,6 +46,7 @@ create table if not exists public.pipeline_jobs (
   attempt int not null default 0,
   input_hash text not null check (length(input_hash) between 8 and 80),
   msg_id bigint,
+  lease_until timestamptz,      -- set by ari_pipeline_start: while now() < lease_until a running job is NOT claimed again
   output jsonb,                 -- small result + refs (ai_calls id, research count, draft id); never prompt text
   output_ref text,              -- where the stage wrote: 'research', 'account_briefs:<id>', '<person>:dm1', ...
   error text,
@@ -56,6 +57,7 @@ create table if not exists public.pipeline_jobs (
   unique (contact_id, stage, input_hash)
 );
 create index if not exists pipeline_jobs_contact on public.pipeline_jobs(contact_id, stage, status);
+alter table public.pipeline_jobs add column if not exists lease_until timestamptz;   -- re-run safe
 
 create table if not exists public.fact_check_cache (
   company_domain text not null check (company_domain ~ '^[a-z0-9.-]{3,120}$'),
@@ -160,6 +162,18 @@ revoke all on function public.people_pipeline_accept() from public, anon, authen
 drop trigger if exists pipeline_accept on public.people;
 create trigger pipeline_accept after insert or update of accepted on public.people for each row execute function public.people_pipeline_accept();
 
+-- a failed job is never silent (review #50): ONE ops_alert per job in the outbox (dedupe key ops:pipeline:<job id>).
+-- The push text names only the stage, never the contact (it shows on a lock screen).
+create or replace function public.ari_pipeline_alert(p_job bigint) returns void language plpgsql security definer set search_path = public as $$
+declare j pipeline_jobs;
+begin
+  select * into j from pipeline_jobs where id = p_job;
+  if not found then return; end if;
+  perform ari_notify('ops_alert', 'ops:pipeline:' || j.id, 'Ari needs a look',
+    'A draft step (' || j.stage || ') stopped. Open Ari to retry.', '/ops', j.contact_id, j.account_id);
+end $$;
+revoke all on function public.ari_pipeline_alert(bigint) from public, anon, authenticated;
+
 -- 4. worker RPCs ---------------------------------------------------------------------------------------------------------------
 -- read up to p_qty messages; each is invisible for p_vt seconds (comes back if not archived). Joined with its job.
 create or replace function public.ari_pipeline_read(p_qty int default 5, p_vt int default 120) returns jsonb
@@ -171,14 +185,26 @@ begin
 end $$;
 
 -- claim a job for this message and re-check its precondition. ok=false + reason when it must wait or stop.
-create or replace function public.ari_pipeline_start(p_job bigint, p_msg bigint) returns jsonb
+-- Lease (review #50): a job that is 'running' with lease_until in the future belongs to a live run; a redelivered message
+-- (pgmq vt ran out, or a parallel read) gets ok=false 'running' and the worker makes NO model call. A lease that ran out
+-- means the run died: the job is claimed again (attempt + 1). After 4 such deliveries the job fails with an alert.
+create or replace function public.ari_pipeline_start(p_job bigint, p_msg bigint, p_lease int default 150) returns jsonb
 language plpgsql security definer set search_path = public as $$
-declare j pipeline_jobs; why text;
+declare j pipeline_jobs; why text; rc int;
 begin
   select * into j from pipeline_jobs where id = p_job for update;
   if not found then perform pgmq.archive('ari_pipeline', p_msg); return jsonb_build_object('ok', false, 'reason', 'gone', 'final', true); end if;
   if j.status in ('done', 'failed', 'skipped') then                       -- a redelivered message for finished work
     perform pgmq.archive('ari_pipeline', p_msg); return jsonb_build_object('ok', false, 'reason', 'already_' || j.status, 'final', true); end if;
+  if j.status = 'running' and j.lease_until > now() then                  -- live run holds it: never twice
+    return jsonb_build_object('ok', false, 'reason', 'running', 'final', false); end if;
+  rc := coalesce((select q.read_ct from pgmq.q_ari_pipeline q where q.msg_id = p_msg), 0);
+  if j.status = 'running' and rc >= 4 then                               -- lease ran out again and again: the run keeps dying
+    update pipeline_jobs set status = 'failed', error = 'gave up: run stopped mid-way ' || rc || ' times', lease_until = null,
+           finished_at = now(), updated_at = now() where id = p_job;
+    perform pgmq.archive('ari_pipeline', p_msg); perform ari_pipeline_alert(p_job);
+    return jsonb_build_object('ok', false, 'reason', 'gave_up_lease', 'final', true);
+  end if;
   why := case
     when not exists (select 1 from people p where p.id = j.contact_id and p.deleted_at is null and coalesce(p.review, '') <> 'personal') then 'contact_unavailable'
     when j.stage = 'brief' and not exists (select 1 from pipeline_jobs r where r.contact_id = j.contact_id and r.stage = 'research' and r.status = 'done') then 'wait_research'
@@ -189,33 +215,52 @@ begin
     when j.stage in ('copy_check', 'fact_check') and not exists (select 1 from pipeline_jobs d where d.contact_id = j.contact_id and d.stage = 'dm1' and d.status = 'done') then 'wait_dm1'
   end;
   if why in ('contact_unavailable', 'dm1_already_sent') then
-    update pipeline_jobs set status = 'skipped', error = why, finished_at = now(), updated_at = now() where id = p_job;
+    update pipeline_jobs set status = 'skipped', error = why, lease_until = null, finished_at = now(), updated_at = now() where id = p_job;
     perform pgmq.archive('ari_pipeline', p_msg); return jsonb_build_object('ok', false, 'reason', why, 'final', true);
   end if;
-  if why is not null and coalesce((select q.read_ct from pgmq.q_ari_pipeline q where q.msg_id = p_msg), 0) >= 8 then
-    update pipeline_jobs set status = 'failed', error = 'gave up: ' || why, finished_at = now(), updated_at = now() where id = p_job;
-    perform pgmq.archive('ari_pipeline', p_msg); return jsonb_build_object('ok', false, 'reason', 'gave_up_' || why, 'final', true);
+  if why is not null and rc >= 8 then
+    update pipeline_jobs set status = 'failed', error = 'gave up: ' || why, lease_until = null, finished_at = now(), updated_at = now() where id = p_job;
+    perform pgmq.archive('ari_pipeline', p_msg); perform ari_pipeline_alert(p_job);
+    return jsonb_build_object('ok', false, 'reason', 'gave_up_' || why, 'final', true);
   end if;
   if why is not null then return jsonb_build_object('ok', false, 'reason', why, 'final', false); end if;   -- message reappears after vt
-  update pipeline_jobs set status = 'running', attempt = attempt + 1, started_at = coalesce(started_at, now()), updated_at = now() where id = p_job
+  update pipeline_jobs set status = 'running', attempt = attempt + 1, started_at = coalesce(started_at, now()),
+         lease_until = now() + make_interval(secs => greatest(30, least(coalesce(p_lease, 150), 300))), updated_at = now() where id = p_job
   returning * into j;
   return jsonb_build_object('ok', true, 'job', to_jsonb(j));
 end $$;
 
 -- finish one job: status + output, enqueue the next stage (if any) and archive the message, all in one transaction.
 -- p_status 'queued' = give it back (transient error): the message is NOT archived and reappears after its vt.
+-- p_attempt fences the finish to the claim that ran (a run whose lease expired and was re-claimed cannot overwrite it).
+-- Failure policy (review #50): a failed research job gets ONE retry job, sent with a 5-minute delay (bounded: the retry's own
+-- failure is final). Every other final failure raises one ops_alert (ari_pipeline_alert), so nothing fails silently.
 create or replace function public.ari_pipeline_finish(p_job bigint, p_msg bigint, p_status text, p_output jsonb, p_output_ref text,
-  p_error text, p_next_stage text default null, p_next_hash text default null) returns jsonb
+  p_error text, p_next_stage text default null, p_next_hash text default null, p_attempt int default null) returns jsonb
 language plpgsql security definer set search_path = public as $$
-declare j pipeline_jobs; nxt jsonb;
+declare j pipeline_jobs; nxt jsonb; rj bigint; rm bigint; rh text;
 begin
   if p_status not in ('done', 'failed', 'skipped', 'queued') then raise exception 'bad status'; end if;
   update pipeline_jobs set status = p_status, output = coalesce(p_output, output), output_ref = coalesce(left(p_output_ref, 200), output_ref),
-         error = left(p_error, 300), finished_at = case when p_status <> 'queued' then now() end, updated_at = now()
-   where id = p_job and status = 'running' returning * into j;
+         error = left(p_error, 300), lease_until = null, finished_at = case when p_status <> 'queued' then now() end, updated_at = now()
+   where id = p_job and status = 'running' and (p_attempt is null or attempt = p_attempt) returning * into j;
   if not found then return jsonb_build_object('ok', false, 'reason', 'not_running'); end if;
   if p_status = 'done' and p_next_stage is not null then
     nxt := ari_pipeline_enqueue(j.contact_id, p_next_stage, p_next_hash, false);
+  end if;
+  if p_status = 'failed' then
+    rh := md5('research:v1:retry1:' || j.contact_id || ':' || coalesce(j.account_id::text, '-'));
+    if j.stage = 'research' and j.input_hash <> rh
+       and (select count(*) from pipeline_jobs r where r.contact_id = j.contact_id and r.stage = 'research') < 2 then
+      insert into pipeline_jobs(contact_id, account_id, stage, input_hash) values (j.contact_id, j.account_id, 'research', rh)
+      on conflict (contact_id, stage, input_hash) do nothing returning id into rj;
+      if rj is not null then
+        select pgmq.send('ari_pipeline', jsonb_build_object('job_id', rj), 300) into rm;
+        update pipeline_jobs set msg_id = rm where id = rj;
+        nxt := jsonb_build_object('retry_job', rj, 'delay_s', 300);
+      end if;
+    end if;
+    if rj is null then perform ari_pipeline_alert(j.id); end if;            -- final failure: visible, deduped per job
   end if;
   if p_status <> 'queued' then perform pgmq.archive('ari_pipeline', p_msg); end if;
   return jsonb_build_object('ok', true, 'next', nxt);
@@ -321,13 +366,14 @@ do $$
 declare f text;
 begin
   foreach f in array array['ari_pipeline_kick()', 'ari_pipeline_enqueue(text, text, text, boolean)', 'ari_pipeline_read(int, int)',
-    'ari_pipeline_start(bigint, bigint)', 'ari_pipeline_finish(bigint, bigint, text, jsonb, text, text, text, text)',
+    'ari_pipeline_start(bigint, bigint, int)', 'ari_pipeline_finish(bigint, bigint, text, jsonb, text, text, text, text, int)',
+    'ari_pipeline_alert(bigint)',
     'ari_pipeline_brief_context(text)', 'ari_pipeline_brief_write(uuid, jsonb)', 'ari_pipeline_save_checks(text, text, jsonb, boolean)',
     'ari_pipeline_fact_get(text, text[])', 'ari_pipeline_fact_put(text, text, text, jsonb)', 'ari_ai_pending_events(int)',
     'ari_ai_notify_dm_ready(text)'] loop
     execute format('revoke all on function public.%s from public, anon, authenticated', f);
     if exists (select 1 from pg_roles where rolname = 'ari_worker') then execute format('revoke all on function public.%s from ari_worker', f); end if;
-    if f <> 'ari_pipeline_kick()' then execute format('grant execute on function public.%s to service_role', f); end if;
+    if f not in ('ari_pipeline_kick()', 'ari_pipeline_alert(bigint)') then execute format('grant execute on function public.%s to service_role', f); end if;
   end loop;
 end $$;
 

@@ -11,6 +11,9 @@
 //    because each stage is only enqueued by the previous one finishing.
 //  - Model failures that would repeat (invalid output, max_tokens) fail the job: no blind retry. Transient errors
 //    (network, budget) give the message back; after MAX_READS deliveries the job fails.
+//  - Nothing fails silently (review #50): every failed job raises ONE deduped 'ops_alert' in the notification outbox
+//    (ari_pipeline_finish / ari_pipeline_start in SQL), and a failed research job gets exactly ONE delayed retry (5 min),
+//    so a contact never quietly misses DM1.
 import { BudgetRefused, Deps, InvalidOutput } from '../_shared/ai/run.ts';
 import { buildBrief, briefForDraft, checkBrief, BriefIn } from '../_shared/ai/brief.ts';
 import { copyCheck } from '../_shared/ai/copycheck.ts';
@@ -82,8 +85,11 @@ export async function runStage(db: Db, deps: Deps, job: Any, o: PipelineOpts = {
         cachePut: (d, h, claim, v) => db.rpc('ari_pipeline_fact_put', { p_domain: d, p_hash: h, p_claim: claim, p_verdict: v }).then(() => {}),
       });
       if (r.status === 'blocked') return { status: 'failed', error: r.reason, output: { ms: ms(), ...r } };
+      // an error or refusal is recorded as UNCHECKED (needs_review), never as clean (review #50)
       await db.rpc('ari_pipeline_save_checks', { p_contact: contact, p_kind: 'fact_check',
-        p_result: { status: r.status, verdicts: r.verdicts, decisions: r.decisions }, p_needs_review: !!(r as Any).flagged });
+        p_result: { status: r.status, unchecked: (r as Any).unchecked ?? 0, verdicts: r.verdicts, decisions: r.decisions }, p_needs_review: !!(r as Any).flagged });
+      // a transport error means the check did not happen: fail the job so ari_pipeline_finish raises the ops alert
+      if ((r as Any).errors > 0) return { status: 'failed', ref: `${contact}:dm1`, error: `fact check unchecked: ${(r as Any).errors} Parallel error(s)`, output: { ms: ms(), ...r } };
       return { status: r.status === 'skipped' ? 'skipped' : 'done', ref: `${contact}:dm1`, output: { ms: ms(), ...r } };
     }
   }
@@ -93,7 +99,9 @@ export async function runStage(db: Db, deps: Deps, job: Any, o: PipelineOpts = {
 /** Handle one queue message end to end: start (precondition), run, finish (archive + enqueue next). */
 export async function handleMessage(db: Db, deps: Deps, m: Msg, o: PipelineOpts = {}): Promise<string> {
   if (!m.job) return 'orphan';
-  const st = await db.rpc<Any>('ari_pipeline_start', { p_job: m.job.id, p_msg: m.msg_id });
+  // start = claim + lease (review #50): a job already 'running' under a live lease is refused here, BEFORE any model call,
+  // so a pgmq redelivery during an active run never runs (or pays for) the stage twice. The lease is VT seconds.
+  const st = await db.rpc<Any>('ari_pipeline_start', { p_job: m.job.id, p_msg: m.msg_id, p_lease: VT });
   if (!st?.ok) return `${st?.final ? 'stop' : 'wait'}:${st?.reason ?? 'unknown'}`;   // SQL fails a job that waited 8 deliveries
   let out: Outcome;
   try { out = await runStage(db, deps, st.job, o); }
@@ -102,7 +110,8 @@ export async function handleMessage(db: Db, deps: Deps, m: Msg, o: PipelineOpts 
     else if (e instanceof BudgetRefused) out = { status: m.read_ct >= MAX_READS ? 'failed' : 'queued', error: `budget: ${e.reason}` };
     else out = { status: m.read_ct >= MAX_READS ? 'failed' : 'queued', error: errText(e) };              // transient: message comes back
   }
-  await db.rpc('ari_pipeline_finish', { p_job: m.job.id, p_msg: m.msg_id, p_status: out.status, p_output: out.output ?? null,
+  // p_attempt fences the finish to THIS claim: a run whose lease expired and was re-claimed cannot overwrite the newer run
+  await db.rpc('ari_pipeline_finish', { p_job: m.job.id, p_msg: m.msg_id, p_attempt: st.job.attempt, p_status: out.status, p_output: out.output ?? null,
     p_output_ref: out.ref ?? null, p_error: out.error ?? null, p_next_stage: out.next?.[0] ?? null, p_next_hash: out.next?.[1] ?? null });
   return `${m.job.stage}:${out.status}`;
 }

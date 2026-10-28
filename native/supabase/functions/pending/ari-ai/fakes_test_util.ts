@@ -18,7 +18,7 @@ export function fakeDb(opts: { capUsd?: number; enabled?: boolean } = {}) {
     pending: { accepts: [] as Any[], dm1_needed: [] as string[] }, spent: 0, rpcLog: [] as string[],
     // 0047 pipeline stand-in: job rows, a pgmq-like queue (vt + read_ct), briefs, checks, fact cache, notification outbox
     pjobs: [] as Any[], queue: [] as Any[], briefs: new Map<string, Any>(), checks: [] as Any[], factCache: new Map<string, Any>(),
-    outbox: new Map<string, Any>(), clock: 0,
+    outbox: new Map<string, Any>(), alerts: new Map<string, Any>(), clock: 0,
   };
   const enqueue = (contact: string, stage: string, hash: string | null) => {
     const h = hash ?? `research:${contact}`;
@@ -88,16 +88,24 @@ export function fakeDb(opts: { capUsd?: number; enabled?: boolean } = {}) {
     ari_pipeline_start: (a) => {
       const j = st.pjobs[a.p_job - 1]; const m = st.queue.find((x) => x.msg_id === a.p_msg);
       if (['done', 'failed', 'skipped'].includes(j.status)) { m.archived = true; return { ok: false, reason: 'already_' + j.status, final: true }; }
+      if (j.status === 'running' && (j.lease_until ?? -1) > st.clock) return { ok: false, reason: 'running', final: false };
       const why = (j.stage === 'brief' || j.stage === 'dm1') && !done(j.contact_id, 'research') ? 'wait_research'
         : j.stage === 'dm1' && !done(j.contact_id, 'brief') ? 'wait_brief'
         : ['copy_check', 'fact_check'].includes(j.stage) && !done(j.contact_id, 'dm1') ? 'wait_dm1' : null;
       if (why) return { ok: false, reason: why, final: false };
-      j.status = 'running'; j.attempt++; return { ok: true, job: structuredClone(j) };
+      j.status = 'running'; j.attempt++; j.lease_until = st.clock + (a.p_lease ?? 150); return { ok: true, job: structuredClone(j) };
     },
     ari_pipeline_finish: (a) => {
-      const j = st.pjobs[a.p_job - 1]; if (j.status !== 'running') return { ok: false, reason: 'not_running' };
-      Object.assign(j, { status: a.p_status, output: a.p_output, error: a.p_error });
-      const next = a.p_status === 'done' && a.p_next_stage ? enqueue(j.contact_id, a.p_next_stage, a.p_next_hash) : null;
+      const j = st.pjobs[a.p_job - 1];
+      if (j.status !== 'running' || (a.p_attempt != null && j.attempt !== a.p_attempt)) return { ok: false, reason: 'not_running' };
+      Object.assign(j, { status: a.p_status, output: a.p_output, error: a.p_error, lease_until: null });
+      let next: Any = a.p_status === 'done' && a.p_next_stage ? enqueue(j.contact_id, a.p_next_stage, a.p_next_hash) : null;
+      if (a.p_status === 'failed') {
+        const rh = `retry1:${j.contact_id}`;
+        if (j.stage === 'research' && j.input_hash !== rh && st.pjobs.filter((x) => x.contact_id === j.contact_id && x.stage === 'research').length < 2) {
+          const r = enqueue(j.contact_id, 'research', rh); st.queue[st.queue.length - 1].vt = st.clock + 300; next = { retry_job: r.job_id, delay_s: 300 };
+        } else st.alerts.set('ops:pipeline:' + j.id, { stage: j.stage });
+      }
       if (a.p_status !== 'queued') st.queue.find((x) => x.msg_id === a.p_msg).archived = true;
       return { ok: true, next };
     },

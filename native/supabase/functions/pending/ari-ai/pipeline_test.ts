@@ -5,7 +5,7 @@ import { draftReply, fakeDb } from './fakes_test_util.ts';
 import { ledgerFor } from './db.ts';
 import { buildBrief, checkBrief } from '../_shared/ai/brief.ts';
 import { copyCheck } from '../_shared/ai/copycheck.ts';
-import { selectClaims, decisionBody } from '../_shared/ai/factcheck.ts';
+import { selectClaims, decisionBody, factCheck } from '../_shared/ai/factcheck.ts';
 import type { AiRequest, Provider } from '../_shared/ai/types.ts';
 
 Deno.env.set('SUPABASE_URL', 'https://abcdefghijklmnopqrst.supabase.co');
@@ -59,13 +59,13 @@ Deno.test('pipeline: a dm1 message that arrives before research is done waits (n
   assertEquals(f.st.queue[0].archived, true); assertEquals(order.length, 0);
 });
 
-Deno.test('pipeline: research that hits max_tokens fails once, is not retried, and nothing downstream runs', async () => {
+Deno.test('pipeline: research that hits max_tokens fails once, is not retried in the same drain (one delayed retry queued), nothing downstream runs', async () => {
   const f = fakeDb(); let calls = 0;
   const p: Provider = { name: 'anthropic', complete(req) { calls++; return Promise.resolve({ provider: 'anthropic', model: req.model, text: '', tokensIn: 100,
     tokensOut: 4000, toolCalls: 1, citations: [], toolUses: [], stopReason: 'max_tokens' }); } };
   await enqueueResearch(f.db, 'P1');
   await runPipeline(f.db, { ledger: ledgerFor(f.db), providers: { anthropic: p } });
-  assertEquals(calls, 1); assertEquals(f.st.pjobs.map((j) => `${j.stage}:${j.status}`), ['research:failed']);
+  assertEquals(calls, 1); assertEquals(f.st.pjobs.map((j) => `${j.stage}:${j.status}`), ['research:failed', 'research:queued']);
   assertEquals(f.st.calls[0].status, 'invalid');
 });
 
@@ -93,4 +93,77 @@ Deno.test('fact check filter: only https-sourced company claims; never the conta
   assertEquals(r.decisions.length, 5);
   const body = decisionBody('Ostrevanthe Co', 'example.com', r.eligible[0].claim);
   assertEquals(Object.keys(body.state).sort(), ['claim', 'company', 'website']);
+});
+
+// ---- review #50 fixes --------------------------------------------------------------------------------------------------------
+Deno.test('review50: a redelivered message during an active run is refused before any model call (lease), stale finish fenced', async () => {
+  const f = fakeDb(); const order: string[] = []; const { p } = provider(order);
+  const deps = { ledger: ledgerFor(f.db), providers: { anthropic: p } };
+  await enqueueResearch(f.db, 'P1');
+  const st = await f.db.rpc<{ ok: boolean }>('ari_pipeline_start', { p_job: 1, p_msg: 1, p_lease: 150 });   // run 1 holds the lease
+  assert(st.ok);
+  f.st.clock += 10;                                                                            // vt ran out early / parallel read
+  assertEquals(await handleMessage(f.db, deps, { msg_id: 1, read_ct: 2, job: f.st.pjobs[0] }), 'wait:running');
+  assertEquals(order.length, 0); assertEquals(f.st.calls.length, 0); assertEquals(f.st.queue[0].archived, false);
+  const stale = await f.db.rpc<{ reason?: string }>('ari_pipeline_finish', { p_job: 1, p_msg: 1, p_attempt: 7, p_status: 'done', p_output: null, p_output_ref: null, p_error: null });
+  assertEquals(stale.reason, 'not_running');
+  f.st.clock += 200;                                                                           // lease expired: the run died
+  assertEquals(await handleMessage(f.db, deps, { msg_id: 1, read_ct: 3, job: f.st.pjobs[0] }), 'research:done');
+  assertEquals(order, ['research']); assertEquals(f.st.pjobs[0].attempt, 2);
+});
+
+Deno.test('review50: failed research gets exactly one delayed retry, then a single ops alert (never silent)', async () => {
+  const f = fakeDb(); let calls = 0;
+  const p: Provider = { name: 'anthropic', complete(req) { calls++; return Promise.resolve({ provider: 'anthropic', model: req.model, text: '', tokensIn: 100,
+    tokensOut: 4000, toolCalls: 1, citations: [], toolUses: [], stopReason: 'max_tokens' }); } };
+  const deps = { ledger: ledgerFor(f.db), providers: { anthropic: p } };
+  await enqueueResearch(f.db, 'P1');
+  await runPipeline(f.db, deps);
+  assertEquals(f.st.pjobs.map((j) => `${j.stage}:${j.status}`), ['research:failed', 'research:queued']);
+  assertEquals(f.st.alerts.size, 0); assertEquals(calls, 1);                 // retry is delayed: not run in the same drain
+  f.st.clock += 301;
+  await runPipeline(f.db, deps);
+  assertEquals(f.st.pjobs.map((j) => `${j.stage}:${j.status}`), ['research:failed', 'research:failed']);
+  assertEquals(calls, 2); assertEquals([...f.st.alerts.keys()], ['ops:pipeline:2']);
+  f.st.clock += 1000; await runPipeline(f.db, deps); assertEquals(calls, 2);  // bounded: no third attempt
+});
+
+Deno.test('review50: Parallel error or refusal is UNCHECKED (flagged, not cached), error fails the job with an alert', async () => {
+  const base = { dm_text: '', company: 'Ostrevanthe Co', domain: 'example.com', contact: { name: 'Dana Whitfield', title: 'VP Security' },
+    source_facts: [{ fact: 'Ostrevanthe Co raised a Series C in 2026', source: 'https://news.example/c' }] };
+  const cache = new Map<string, unknown>();
+  const deps = { cacheGet: () => Promise.resolve({}), cachePut: (_d: string, h: string, _c: string, v: unknown) => { cache.set(h, v); return Promise.resolve(); } };
+  const refused = await factCheck(base, { ...deps, post: () => Promise.resolve({ answers: { verdict: { type: 'refusal' } } }) });
+  assertEquals([refused.status, refused.flagged, refused.unchecked, cache.size], ['unchecked', true, 1, 0]);
+  const errored = await factCheck(base, { ...deps, post: () => Promise.reject(new Error('502 upstream')) });
+  assertEquals([errored.status, errored.flagged, errored.errors, cache.size], ['unchecked', true, 1, 0]);
+  const noChoice = await factCheck(base, { ...deps, post: () => Promise.resolve({ answers: { verdict: { type: 'choice' } } }) });
+  assertEquals(noChoice.status, 'unchecked');
+  const ok = await factCheck(base, { ...deps, post: () => Promise.resolve({ answers: { verdict: { type: 'choice', choice: 'true', confidence: 0.9 } } }) });
+  assertEquals([ok.status, ok.flagged, cache.size], ['done', false, 1]);
+  // end to end: Parallel down -> fact_check job failed + one ops alert; DM1 meta marked needs_review
+  const f = fakeDb(); const order: string[] = []; const { p } = provider(order);
+  await enqueueResearch(f.db, 'P1');
+  await runPipeline(f.db, { ledger: ledgerFor(f.db), providers: { anthropic: p } }, { factPost: () => Promise.reject(new Error('timeout')) });
+  assertEquals(f.st.pjobs.at(-1).stage + ':' + f.st.pjobs.at(-1).status, 'fact_check:failed');
+  assertEquals(f.st.alerts.size, 1);
+  const fc = f.st.checks.find((c) => c.kind === 'fact_check'); assertEquals([fc.result.status, fc.needs_review], ['unchecked', true]);
+});
+
+Deno.test('review50: accented / Unicode contact names are blocked in every form', () => {
+  const facts = (xs: string[]) => xs.map((fact) => ({ fact, source: 'https://news.example/x' }));
+  const run = (name: string, xs: string[]) => selectClaims({ dm_text: '', company: 'Ostrevanthe Co', domain: 'example.com', contact: { name, title: 'CISO' },
+    source_facts: facts(xs) }).decisions.map((d) => d.decision.split(':')[0]);
+  assertEquals(run('Jürgen Müller', ['Müller joined Ostrevanthe Co in 2025', 'Muller joined Ostrevanthe Co', 'Mueller spoke at RSA', 'MÜLLER hired',
+    'Ostrevanthe Co opened a Munich office']), ['blocked', 'blocked', 'blocked', 'blocked', 'eligible']);
+  assertEquals(run('José Núñez', ['Jose Nunez leads security', 'José leads security', 'JOSÉ said', 'Nuñez-led team', 'Ostrevanthe Co hired 40 engineers']),
+    ['blocked', 'blocked', 'blocked', 'blocked', 'eligible']);
+  // decomposed input (NFD) is the same name
+  assertEquals(run('Jose\u0301 Ma', ['Jos\u00e9 led the launch']), ['blocked']);
+  // two-letter parts count; whole words only (Li is blocked, "Lisbon" is not)
+  assertEquals(run('Wei Li', ['Li presented the roadmap', 'Ostrevanthe Co opened Lisbon office']), ['blocked', 'eligible']);
+  // a name part that folds to nothing blocks every claim (cannot be matched safely)
+  assertEquals(run('Dana \u0301\u0301', ['Ostrevanthe Co hired 40 engineers']), ['blocked']);
+  // the Oct 28 filter stripped accents first ("Müller" -> "mller") and let "Müller" through; prove that path is gone
+  assertEquals(run('Müller', ['Müller is CISO']), ['blocked']);
 });

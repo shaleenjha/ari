@@ -8,8 +8,11 @@ drop function if exists public.people_pipeline_accept();
 drop function if exists public.ari_pipeline_kick();
 drop function if exists public.ari_pipeline_enqueue(text, text, text, boolean);
 drop function if exists public.ari_pipeline_read(int, int);
-drop function if exists public.ari_pipeline_start(bigint, bigint);
+drop function if exists public.ari_pipeline_start(bigint, bigint);                       -- pre-review-50 shape
 drop function if exists public.ari_pipeline_finish(bigint, bigint, text, jsonb, text, text, text, text);
+drop function if exists public.ari_pipeline_start(bigint, bigint, int);
+drop function if exists public.ari_pipeline_finish(bigint, bigint, text, jsonb, text, text, text, text, int);
+drop function if exists public.ari_pipeline_alert(bigint);
 drop function if exists public.ari_pipeline_brief_context(text);
 drop function if exists public.ari_pipeline_brief_write(uuid, jsonb);
 drop function if exists public.ari_pipeline_save_checks(text, text, jsonb, boolean);
