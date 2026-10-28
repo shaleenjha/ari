@@ -2,7 +2,7 @@
 
 Spec: plans/assumptions-to-confirm.md (Owner chose option C, Oct 28 13:32 IST). Status: **staging only**. Production has no
 `queue.assumptions` column and the worker does not run this contract until Owner says go (needs migration 0046 on prod with a
-fresh PAT, then the ae-styles.md line flipped to LIVE, then ARI_ASSUMPTIONS_STORE=1 for the worker's runs).
+fresh PAT, then the ae-styles.md line flipped to LIVE, then scripts/assumptions_store.conf set to `on`; it ships `off`).
 
 ## What it is
 Every draft (DM1, DM2, DM3, connect note, exec note) carries a short list of the facts in it that have no written source:
@@ -57,6 +57,6 @@ a redraft is open again. Confirmed items stay on the row as sources. At most 60 
   item remains. Other kinds only count.
 
 ## Off switch and rollback
-Hide: set `assumptions_ui` to `false` (or delete the row). Storage off: unset ARI_ASSUMPTIONS_STORE. Schema:
+Hide: set `assumptions_ui` to `false` (or delete the row). Storage off: put `off` in scripts/assumptions_store.conf (ARI_ASSUMPTIONS_STORE=1 is a one-run override only). Schema:
 `native/supabase/migrations/pending/0046_draft_assumptions_rollback.sql` (refuses while Owner's confirmed/struck items exist unless
 `set ari.allow_drop_assumptions = 'yes'`).

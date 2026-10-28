@@ -12,7 +12,7 @@
 #   G12 draft assumptions (Oct 28 2026, scripts/assumptions.py; opt-in, never changes PASS/FLAG or the exit code):
 #        add --g12 [--assumptions drafter.json] [--store] to check. Prints "ASSUMPTIONS <n>: [...]" (facts with no written
 #        source, the drafter's list unioned with G12's) before the PASS/FLAG line. --store writes them to the draft's queue
-#        row AS:<person_id>:<kind> only when ARI_ASSUMPTIONS_STORE=1 (staging until Owner turns it on).
+#        row AS:<person_id>:<kind> only when scripts/assumptions_store.conf says on (or ARI_ASSUMPTIONS_STORE=1 for one run).
 #   python3 scripts/copy_check.py arm <person_id>      -> JSON {arm, pick, switch, why}: which DM1 structure Ari uses
 #   python3 scripts/copy_check.py arm2 <person_id>     -> JSON {arm, variant, pick, fallback}: the person's DM2 A/B arm (Oct 22)
 #   python3 scripts/copy_check.py regen [limit]        -> JSON list of unsent DM1s and DM2s that fail the AE style guide (since 21 Oct 2026)

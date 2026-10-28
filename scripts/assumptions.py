@@ -9,7 +9,7 @@ G12 never fails a draft. An unapproved customer name stays a hard G2 fail in cop
 (seller settings) count as sourced, because the approved proof list is their source.
 
 Storage: one queue row per draft, id 'AS:<person_id>:<kind>', column queue.assumptions (migration 0046). Writing is OFF
-unless ARI_ASSUMPTIONS_STORE=1 (staging only until Owner turns it on; production has no such column yet).
+unless scripts/assumptions_store.conf says on (or ARI_ASSUMPTIONS_STORE=1 for one run). Off until Owner turns it on.
 Option C gating lives in the app: Copy stays off while an open item of kind number or customer remains.
 
 usage (shell, project folder):
@@ -404,8 +404,25 @@ def merge(drafter, checker, previous=None, text=None):
     return sorted(opens + rest, key=lambda r: order[id(r)])
 
 
+SWITCH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assumptions_store.conf")
+
+
+def switch_on(path=None):
+    """The worker switch: one line in scripts/assumptions_store.conf, 'on' or 'off' (Owner, Oct 28 2026: a file, not an env var).
+    A missing or unreadable file, or anything other than on/true/1/yes on its first line, means off."""
+    try:
+        with open(path or os.environ.get("ARI_ASSUMPTIONS_SWITCH") or SWITCH, encoding="utf8") as f:
+            first = (f.readline() or "").split("#", 1)[0].strip().lower()
+    except OSError:
+        return False
+    return first in ("1", "on", "true", "yes")
+
+
 def enabled():
-    return os.environ.get("ARI_ASSUMPTIONS_STORE", "").strip().lower() in ("1", "on", "true", "yes")
+    # ARI_ASSUMPTIONS_STORE stays as a one-run override (staging runs and tests); the config file is the standing switch.
+    if os.environ.get("ARI_ASSUMPTIONS_STORE", "").strip().lower() in ("1", "on", "true", "yes"):
+        return True
+    return switch_on()
 
 
 def row_id(pid, kind):
@@ -415,7 +432,7 @@ def row_id(pid, kind):
 def store(pid, kind, items):
     """Upsert the draft's list onto its AS row. Returns (stored, message). Never raises."""
     if not enabled():
-        return False, "not stored (assumptions are off: ARI_ASSUMPTIONS_STORE is not set)"
+        return False, "not stored (assumptions are off: scripts/assumptions_store.conf says off)"
     n_open = sum(1 for i in items if i.get("status") == "open")
     row = {"id": row_id(pid, kind), "action": "Draft assumptions", "target": pid, "details": kind, "status": "done",
            "result": "%d to confirm" % n_open, "assumptions": items,

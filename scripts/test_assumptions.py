@@ -158,7 +158,24 @@ class Merge(unittest.TestCase):
 class Store(unittest.TestCase):
     def tearDown(self):
         os.environ.pop("ARI_ASSUMPTIONS_STORE", None)
+        os.environ.pop("ARI_ASSUMPTIONS_SWITCH", None)
         WRITES.clear()
+
+    def test_switch_file_ships_off(self):
+        with open(A.SWITCH, encoding="utf8") as f:
+            self.assertEqual(f.read().strip(), "off")
+        self.assertFalse(A.switch_on())
+        self.assertFalse(A.enabled())
+
+    def test_switch_file_on_and_garbage(self):
+        p = "/tmp/_g12_switch.conf"
+        for text, want in (("on\n", True), ("ON  # Owner said go\n", True), ("off\n", False), ("maybe\n", False), ("", False)):
+            with open(p, "w") as f:
+                f.write(text)
+            os.environ["ARI_ASSUMPTIONS_SWITCH"] = p
+            self.assertEqual(A.enabled(), want, text)
+        os.environ["ARI_ASSUMPTIONS_SWITCH"] = "/tmp/_g12_missing_switch.conf"
+        self.assertFalse(A.enabled())
 
     def test_off_by_default(self):
         ok, msg = A.store("P900001", "dm1", [])
