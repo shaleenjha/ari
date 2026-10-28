@@ -31,7 +31,7 @@ import repo_scan
 INCLUDE = [
     'web/ops.html', 'web/sw.js', 'web/vercel.json', 'web/build.json',
     'web/ari.webmanifest', 'web/ari-fonts.css', 'web/ari-supabase.js',
-    'web/ari-*.png', 'web/kelvarrow-*.png', 'web/kelvarrow-*.svg', 'web/ari-*.woff2', 'web/about.html', 'web/privacy.html', 'web/terms.html', 'web/support.html', 'web/accessibility.html',  # served live (Vercel audit V2), S1 R2
+    'web/ari-*.png', 'web/kelvarrow-192.png:web/kelvarrow-192.png', 'web/kelvarrow-512.png:web/kelvarrow-512.png', 'web/kelvarrow-192-maskable.png:web/kelvarrow-192-maskable.png', 'web/kelvarrow-512-maskable.png:web/kelvarrow-512-maskable.png', 'web/kelvarrow-apple-180.png:web/kelvarrow-apple-180.png', 'web/kelvarrow-badge-96.png:web/kelvarrow-badge-96.png', 'web/kelvarrow-favicon-64.png:web/kelvarrow-favicon-64.png', 'web/kelvarrow-favicon.svg:web/kelvarrow-favicon.svg', 'web/ari-*.woff2', 'web/about.html', 'web/privacy.html', 'web/terms.html', 'web/support.html', 'web/accessibility.html',  # served live (Vercel audit V2), S1 R2
     # native/ari/ moved to archive/native-ari-expo-starter/ (PR #7, Oct 21 2026)
     'native/supabase/migrations/*.sql', 'native/supabase/rollbacks/*.sql',
     'native/supabase/pending/*.sql', 'native/supabase/functions/**',  # S1 R2: '*/index.ts' never matched (audit S4)
