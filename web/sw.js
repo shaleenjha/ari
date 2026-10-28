@@ -1,5 +1,5 @@
-/* Ari service worker (v18.4; v18.13.4: app shell fetched with no-store, cache renamed so every phone drops old copies; v18.13.5: Kelvarrow by Thrandvex in what it shows). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
-const V='ari-v18.13.5',LOGOS='ari-logos-1',ACKS='ari-acks';
+/* Ari service worker (v18.4; v18.13.4: app shell fetched with no-store, cache renamed so every phone drops old copies; v18.13.5: Kelvarrow by Thrandvex in what it shows; v18.13.6: cache renamed for the iPhone fixes). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
+const V='ari-v18.13.6',LOGOS='ari-logos-1',ACKS='ari-acks';
 const SHELL=['/ops','/ari-supabase.js?v17','/ari-fonts.css','/ari-geist.woff2','/ari-geistmono.woff2','/ari-192.png','/ari-512.png','/ari.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==LOGOS&&k!==ACKS).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

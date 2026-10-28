@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.13.5"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.13.6"><meta name="ari-rev" content="05ae22f947">
 <title>Kelvarrow by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -25,6 +25,17 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 <link rel="icon" href="/ari-192.png" sizes="192x192">
 <link rel="apple-touch-icon" href="/ari-apple-180.png">
 <meta name="description" content="Kelvarrow by Thrandvex: your LinkedIn outbound, prepared. You send.">
+<script>/* v18.13.6: one plain-text helper for every signal, trigger and note shown. Decodes entities, drops markup, returns text only
+   (callers escape it once when they build HTML). ariHref gives an http(s) source link or ''. ariNoteClean drops the worker's
+   own draft notes ("Ari's pick (dmN): ... Switch to other angle: ...") from what is shown; the stored notes are untouched. */
+(function(){var TA=null,TAGS=/<\/?(a|b|i|u|em|strong|small|span|p|div|br|font)\b[^>]*>/gi,ENT=/&(#\d+|#x[0-9a-f]+|[a-z]+);/i;
+function dec(s){try{if(!TA)TA=document.createElement('textarea');TA.innerHTML=s.replace(/</g,'&lt;');return TA.value}catch(e){
+  return s.replace(/&#39;|&#x27;|&apos;/gi,"'").replace(/&quot;/gi,'"').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&')}}
+window.ariPlain=function(s){s=String(s==null?'':s);for(var i=0;i<3&&(ENT.test(s)||(TAGS.lastIndex=0,TAGS.test(s)));i++){TAGS.lastIndex=0;s=dec(s.replace(TAGS,' '))}TAGS.lastIndex=0;return s.replace(TAGS,' ').replace(/\s+/g,' ').trim()};
+window.ariHref=function(s){s=String(s==null?'':s);var m=s.match(/href\s*=\s*["']([^"']+)["']/i),u=m?window.ariPlain(m[1]):'';
+  if(!u){var t=window.ariPlain(s).match(/https?:\/\/[^\s<>"')]+/i);u=t?t[0]:''}return /^https?:\/\/[^\s]+$/i.test(u)?u:''};
+window.ariNoteClean=function(s){return String(s==null?'':s).split('\n').map(function(l){return l.split(' | ').filter(function(x){return !/^\s*(Ari|Hark|Kelvarrow)(\b|(&#39;|'|\u2019)s\b)/i.test(x)}).join(' | ')}).filter(function(l){return l.trim()}).join('\n')};
+})();</script>
 <script>/* ===== Ari v16 prologue: runs before the app script. First-run reset, the real-data model, LinkedIn links. ===== */
 (function(){
 var LSg=function(k,d){try{var v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},LSs=function(k,v){try{localStorage.setItem(k,v)}catch(e){}},LSr=function(k){try{localStorage.removeItem(k)}catch(e){}};
@@ -137,13 +148,13 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
     else if(d3){next='Sequence done. Background.';BG.push({n:p.name,c:p.title+' · '+acct,back:'Done '+short(d3),why:'Three touches sent, no reply yet'})}
     else if(d2){if(d3due<=sd)item={tag:'DM3',kind:'dm3',why:'DM2 went out '+rel(d2,sd)+' with no reply. Last, polite note.',msg:p.dm3_text||'',field:'dm3_text',due:d3due};else{next='DM3 on '+nice(d3due);COMING.push([d3due,p,'DM3'])}}
     else if(d1){if(d2due<=sd)item={tag:'DM2',kind:'dm2',why:'DM1 went out '+rel(d1,sd)+', no reply. A new reason, never a bump.',msg:p.dm2_text||'',field:'dm2_text',due:d2due};else{next='DM2 on '+nice(d2due);COMING.push([d2due,p,'DM2'])}}
-    else if(ac){if(d1due<=sd)item={tag:'DM1',kind:'dm1',why:'Accepted '+rel(ac,sd)+'. '+(a.hook?'The reason: '+a.hook:''),msg:p.dm||'',field:'dm',due:d1due,rs:rs};else{next='DM1 on '+nice(d1due);COMING.push([d1due,p,'DM1'])}}
+    else if(ac){if(d1due<=sd)item={tag:'DM1',kind:'dm1',why:'Accepted '+rel(ac,sd)+'. '+(a.hook?'The reason: '+window.ariPlain(a.hook):''),msg:p.dm||'',field:'dm',due:d1due,rs:rs};else{next='DM1 on '+nice(d1due);COMING.push([d1due,p,'DM1'])}}
     else if(cs){var age=diffD(sd,cs);if(age>=14)item={tag:'WITHDRAW',kind:'withdraw',why:'Invite sent '+short(cs)+', '+age+' days with no accept. Withdraw it on LinkedIn, then tick.',msg:'',field:''};else{next='Waiting on accept · day '+age+' of 14';WAIT.push({p:p,age:age})}}
     else if(/connect queued/i.test(stage)||!stage){var cd=dOnly(p.connect_day);if(cd&&cd<=sd){item={tag:'CONNECT',kind:'connect',why:(cd<sd?'Carried over from '+nice(cd)+'. ':'')+'Send a blank connect. '+(p.role?p.role.replace(/\.$/,'')+'.':''),msg:'',field:'',due:cd}}else next=cd?'Connect on '+nice(cd):'Not scheduled yet'}
     if(item&&snoozed){next='Snoozed until '+nice(snz);COMING.push([snz,p,item.tag]);item=null}
     if(item){item.n=p.name;item.c=[p.title,acct].filter(Boolean).join(' · ');item.id=p.id;item.url=liHttps(p.linkedin_url);item.acc=item.tag==='REPLY'?1:0;item.p=p;Q.push(item);next=next||({CONNECT:'Send the connect',DM1:'Send DM1',DM2:'Send DM2',DM3:'Send DM3',WITHDRAW:'Withdraw the invite',REPLY:'Answer the reply'})[item.tag]}
-    var found=[];if(a.hook)found.push([a.hook_date?short(dOnly(a.hook_date)):'Hook',a.hook_url?'<a class="v16src" href="'+esc(a.hook_url)+'" target="_blank" rel="noopener">'+esc((String(a.hook_url).match(/^https?:\/\/([^\/]+)/)||[,'source'])[1].replace(/^www\./,''))+'</a>':'Account hook',esc(a.hook),a.hook_date&&diffD(sd,dOnly(a.hook_date))<=30?1:0]);
-    if(p.notes)found.push(['Notes','Research note',esc(p.notes),0]);
+    var found=[];if(a.hook)found.push([a.hook_date?short(dOnly(a.hook_date)):'Hook',a.hook_url?'<a class="v16src" href="'+esc(a.hook_url)+'" target="_blank" rel="noopener">'+esc((String(a.hook_url).match(/^https?:\/\/([^\/]+)/)||[,'source'])[1].replace(/^www\./,''))+'</a>':'Account hook',esc(window.ariPlain(a.hook)),a.hook_date&&diffD(sd,dOnly(a.hook_date))<=30?1:0]);
+    var nt0=window.ariNoteClean(p.notes);if(nt0.trim())found.push(['Notes','Research note',esc(nt0),0]); /* v18.13.6: the worker's draft notes are not a finding */
     var angle=[];if(p.route)angle.push(['Route',esc(p.route)]);if(a.why_thrandvex)angle.push(['Why us',esc(a.why_thrandvex)]);if(a.suggested_order)angle.push(['Order',esc(a.suggested_order)]);
     hist.unshift([nice(sd),'Next: '+esc(next||'·'),'nx']);
     var why0=String(p.why||p.role||'').trim()||composeWhy(p,a,bk,stage,false);if(stage==='Founder')why0='On the exec track. '+why0;if(mhold)why0='Meeting set on '+acct+', so outreach is held. '+why0;
@@ -6192,6 +6203,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.13.6',d:'Oct 28',items:['The send screen opens with your message right under the name, and nothing slides sideways any more','Signals read as plain sentences with a tappable source, and my own draft notes stay out of them','Every way into a person opens the same clean file, and the stage bar shows where they really are','Search keeps its results above the keyboard, and the People list reads like a normal list with clear labels']},
  {v:'v18.13.5',d:'Oct 28',items:['New name: Kelvarrow by Thrandvex. Same app, same data, one name for the app and for me','Search lives in the bottom bar, in a long pull down from the top, and behind / or Ctrl K on a computer. The magnifier at the top is gone']},
  {v:'v18.13.4',d:'Oct 28',items:['Search sits in the bottom bar, and a long pull down from the top of any screen opens it too. Type a question and it goes straight to chat','People and accounts open the same way now: who they are, why now, one main button, then signals, conversation and history','Tap any company to open its account, and any person to open their file. Back takes you exactly where you were','Company tiles carry one clean letter, tinted by AE','When nothing is waiting to send, Today shows what I found instead of a zero','A shorter menu, one style of switch, back button and button across the app, and no internal codes on screen','Updates arrive on their own: the app checks for a new version every time you come back to it']},
  {v:'v18.13.3',d:'Oct 28',items:['Find anyone fast: the search button at the top (or / and Ctrl K on a computer) opens a person or an account in one tap','The tabs at the bottom stay on screen everywhere. Only the phone keyboard hides them','Headers stay sharp when a file opens or you scroll','On a computer Kelvarrow sits in a wider centred column and runs lighter','Accounts search looks across every filter and never shows a negative count','About tells my story again: what I do, what I never do and how I was made']},
@@ -7126,7 +7138,7 @@ function acctRow(x){const open=AF2.open.has(x.k);const pc=x.pp.length;
   const ppl=x.pp.map(p=>{const st=V162S.key(p),url=liHttps2(p.linkedin_url);return `<div class="v162pp"><div style="min-width:0"><div class="nm press" data-pf="${E(p.name)}">${E(p.name)}</div><div class="co"><span class="v162st s-${st}">${E(V162S.label(p))}</span>${E([p.title,/screenshot|csv|upload|chat/i.test(p.source||'')?'from you':/hark/i.test(p.source||'')?'Kelvarrow found':''].filter(Boolean).join(' · '))}</div></div><div class="acts2">${url?`<a href="${E(LI.href(url))}" data-li="${E(url)}">LinkedIn</a>`:''}${st==='none'&&!/^(hold|founder)$/i.test(p.stage||'')?`<span class="press" data-cs="${E(p.id)}">Mark connect sent</span>`:''}</div></div>`}).join('');
   const scans=x.scan.slice(-3).reverse().map(r=>`<div class="blk"><b>${E(r.action)} · ${E(agoTxt(r.created))}</b>${E(String(r.result||r.details||'').slice(0,600))}</div>`).join('');
   const mapTxt=mq?(/^done/i.test(mq.status)?'People found · find more':`Finding people · asked ${E(agoTxt(mq.created))}`):'Find 4 to 5 people here';
-  const body=`<div class="v162ad">${a.hook?`<div class="blk"><b>Hook${a.hook_date?' · '+E(shortDate(a.hook_date)):''}</b>${E(a.hook)}${a.hook_url?` <a href="${E(a.hook_url)}" target="_blank" rel="noopener">source</a>`:''}</div>`:''}
+  const body=`<div class="v162ad">${a.hook?`<div class="blk"><b>Hook${a.hook_date?' · '+E(shortDate(a.hook_date)):''}</b>${E(window.ariPlain(a.hook))}${a.hook_url?` <a href="${E(a.hook_url)}" target="_blank" rel="noopener">source</a>`:''}</div>`:''}
    ${x.sig?`<div class="blk"><b>Last scan${x.checked?' · '+E(shortDate(x.checked)):''}</b>${E(x.sig)}</div>`:x.checked?`<div class="blk"><b>Last scan · ${E(shortDate(x.checked))}</b>Nothing worth a note yet.</div>`:''}
    ${x.flag?`<div class="blk"><b>Flagged</b>${E(x.flag)}. No cold outreach; ask the AE.</div>`:''}
    ${a.meeting_status==='set'?`<div class="blk"><b>Meeting</b>${E([a.meeting_source,a.meeting_person,a.meeting_date,a.meeting_ae].filter(Boolean).join(' · ')||'Details not added yet')}${a.meeting_notes?'<br>'+E(a.meeting_notes):''}</div>`:''}
@@ -8054,7 +8066,7 @@ function liBlock171(p){const u=String(p.linkedin_url||'').trim();
   return `<div class="pfs rv v171li" data-pid="${E(p.id)}"><div class="cap v163cap"><span>LinkedIn</span><span class="v163saved"></span></div>${u&&!V171.liEdit?`<div class="v171r"><span class="u">${E(u.replace(/^https?:\/\/(www\.)?/,''))}</span><button type="button" class="v163btn sec sm press" data-li171="edit">Edit</button></div>`:
    `<div class="v171r"><input type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="linkedin.com/in/…" value="${E(u)}"><button type="button" class="v163btn sec sm press" data-li171="paste">Paste</button><button type="button" class="v163btn pri sm press" data-li171="save">Save</button></div><div class="err">That isn’t a profile link. It should look like linkedin.com/in/name.</div>`}</div>`}
 function replyBox171(p){if(!p.replied||p.meeting)return '';return `<div class="pfs rv v171rp" data-pid="${E(p.id)}"><div class="cap v163cap"><span>Their reply</span></div><div class="v171form"><textarea rows="3" maxlength="1500" placeholder="Paste what ${E(first(p.name))} wrote, and Kelvarrow drafts your answer to it."></textarea><div class="v171acts"><div class="v171btn pri press" data-rp171="1">Draft my answer</div></div></div></div>`}
-function research171(p){const n=String(p.notes||'');if(!n.trim())return '';const parts=[];
+function research171(p){const n=window.ariNoteClean(p.notes||'').split('\n').map(l=>window.ariPlain(l)).join('\n'); /* v18.13.6: plain text, no draft notes */if(!n.trim())return '';const parts=[];
   const trig=[...n.matchAll(/Trigger:\s*([^\n|]+)/gi)].map(m=>m[1].trim());const url=s=>(s.match(/https?:\/\/[^\s)'"]+/)||[])[0]||'';
   const ctx=(n.match(/Context:\s*([^\n]+)/i)||[])[1];const flag=(n.match(/FLAG:\s*([^|\n]+)/)||[])[1];const nt=/No trigger/i.test(n);
   const rest=n.replace(/(?:^|\n)\s*(Trigger|Context|FLAG):[^\n]*/gi,'').replace(/QA TEST ROW[^\n]*/,'').trim();
@@ -8090,7 +8102,7 @@ let PG171=null,PGK=null,PGTAB='contacts';
 function acct171(name){const all=buildAccts();const k=NC(name);return all.find(x=>x.k===k)||all.find(x=>nc171(x.n)===nc171(name))||null}
 function stageChip171(p){return `<span class="v162st s-${V162S.key(p)}">${E(V162S.label(p))}</span>`}
 function sigs171(x){const out=[];const a=x.acc||{};
-  if(a.hook)out.push({d:a.hook_date||'',t:a.hook,u:a.hook_url||'',k:'Hook'});
+  if(a.hook)out.push({d:a.hook_date||'',t:window.ariPlain(a.hook),u:a.hook_url||'',k:'Hook'});
   (DATA.queue||[]).filter(r=>nc171(r.target)===nc171(x.n)&&/new signal|claimable|heads-up/i.test(r.action||'')).slice().reverse().forEach(r=>{const u=(String(r.result||'').match(/https?:\/\/[^\s)'"]+/)||[])[0]||'';out.push({d:String(r.created||'').slice(0,10),t:String(r.result||r.details||'').split(/\n/)[0].slice(0,400),u,k:r.action})});
   return out}
 function acctHTML171(x){const a=x.acc||{},ae=window.ariAE(x.owner||a.owner||''),site=site171(x.n),pp=(x.pp||[]).slice().sort((p,q)=>String(p.stage||'').localeCompare(String(q.stage||'')));
@@ -9924,7 +9936,7 @@ function softHTML(name,b){const S=b.soft_angles||[];if(!S.length)return '';const
   return `<div class="v171card v1821so${trig?'':' v182prom'}" id="v1821soft"><div class="cap"><span>${trig?'If the trigger does not land':'No public trigger: softer angles'}</span><span class="v182lb l-s">Softer</span></div>
    ${trig&&!u.soft?`<div class="v1821more press" role="button" tabindex="0" data-v182soft="1"><span>${S.length} softer angles: role pain, peer moves, hiring, product change</span><i>${CH_SVG}</i></div>`:rows}</div>`}
 function acctSum(name){const a=accRow(name)||{};const fx=[];
-  if(a.hook)fx.push({k:a.hook_date?'Latest signal · '+dLabel(a.hook_date):'Signal',t:cutW(a.hook,140),u:a.hook_url});
+  if(a.hook)fx.push({k:a.hook_date?'Latest signal · '+dLabel(a.hook_date):'Signal',t:cutW(window.ariPlain(a.hook),140),u:a.hook_url});
   if(a.why_thrandvex)fx.push({k:'Our read',t:cutW(String(a.why_thrandvex).split(/(?<=\.)\s/)[0],150)});
   if(!a.one_liner&&!fx.length)return '';
   return `<div class="v171card v1821sum"><div class="cap"><span>What we know</span><span>Before the brief</span></div>${a.one_liner?`<p class="v1821ts s">${E1(a.one_liner)}</p>`:''}
@@ -11872,7 +11884,15 @@ function view(){const L=rows();let out=L;
   const rk=p=>canConnect(p)?0:p.accepted&&!p.replied?1:2;
   return out.slice().sort((a,b)=>rk(a)-rk(b)||String(a.company||'').localeCompare(String(b.company||''))||String(a.name).localeCompare(String(b.name)))}
 function chipsHTML(L){const T=tags(L),ev=L.filter(p=>evOf(p)).length;const c=(k,lab,n)=>`<span class="press${F.tag===k?' on':''}" role="button" data-pt="${E(k)}">${E(lab)}${n!=null?` <small>${n}</small>`:''}</span>`;
-  return c('','All',null)+(ev?c('__ev','🎟 Events',ev):'')+T.map(([t,n])=>c(t,t,n)).join('')}
+  return c('','All',null)+(ev?c('__ev','🎟 Events',ev):'')+T.map(([t,n])=>c(t,human(t),n)).join('')}
+/* v18.13.6: "wk44 · Idris" reads "Idris · this week" (label only; the filter key stays the import tag) */
+const MON3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function isoWk(d){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const n=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-n);const y0=new Date(Date.UTC(x.getUTCFullYear(),0,1));return [x.getUTCFullYear(),Math.ceil(((x-y0)/864e5+1)/7)]}
+function human(t){const m=String(t||'').match(/^wk\s?(\d{1,2})\s*·\s*(.+)$/i);if(!m)return t;const w=+m[1];const [yr,now]=isoWk(new Date());
+  if(w===now)return m[2].trim()+' · this week';if(w===now-1)return m[2].trim()+' · last week';
+  const y=w>now?yr-1:yr;const j4=new Date(Date.UTC(y,0,4));const mon=new Date(j4.getTime()-((j4.getUTCDay()+6)%7)*864e5+(w-1)*7*864e5);
+  return m[2].trim()+' · week of '+mon.getUTCDate()+' '+MON3[mon.getUTCMonth()]}
+V.human=human;
 function rowHTML(p){const ev=evOf(p),st=stLab(p);
   return `<div class="pr press" role="button" tabindex="0" data-pn="${E(p.name)}"><span style="min-width:0"><span class="l1">${E(p.name)}<span> · ${E(p.company||'')}</span></span><span class="l2">${ev?'🎟 '+E(ev)+' · ':''}${E(cleanTitle(p.title))}</span></span><span class="st${st==='To connect'?' q':''}">${E(st)}</span></div>`}
 function paint(){const o=$('#pplx');if(!o||o.hidden)return;const L=rows(),R=view();
@@ -11899,7 +11919,7 @@ function wire(o){let t=0;const s=o.querySelector('.srch');s.addEventListener('in
 /* entry on Today: a chip row under the status line */
 function entry(){try{const w=$('#v1812');if(!w)return;let el=$('#pplent');const L=rows();if(!L.length){if(el)el.remove();return}
   const ev=L.filter(p=>evOf(p)&&canConnect(p)).length,T=tags(L.filter(canConnect)).slice(0,2);
-  const h=`<span class="press" role="button" data-pe="">Find people</span>${ev?`<span class="press" role="button" data-pe="__ev">🎟 Events <small>${ev}</small></span>`:''}${T.map(([t,n])=>`<span class="press" role="button" data-pe="${E(t)}">${E(t)} <small>${n}</small></span>`).join('')}`;
+  const h=`<span class="press" role="button" data-pe="">Find people</span>${ev?`<span class="press" role="button" data-pe="__ev">🎟 Events <small>${ev}</small></span>`:''}${T.map(([t,n])=>`<span class="press" role="button" data-pe="${E(t)}">${E(human(t))} <small>${n}</small></span>`).join('')}`;
   if(!el){el=document.createElement('div');el.id='pplent';el.className='pplent';el.addEventListener('click',e=>{const b=e.target.closest('[data-pe]');if(b){F.q='';const s=$('#pplx .srch');if(s)s.value='';open(b.dataset.pe)}})}
   const st=$('#v1812st');if(st&&st.nextElementSibling!==el)st.after(el);if(el.innerHTML!==h)el.innerHTML=h}catch(e){V.errs.push('entry '+e)}}
 setInterval(entry,2500);
@@ -12721,6 +12741,18 @@ const ini=s=>String(s||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0])
 const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n||6)}catch(e){}};
 const err=(k,e)=>{if(V.errs.length<40)V.errs.push(k+' '+String(e&&e.message||e).slice(0,140))};
 const CH='<span class="ch" aria-hidden="true">›</span>';
+/* v18.13.6: signals are plain text (one helper), sources are real links, research and draft notes are not signals */
+const P=t=>G.ariPlain?G.ariPlain(t):String(t==null?'':t);
+const host=u=>(String(u||'').match(/^https?:\/\/([^\/?#]+)/i)||[,''])[1].replace(/^www\./,'');
+const DLEAD=/^(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.? \d{1,2},? \d{4}|\d{4}-\d\d-\d\d)[,:.]?\s+/i;
+const tidy=(t,d)=>{t=String(t||'').trim();return d&&!/^(Hook|Notes|Signal)$/i.test(d)?t.replace(DLEAD,''):t}; /* the date already sits in its own column */
+function pSigs(f,p){const out=[],seen=new Set();const add=(d,src,t,url)=>{t=tidy(t,d);const k=low(t).replace(/[^a-z0-9]/g,'').slice(0,40);if(!t||seen.has(k))return;seen.add(k);out.push({d:d||'',src:src||'',t,url:url||''})};
+  (f&&f.found||[]).forEach(x=>{if(x[0]==='Notes')return;const u=G.ariHref?ariHref(x[1]):'';add(x[0],u?host(u):P(x[1]),P(x[2]),u)});
+  const n=G.ariNoteClean?ariNoteClean((p&&p.notes)||''):'';
+  [...n.matchAll(/Trigger:\s*([^\n|]+)/gi)].forEach(m=>{const raw=P(m[1]);const u=(raw.match(/https?:\/\/[^\s)'"]+/)||[])[0]||'';const d=(raw.match(/\d{4}-\d\d-\d\d/)||[])[0]||'';
+    add(d,u?host(u):'Research',raw.replace(u,'').replace(/\d{4}-\d\d-\d\d,?\s*/,'').replace(/\s+([.,;:])/g,'$1').trim(),u)});
+  return out}
+V.pSigs=pSigs;
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function dshort(d){const s=String(d||'');const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return (+m[3])+' '+MON[+m[2]-1];return s.slice(0,8)}
 function dnum(d){const t=Date.parse(String(d||'').slice(0,10));return isNaN(t)?0:t}
@@ -12747,10 +12779,10 @@ function stageOf(p){try{if(G.ariIsExec&&ariIsExec(p))return ['Exec track',''];}c
   if(p.meeting)return ['Meeting',''];if(p.replied)return ['Replied',''];if(p.withdrawn)return ['Withdrawn',''];if(p.dm3_sent)return ['DM3 sent',''];if(p.dm2_sent)return ['DM2 sent',''];if(p.dm1_sent)return ['DM1 sent',''];if(p.accepted)return ['Accepted',''];if(p.connect_sent)return ['Invited',''];return ['Coming up','']}
 function briefFor(co){try{const B=G.ariV182&&ariV182.briefs;let b=null;if(B instanceof Map)b=B.get(co)||[...B.values()].find(x=>x&&nc(x.company)===nc(co));else if(Array.isArray(B))b=B.find(x=>x&&nc(x.company)===nc(co));else if(B&&typeof B==='object')b=B[co]||Object.values(B).find(x=>x&&nc(x.company)===nc(co));return b||null}catch(e){return null}}
 /* signals for an account: its hook, the brief's why-now items (with their source), and what was found on each person */
-function signalsFor(co,ppl){const out=[],seen=new Set();const add=(d,src,t,url,who)=>{const k=low(t).slice(0,80);if(!t||seen.has(k))return;seen.add(k);out.push({d,src,t:String(t),url:url||'',who:who||''})};
-  try{const b=briefFor(co);(b&&b.why_now||[]).forEach(w=>add(w.date,'News',w.text||w.title,w.url))}catch(e){}
-  try{const a=accts().find(x=>nc(x.company)===nc(co));if(a&&a.hook)add(a.hook_date,'Account hook',a.hook,a.hook_url||'')}catch(e){}
-  try{(ppl||[]).forEach(p=>{const f=(G.ariPF||{})[p.name];(f&&f.found||[]).forEach(x=>add(x[0]&&/\d{4}-/.test(x[0])?x[0]:x[0],x[1],x[2],x[4]||'',p.name))})}catch(e){}
+function signalsFor(co,ppl){const out=[],seen=new Set();const add=(d,src,t,url,who)=>{t=tidy(t,d);const k=low(t).replace(/[^a-z0-9]/g,'').slice(0,40);if(!t||seen.has(k))return;seen.add(k);out.push({d,src,t:String(t),url:url||'',who:who||''})};
+  try{const b=briefFor(co);(b&&b.why_now||[]).forEach(w=>add(w.date,'News',P(w.text||w.title),w.url))}catch(e){}
+  try{const a=accts().find(x=>nc(x.company)===nc(co));if(a&&a.hook)add(a.hook_date,'Account hook',P(a.hook),a.hook_url||'')}catch(e){}
+  try{(ppl||[]).forEach(p=>{const f=(G.ariPF||{})[p.name];pSigs(f,p).forEach(x=>add(x.d,x.src,x.t,x.url,p.name))})}catch(e){}
   return out.sort((x,y)=>(dnum(y.d)||0)-(dnum(x.d)||0))}
 function eventsFor(ppl){const ev=[];ppl.forEach(p=>{const f=first(p.name);
   [['meeting','Meeting booked with '+p.name],['replied',p.name+' replied'],['dm3_sent','DM3 to '+f],['dm2_sent','DM2 to '+f],['dm1_sent','DM1 to '+f],['accepted',p.name+' accepted'],['connect_sent','You invited '+p.name],['withdrawn','Invite to '+f+' withdrawn']].forEach(([k,t])=>{const v=p[k];if(v&&/^\d{4}-/.test(String(v)))ev.push({d:v,t,n:p.name})})});
@@ -12773,7 +12805,8 @@ function openAcctFrom(co){if(!co||!(G.ariV171&&ariV171.openAcct))return;buzz(6);
 function openPersonFrom(n){if(!n||typeof G.openFile!=='function')return;buzz(6);
   /* the person file is one sheet: when another person's file is underneath the account page, remember it so Back comes back to it */
   try{const cur=ovIsOn()&&($('#ovb')||{}).dataset;if(cur&&cur.v18134n&&cur.v18134n!==n&&pgOn())V.stack.push({n:cur.v18134n,y:($('#ovb')||{}).scrollTop||0})}catch(e){}
-  H.dataset.v18134top='file';lift();try{G.openFile(n,null)}catch(e){err('file',e)}}
+  H.dataset.v18134top='file';lift();const was=(($('#ovb')||{}).dataset||{}).v18134n;try{G.openFile(n,null)}catch(e){err('file',e)}
+  try{const o=$('#ovb');if(o&&was!==n)o.scrollTop=0}catch(e){}}
 V.openAcct=openAcctFrom;V.openPerson=openPersonFrom;
 document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
   const a=t.closest('[data-v18134acct]');if(a){e.preventDefault();e.stopPropagation();openAcctFrom(a.dataset.v18134acct);return}
@@ -12786,16 +12819,21 @@ document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
 
 /* ---------- person file ---------- */
 function capOf(el){const c=el&&el.querySelector(':scope>.cap');return c?low(c.textContent):''}
-function whyNow(f,p){const it=f.item||{};if(it.why)return String(it.why);const fd=(f.found||[])[0];const nx=f.next?String(f.next).replace(/\.$/,''):'';
-  const sig=fd?`Latest signal ${fd[0]}: ${fd[2]}`:'';if(nx&&sig)return `${nx}. ${sig}.`;if(nx)return nx+'.';if(sig)return sig+'.';
+function whyNow(f,p){const it=f.item||{};if(it.why)return P(it.why);const fd=pSigs(f,p)[0];const nx=f.next?String(f.next).replace(/\.$/,''):'';
+  const sig=fd?`Latest signal ${dshort(fd.d)}: ${fd.t.replace(/\.$/,'')}`:'';if(nx&&sig)return `${nx}. ${sig}.`;if(nx)return nx+'.';if(sig)return sig+'.';
   const st=stageOf(p)[0];return st&&st!=='Coming up'?st+'.':''}
 function decoPF(){const ovb=$('#ovb');if(!ovb||!ovIsOn())return;if(ovb.querySelector(':scope>#v18134pfm'))return;
   const top=ovb.firstElementChild;if(!top||!top.querySelector('.pfn'))return;
   try{const n=top.querySelector('.pfn').textContent.trim();const f=(G.ariPF||{})[n]||{};const p=f.p||personByName(n)||{name:n};const co=String(p.company||f.acct||'').trim();
     ovb.dataset.v18134n=n;V.pf++;
     /* machinery out: internal id, chips with no words */
-    const id=top.querySelector(':scope>.cap');if(id&&/^[A-Z]{1,5}\d{2,}$/.test(id.textContent.trim()))id.classList.add('v18134gone');
-    top.querySelectorAll('.chips').forEach(c=>{[...c.children].forEach(x=>{if(!x.textContent.trim())x.remove()});if(!c.children.length)c.classList.add('v18134gone')});
+    const id=top.querySelector(':scope>.cap');if(id&&/^[A-Z]{1,5}\d{2,}(\s|$)/.test(id.textContent.trim()))id.classList.add('v18134gone');
+    top.querySelectorAll('.chips').forEach(c=>{[...c.children].forEach(x=>{if(!x.textContent.trim()||x.classList.contains('acc')||(p.route&&low(x.textContent)===low(p.route)))x.remove()});if(!c.children.length)c.classList.add('v18134gone')});
+    /* v18.13.6: the stage bar fills up to the last step that really happened; nothing half-filled for a step still waiting */
+    {const lad=top.querySelector('.lad'),ladl=top.querySelector('.ladl');if(lad){const LB=['Connect sent','Accepted','DM1 sent','DM2 sent','DM3 sent','Replied'];
+      const fl=[p.connect_sent,p.accepted,p.dm1_sent,p.dm2_sent,p.dm3_sent,p.replied||p.meeting].map(v=>!!String(v||'').trim());let last=-1;fl.forEach((v,i)=>{if(v)last=i});
+      [...lad.children].forEach((x,i)=>{x.className=i<=last?'d':''});if(ladl)[...ladl.children].forEach((x,i)=>{x.className=i===last?'on':''});
+      lad.setAttribute('role','img');lad.setAttribute('aria-label','Stage: '+(last<0?'not contacted yet':LB[last]));if(ladl)ladl.setAttribute('aria-hidden','true')}}
     /* who */
     top.classList.add('v18134hero');const nm=top.querySelector('.pfn'),pr=top.querySelector('.pfr');
     const idw=document.createElement('div');idw.className='v18134id';idw.innerHTML=`<span class="v18134av l" aria-hidden="true">${E(ini(n))}</span><div></div>`;nm.parentNode.insertBefore(idw,nm);idw.lastChild.appendChild(nm);
@@ -12813,7 +12851,7 @@ function decoPF(){const ovb=$('#ovb');if(!ovb||!ovIsOn())return;if(ovb.querySele
     const used=new Set([status,next,draft,li,ctx,why,found,marks,hist,stamp,thread].filter(Boolean));
     const frag=document.createDocumentFragment();
     /* Signals */
-    {const s=secEl('sig','Signals',(f.found||[]).length+(why?1:0));const b=s.querySelector('.v4b'),r=s.querySelector('.v4r');
+    {const nSig=(found?found.querySelectorAll('.fd').length+[...found.querySelectorAll('.v171card')].reduce((a,c)=>a+(c.querySelectorAll('.v171sig').length||1),0):0)+(why?1:0);const s=secEl('sig','Signals',nSig);const b=s.querySelector('.v4b'),r=s.querySelector('.v4r');
       if(found){const c=found.querySelector(':scope>.cap');if(c)c.classList.add('h1cap');b.appendChild(found);if(why){why.querySelector('.pfp')&&why.querySelector('.pfp').classList.add('v18134cl');r.appendChild(why)}}
       else if(why){const pp=why.querySelector('.pfp');if(pp)pp.classList.add('v18134cl');const c=why.querySelector(':scope>.cap');if(c)c.classList.add('h1cap');b.appendChild(why)}
       frag.appendChild(s);finishSec(s)}
@@ -12889,9 +12927,10 @@ function decoFX(){$$('.v1812fx').forEach(fx=>{if(fx.hidden||getComputedStyle(fx)
   /* context fills the empty half: the signal and the account, both one tap away */
   const mid=fx.querySelector('.v1812mid');if(!mid)return;let c=mid.querySelector('.v18134fxc');if(c)c.remove();
   const p=personByName(b.textContent.trim());if(!p)return;const co=String(p.company||'').trim();const f=(G.ariPF||{})[p.name]||{};
-  const fd=(f.found||[]).slice(0,2);const ppl=people().filter(x=>nc(x.company)===nc(co));const ae=first(aeOf(co));
+  const fd=pSigs(f,p).slice(0,2);const ppl=people().filter(x=>nc(x.company)===nc(co));const ae=first(aeOf(co));
   c=document.createElement('div');c.className='v18134fxc';
-  c.innerHTML=`${fd.length?`<div class="v4h"><b>Signals</b></div>${fd.map(x=>`<div class="v18134row sig"><span class="dt">${E(x[0])}</span><span class="tx"><b>${E(x[2])}</b><small>${E(x[1])}</small></span></div>`).join('')}`:''}
+  const sr=x=>{const inner=`<span class="dt">${E(dshort(x.d))}</span><span class="tx"><b>${E(x.t)}</b><small>${E(x.src)}</small></span>`;return x.url?`<a class="v18134row sig" href="${E(x.url)}" target="_blank" rel="noopener">${inner}${CH}</a>`:`<div class="v18134row sig">${inner}</div>`};
+  c.innerHTML=`${fd.length?`<div class="v4h"><b>Signals</b></div>${fd.map(sr).join('')}`:''}
     ${co?`<div class="v4h" style="margin-top:12px"><b>Account</b></div><div class="v18134row">${mono(co,40)}<span class="tx"><b>${E(co)}</b><small>${E([ae?ae+'’s book':'No AE',ppl.length+(ppl.length===1?' person':' people')].join(' · '))}</small></span></div>`:''}`;
   mid.appendChild(c)}catch(e){err('fx',e)}})}
 
@@ -12901,7 +12940,7 @@ function foundHTML(){const ppl=people();const nb=(($('.v1812done span')||{}).tex
   const act=((G.ariV182&&ariV182.act)||[]).filter(x=>x&&/person_added|brief_ready|signal/.test(x.kind||'')).slice(0,3);
   const card=(t,h)=>`<div class="v1813card"><div class="v1813sec" style="margin:0 0 4px"><b>${E(t)}</b></div>${h}</div>`;
   let h='';
-  if(A.length)h+=card('New signals',A.map(a=>`<button type="button" class="v18134row" data-v18134acct="${E(a.company)}">${mono(a.company,40)}<span class="tx"><b>${E(a.company)}</b><small>${E(a.hook)}${a.hook_date?' · '+E(dshort(a.hook_date)):''}</small></span>${CH}</button>`).join(''));
+  if(A.length)h+=card('New signals',A.map(a=>`<button type="button" class="v18134row" data-v18134acct="${E(a.company)}">${mono(a.company,40)}<span class="tx"><b>${E(a.company)}</b><small>${E(P(a.hook))}${a.hook_date?' · '+E(dshort(a.hook_date)):''}</small></span>${CH}</button>`).join(''));
   if(warm.length)h+=card('Warming up',warm.map(p=>`<button type="button" class="v18134row" data-v18134pf="${E(p.name)}"><span class="v18134av" aria-hidden="true">${E(ini(p.name))}</span><span class="tx"><b>${E(p.name)}</b><small>${E([p.replied&&!p.meeting?'Replied '+ago(p.replied):'Accepted '+ago(p.accepted),p.company].filter(Boolean).join(' · '))}</small></span>${CH}</button>`).join(''));
   if(act.length)h+=card('New finds',act.map(x=>{const pp=x.person_id&&ppl.find(p=>String(p.id)===String(x.person_id));const attr=pp?`data-v18134pf="${E(pp.name)}"`:x.account?`data-v18134acct="${E(x.account)}"`:'';
     return `<button type="button" class="v18134row" ${attr}>${x.account?mono(x.account,40):`<span class="v18134av" aria-hidden="true">${E(ini(pp?pp.name:x.title))}</span>`}<span class="tx"><b>${E(x.title||'')}</b></span>${attr?CH:''}</button>`}).join(''));
@@ -12996,6 +13035,66 @@ function tick(){try{watch();wrapPage();found();moreRow();barBtn();provAsk();sett
 function boot(){tick();pullInit();setInterval(()=>{if(!document.hidden)tick()},1500);
   const r=$('#v1812');if(r)new MutationObserver(()=>{found()}).observe(r,{childList:true,subtree:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script>
+<style id="v18136css">/* v18.13.6 (Owner's iPhone screenshots, Oct 28): nothing wider than the screen, search above the keyboard, People rows read as rows */
+/* DM focus: the context rows sat 8 px outside the scroller on both sides, so the middle scrolled sideways on iPhone */
+.v1812fx .fxin>*{min-width:0}
+.v1812fx .v1812mid{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;overflow-anchor:none;min-width:0;max-width:100%}
+.v1812fx .fxwho,.v1812fx .fxwhy,.v1812fx .v1812mid .v163draft{min-width:0;overflow-wrap:anywhere}
+.v18134fxc .v18134row{margin:0;width:100%;padding-left:0;padding-right:0}
+.v18134row .tx b,.v18134row .tx small{overflow-wrap:anywhere}
+.v18134fxc a.v18134row{color:var(--ink)}
+/* search sheet: sized to the visible area above the keyboard, rows inside the padding, avatars stay square */
+#v18133qf .qp{top:calc(var(--v18136vt,0px) + env(safe-area-inset-top) + 12px);max-height:min(72dvh,calc(var(--v18136vh,100dvh) - env(safe-area-inset-top) - 24px))}
+html.v18136kb #v18133qf .qp{max-height:calc(var(--v18136vh,100dvh) - env(safe-area-inset-top) - 24px)}
+#v18133qf .ql{margin:8px 0 0;padding:0 0 12px;scroll-padding-bottom:12px;min-height:0}
+#v18133qf .qr{margin:0;width:100%;padding:6px 8px;box-sizing:border-box}
+#v18133qf .qr .lg,#v18133qf .qr .v18134mg{flex:0 0 36px;width:36px!important;height:36px!important;min-width:36px;max-height:36px;aspect-ratio:1;align-self:center;box-sizing:border-box}
+#v18133qf .qr em{flex:none}
+@media (hover:hover) and (pointer:fine){#v18133qf .qp{top:12vh;max-height:64vh}}
+/* People list: a global ".pr" pill style (grey fill, grey 10 px text) was leaking into every row */
+#pplx .pr{background:none;color:var(--ink);font:400 16px/22px var(--sans);padding:var(--ds-sp2) 0;margin:0;border-radius:0;box-shadow:none;opacity:1}
+#pplx .pr .l1{color:var(--ink)}
+#pplx .pr .l1 span,#pplx .pr .l2{color:var(--ink2)}
+#pplx .pr .l2{font-weight:400}
+#pplx .pr .st,#pplx .pr .st.q{border:0;padding:0;border-radius:0;background:none;font:500 13px/18px var(--sans);color:var(--ink2);letter-spacing:0}
+#pplx .pr{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#pplx .pr:active{background:var(--fill)}
+@media (hover:hover){#pplx .pr:hover{background:var(--fill)}}
+#pplx .pr:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#pplx .pplchips{scroll-padding-inline:var(--ds-sp5)}
+#pplx .pplchips::after{content:'';flex:0 0 1px}
+html.v1813 #pplx .bar{padding-bottom:var(--ds-sp3)}
+html.v1813 #pplx .list{padding-bottom:96px}
+</style>
+<script>/* ===== v18.13.6 (Owner, Wed 28 Oct 2026): iPhone screenshot fixes =====
+   - DM focus opens with the message right under the header (top and left reset on every new person, until the finger moves it)
+   - the search sheet follows the visible area above the keyboard (visualViewport), so the last rows can be reached
+   No new reads or writes. */
+(function(){'use strict';
+const G=window,H=document.documentElement,$=s=>document.querySelector(s);
+const V=G.ariV18136={v:'v18.13.6',errs:[],tops:0};
+const err=(k,e)=>{if(V.errs.length<30)V.errs.push(k+' '+String(e&&e.message||e).slice(0,140))};
+/* ---------- DM focus: start at the message ---------- */
+let lastMid=null;
+function fxTop(){try{const m=$('#v1812fx .v1812mid');if(!m||m===lastMid)return;lastMid=m;let moved=false;const mv=()=>{moved=true};
+  m.addEventListener('touchstart',mv,{passive:true,once:true});m.addEventListener('wheel',mv,{passive:true,once:true});m.addEventListener('keydown',mv,{once:true});
+  const go=()=>{if(moved||!m.isConnected)return;if(m.scrollLeft)m.scrollLeft=0;if(m.scrollTop)m.scrollTop=0};V.tops++;
+  go();requestAnimationFrame(go);[120,400,900].forEach(t=>setTimeout(go,t))}catch(e){err('fx',e)}}
+let fxObs=null;
+function watchFx(){const o=$('#v1812fx');if(!o||fxObs)return;fxObs=new MutationObserver(fxTop);fxObs.observe(o,{childList:true});fxTop()}
+new MutationObserver(()=>{if(!fxObs)watchFx()}).observe(document.body,{childList:true});
+watchFx();
+/* People rows are role=button: Enter and Space open the file like a tap */
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const r=e.target&&e.target.closest&&e.target.closest('#pplx .pr[data-pn]');if(!r||e.target!==r)return;e.preventDefault();r.click()});
+/* ---------- search sheet above the keyboard ---------- */
+const vv=G.visualViewport;
+function size(){try{if(!vv)return;const h=Math.round(vv.height),t=Math.max(0,Math.round(vv.offsetTop));H.style.setProperty('--v18136vh',h+'px');H.style.setProperty('--v18136vt',t+'px');
+  const kb=G.innerHeight-h>120;if(H.classList.contains('v18136kb')!==kb)H.classList.toggle('v18136kb',kb);
+  if(kb){const a=document.activeElement;const m=$('#v18133qf');if(m&&!m.hidden&&a&&m.contains(a)){const l=m.querySelector('.ql');const on=l&&l.querySelector('.qr.on');if(on&&on.getBoundingClientRect().bottom>t+h)try{on.scrollIntoView({block:'nearest'})}catch(x){}}}}catch(e){err('vv',e)}}
+if(vv){vv.addEventListener('resize',size);vv.addEventListener('scroll',size)}
+addEventListener('resize',size);document.addEventListener('focusin',()=>setTimeout(size,60));document.addEventListener('focusout',()=>setTimeout(size,250));size();
 })();
 </script>
 </body>
