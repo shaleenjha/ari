@@ -24,10 +24,17 @@ def recipient_files(folder=OFFSITE):
     return certs, holders
 
 
-def _norm_serial(s):
-    s = s.strip().lower()
-    s = s[2:] if s.startswith('0x') else s
-    return s.lstrip('0') or '0'
+def _norm_serial(s, hex_default=True):
+    """Serial as lowercase hex without leading zeros. `openssl x509 -serial` always prints hex, but
+    `openssl cms -print` prints a serial that fits in 64 bits as DECIMAL and only bigger ones as 0x-hex (R7 fix, Oct 28 2026:
+    Owner's cert, serial 0xB4391056CA38710A, showed as 12986428965445464330 and was reported unknown)."""
+    s = s.strip().lower().replace(':', '')
+    neg = s.startswith('-'); s = s.lstrip('-')
+    if s.startswith('0x'):
+        n = int(s[2:], 16)
+    else:
+        n = int(s, 16 if hex_default else 10)
+    return ('-' if neg else '') + format(n, 'x')
 
 
 def _norm_name(s):
@@ -49,7 +56,7 @@ def cms_recipients(der: bytes):
         r = subprocess.run(['openssl', 'cms', '-cmsout', '-print', '-inform', 'DER', '-in', f.name], capture_output=True, text=True)
     if r.returncode != 0:
         raise ValueError('not a readable CMS blob: ' + r.stderr.strip()[:160])
-    return [(_norm_name(m.group(1)), _norm_serial(m.group(2)))
+    return [(_norm_name(m.group(1)), _norm_serial(m.group(2), hex_default=False))
             for m in re.finditer(r'issuer:\s*(.+?)\n\s*serialNumber:\s*(\S+)', r.stdout)]
 
 

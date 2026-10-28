@@ -327,12 +327,13 @@ WAVE = ["curious", "wondering", "would love your take", "love your take", "swap 
         "thoughts?", "resonate", "on your radar", "on your roadmap", "how are you handling", "how is your team",
         "the reason i asked", "reason i asked", "i'm assuming", "i am assuming", "i'm guessing", "happy to share how other",
         "no worries if", "timing is off", "timing may be off", "is that coming up", "does that ring", "open to a quick chat"]
-PEER_FILLER = re.compile(r"\bmost [\w ,'-]{2,60} we (talk|speak) (to|with)\b", re.I)
+PEER_FILLER = re.compile(r"\bmost [\w ,'&/-]{2,60} we (talk|speak) (to|with)\b", re.I)
 OPEN_ASK = re.compile(r"^(how|what|which|where|who|why|when|is |are |does |do |did |would |could |should |any )", re.I)
 CONCRETE = re.compile(r"\b(phi|pii|pci|ssn|ssns|social security|card numbers?|card data|account numbers?|member ids?|patient|patients|"
                       r"medical records?|health records?|ehr|clinical|claims?|transcripts?|recordings?|call data|bank details|bank|payment|"
                       r"dates? of birth|addresses|names|identifiers?|policyholder|member data|employee data|pay data|payroll|candidate|"
-                      r"tickets?|customer data|personal data|financial data|training data|records|identity data|voice data|prompts?|logs)\b", re.I)
+                      r"tickets?|customer data|personal data|financial data|training data|records|identity data|voice data|prompts?|logs|"
+                      r"subscriber data|caller data|caller details|participant data|id numbers?|customer fields|data fields)\b", re.I)
 STOP = set("about after again against their there these those which while would could should where every other being "
            "your yours with from into that this what when have will once than then them they ever only just more most also "
            "thanks connecting quick following last minutes worth happy show call teams team data".split())

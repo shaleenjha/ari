@@ -5,10 +5,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import offsite_certs, backup_check
 
 
-def mkcert(d, name, cn):
+def mkcert(d, name, cn, serial=None):
+    extra = ['-set_serial', serial] if serial else []
     subprocess.run(['openssl', 'req', '-x509', '-newkey', 'ec', '-pkeyopt', 'ec_paramgen_curve:P-384', '-nodes',
                     '-keyout', os.path.join(d, name + '.key'), '-out', os.path.join(d, name + '.pem'), '-days', '2',
-                    '-subj', '/CN=' + cn], check=True, capture_output=True)
+                    '-subj', '/CN=' + cn, *extra], check=True, capture_output=True)
     return os.path.join(d, name + '.pem'), os.path.join(d, name + '.key')
 
 
@@ -90,6 +91,22 @@ class T(unittest.TestCase):
         self.assertEqual(name, 'ari_x.json.gz'); self.assertEqual(data['public.t'], [{'id': 1}])
         with self.assertRaises(SystemExit):
             restore_drill.load(self.blob, 'ari_x.json.gz.cms', None)
+
+    def test_short_serial_matches(self):
+        # R7: a serial that fits in 64 bits is printed DECIMAL by `openssl cms -print` but hex by `x509 -serial`
+        # (Owner's real cert, 0xB4391056CA38710A). It must match, not show up as missing + unknown.
+        d = tempfile.mkdtemp(dir=self.tmp)
+        shutil.copy(os.path.join(self.folder, 'ari-offsite-recipient.pem'), d)
+        s, _ = mkcert(d, 'short', 'throwaway short serial', serial='0xB4391056CA38710A')
+        shutil.move(s, os.path.join(d, 'ari-offsite-recipient-shal.pem'))
+        r = offsite_certs.check_recipients(offsite_certs.encrypt(self.plain, d), d)
+        self.assertTrue(r['ok'], r); self.assertEqual((r['missing'], r['unknown']), ([], []))
+
+    def test_norm_serial_formats(self):
+        n = offsite_certs._norm_serial
+        self.assertEqual(n('B4391056CA38710A'), n('12986428965445464330', hex_default=False))
+        self.assertEqual(n('0x00B4391056CA38710A', hex_default=False), 'b4391056ca38710a')
+        self.assertEqual(n('0123'), '123'); self.assertEqual(n('0', hex_default=False), '0')
 
     def _only_vault(self):
         d = tempfile.mkdtemp(dir=self.tmp)

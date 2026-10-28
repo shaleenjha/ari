@@ -2,6 +2,10 @@
 -- Also safe on STAGING after the apply: synthetic fixtures, one transaction, ends in ROLLBACK, nothing survives.
 -- The release gate (Basalt H1): once a TOTP factor is enrolled, a Google-only (aal1) session reads ZERO rows of every tenant
 -- table and app.*, and cannot write; aal2 reads everything; no factor (today) changes nothing.
+-- S1 R7 (Oct 28 2026): after 0045, pair visibility is owner-based. A non-owner member reads only the rows it owns
+-- (owner_uid / sdr_uid = member) in tables that carry an owner column, so member cases compare against member_own,
+-- not total. Before 0045 (no owner columns, e.g. CI sql-prod-shape) member_own = total and the test is unchanged.
+-- Exact match both ways: a member that sees any owner row (n > member_own) fails, as does one that sees too little.
 \set ON_ERROR_STOP on
 begin;
 
@@ -22,20 +26,37 @@ insert into app.memberships(workspace_id, user_id, role, display_name)
 insert into public.people(id, name, company, stage) values ('PA0037', 'Check Person 0037', 'Synthetic Check Co', 'Connect queued') on conflict do nothing;
 do $$ declare r record; n bigint;
 begin for r in select rel from t37 loop execute 'select count(*) from ' || r.rel into n; update t37 set total = n where rel = r.rel; end loop; end $$;
+-- rows the synthetic member OWNS (0045): tables without owner_uid / sdr_uid (app.workspaces, app.memberships, or any
+-- table before 0045) stay membership-scoped, so the member's expectation there is the full total
+alter table t37 add column member_own bigint not null default 0;
+do $$ declare r record; c text; n bigint;
+begin for r in select rel from t37 loop
+  select string_agg(format('%I = %L::uuid', column_name, '00000000-0000-4000-8000-00000000a037'), ' or ' order by column_name) into c
+    from information_schema.columns
+   where format('%I.%I', table_schema, table_name) = r.rel and column_name in ('owner_uid', 'sdr_uid');
+  if c is null then n := (select t.total from t37 t where t.rel = r.rel);
+  else execute 'select count(*) from ' || r.rel || ' where ' || c into n; end if;
+  update t37 set member_own = n where rel = r.rel;
+end loop; end $$;
 do $$ begin
   if (select count(*) from t37 where rel like 'public.%') + (select count(*) from t37_closed where rel like 'public.%') <> 42 then
     raise exception 'FAIL 0037 setup: % tenant tables, expected 42', (select count(*) from t37 where rel like 'public.%') + (select count(*) from t37_closed where rel like 'public.%'); end if;
-  raise notice '0037 setup: % readable tables checked, % closed to signed-in users (%)', (select count(*) from t37),
-    (select count(*) from t37_closed), (select string_agg(rel, ', ' order by rel) from t37_closed);
+  -- with 0045 present the member must actually be denied owner rows somewhere (PA0037 is owner-filled), or the check is vacuous
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and column_name in ('owner_uid', 'sdr_uid'))
+     and not exists (select 1 from t37 where member_own < total) then
+    raise exception 'FAIL 0037 setup: owner columns exist but no table holds owner rows the member should not see'; end if;
+  raise notice '0037 setup: % readable tables checked, % closed to signed-in users (%); % owner-scoped for the member (%)', (select count(*) from t37),
+    (select count(*) from t37_closed), (select string_agg(rel, ', ' order by rel) from t37_closed),
+    (select count(*) from t37 where member_own <> total), (select string_agg(rel, ', ' order by rel) from t37 where member_own <> total);
 end $$;
 grant select on t37 to authenticated;
 
 -- what the CURRENT role and claims can see, per table
-create function pg_temp.seen() returns table(rel text, n bigint, total bigint) language plpgsql as $$
+create function pg_temp.seen() returns table(rel text, n bigint, total bigint, member_own bigint) language plpgsql as $$
 declare r record;
 begin
-  for r in select t.rel, t.total from t37 t order by 1 loop
-    rel := r.rel; total := r.total; execute 'select count(*) from ' || r.rel into n; return next;
+  for r in select t.rel, t.total, t.member_own from t37 t order by 1 loop
+    rel := r.rel; total := r.total; member_own := r.member_own; execute 'select count(*) from ' || r.rel into n; return next;
   end loop;
 end $$;
 grant execute on function pg_temp.seen() to authenticated;
@@ -56,33 +77,33 @@ create function pg_temp.claims(uid uuid, aal text) returns void language sql as 
 $$;
 grant execute on function pg_temp.claims(uuid, text) to authenticated;
 
--- 1. No factor yet (today): owner and member, Google-only, read everything.
+-- 1. No factor yet (today), Google-only: the owner reads everything; the member reads exactly its own rows (0045).
 set local role authenticated;
 select pg_temp.claims('b14d1605-c766-4684-9a5b-71ffcab6967b', 'aal1');
 do $$ begin if exists (select 1 from pg_temp.seen() where n <> total) then
   raise exception 'FAIL 0037 case 1 owner aal1, no factor: % reads less than everything', (select string_agg(rel, ', ') from pg_temp.seen() where n <> total); end if; end $$;
 select pg_temp.claims('00000000-0000-4000-8000-00000000a037', 'aal1');
-do $$ begin if exists (select 1 from pg_temp.seen() where n <> total) then
-  raise exception 'FAIL 0037 case 1 member aal1, no factor: % reads less than everything', (select string_agg(rel, ', ') from pg_temp.seen() where n <> total); end if; end $$;
+do $$ begin if exists (select 1 from pg_temp.seen() where n <> member_own) then
+  raise exception 'FAIL 0037 case 1 member aal1, no factor: reads other than its own rows in: %', (select string_agg(rel || '=' || n || '/' || member_own, ', ') from pg_temp.seen() where n <> member_own); end if; end $$;
 reset role;
 
 -- 2. An unverified (half-done) enrolment locks nobody out.
 select pg_temp.enrol('00000000-0000-4000-8000-00000000a037', 'unverified');
 set local role authenticated;
 select pg_temp.claims('00000000-0000-4000-8000-00000000a037', 'aal1');
-do $$ begin if exists (select 1 from pg_temp.seen() where n <> total) then
-  raise exception 'FAIL 0037 case 2 unverified factor locked the member out of: %', (select string_agg(rel, ', ') from pg_temp.seen() where n <> total); end if; end $$;
+do $$ begin if exists (select 1 from pg_temp.seen() where n <> member_own) then
+  raise exception 'FAIL 0037 case 2 unverified factor changed what the member reads in: %', (select string_agg(rel || '=' || n || '/' || member_own, ', ') from pg_temp.seen() where n <> member_own); end if; end $$;
 reset role;
 
--- 3. The member enrols: aal1 reads zero everywhere, aal2 reads everything.
+-- 3. The member enrols: aal1 reads zero everywhere, aal2 reads exactly its own rows (0045).
 select pg_temp.enrol('00000000-0000-4000-8000-00000000a037', 'verified');
 set local role authenticated;
 select pg_temp.claims('00000000-0000-4000-8000-00000000a037', 'aal1');
 do $$ begin if exists (select 1 from pg_temp.seen() where n <> 0) then
   raise exception 'FAIL 0037 case 3 member aal1 with a factor still reads: %', (select string_agg(rel || '=' || n, ', ') from pg_temp.seen() where n <> 0); end if; end $$;
 select pg_temp.claims('00000000-0000-4000-8000-00000000a037', 'aal2');
-do $$ begin if exists (select 1 from pg_temp.seen() where n <> total) then
-  raise exception 'FAIL 0037 case 3 member aal2 reads less than everything: %', (select string_agg(rel, ', ') from pg_temp.seen() where n <> total); end if; end $$;
+do $$ begin if exists (select 1 from pg_temp.seen() where n <> member_own) then
+  raise exception 'FAIL 0037 case 3 member aal2 reads other than its own rows in: %', (select string_agg(rel || '=' || n || '/' || member_own, ', ') from pg_temp.seen() where n <> member_own); end if; end $$;
 reset role;
 
 -- 4. Owner enrols (the release gate): Google-only reads zero rows and cannot write; with the code, everything.

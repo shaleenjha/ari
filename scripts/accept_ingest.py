@@ -34,6 +34,7 @@ ACCEPT_SUBJ = [
 NOT_ACCEPT = re.compile(r"other people.s connections|I.d like to connect|role - \d+ connection", re.I)
 FULLNAME = re.compile(r"See (.+?)(?:'|’|&#39;)s connections, experience", re.I)
 # the senders scripts/reply_ingest.py scans (worker step 0 runs it); these still wake the worker
+PROFILE_VIEWS = re.compile(r"\bviewed your profile\b", re.I)
 MESSAGE_FROM = re.compile(r"(messaging-digest-noreply|messages-noreply|hit-reply|inmail-hit-reply)@linkedin\.com", re.I)
 
 
@@ -55,6 +56,8 @@ def classify(frm, subject, snippet=""):
                 if full and core_name(full.group(1)).lower().startswith(core_name(name).lower()):
                     name = full.group(1).strip()
                 return "accept", core_name(name)
+    if PROFILE_VIEWS.search(subj or ""):                 # "N people viewed your profile" is not a message
+        return "other", None
     if MESSAGE_FROM.search(frm or ""):
         return "message", None
     return "other", None
