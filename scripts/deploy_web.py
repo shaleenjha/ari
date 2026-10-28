@@ -18,7 +18,11 @@ sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 import deploy_provenance
 P=deploy_provenance.check()
 files=[{"file":f,"data":base64.b64encode(open(os.path.join(W,f),'rb').read()).decode(),"encoding":"base64"} for f in sorted(os.listdir(W)) if os.path.isfile(os.path.join(W,f)) and f!='_archive' and not f.startswith('.') and not re.match(r'^ops_v\d.*\.html$',f)]
-_un=[x['file'] for x in files if 'web/'+x['file'] not in P['paths']]
+# The export may rename a file to its scrubbed name (git_export.py INCLUDE 'src:dst', e.g. the Kelvarrow icons);
+# the gate vouches for it under that exported name.
+import git_export as _ge
+_ren={s:d for s,_,d in (x.partition(':') for x in _ge.INCLUDE) if d}
+_un=[x['file'] for x in files if _ren.get('web/'+x['file'],'web/'+x['file']) not in P['paths']]
 if _un: sys.exit('REFUSED (provenance gate): web/ files not in the repo export, so no commit vouches for them: %s. Add them to git_export.py INCLUDE, commit, rerun. Nothing deployed.'%_un)
 # build.json keeps its existing keys (ops.html reads "build") and gains the commit it was deployed from.
 _b=json.load(open(os.path.join(W,'build.json')));_b.update(commit=P['sha'],tree=P['tree'],ci_run=P['ci_runs'][0])
