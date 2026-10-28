@@ -184,6 +184,12 @@ begin
     left join pipeline_jobs j on j.id = (r.message->>'job_id')::bigint), '[]'::jsonb);
 end $$;
 
+-- review #51: an earlier draft of 0047 made ari_pipeline_start(bigint, bigint) and an 8-arg ari_pipeline_finish. A new argument
+-- list is a NEW function in Postgres, so on a DB that ran that draft the old ones would stay (no lease, no fence, no retry, no
+-- alert) and a 2-arg call would be ambiguous. Drop them first; on a fresh DB these are no-ops.
+drop function if exists public.ari_pipeline_start(bigint, bigint);
+drop function if exists public.ari_pipeline_finish(bigint, bigint, text, jsonb, text, text, text, text);
+
 -- claim a job for this message and re-check its precondition. ok=false + reason when it must wait or stop.
 -- Lease (review #50): a job that is 'running' with lease_until in the future belongs to a live run; a redelivered message
 -- (pgmq vt ran out, or a parallel read) gets ok=false 'running' and the worker makes NO model call. A lease that ran out

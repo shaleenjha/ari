@@ -16,7 +16,12 @@ begin
      or has_function_privilege('anon', 'public.ari_pipeline_finish(bigint, bigint, text, jsonb, text, text, text, text, int)', 'execute')
      or not has_function_privilege('service_role', 'public.ari_pipeline_read(int, int)', 'execute')
      or has_function_privilege('authenticated', 'public.ari_pipeline_alert(bigint)', 'execute')
-     or to_regprocedure('public.ari_pipeline_start(bigint, bigint)') is not null then raise exception 'FAIL 2: function grants'; end if;
+     then raise exception 'FAIL 2: function grants'; end if;
+  -- review #51: no pre-review-50 overloads left behind (old 2-arg start / 8-arg finish)
+  if to_regprocedure('public.ari_pipeline_start(bigint, bigint)') is not null
+     or to_regprocedure('public.ari_pipeline_finish(bigint, bigint, text, jsonb, text, text, text, text)') is not null
+     or (select count(*) from pg_proc where proname in ('ari_pipeline_start', 'ari_pipeline_finish') and pronamespace = 'public'::regnamespace) <> 2
+     then raise exception 'FAIL 2: old pipeline overloads left'; end if;
   -- 3. kill switch untouched (must be off outside a test run)
   if exists (select 1 from ai_budget where enabled) then raise exception 'FAIL 3: ai_budget is on'; end if;
   -- 4. synthetic probe: Accepted insert -> exactly one research job + one message; repeat update -> nothing new; outbox dedupe

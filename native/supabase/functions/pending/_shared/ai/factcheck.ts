@@ -44,27 +44,56 @@ export function mentions(text: string, part: string): boolean {
   const texts = forms(text);
   return forms(part).some((p) => p && texts.some((t) => new RegExp(`(?<![\\p{L}\\p{N}])${esc(p)}(?![\\p{L}\\p{N}])`, 'u').test(t)));
 }
-/** Name parts worth matching: whole name, and each part of 2+ letters (split on spaces, hyphens, apostrophes, dots). */
-export function nameParts(name: string): { parts: string[]; unfoldable: boolean } {
-  const n = name.trim(); if (!n) return { parts: [], unfoldable: false };
-  const raw = [n, ...n.split(/[\s\-\u2010\u2011'\u2019.,]+/)].filter((p) => p.trim().length > 0);
-  // a part that folds to nothing (only marks / symbols) cannot be matched safely, so every claim is blocked
-  const unfoldable = raw.some((p) => fold(p).replace(/[^\p{L}\p{N}]/gu, '') === '');
-  return { parts: [...new Set(raw.filter((p) => fold(p).replace(/[^\p{L}\p{N}]/gu, '').length >= 2))], unfoldable };
+// Scripts written without spaces between words (Han, kana, Hangul, Thai, Lao, Khmer, Myanmar): a word boundary means nothing
+// there ("李明是..." has no boundary after 明), so a name part in one of them is matched as a plain substring.
+const NO_SPACE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]/u;
+const NOT_LN = /[^\p{L}\p{N}]/gu;
+/** Letters and numbers only, folded ("(Dee)" -> "dee", "李 明" -> "李明", "O'Brien" -> "obrien"). */
+export const core = (s: string) => fold(s).replace(NOT_LN, '');
+
+/** Name parts worth matching (review #51). The name is split on whitespace; each part is matched as written (outer
+ *  punctuation trimmed: "(Dee)" -> "Dee") and with inner punctuation removed ("O'Brien" -> "OBrien"), plus its hyphen /
+ *  apostrophe / dot pieces of 2+ letters ("Jean-Luc" -> "Jean", "Luc"). `spaceless` is the whole name with every non
+ *  letter/number removed ("李 明" -> "李明", "Mary Ann" -> "maryann"); it is matched against the claim with the same characters
+ *  removed. `unfoldable` = some whitespace part has fewer than 2 letters/numbers left (an initial "J.", a one-character CJK
+ *  part "李", a part of only marks or symbols): such a name cannot be matched safely, so every claim is blocked. */
+export function nameParts(name: string): { parts: string[]; spaceless: string; unfoldable: boolean } {
+  const n = name.normalize('NFC').trim(); if (!n) return { parts: [], spaceless: '', unfoldable: false };
+  const tokens = n.split(/\s+/).filter(Boolean);
+  const unfoldable = tokens.some((tk) => [...core(tk)].length < 2);
+  const trimP = (s: string) => s.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+  const parts: string[] = [];
+  const add = (s: string) => { if ([...core(s)].length >= 2) parts.push(s); };
+  add(n);
+  for (const tk of tokens) {
+    add(trimP(tk)); add(tk.replace(NOT_LN, ''));
+    for (const piece of tk.split(/[\-\u2010\u2011'\u2019.,()\[\]{}"\u201c\u201d]+/)) add(trimP(piece));
+  }
+  return { parts: [...new Set(parts)], spaceless: core(n), unfoldable };
+}
+
+/** true when the claim names the contact in any matched form. */
+export function mentionsName(text: string, np: { parts: string[]; spaceless: string }): boolean {
+  if (np.parts.some((p) => NO_SPACE.test(p) ? forms(text).some((t) => forms(p).some((x) => x && t.includes(x))) : mentions(text, p))) return true;
+  // space-free whole name: "李明" for "李 明", "DanaWhitfield" / "dana-whitfield" for "Dana Whitfield". Substring on purpose:
+  // a false hit only blocks a claim (safe side). Needs 4+ characters (or a no-space script) so it cannot hit by chance.
+  const s = np.spaceless;
+  if (!s || ([...s].length < 4 && !NO_SPACE.test(s))) return false;
+  return forms(text).some((t) => t.replace(NOT_LN, '').includes(s)) || core(text).includes(s);
 }
 
 /** Pick the claims that MAY be sent. Pure; every item gets a logged decision. */
 export function selectClaims(f: FactInput): { eligible: { claim: string; source: string }[]; decisions: Decision[] } {
   const decisions: Decision[] = [], eligible: { claim: string; source: string }[] = [];
-  const { parts, unfoldable } = nameParts(f.contact.name ?? '');
+  const np = nameParts(f.contact.name ?? '');
   const title = (f.contact.title ?? '').trim();
   const seller = f.seller ?? 'Thrandvex';
   for (const sf of f.source_facts ?? []) {
     const c = String(sf.fact ?? '').trim(), low = fold(c), src = String(sf.source ?? '');
     const why = !c ? 'empty'
       : !/^https:\/\//i.test(src) ? 'blocked: not from public web research (record field or no url)'
-      : unfoldable ? 'blocked: contact name cannot be matched safely'
-      : parts.some((p) => mentions(c, p)) ? 'blocked: mentions the contact'
+      : np.unfoldable ? 'blocked: contact name cannot be matched safely'
+      : mentionsName(c, np) ? 'blocked: mentions the contact'
       : title && forms(c).some((t) => forms(title).some((x) => t.includes(x))) ? 'blocked: mentions the contact title'
       : mentions(c, seller) ? 'blocked: seller pitch'
       : /(?<![\p{L}\p{N}])(ae|account executive|deal|opportunity|pipeline|crm|crm|meeting with us|our call)(?![\p{L}\p{N}])/u.test(low) ? 'blocked: sales or CRM data'

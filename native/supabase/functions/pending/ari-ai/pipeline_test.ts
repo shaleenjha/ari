@@ -5,7 +5,7 @@ import { draftReply, fakeDb } from './fakes_test_util.ts';
 import { ledgerFor } from './db.ts';
 import { buildBrief, checkBrief } from '../_shared/ai/brief.ts';
 import { copyCheck } from '../_shared/ai/copycheck.ts';
-import { selectClaims, decisionBody, factCheck } from '../_shared/ai/factcheck.ts';
+import { selectClaims, decisionBody, factCheck, nameParts } from '../_shared/ai/factcheck.ts';
 import type { AiRequest, Provider } from '../_shared/ai/types.ts';
 
 Deno.env.set('SUPABASE_URL', 'https://abcdefghijklmnopqrst.supabase.co');
@@ -166,4 +166,32 @@ Deno.test('review50: accented / Unicode contact names are blocked in every form'
   assertEquals(run('Dana \u0301\u0301', ['Ostrevanthe Co hired 40 engineers']), ['blocked']);
   // the Oct 28 filter stripped accents first ("Müller" -> "mller") and let "Müller" through; prove that path is gone
   assertEquals(run('Müller', ['Müller is CISO']), ['blocked']);
+});
+
+Deno.test('review51: CJK, space-free and punctuated name parts are blocked', () => {
+  const facts = (xs: string[]) => xs.map((fact) => ({ fact, source: 'https://news.example/x' }));
+  const run = (name: string, xs: string[]) => selectClaims({ dm_text: '', company: 'Ostrevanthe Co', domain: 'example.com', contact: { name, title: 'CISO' },
+    source_facts: facts(xs) }).decisions.map((d) => d.decision);
+  const kind = (name: string, xs: string[]) => run(name, xs).map((d) => d.split(':')[0]);
+  // "李 明": one-character parts cannot be matched safely -> every claim blocked, incl. the space-free "李明" and a clean claim
+  assertEquals(run('李 明', ['李明是公司的CEO', 'Ostrevanthe Co hired 40 engineers']),
+    ['blocked: contact name cannot be matched safely', 'blocked: contact name cannot be matched safely']);
+  assertEquals(nameParts('李 明').unfoldable, true);
+  // "李明" written without a space: matched as a substring (no word boundaries in Han text), both spaced and unspaced
+  assertEquals(kind('李明', ['李明是公司的CEO', '公司宣布李 明加入', 'Ostrevanthe Co hired 40 engineers']), ['blocked', 'blocked', 'eligible']);
+  // punctuation stripped from each part: "(Dee)" matches "Dee"; whole words still (Deere is not Dee)
+  assertEquals(kind('Dana (Dee) Whitfield', ['Dee spoke at RSA', '(Dee) joined in 2024', 'Ostrevanthe Co partnered with Deere',
+    'Ostrevanthe Co hired 40 engineers']), ['blocked', 'blocked', 'eligible', 'eligible']);
+  assertEquals(nameParts('Dana (Dee) Whitfield').parts.includes('Dee'), true);
+  // the name with spaces removed: "DanaWhitfield", "dana-whitfield" handle styles
+  assertEquals(kind('Dana Whitfield', ['Talk by DanaWhitfield at RSA', 'speaker handle dana-whitfield on the agenda', 'Ostrevanthe Co raised $50M']),
+    ['blocked', 'blocked', 'eligible']);
+  // inner punctuation: O'Brien matches "OBrien" and "O'Brien"; the 1-letter "O" piece neither blocks all nor matches alone
+  assertEquals(kind("Sean O'Brien", ["O'Brien leads security", 'OBrien joined', 'Ostrevanthe Co opened an O-ring plant']), ['blocked', 'blocked', 'eligible']);
+  assertEquals(kind('Jean-Luc Picard', ['Luc presented', 'Jean-Luc said', 'JeanLuc said', 'Ostrevanthe Co expanded']), ['blocked', 'blocked', 'blocked', 'eligible']);
+  // a middle initial is a part too short to match safely -> conservative block of every claim
+  assertEquals(kind('Dana J. Whitfield', ['Ostrevanthe Co raised $50M']), ['blocked']);
+  // Hangul / kana names (no spaces between words) are substring-matched too
+  assertEquals(kind('김민준', ['김민준이 발표했다', 'Ostrevanthe Co expanded']), ['blocked', 'eligible']);
+  assertEquals(kind('さくら たなか', ['たなかさくらが登壇', 'Ostrevanthe Co expanded']), ['blocked', 'eligible']);
 });
