@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.0"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.1"><meta name="ari-rev" content="05ae22f947">
 <title>Kelvarrow by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -3962,6 +3962,107 @@ html #v18rep .t3link{display:flex!important}
 /* v18.13.8 What's new note stays hidden until the assumptions feature is on */
 html:not(.a18on) .wb[data-v="v18.13.8"]{display:none!important}
 @media (prefers-reduced-motion:reduce){.t3set .t3sw::after{transition:none}}
+/* ===== v18.14.1 batch 4 UI polish (Owner, Oct 28 21:10 IST). Everything scoped to html.t4on: off = v18.14.0 exactly.
+   Tokens only (bg #E7E2D9, bg2, ink, ink2, indigo), no gradients, no glows, no green. Targets 48 px or more. ===== */
+.t4gone{display:none!important}
+#t4set{display:none}
+#v171set>#t4set{display:flex}
+
+/* ---------- 1. tab bar: 56 px + safe area, tighter icon and label, smaller badge ---------- */
+html.v1813.t4on .tbi{min-height:56px!important;gap:0!important;padding-top:2px!important}
+html.v1813.t4on .tbi svg{width:22px!important;height:22px!important}
+html.v1813.t4on .tbi .v163tl{font-size:11px!important;line-height:14px!important;margin-top:2px}
+html.v1813.t4on .tbi .dot{top:5px!important;left:calc(50% + 3px)!important;min-width:16px!important;height:14px!important;padding:0 4px!important;border-radius:7px!important;font:700 10px/14px var(--sans)!important}
+
+/* ---------- 1. person file: one action bar, one primary and ••• ---------- */
+html.t4on #ovBar .pfbar.t4bar{display:grid!important;grid-template-columns:1fr 56px!important;gap:8px!important;padding:8px 16px!important}
+html.t4on #ovBar .pfbar.t4bar>.b:not(.pri){display:none!important}
+html.t4on #ovBar .pfbar.t4bar>.b.pri{min-height:48px}
+.t4dots{display:none}
+html.t4on #ovBar .t4dots{display:grid;place-items:center;min-height:48px;min-width:48px;border:0;border-radius:14px;background:var(--bg2);color:var(--ink);padding:0;cursor:pointer}
+html.t4on #ovBar .t4dots:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+html.t4on #ovb .v18134nx{display:none!important}
+/* 6: blocks moved into a section lost their reveal animation and stayed at opacity 0 (the big blank) */
+html.t4on #ovb .v18134sec .rv{opacity:1!important;transform:none!important}
+html.t4on #ovb .t4empty{margin:4px 0 0;color:var(--ink2);font:400 16px/22px var(--sans)}
+html.t4on #ovb .v18134sec[data-t4="empty"]{padding-bottom:8px}
+
+/* the sheet */
+#t4sheet{position:fixed;inset:0;z-index:2147483000}
+#t4sheet[hidden]{display:none}
+#t4sheet .t4scr{position:absolute;inset:0;background:rgba(31,29,26,.32)}
+#t4sheet .t4pan{position:absolute;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;background:var(--bg);border-radius:20px 20px 0 0;padding:8px 16px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+#t4sheet .t4grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 8px}
+#t4sheet .t4row{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;min-height:56px;padding:8px 16px;border:0;border-radius:16px;background:var(--bg2);color:var(--ink);text-align:left;cursor:pointer;width:100%}
+#t4sheet .t4row b{font:600 16px/22px var(--sans)}
+#t4sheet .t4row small{font:400 14px/20px var(--sans);color:var(--ink2)}
+#t4sheet .t4cancel{align-items:center;background:none;margin-top:4px}
+#t4sheet .t4cancel b{color:var(--acc)}
+#t4sheet .t4row:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#t4sheet .t4none{margin:8px 4px;color:var(--ink2);font:400 16px/22px var(--sans)}
+@media (prefers-reduced-motion:no-preference){#t4sheet:not([hidden]) .t4pan{animation:t4up .22s cubic-bezier(.2,.8,.2,1)}@keyframes t4up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
+
+/* ---------- 2. the mark: only the header and the "Kelvarrow's pick" card ---------- */
+html.t4on .arif:not(#hdAri .arif):not(.v1810pk .arif){display:none!important}
+html.t4on .arif svg.t4kgl path{fill:#2A4274;stroke:none}
+html.t4on .v18134why{padding:12px 16px}
+html.t4on .v1810rs .r{gap:0!important}
+
+/* ---------- 6. signal lines: two whole lines (JS cuts at a word) ---------- */
+html.t4on .v18134why p{display:block!important;-webkit-line-clamp:unset!important;max-height:none!important;overflow:hidden}
+html.t4on #v18134ap .v18134row.sig .tx>b{display:block!important;white-space:normal!important;-webkit-line-clamp:unset!important;text-overflow:clip!important;overflow:hidden;line-height:22px}
+
+/* ---------- 4. quick check: the pick once, a quiet line, one Agree; titles clear the sticky header ---------- */
+html.t4on #v182qc .v182qo,html.t4on #v182qc .v182why,html.t4on #v182qc [data-v182qcd]{display:none!important}
+html.t4on #v182qc .t4not{margin:8px 0 0;font:400 14px/20px var(--sans);color:var(--ink2)}
+html.t4on #v182qc .t4qcok{width:100%;min-height:56px;margin-top:16px}
+html.t4on #v171acc .v182q,html.t4on #v171acc .v171card,html.t4on #v171acc .v18134sec,html.t4on #v171acc section{scroll-margin-top:var(--t4hd,168px)}
+html.t4on #v171acc .pb{scroll-padding-top:var(--t4hd,168px)}
+
+/* ---------- 5. search ---------- */
+html.t4on #v18133qf .qr .lg{align-self:center!important;flex:none!important;width:36px!important;height:36px!important;min-height:0!important;aspect-ratio:1/1}
+html.t4on #v18133qf .qr .lg.pp{border-radius:50%!important}
+html.t4on #v18133qf input::placeholder{text-overflow:ellipsis}
+html.t4on #v18133qf .qh{gap:4px!important}
+html.t4on #v18133qf .qh label{padding-left:12px!important;padding-right:8px!important;gap:8px!important}
+html.t4on #v18133qf .qx{padding:0 4px!important;min-width:48px}
+
+/* ---------- 7. account cards: Next + one count chip; the stage chips on expand ---------- */
+.t4cnt{display:none}
+html.t4on .v1813acct .t4cnt{display:inline-flex;align-items:center;align-self:flex-start;height:28px;padding:0 12px;border-radius:14px;background:var(--bg3);color:var(--ink2);font:600 12px/16px var(--sans);margin:8px 0 0;width:max-content}
+html.t4on .v1813acct .ah[aria-expanded="false"] .stages{display:none!important}
+html.t4on .v1813acct .ah[aria-expanded="true"] .t4cnt{display:none}
+
+/* ---------- 8. About + What's new ---------- */
+html.t4on .t4ab{padding:8px 0 24px}
+html.t4on .t4ab .t4abn{margin:8px 0 0;font:600 20px/26px var(--sans);color:var(--ink)}
+html.t4on .t4ab .t4abv{margin:4px 0 0;font:400 14px/20px var(--sans);color:var(--ink2)}
+html.t4on .t4ab .t4abl{margin:16px 0 24px;font:400 16px/22px var(--sans);color:var(--ink)}
+html.t4on .t4ab .aprow{min-height:56px;margin-top:8px;text-decoration:none;color:var(--ink)}
+#t4sheet .t4wnp{max-height:82vh}
+#t4sheet .t4wnt{margin:4px 4px 0;font:600 20px/26px var(--sans);color:var(--ink)}
+#t4sheet .t4wns{overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:16px;padding:8px 4px}
+#t4sheet .t4rel b{font:600 16px/22px var(--sans);color:var(--ink)}
+#t4sheet .t4rel b span{font-weight:400;color:var(--ink2);margin-left:4px}
+#t4sheet .t4rel ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+#t4sheet .t4rel li{font:400 16px/22px var(--sans);color:var(--ink)}
+#t4sheet .t4wnb{min-height:48px;padding:0 16px;border:0;border-radius:16px;background:var(--bg2);color:var(--acc);font:600 16px/22px var(--sans);cursor:pointer;align-self:flex-start}
+/* the big face circle above Settings and About is the mark's old stage: gone */
+html.t4on #ariPage .aphero{display:none!important}
+html.t4on #v171set .v162hint,html.t4on #v171set .v181hint{display:none!important}
+
+/* ---------- 9. Settings: groups by order, Advanced folded ---------- */
+html.t4on #v171set{display:flex!important;flex-direction:column}
+html.t4on #v171set>.v18134set{display:contents!important}
+html.t4on #v171set [data-t4g="hide"]{display:none!important}
+html.t4on #v171set:not(.t4advon) [data-t4g="adv"]{display:none!important}
+.t4cap{display:none!important}
+html.t4on #v171set>.t4cap{display:flex!important}
+html.t4on #v171set>.t4cap.apcap{margin-top:24px}
+html.t4on #v171set>.t4advb{margin-top:24px;min-height:56px;width:100%;border:0;border-radius:0;background:none;color:var(--ink);font:inherit;text-align:left;display:flex!important;align-items:center;justify-content:space-between;padding:8px 0;cursor:pointer;-webkit-appearance:none;appearance:none}
+html.t4on #v171set>.t4advb:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+html.t4on #v171set.t4advon>.t4advb .v181ch{transform:rotate(90deg)}
+html.t4on #v171set>#t4set{order:0}
 </style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -4561,7 +4662,7 @@ const ARI_SVG='<svg class="kgl" viewBox="80 130 352 286" aria-hidden="true" focu
 const FACE_ALIAS={work:'focus',working:'focus',sleep:'sleepy',asleep:'sleepy',wait:'idle',pleased:'happy',thinking:'think',concerned:'concern',listening:'listen',sceptic:'skeptic',sceptical:'skeptic',mischief:'sly'};
 const normFace=f=>{f=FACE_ALIAS[f]||f||'idle';return f==='happy'||f==='focus'?f:(f==='think'?'focus':'idle')};
 const AF=(face='idle',size='s',extra='')=>`<span class="arif ${size}" data-face="${normFace(face)}"${extra}></span>`;
-function ariFill(r){if(!r||!r.querySelectorAll)return;const k=a=>{a.innerHTML=ARI_SVG;if(!a.dataset.face)a.dataset.face='idle';a.setAttribute('role','img');a.setAttribute('aria-label','Kelvarrow')};if(r.matches&&r.matches('.arif:empty'))k(r);
+function ariFill(r){if(!r||!r.querySelectorAll)return;const k=a=>{a.innerHTML=(window.ariT4&&ariT4.on())?ariT4.markSVG():ARI_SVG;if(!a.dataset.face)a.dataset.face='idle';a.setAttribute('role','img');a.setAttribute('aria-label','Kelvarrow')};if(r.matches&&r.matches('.arif:empty'))k(r);
   r.querySelectorAll('.arif:empty').forEach(k)}
 ariFill(document);
 new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1&&n.tagName!=='svg')ariFill(n)}).observe($('#app'),{childList:true,subtree:true});
@@ -6338,6 +6439,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.14.1',d:'Oct 28',items:['Calmer pages are built and switched off for now. Try them on this phone: Settings, then Calmer pages','A person’s page has one button and a ••• for the rest. The tab bar is slimmer','The person page and the account page show the same latest signal, and the trigger age counts from the newest one','Account cards show the next step and one count. About and Settings are shorter','A new Kelvarrow mark, shown only at the top and on Kelvarrow’s pick']},
  {v:'v18.14.0',d:'Oct 28',items:['A calmer Today and Report are built and switched off for now. They turn on after your phone check, or try them on this phone from Settings','New Today: one count, one card with one fact and one button, then the next three. Briefs sit in the same list. Sync news only shows up when something is wrong','New Report: are you on pace for meetings, one funnel that follows the same people, and the three things to do next. The old cards sit under More']},
  {v:'v18.13.8',d:'Oct 28',items:['Under a draft, a short list of facts Kelvarrow could not find written down: names, numbers, dates, customers. Tap it to confirm, edit or strike each one','Copy waits while a number or a customer name is still unconfirmed']},
  {v:'v18.13.7',d:'Oct 28',items:['Plain words everywhere: First message, Follow-up and Last note, Invite and Invite pending, Exec outreach, and weeks read as this week or week of a date','A new mark: the kelvarrow replaces the old face in the app, on your Home Screen and in notifications','Today stays quiet: the sync line only shows up when something is wrong, and the top card is a name, one reason and one button']},
@@ -8222,7 +8324,7 @@ function research171(p){const n=window.ariNoteClean(p.notes||'').split('\n').map
   else if(nt)parts.push(`<div class="v171card"><div class="cap"><span>Why now</span></div><p>No dated trigger yet. The draft works from the account hypothesis.</p></div>`);
   if(flag)parts.push(`<div class="v171card"><div class="cap"><span>Flag</span></div><p>${E(flag.trim())}</p></div>`);
   if(ctx)parts.push(`<div class="v171card"><div class="cap"><span>Your context</span></div><p>${E(ctx.trim())}</p></div>`);
-  if(rest)parts.push(`<div class="v171card"><div class="cap"><span>Research notes</span></div><p class="v171clamp">${E(rest.slice(0,1400))}</p></div>`);
+  if(rest&&!(window.ariT4&&ariT4.on()))parts.push(`<div class="v171card"><div class="cap"><span>Research notes</span></div><p class="v171clamp">${E(rest.slice(0,1400))}</p></div>`);
   return parts.length?`<div class="pfs rv v171rs"><span class="cap">What we found</span><div style="margin-top:8px">${parts.join('')}</div></div>`:''}
 const _fileHTML171=fileHTML;
 fileHTML=function(n){let h=_fileHTML171(n);const f=PF[n];if(!f||!f.p)return h;const p=f.p;
@@ -10107,7 +10209,10 @@ function rescanHTML(name,b){const a=accRow(name);if(!a)return '';if(/^(hold|cust
   const Q=rsRows(name);V182.rsLocal=V182.rsLocal||{};
   const open=Q.find(q=>/^(queued|working)$/i.test(q.status||''))||(V182.rsLocal[k]&&Date.now()-V182.rsLocal[k]<15*60e3?{status:'queued'}:null);
   const last=Q.filter(q=>/^done/i.test(q.status||'')).sort((x,y)=>String(y.updated_at||y.created_at||'').localeCompare(String(x.updated_at||x.created_at||'')))[0];
-  const hd=String(a.hook_date||'').slice(0,10);const age=/^\d{4}-\d\d-\d\d$/.test(hd)?Math.max(0,Math.round((Date.now()-Date.parse(hd+'T12:00:00+05:30'))/864e5)):null;
+  let hd=String(a.hook_date||'').slice(0,10);
+  /* v18.14.1 (ui_v4): the hook can be older than the brief's newest trigger (an Oct 6 trigger under a Jun 15 hook read as 135 days old) */
+  if((window.ariT4&&ariT4.on()))try{(b&&b.why_now||[]).forEach(w=>{const d=String(w&&w.date||'').slice(0,10);if(/^\d{4}-\d\d-\d\d$/.test(d)&&(!/^\d{4}-\d\d-\d\d$/.test(hd)||d>hd))hd=d})}catch(e){}
+  const age=/^\d{4}-\d\d-\d\d$/.test(hd)?Math.max(0,Math.round((Date.now()-Date.parse(hd+'T12:00:00+05:30'))/864e5)):null;
   const stale=age==null||age>=RS_DAYS;
   const line=open?(/^working$/i.test(open.status)?'Kelvarrow is re-scanning now: fresh triggers, why now and the brief.':'Re-scan asked. Kelvarrow picks it up on its next run, usually within ten minutes.'):
     (age==null?'No dated trigger on file yet.':`The last trigger is ${age===0?'from today':age===1?'a day old':age+' days old'}${stale?', so it may be stale.':'.'}`)+(last?` Last re-scan ${rsAgo(last.updated_at||last.created_at)}.`:'');
@@ -12697,7 +12802,7 @@ document.addEventListener('keydown',e=>{const qfOn=H.classList.contains('v18133q
 /* ---------- About: Ari's own story (restored from v16 to v18.0), current theme ---------- */
 const LOOP=[['Find','I source people with fresh signals from Tamsin’s and Idris’s books.'],['Connect','About fifteen invites a weekday, each queued with its own reason.'],['Accepts','When someone accepts, their first message is already written.'],['Follow up','The second message at four days, the third a week after that, and I suggest withdrawing at fourteen.'],['Replies','A reply jumps the queue, with an answer drafted in a line or two.'],['Momentum','I keep score, so you only have to keep going.']];
 let BUILD='';
-function aboutHTML(){const T=(G.ARI_MEM&&ARI_MEM.timeline)||[];
+function aboutHTML(){if(G.ariT4&&ariT4.on())return ariT4.aboutHTML(BUILD);const T=(G.ARI_MEM&&ARI_MEM.timeline)||[];
   return `<div class="v181ab v18133ab">
   <div class="apcap"><span class="cap">What I am</span><span class="cap">Kelvarrow by Thrandvex</span></div>
   <p>I’m Kelvarrow. I look after your LinkedIn outbound from the first search to the last follow-up, and I keep your hours.</p>
@@ -12980,7 +13085,9 @@ document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
 
 /* ---------- person file ---------- */
 function capOf(el){const c=el&&el.querySelector(':scope>.cap');return c?low(c.textContent):''}
-function whyNow(f,p){const it=f.item||{};if(it.why)return P(it.why);const fd=pSigs(f,p)[0];const nx=f.next?String(f.next).replace(/\.$/,''):'';
+function whyNow(f,p){const it=f.item||{};if(it.why)return P(it.why);let fd=pSigs(f,p)[0];
+  /* v18.14.1 (ui_v4): one latest signal per account, so this line and the account page agree */
+  if((window.ariT4&&ariT4.on())&&p&&p.company){try{const co=String(p.company).trim();const s0=signalsFor(co,people().filter(x=>nc(x.company)===nc(co)))[0];if(s0)fd=s0}catch(e){err('why4',e)}}const nx=f.next?String(f.next).replace(/\.$/,''):'';
   const sig=fd?`Latest signal ${dshort(fd.d)}: ${fd.t.replace(/\.$/,'')}`:'';if(nx&&sig)return `${nx}. ${sig}.`;if(nx)return nx+'.';if(sig)return sig+'.';
   const st=stageOf(p)[0];return st&&st!=='Coming up'?st+'.':''}
 function decoPF(){const ovb=$('#ovb');if(!ovb||!ovIsOn())return;if(ovb.querySelector(':scope>#v18134pfm'))return;
@@ -13657,6 +13764,200 @@ let tries=0;const boot=setInterval(()=>{tries++;if(signed()&&!locked()){readFlag
 setInterval(()=>{if(!document.hidden)readFlags()},5*60e3);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(readFlags,800)});
 setInterval(()=>{if(!document.hidden){paintSet();if(T.today()){const h=health().state;if(h!==T.lastH){T.lastH=h;try{ariV1812.render()}catch(e){}}badge()}}},1500);
+})();
+</script>
+<script>/* =====================================================================
+   v18.14.1 batch 4 UI polish (Owner, Oct 28 21:10 IST, "UI is still not it"). Notes: work/oct28/batch4/README.md.
+   1 one action bar on the person file (one primary + ••• sheet), tab bar 56 px + safe area, smaller badge.
+   2 new Kelvarrow mark behind one constant (MARK), shown only in the header and on the "Kelvarrow's pick" card.
+   3 no internal research notes on the person file; the person file and the account page read the same latest signal;
+     the Triggers card ages from the newest dated trigger (patched in place, gated on ariT4.on()).
+   4 quick check: the pick once + one quiet "passed on" line, one Agree button; scroll-margin under the sticky header.
+   5 search: "Search people or accounts", round avatars. 6 empty Conversation collapses; signal lines are 2 whole lines.
+   7 account cards: Next line + one count chip, the stage chips on expand. 8 About: name, version, one line, What's new,
+   Privacy and Terms; What's new shows the latest release first. 9 Settings: four groups + Advanced.
+   Flag: app_config ui_v4 ('true' = everyone) or the Settings preview on this phone (localStorage ari-t4, ?t4=1 / ?t4=0).
+   Off = the v18.14.0 screens. Nothing here writes data; every action is the existing button, clicked.
+   ===================================================================== */
+(function(){'use strict';const G=window;if(G.ariT4)return;const H=document.documentElement;
+/* ---------- the mark: change this one constant to swap it ('c1' profile, 'c2' glide, 'c3' wing K, 'old' current) ---------- */
+const MARK='c1';
+const MARKS={
+ c1:{vb:'0 0 64 64',d:'M16 56 C11.5 40 14 16 33 11 C42 9 49 13 52 20 L56 22 C60.5 24 61.5 30.5 58 36.5 C57.2 33.4 55.2 31.2 52.2 31.2 L49.2 32.2 C47.6 40.5 45.5 48.5 40 56 Q28 60.5 16 56 Z M41 15 A4.2 4.2 0 1 0 41 23.4 A4.2 4.2 0 1 0 41 15 Z'},
+ c2:{vb:'0 0 64 64',d:'M32 14 C34.5 14 36 16 36 19 L36.5 23 C44 23.5 54 25.5 62 30 C55 31 47 33.5 40 37.5 L37 39 L39 55 C36 56.5 33.5 57 32 57 C30.5 57 28 56.5 25 55 L27 39 L24 37.5 C17 33.5 9 31 2 30 C10 25.5 20 23.5 27.5 23 L28 19 C28 16 29.5 14 32 14 Z'},
+ c3:{vb:'0 0 64 64',d:'M11 7 H22 V57 H11 Z M22 36 L47 7 C52 9.5 55 13.5 56 18 L50.5 18.5 L53 23.5 L47 24 L48.5 29.5 L42 29.5 L28 41 L22 41 Z M31 41.5 L37.5 36 L55 57 H42 Z'},
+ old:null};
+const T=G.ariT4={v:'v18.14.1',mark:MARK,errs:[],srv:{ui_v4:false},flagAt:0,passes:0,fits:0};
+const err=(k,e)=>{if(T.errs.length<30)T.errs.push(k+': '+String(e&&e.message||e).slice(0,140))};
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const bz=n=>{try{navigator.vibrate&&navigator.vibrate(n||6)}catch(e){}};
+const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const low=s=>String(s||'').toLowerCase();
+const LK='ari-t4';
+const loc=()=>{try{return localStorage.getItem(LK)==='1'}catch(e){return false}};
+try{const m=location.search.match(/[?&]t4=([^&#]*)/);if(m){const v=decodeURIComponent(m[1]);if(v==='0'||v==='off')localStorage.removeItem(LK);else if(v==='1'||v==='on')localStorage.setItem(LK,'1')}}catch(e){}
+T.on=()=>!!(T.srv.ui_v4||loc());
+T.local=loc;
+T.setLocal=on=>{try{on?localStorage.setItem(LK,'1'):localStorage.removeItem(LK)}catch(e){}apply()};
+T.markSVG=()=>{const m=MARKS[MARK];if(!m)return (typeof ARI_SVG!=='undefined'?ARI_SVG:'');return `<svg class="kgl t4kgl" viewBox="${m.vb}" aria-hidden="true" focusable="false"><path fill-rule="evenodd" d="${m.d}"/></svg>`};
+
+/* ---------- flag ---------- */
+const signed=()=>{try{return !!(G.ariV17&&ariV17.signed&&ariV17.signed())}catch(e){return false}};
+const locked=()=>{try{return !!(G.ariV162&&ariV162.locked&&ariV162.locked())}catch(e){return false}};
+let fP=null;
+function readFlags(){if(fP)return fP;if(!signed()||locked()||!G.ariV17||!ariV17.ready)return Promise.resolve();
+  fP=ariV17.ready().then(c=>{if(!c)throw new Error('offline');return c.from('app_config').select('key,value').in('key',['ui_v4'])})
+    .then(({data,error})=>{if(error)throw error;let on=false;(data||[]).forEach(r=>{if(r&&r.key==='ui_v4')on=/^(true|on|1|yes)$/i.test(String(r.value==null?'':r.value).trim())});T.srv={ui_v4:on};T.flagAt=Date.now()})
+    .catch(e=>err('flag',e)).finally(()=>{fP=null;apply()});return fP}
+T.readFlags=readFlags;
+function apply(){const on=T.on();H.classList.toggle('t4on',on);
+  if(on!==T.last){const first=T.last===undefined;T.last=on;if(!first||on){refill();try{G.ariV18133&&ariV18133.about&&ariV18133.about(true)}catch(e){err('about',e)}
+      if(!on)undo();try{G.ariV171&&ariV171&&document.getElementById('v171acc')}catch(e){}}}
+  paintSet();pass()}
+
+/* ---------- 2. the mark: header + Kelvarrow's pick only (CSS hides the rest under t4on) ---------- */
+function refill(){const svg=T.on()?T.markSVG():(typeof ARI_SVG!=='undefined'?ARI_SVG:null);if(!svg)return;
+  $$('.arif').forEach(a=>{if(a.querySelector('svg.kgl')&&a.dataset.t4m!==String(T.on())){a.innerHTML=svg;a.dataset.t4m=String(T.on())}})}
+
+/* ---------- 6. two whole lines, cut at a word, never mid-word ---------- */
+function fit2(el){try{if(!el||!el.isConnected||!el.getClientRects().length)return;const cur=el.textContent,cw=String(el.clientWidth);
+  if(el.dataset.t4o===cur&&el.dataset.t4w===cw)return;el.dataset.t4w=cw;
+  if(el.dataset.t4o!==cur){el.dataset.t4f=cur;}const full=el.dataset.t4f||cur;
+  const lh=parseFloat(getComputedStyle(el).lineHeight)||22;const max=lh*2+2;
+  if(el.textContent!==full)el.textContent=full;if(el.scrollHeight<=max){el.dataset.t4o=full;el.removeAttribute('title');return}
+  const w=full.split(/\s+/);let lo=1,hi=w.length-1,best=1;
+  while(lo<=hi){const mid=(lo+hi)>>1;el.textContent=w.slice(0,mid).join(' ').replace(/[\s,.;:·]+$/,'')+'…';if(el.scrollHeight<=max){best=mid;lo=mid+1}else hi=mid-1}
+  const out=w.slice(0,best).join(' ').replace(/[\s,.;:·]+$/,'')+'…';el.textContent=out;el.dataset.t4o=out;el.title=full;T.fits++}catch(e){err('fit',e)}}
+function unfit(){$$('[data-t4f]').forEach(el=>{if(el.dataset.t4o===el.textContent)el.textContent=el.dataset.t4f;delete el.dataset.t4f;delete el.dataset.t4o;delete el.dataset.t4w;el.removeAttribute('title')})}
+
+/* ---------- 1 + 3 + 6. the person file ---------- */
+function stepLine(){try{const n=(($('#ovb')||{}).dataset||{}).v18134n;const p=n&&G.ariPF&&ariPF[n]&&ariPF[n].p;if(p){if(p.connect_sent&&!p.accepted&&!p.withdrawn)return 'Nothing to send yet. Waiting on the accept.';if(p.replied&&!p.meeting)return 'They replied. Answer them on LinkedIn.'}}catch(e){}return 'Nothing to send right now.'}
+function pf(){const ovb=$('#ovb');if(!ovb)return;
+  /* 3: internal research notes never show */
+  $$('.v171card',ovb).forEach(c=>{const cap=c.querySelector(':scope>.cap');if(cap&&/^research notes/i.test(cap.textContent.trim()))c.classList.add('t4gone')});
+  $$('.fd',ovb).forEach(f=>{const s=f.querySelector('.src');if(s&&/^research note/i.test(s.textContent.trim()))f.classList.add('t4gone')});
+  /* 6: an empty Conversation is one line; its step buttons move into the ••• sheet, the LinkedIn steps under History */
+  const conv=ovb.querySelector('.v18134sec[data-v18134s="conv"]');
+  if(conv&&!conv.dataset.t4){const has=conv.querySelector('.v163draft,[id^="v182pf-"],textarea');
+    let hold=ovb.querySelector(':scope>#t4hold');if(!hold){hold=document.createElement('div');hold.id='t4hold';hold.hidden=true;ovb.appendChild(hold)}
+    if(!has){conv.dataset.t4='empty';$$('.v163nx',conv).forEach(x=>hold.appendChild(x));
+      const mk=conv.querySelector('.v16marks');const blk=mk&&(mk.closest('.pfs')||mk.parentNode);const hist=ovb.querySelector('.v18134sec[data-v18134s="hist"]');
+      if(blk&&hist){let r=hist.querySelector(':scope>.v4r');if(!r){r=document.createElement('div');r.className='v4r';hist.appendChild(r)}r.appendChild(blk);const sb=hist.querySelector('.v18134all');if(sb)sb.hidden=false}else if(blk)hold.appendChild(blk);
+      const b=conv.querySelector(':scope>.v4b'),r=conv.querySelector(':scope>.v4r');if(r)r.remove();if(b)b.innerHTML=`<p class="v18134empty t4empty">${E(stepLine())}</p>`;const sa=conv.querySelector('.v18134all');if(sa)sa.hidden=true}
+    else conv.dataset.t4='full'}
+  /* 1: one action bar */
+  const bar=$('#ovBar .pfbar');if(bar&&!bar.querySelector('.t4dots')){bar.classList.add('t4bar');
+    const d=document.createElement('button');d.type='button';d.className='t4dots press';d.dataset.t4more='1';d.setAttribute('aria-label','More actions');d.setAttribute('aria-haspopup','dialog');
+    d.innerHTML='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>';bar.appendChild(d)}
+  $$('.v18134why p',ovb).forEach(fit2)}
+
+/* ---------- 1. the ••• sheet: every other action, each one the existing control ---------- */
+let REFS=[];
+function actions(){const ovb=$('#ovb'),out=[],seen=new Set();const add=(el,label,sub)=>{if(!el)return;const k=low(label);if(!label||seen.has(k))return;seen.add(k);out.push({el,label,sub})};
+  if(ovb)$$('.v163nx [data-nx]',ovb).forEach(b=>add(b,(b.getAttribute('aria-label')||b.textContent).trim(),'Logs it, with Undo'));
+  $$('#ovBar .pfbar>.b:not(.pri):not(.t4dots)').forEach(a=>add(a,/inbox/i.test(a.textContent)?'Open LinkedIn inbox':a.textContent.trim(),''));
+  if(ovb){add(ovb.querySelector('[data-pf="snooze"]'),'Snooze','Back in your queue later');add(ovb.querySelector('[data-pf="unsnooze"]'),'Unsnooze','');
+    add(ovb.querySelector('[data-pf="skip"]'),'Skip this person','Takes them out of the queue');add(ovb.querySelector('[data-pf="unskip"]'),'Undo skip','')}
+  return out}
+function openSheet(from){const A=actions();REFS=A.map(a=>a.el);let m=$('#t4sheet');
+  if(!m){m=document.createElement('div');m.id='t4sheet';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','More actions');document.body.appendChild(m)}
+  m.innerHTML=`<div class="t4scr" data-t4x="1"></div><div class="t4pan"><div class="t4grab" aria-hidden="true"></div>${A.length?A.map((a,i)=>`<button type="button" class="t4row press" data-t4act="${i}"><b>${E(a.label)}</b>${a.sub?`<small>${E(a.sub)}</small>`:''}</button>`).join(''):'<p class="t4none">Nothing else to do here.</p>'}<button type="button" class="t4row t4cancel press" data-t4x="1"><b>Cancel</b></button></div>`;
+  m.hidden=false;H.classList.add('t4sheeton');T.from=from;bz(6);setTimeout(()=>{const f=m.querySelector('.t4row');f&&f.focus({preventScroll:true})},30)}
+function closeSheet(){const m=$('#t4sheet');if(!m||m.hidden)return;m.hidden=true;H.classList.remove('t4sheeton');try{T.from&&T.from.focus({preventScroll:true})}catch(e){}}
+T.openSheet=openSheet;T.closeSheet=closeSheet;T.actions=()=>actions().map(a=>a.label);
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;let b;
+  if((b=t.closest('[data-t4more]'))){e.preventDefault();e.stopPropagation();openSheet(b);return}
+  if(t.closest('#t4sheet [data-t4x]')){e.preventDefault();e.stopPropagation();closeSheet();return}
+  if((b=t.closest('#t4sheet [data-t4act]'))){e.preventDefault();e.stopPropagation();const el=REFS[+b.dataset.t4act];closeSheet();if(el&&el.isConnected)setTimeout(()=>{try{el.click()}catch(x){err('act',x)}},60);return}
+  if((b=t.closest('[data-t4set]'))){e.preventDefault();e.stopPropagation();bz(8);T.setLocal(!T.local());return}
+  if((b=t.closest('[data-t4adv]'))){e.preventDefault();e.stopPropagation();const s=$('#v171set');if(s){const on=!s.classList.contains('t4advon');s.classList.toggle('t4advon',on);b.setAttribute('aria-expanded',String(on))}bz(4);return}
+  if((b=t.closest('[data-t4wnopen]'))){e.preventDefault();e.stopPropagation();bz(6);openWN4(b,false);return}
+  if(t.closest('[data-t4wnall]')){e.preventDefault();e.stopPropagation();openWN4(null,true);return}
+  if((b=t.closest('[data-t4qcok]'))){e.preventDefault();e.stopPropagation();agree();return}},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&H.classList.contains('t4sheeton')){e.preventDefault();e.stopPropagation();closeSheet();return}
+  if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.closest&&e.target.closest('[data-t4wnopen]')){e.preventDefault();openWN4(e.target,false)}},true);
+
+/* ---------- 4. quick check: the pick once, one quiet line for the rest, one Agree ---------- */
+function qc(){const c=$('#v182qc');if(!c)return;
+  $$('.v182q',c).forEach(q=>{const pk=q.querySelector('.v1810pk b');const opts=$$('.v182qo [data-v182qa]',q);if(!pk||!opts.length)return;const pick=pk.textContent.trim();
+    const others=opts.map(o=>o.textContent.trim()).filter(x=>x&&x!==pick);let n=q.querySelector(':scope>.t4not');const txt=others.length?`Kelvarrow passed on: ${others.join('; ')}.`:'';
+    if(!txt){if(n)n.remove();return}if(!n){n=document.createElement('p');n.className='t4not';const at=q.querySelector('.v1810pk');at&&at.parentNode.insertBefore(n,at.nextSibling)}if(n.textContent!==txt)n.textContent=txt});
+  const done=c.classList.contains('done');let ok=c.querySelector(':scope>.t4qcok');
+  if(done||!$$('.v182q .v182qo',c).length){if(ok)ok.remove();return}
+  if(!ok){ok=document.createElement('button');ok.type='button';ok.className='v163btn ok big press t4qcok';ok.dataset.t4qcok='1';ok.innerHTML='<span>Agree with Kelvarrow’s picks</span>';c.appendChild(ok)}}
+async function agree(){bz([8,30,10]);const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  for(let i=0;i<8;i++){const c=$('#v182qc');if(!c)return;const q=$$('.v182q',c).find(q=>{const pk=q.querySelector('.v1810pk b');const on=q.querySelector('.v182qo .on');return pk&&!(on&&on.textContent.trim()===pk.textContent.trim())});
+    if(!q)break;const pick=q.querySelector('.v1810pk b').textContent.trim();const o=$$('.v182qo [data-v182qa]',q).find(o=>o.textContent.trim()===pick);if(!o)break;o.click();await wait(80)}
+  const d=$('#v182qc [data-v182qcd]');if(d)d.click();else err('qc','no Got it after agreeing')}
+function hdr(){const pg=$('#v171acc');if(!pg||!pg.classList.contains('on'))return;let b=0;const top=pg.getBoundingClientRect().top;
+  $$('.ph,[class*="tabs"],.v1821seg,.v182tabs',pg).forEach(x=>{const cs=getComputedStyle(x);if(cs.position==='sticky'||cs.position==='fixed'||x.classList.contains('ph')){const r=x.getBoundingClientRect();if(r.height&&r.top-top<220)b=Math.max(b,r.bottom-top)}});
+  const v=Math.round(b+12)+'px';if(pg.style.getPropertyValue('--t4hd')!==v)pg.style.setProperty('--t4hd',v)}
+
+/* ---------- 7. account cards: Next line + one count chip; the stage chips on expand ---------- */
+function cards(){$$('.v1813acct').forEach(c=>{const st=c.querySelector('.stages');if(!st)return;let acc=0,wait=0;
+  $$('.v1813st',st).forEach(s=>{const m=s.textContent.trim().match(/^(.*?)\s+(\d+)$/);if(!m)return;const n=+m[2];if(s.classList.contains('acc'))acc+=n;else if(/^invite( pending)?$/i.test(m[1]))wait+=n});
+  const txt=wait?`${wait} waiting`:acc>1?`${acc} to send`:'';let ch=c.querySelector('.t4cnt');
+  if(!txt){if(ch)ch.remove();return}if(!ch){ch=document.createElement('span');ch.className='t4cnt';st.parentNode.insertBefore(ch,st)}if(ch.textContent!==txt)ch.textContent=txt})}
+
+/* ---------- 9. Settings: Notifications, Outreach, Privacy and sign-in, Account, then Advanced ---------- */
+const GROUPS=[['notif','Notifications',20],['out','Outreach',30],['sec','Privacy and sign-in',40],['acct','Account',50],['adv','Advanced',90]];
+const CAPG=[[/^general/i,'adv'],[/^motion/i,'adv'],[/^notification/i,'notif'],[/^invites/i,'out'],[/^gmail/i,'out'],[/^two-step/i,'sec'],[/^privacy/i,'sec'],[/^account/i,'acct']];
+const LABELS={'Pings':'What you get notified about','Phones getting pings':'Phones that get notifications','Say hello':'Replay the intro','Authenticator code':'Two-step code','Sync now':'Sync now'};
+function settings(){const s=$('#v171set');if(!s)return;const inner=s.querySelector(':scope>.v18134set');let g='adv',i=0;
+  const kids=[...s.children].flatMap(x=>x===inner?[...x.children]:[x]);
+  kids.forEach(x=>{if(x.classList.contains('t4cap')||x.id==='t4set')return;if(x.classList.contains('apcap')){const t=(x.textContent||'').trim();const m=CAPG.find(c=>c[0].test(t));if(m)g=m[1];x.dataset.t4g='hide';return}
+    if(x.classList.contains('v181ver')){x.dataset.t4g='hide';return}
+    let gg=g;if(x.id==='t3set'||x.matches('[data-v18134set],[data-v181="motion"]'))gg='adv';x.dataset.t4g=gg;x.style.order=String((GROUPS.find(q=>q[0]===gg)||[0,0,95])[2]*10+(++i))});
+  GROUPS.forEach(([k,t,o])=>{let h=s.querySelector(`:scope>.t4cap[data-k="${k}"]`);if(!h){if(k==='adv'){h=document.createElement('button');h.type='button';h.className='t4cap t4advb aprow press';h.dataset.t4adv='1';h.setAttribute('aria-expanded',String(s.classList.contains('t4advon')));h.innerHTML='<div><b>Advanced</b><span>Sync, activity, scans, motion and previews</span></div><span class="v181ch" aria-hidden="true">›</span>'}
+      else{h=document.createElement('div');h.className='t4cap apcap';h.innerHTML=`<span class="cap">${E(t)}</span>`}h.dataset.k=k;s.appendChild(h)}h.style.order=String(o*10)});
+  $$('b',s).forEach(b=>{const o=b.dataset.t4l||b.textContent.trim();if(LABELS[o]&&b.textContent!==LABELS[o]){b.dataset.t4l=o;b.textContent=LABELS[o]}})}
+function paintSet(){try{const s=$('#v171set');if(!s)return;let r=$('#t4set');
+  if(!r){r=document.createElement('button');r.type='button';r.id='t4set';r.className='t3set t4setb';r.setAttribute('role','switch');r.dataset.t4set='1';
+    r.innerHTML='<span class="t3tx"><b>Calmer pages</b><small>Try the new contact, account, About and Settings layout on this phone</small></span><span class="t3sw" aria-hidden="true"></span>'}
+  if(r.parentNode!==s)s.insertBefore(r,s.firstChild);const on=String(T.local());if(r.getAttribute('aria-checked')!==on)r.setAttribute('aria-checked',on);r.hidden=!!T.srv.ui_v4}catch(e){err('set',e)}}
+T.paintSet=paintSet;
+
+/* ---------- 8. About ---------- */
+T.aboutHTML=build=>{
+  return `<div class="v181ab v18133ab t4ab"><h2 class="t4abn">Kelvarrow by Thrandvex</h2><p class="t4abv">Version ${E(((document.querySelector('meta[name="ari-build"]')||{}).content)||T.v)}</p>
+  <p class="t4abl">Finds the people with a reason to talk now, writes every message and keeps the follow-ups on time. You send each one yourself.</p>
+  <div class="aprow press" data-t4wnopen="1" role="button" tabindex="0" aria-haspopup="dialog"><div><b>What’s new</b><span>${E(latestLine())}</span></div><span class="v181ch" aria-hidden="true">›</span></div>
+  <a class="aprow press t4lnk" href="/privacy.html" target="_blank" rel="noopener"><div><b>Privacy</b></div><span class="v181ch" aria-hidden="true">›</span></a>
+  <a class="aprow press t4lnk" href="/terms.html" target="_blank" rel="noopener"><div><b>Terms</b></div><span class="v181ch" aria-hidden="true">›</span></a></div>`};
+const LOG=()=>((G.ariWhatsNew&&ariWhatsNew.LOG)||[]);
+function latestLine(){const L=LOG()[0];return L?`${L.v} · ${L.d}`:'The latest release'}
+const relHTML=(b,open)=>`<div class="t4rel"><b>${E(b.v)} <span>${E(b.d||'')}</span></b>${open?`<ul>${(b.items||[]).map(x=>`<li>${E(x)}</li>`).join('')}</ul>`:''}</div>`;
+function openWN4(from,all){const L=LOG();let m=$('#t4sheet');if(!m){m=document.createElement('div');m.id='t4sheet';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');document.body.appendChild(m)}
+  m.setAttribute('aria-label','What’s new');
+  m.innerHTML=`<div class="t4scr" data-t4x="1"></div><div class="t4pan t4wnp"><div class="t4grab" aria-hidden="true"></div><h2 class="t4wnt">What’s new</h2><div class="t4wns">${L.length?relHTML(L[0],true):'<p class="t4none">Nothing new yet.</p>'}
+   ${L.length>1?(all?L.slice(1).map(b=>relHTML(b,true)).join(''):`<button type="button" class="t4wnb press" data-t4wnall="1">Earlier releases</button>`):''}</div><button type="button" class="t4row t4cancel press" data-t4x="1"><b>Done</b></button></div>`;
+  m.hidden=false;H.classList.add('t4sheeton');if(from)T.from=from;setTimeout(()=>{const f=m.querySelector('.t4wnb,.t4cancel');f&&f.focus({preventScroll:true})},30)}
+T.openWN=openWN4;
+function wn(){}
+
+/* ---------- 5. search ---------- */
+const PH0='Find a person or account, or ask',PH4='Search people or accounts';
+function search(){const i=$('#v18133qf input');if(!i)return;const want=T.on()?PH4:PH0;if(i.placeholder!==want)i.placeholder=want}
+
+/* ---------- the pass ---------- */
+function pass(){if(!T.on()){search();return}T.passes++;
+  try{pf()}catch(e){err('pf',e)}try{qc()}catch(e){err('qc',e)}try{hdr()}catch(e){err('hd',e)}try{cards()}catch(e){err('cards',e)}
+  try{settings()}catch(e){err('settings',e)}try{wn()}catch(e){err('wn',e)}try{search()}catch(e){err('search',e)}try{refill()}catch(e){err('mark',e)}
+  try{$$('#v18134ap .v18134why p,#v18134ap .v18134row.sig .tx>b').forEach(fit2)}catch(e){err('fit',e)}}
+T.pass=pass;
+function undo(){try{unfit();$$('.t4cnt,.t4not,.t4qcok,.t4cap').forEach(x=>x.remove());$$('#v171set [data-t4g]').forEach(x=>{delete x.dataset.t4g;x.style.removeProperty('order')});
+  $$('#v171set b[data-t4l]').forEach(b=>{b.textContent=b.dataset.t4l;delete b.dataset.t4l});closeSheet();search()}catch(e){err('undo',e)}}
+let raf=0;const soon=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;if(T.on()){mo.disconnect();try{pass()}finally{watch()}}})};
+const mo=new MutationObserver(soon);
+function watch(){try{mo.observe(document.body,{childList:true,subtree:true})}catch(e){}}
+
+/* ---------- boot ---------- */
+function boot(){apply();watch();
+  let tries=0;const bt=setInterval(()=>{tries++;if(signed()&&!locked()){readFlags();clearInterval(bt)}else if(tries>120)clearInterval(bt)},1000);
+  setInterval(()=>{if(!document.hidden)readFlags()},5*60e3);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(readFlags,900)});
+  setInterval(()=>{if(!document.hidden){paintSet();if(T.on())soon()}},1500)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
 </script>
 </body>
