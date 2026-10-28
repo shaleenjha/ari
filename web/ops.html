@@ -15,15 +15,16 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.13.6"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.13.7"><meta name="ari-rev" content="05ae22f947">
 <title>Kelvarrow by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Kelvarrow">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="icon" href="/ari-192.png" sizes="192x192">
-<link rel="apple-touch-icon" href="/ari-apple-180.png">
+<link rel="icon" href="/kelvarrow-favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/kelvarrow-favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="/kelvarrow-apple-180.png">
 <meta name="description" content="Kelvarrow by Thrandvex: your LinkedIn outbound, prepared. You send.">
 <script>/* v18.13.6: one plain-text helper for every signal, trigger and note shown. Decodes entities, drops markup, returns text only
    (callers escape it once when they build HTML). ariHref gives an http(s) source link or ''. ariNoteClean drops the worker's
@@ -3828,6 +3829,34 @@ button.skc-g:focus-visible{outline:2px solid var(--ds-accent);outline-offset:-2p
 .skc-g .c{font-size:var(--ds-t4);line-height:1;color:var(--ds-ink2)}
 .skc-e{margin:auto 0;font-size:var(--ds-t2);line-height:var(--ds-lh2);color:var(--ds-ink2)}
 @media (prefers-reduced-motion:reduce){.skc-tr{scroll-behavior:auto}.skc-dot i{transition:none}}
+
+/* ===== v18.13.7: Kelvarrow mark + plain-language labels ===== */
+/* the mark: one static glyph in every former face slot; no breathing, morphs, blinks or ground ring */
+.arif svg.kgl{width:100%;height:100%;overflow:visible;display:block;animation:none!important;transform:none!important;transition:none!important}
+.arif svg.kgl path,.arif svg.kgl circle{fill:#2A4274;stroke:none}
+.arif,.arif *{animation:none!important}
+.arif.xl svg.kgl,.arif.xxl svg.kgl{width:64%;height:64%;margin:18%}
+.arif.l svg.kgl{width:78%;height:78%;margin:11%}
+.apstage .orb{animation:none!important}.apstage .orb i,.apstage .tapl{display:none!important}
+.arif::before,.arif::after{display:none!important}
+/* header sync line: hidden unless something is wrong */
+#v163sync:not(.v18137show){display:none!important}
+/* sentence case on chips and small labels (section captions keep their style) */
+.ang .k,.ptr .pl2,.aht .st,.fd .dd b,#v1871ad .v1871h b,.eta,#rcx,.v1813st,.v1813tg{text-transform:none!important;letter-spacing:0!important}
+/* stage bar: full words wrap to two short lines instead of being cut */
+.ladl{column-gap:4px;align-items:start}
+.ladl span,#ovb .ladl span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:12px!important;font-size:10px!important;overflow-wrap:normal;word-break:normal;hyphens:none}
+/* Today hero: name, company, one reason in two lines, one button */
+.v1813hero .co{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1813hero .why{-webkit-line-clamp:2!important}
+/* chips with full words wrap inside the card instead of running out */
+.v1813acct .stages{flex-wrap:wrap}
+/* person file action bar: the LinkedIn button gets the room its label needs (was clipped at 375/390) */
+#ovBar .pfbar{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)!important}
+#ovBar .pfbar .b{min-width:0;white-space:nowrap;padding:0 10px!important}
+/* funnel rows: the longer step names ("First message sent") get a wider label column */
+.skc-r:not(.wide){grid-template-columns:112px minmax(0,1fr) 30px 34px}
+.v18cap>span:first-child{text-transform:none!important;letter-spacing:0!important}
 </style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -4422,12 +4451,13 @@ $('#rsend').onclick=()=>stopRec(true);$('#rcx').onclick=()=>stopRec(false);
    Ari: one component. One pebble, six faces, the same blink,
    gaze and breath at S, M and L, everywhere it appears.
    ========================================================= */
-const ARI_SVG='<svg viewBox="0 0 48 48" aria-hidden="true"><g class="agr"><ellipse class="acs" cx="24" cy="43.4" rx="6.4" ry="1.05"/><ellipse class="arg" cx="24" cy="43.4" rx="13.6" ry="3"/><ellipse class="arr" cx="24" cy="43.4" rx="13.6" ry="3"/><ellipse class="ars" cx="24" cy="43.4" rx="13.6" ry="3" pathLength="100"/><ellipse class="ara" cx="24" cy="43.4" rx="13.6" ry="3" pathLength="100"/><ellipse class="arp" cx="24" cy="43.4" rx="13.6" ry="3"/></g><g class="abst"><path d="M7.25 11.75L4.56 10.20"/><path d="M15.38 3.90L13.92 1.16"/><path d="M25.00 1.50L25.00 -1.60"/><path d="M34.62 3.90L36.08 1.16"/><path d="M42.75 11.75L45.44 10.20"/></g><g class="afl"><g class="ahd"><g class="abt"><path class="ab" d="M23.4 38.5C13.8 38.5 7.6 34.6 7.4 27 7.2 21.6 8.6 17.4 11.2 14.2L18.6 8.3C21.6 6.4 25 5.1 29.4 4.9 37 4.6 41.3 10.8 41.1 20.2 40.9 31.8 33.6 38.5 23.4 38.5Z"/><path class="ash" d="M41 20C40.8 31.4 33.4 38.4 23.6 38.4 16.4 38.4 11 35.6 8.8 31.2 12.6 34.6 17.6 35.8 23 35.6 32.4 35.2 38.8 29.6 39.8 18.2 40.6 18.8 41 19.4 41 20Z"/><path class="afc" d="M11.2 14.2L18.6 8.3 20.2 10.9C17.2 12.6 14.8 14.8 13 17.6Z"/><path class="afe" d="M11.2 14.2L18.6 8.3"/><path class="asm" d="M32.2 35.2Q37 32.2 38.9 26.6"/><circle class="asd" cx="39.15" cy="25.55" r=".62"/><g class="asc"><path class="asc1" d="M9.2 30.4Q24 37.2 40.2 29.4"/><path class="asc2" d="M9.2 30.4Q24 37.2 40.2 29.4"/><path class="asc1 asct" d="M32.8 33.4L35 39.8"/><path class="asc2 asct" d="M32.8 33.4L35 39.8"/></g><g class="gz"><g class="ft"><g class="asz"><path class="abw l" d="M16.90 16.40 Q19.75 16.05 22.60 16.40"/><path class="abw r" d="M28.00 15.40 Q30.85 15.05 33.70 15.40"/><g class="aey"><path class="ayg l" d="M17.50 21.20 C17.50 20.92 18.58 20.70 19.90 20.70 C21.22 20.70 22.30 20.92 22.30 21.20 C22.30 23.46 21.22 25.30 19.90 25.30 C18.58 25.30 17.50 23.46 17.50 21.20 Z"/><path class="ayg r" d="M28.30 20.20 C28.30 19.92 29.38 19.70 30.70 19.70 C32.02 19.70 33.10 19.92 33.10 20.20 C33.10 22.46 32.02 24.30 30.70 24.30 C29.38 24.30 28.30 22.46 28.30 20.20 Z"/><path class="aye l" d="M17.50 21.20 C17.50 20.92 18.58 20.70 19.90 20.70 C21.22 20.70 22.30 20.92 22.30 21.20 C22.30 23.46 21.22 25.30 19.90 25.30 C18.58 25.30 17.50 23.46 17.50 21.20 Z"/><path class="aye r" d="M28.30 20.20 C28.30 19.92 29.38 19.70 30.70 19.70 C32.02 19.70 33.10 19.92 33.10 20.20 C33.10 22.46 32.02 24.30 30.70 24.30 C29.38 24.30 28.30 22.46 28.30 20.20 Z"/><circle class="acl l" cx="20.9" cy="20.2" r=".62"/><circle class="acl r" cx="31.7" cy="19.2" r=".62"/></g><g class="amg"><path class="ami" d="M23.40 29.40 C23.40 29.59 24.39 29.75 25.60 29.75 C26.65 29.75 27.50 29.26 27.50 28.65 C27.50 29.26 26.65 29.75 25.60 29.75 C24.39 29.75 23.40 29.59 23.40 29.40 Z"/><path class="atg" d="M25.10 29.40 C25.10 29.29 25.23 29.20 25.40 29.20 C25.57 29.20 25.70 29.29 25.70 29.40 C25.70 29.51 25.57 29.60 25.40 29.60 C25.23 29.60 25.10 29.51 25.10 29.40 Z"/><path class="atc" d="M25.40 29.25 Q25.42 29.38 25.40 29.46"/><path class="aml" d="M23.40 29.40 C23.40 29.59 24.39 29.75 25.60 29.75 C26.65 29.75 27.50 29.26 27.50 28.65 C27.50 29.26 26.65 29.75 25.60 29.75 C24.39 29.75 23.40 29.59 23.40 29.40 Z"/><circle class="apf" cx="28.9" cy="29.6" r=".85"/></g></g></g></g></g></g></g></svg>';
+/* v18.13.7: the Kelvarrow mark (option C) replaces the pebble face in every slot; expression states are gone (data-face stays for old callers, unused) */
+const ARI_SVG='<svg class="kgl" viewBox="80 130 352 286" aria-hidden="true" focusable="false"><path d="M112 150 L256 248 L400 150 L382 206 L256 330 L130 206 Z"/><circle cx="256" cy="378" r="26"/></svg>';
 const FACE_ALIAS={work:'focus',working:'focus',sleep:'sleepy',asleep:'sleepy',wait:'idle',pleased:'happy',thinking:'think',concerned:'concern',listening:'listen',sceptic:'skeptic',sceptical:'skeptic',mischief:'sly'};
 const normFace=f=>{f=FACE_ALIAS[f]||f||'idle';return f==='happy'||f==='focus'?f:(f==='think'?'focus':'idle')};
 const AF=(face='idle',size='s',extra='')=>`<span class="arif ${size}" data-face="${normFace(face)}"${extra}></span>`;
-function ariFill(r){if(!r||!r.querySelectorAll)return;if(r.matches&&r.matches('.arif:empty')){r.innerHTML=ARI_SVG;if(!r.dataset.face)r.dataset.face='idle'}
-  r.querySelectorAll('.arif:empty').forEach(a=>{a.innerHTML=ARI_SVG;if(!a.dataset.face)a.dataset.face='idle'})}
+function ariFill(r){if(!r||!r.querySelectorAll)return;const k=a=>{a.innerHTML=ARI_SVG;if(!a.dataset.face)a.dataset.face='idle';a.setAttribute('role','img');a.setAttribute('aria-label','Kelvarrow')};if(r.matches&&r.matches('.arif:empty'))k(r);
+  r.querySelectorAll('.arif:empty').forEach(k)}
 ariFill(document);
 new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1&&n.tagName!=='svg')ariFill(n)}).observe($('#app'),{childList:true,subtree:true});
 const ari=$('#ari'),ariHead=$('#ari .arif');
@@ -6203,6 +6233,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.13.7',d:'Oct 28',items:['Plain words everywhere: First message, Follow-up and Last note, Invite and Invite pending, Exec outreach, and weeks read as this week or week of a date','A new mark: the kelvarrow replaces the old face in the app, on your Home Screen and in notifications','Today stays quiet: the sync line only shows up when something is wrong, and the top card is a name, one reason and one button']},
  {v:'v18.13.6',d:'Oct 28',items:['The send screen opens with your message right under the name, and nothing slides sideways any more','Signals read as plain sentences with a tappable source, and my own draft notes stay out of them','Every way into a person opens the same clean file, and the stage bar shows where they really are','Search keeps its results above the keyboard, and the People list reads like a normal list with clear labels']},
  {v:'v18.13.5',d:'Oct 28',items:['New name: Kelvarrow by Thrandvex. Same app, same data, one name for the app and for me','Search lives in the bottom bar, in a long pull down from the top, and behind / or Ctrl K on a computer. The magnifier at the top is gone']},
  {v:'v18.13.4',d:'Oct 28',items:['Search sits in the bottom bar, and a long pull down from the top of any screen opens it too. Type a question and it goes straight to chat','People and accounts open the same way now: who they are, why now, one main button, then signals, conversation and history','Tap any company to open its account, and any person to open their file. Back takes you exactly where you were','Company tiles carry one clean letter, tinted by AE','When nothing is waiting to send, Today shows what I found instead of a zero','A shorter menu, one style of switch, back button and button across the app, and no internal codes on screen','Updates arrive on their own: the app checks for a new version every time you come back to it']},
@@ -6708,7 +6739,7 @@ function tcol(){if(meta)meta.content=TC[root.dataset.theme]||'#E7E2D9'}tcol();ne
 /* ---------- notifications (only while Ari is open or in the background; real push comes with the native app) ---------- */
 window.ariV16N=null;let prevDue=-1;
 function notifyCheck(){if(!('Notification' in window)||Notification.permission!=='granted')return;const due=Q.filter(q=>/REPLY|DM/.test(q.tag)).length;
-  if(prevDue>=0&&due>prevDue&&document.hidden){navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.showNotification('Kelvarrow',{body:`${due} LinkedIn follow-up${due===1?' is':'s are'} waiting for you.`,icon:'/ari-192.png',badge:'/ari-badge.png',tag:'ari-due'})).catch(()=>{})}prevDue=due}
+  if(prevDue>=0&&due>prevDue&&document.hidden){navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.showNotification('Kelvarrow',{body:`${due} LinkedIn follow-up${due===1?' is':'s are'} waiting for you.`,icon:'/kelvarrow-192.png',badge:'/kelvarrow-badge-96.png',tag:'ari-due'})).catch(()=>{})}prevDue=due}
 const _apply=apply;
 
 /* =========================================================
@@ -7914,6 +7945,11 @@ V17.line=function(){const el=$('#v163sync');if(!el)return;const ob=outbox().leng
   else if(SYNC.lastOk){t=RT17.down?'Reconnecting…':(`Synced ${agoShort(SYNC.lastOk)}`).replace('Synced just now','Synced now');if(Date.now()-SYNC.lastOk>15*60e3)warn=true}
   else t='Connecting…';
   if(on&&hAge!=null&&hAge>45*60e3){t+=` · Kelvarrow last ran ${agoShort(hl)}`;warn=true}else if(sc&&!(window.ariScansOff&&ariScansOff()))t+=` · Kelvarrow updated ${sc}`;
+  /* v18.13.7: the line stays hidden unless something is wrong: offline, unsaved edits, no sync for 3 h, or Kelvarrow quiet for 3 h */
+  {const H3=3*36e5,sAge=SYNC.lastOk?Date.now()-SYNC.lastOk:null,stS=S17.loaded&&sAge!=null&&sAge>H3,stH=hAge!=null&&hAge>H3,
+    nev=!S17.loaded&&!SYNC.lastOk&&!SYNC.busy&&(Date.now()-(V17.t0||(V17.t0=Date.now())))>6e4,bad=!on||ob>0||stS||stH||nev;
+   if(bad&&on&&!ob)t=stS?`Not synced for ${agoShort(SYNC.lastOk).replace(/ ago$/,'')}`:stH?`Kelvarrow last ran ${agoShort(hl)}`:'Can’t reach your data. Retrying…';
+   el.classList.toggle('v18137show',bad);if(bad)warn=true}
   el.textContent=t;el.classList.toggle('warn',warn);el.classList.toggle('live',on&&RT17.state==='SUBSCRIBED'&&!warn)};
 addEventListener('offline',()=>{try{syncLine()}catch(e){}});addEventListener('online',()=>{try{syncLine()}catch(e){}});
 setInterval(()=>{try{if(!document.hidden)syncLine()}catch(e){}},60e3);
@@ -8239,7 +8275,7 @@ document.addEventListener('click',async e=>{let b=e.target.closest('[data-lk171]
   else if(k==='pushtest'){let sent=false;try{if(Notification.permission==='granted')await ariV17.pushOn(false)}catch(x){}
     try{const c=await ariV17.ready();if(c&&ariV17.signed()){const {error}=await c.rpc('ari_test_ping',{p_note:/iPhone|iPad/.test(navigator.userAgent)?'from iPhone':/Android/.test(navigator.userAgent)?'from Android':'from a computer'});if(!error)sent=true}}catch(x){}
     if(sent){toast(`${ICO.ok} Test ping sent to your devices. If it doesn’t show here in a minute, check this phone’s notification settings for Kelvarrow.`);setTimeout(()=>{try{renderSet171()}catch(x){}},12000)}
-    else{const reg=await navigator.serviceWorker.ready;await reg.showNotification('Kelvarrow',{body:'Local test only (offline). This is how accepts and replies will look.',icon:'/ari-192.png',badge:'/ari-badge.png',tag:'ari-test'});toast('Offline: showed a local test only.')}}
+    else{const reg=await navigator.serviceWorker.ready;await reg.showNotification('Kelvarrow',{body:'Local test only (offline). This is how accepts and replies will look.',icon:'/kelvarrow-192.png',badge:'/kelvarrow-badge-96.png',tag:'ari-test'});toast('Offline: showed a local test only.')}}
   else if(k==='motion'){const on=L171.g('ari-still','')!=='1';L171.s('ari-still',on?'1':'0');document.documentElement.classList.toggle('v171still',on);renderSet171()}
   else if(k==='sync'){b.textContent='Syncing…';await fetchNow('manual');toast(`${ICO.ok} Synced.`);renderSet171()}
   else if(k==='clear'){if(!confirm('Clear cached data on this phone? You stay signed in.'))return;wipeCache();['ari-ops','ari-lq','ari-pco','ari-last-ok'].forEach(x=>localStorage.removeItem(x));try{const ks=await caches.keys();await Promise.all(ks.filter(x=>/logos/.test(x)).map(x=>caches.delete(x)))}catch(x){}location.reload()}
@@ -11283,7 +11319,7 @@ const subOf=it=>{const p=it.p||{};return [p.title,it.co].filter(Boolean).join(' 
 function rowHTML(it,i){return `<li><button type="button" class="v1812row v1813tile" data-v1812i="${i}" aria-label="${E(it.tag+': '+it.name+(it.co?', '+it.co:''))}"><span class="v1813st${ACC.has(it.tag)?' acc':''}">${E(it.tag)}</span><b>${E(it.name||it.co)}</b><span class="s">${E(it.co||'')}</span></button></li>`}
 function upHTML(it,n){const relay=it.k==='relay';
   return `<article class="v1813card v1813hero" aria-label="Up next"><div class="r2"><span class="v1813tg acc">${E(it.tag)} · up next</span><span class="v1813tg">1 of ${n}</span></div>
-  <h2>${E(it.name||it.co)}</h2><div class="co">${E(subOf(it))}</div><p class="why">${E(it.why)}</p>
+  <h2>${E(it.name||it.co)}</h2>${it.name&&it.co?`<div class="co">${E(it.co)}</div>`:''}<p class="why">${E(it.why)}</p>
   <button type="button" class="v1813pri" ${relay?'data-v1812up="1">Answer the reply':`data-v1812go="1">Start with ${E(first(it.name)||'the first one')}`}</button></article>`}
 let NYC_ALL=false,NYC_LATER=false;
 function needsHTML(L){const P=((M()||{}).PEND||[]).filter(p=>p&&p.id!=null);const W=L.map((x,i)=>[x,i]).filter(([x])=>x.k==='withdraw');let h='',c=0;
@@ -13095,6 +13131,57 @@ function size(){try{if(!vv)return;const h=Math.round(vv.height),t=Math.max(0,Mat
   if(kb){const a=document.activeElement;const m=$('#v18133qf');if(m&&!m.hidden&&a&&m.contains(a)){const l=m.querySelector('.ql');const on=l&&l.querySelector('.qr.on');if(on&&on.getBoundingClientRect().bottom>t+h)try{on.scrollIntoView({block:'nearest'})}catch(x){}}}}catch(e){err('vv',e)}}
 if(vv){vv.addEventListener('resize',size);vv.addEventListener('scroll',size)}
 addEventListener('resize',size);document.addEventListener('focusin',()=>setTimeout(size,60));document.addEventListener('focusout',()=>setTimeout(size,250));size();
+})();
+</script>
+<script>/* v18.13.7 (Owner, Oct 28): plain-language labels at render. A new rep reads every label without training:
+   DM1/DM2/DM3 -> First message / Follow-up / Last note, Connect -> Invite (Connect sent -> Invite pending, To connect -> To invite),
+   Exec track -> Exec outreach, wk44 -> this week / week of 12 Oct, chip words in capitals -> sentence case.
+   Only text the person sees is rewritten (text nodes plus aria-label, title, placeholder). Stored values, stage keys, queue tags,
+   filters and drafts are untouched: message bodies, drafts, editors and the person's own chat bubbles are skipped.
+   The Kelvarrow mark replaces the face; motion on the old face slots is switched off here too. */
+(function(){const G=window;if(G.ariV18137)return;const V=G.ariV18137={v:'v18.13.7',errs:[],n:0};
+const err=(k,e)=>{if(V.errs.length<20)V.errs.push(k+': '+(e&&e.message||e))};
+/* face slots hold a static mark now: their old Web Animations (hop, stretch, glance, talk) become no-ops */
+try{const EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try{if(this.closest&&this.closest('.arif'))return EA.call(this,[],{duration:0})}catch(e){}return EA.apply(this,arguments)}}catch(e){err('anim',e)}
+const SKIP='textarea,input,select,script,style,code,pre,svg,[contenteditable=""],[contenteditable="true"],.msg,.fxdraft,.thread,.dthread,.bb.mine,.v182msg>p,.v182ed,[data-v1881gm],[data-nolbl]';
+const EXACT={'Connect':'Invite','CONNECT':'Invite','Connect sent':'Invite pending','Connect queued':'To invite','To connect':'To invite','Connects':'Invites',
+  'Invited':'Invite pending','Exec track':'Exec outreach','EXEC':'Exec outreach','Exec':'Exec outreach'};
+const CAPS=new Set(['FRESH','CANCEL','QUEUED','OPEN NOW','REPLY','WITHDRAW','DONE','READY','PENDING','ACCEPTED','REPLIED','RESEARCHING','RESEARCH','DRAFTING','DRAFT DUE','NURTURE','NEWS','POSTS','JOBS','ROLES','TALKS','FILES','FILE','TODAY','START','MOTION','PULL','PAGE','YOU','DELETE','STALE','NEW','LIVE','HERE']);
+const DMW={1:['first message','first messages'],2:['follow-up','follow-ups'],3:['last note','last notes']};
+const cap1=w=>w.charAt(0).toUpperCase()+w.slice(1);
+const MON3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function isoWk(d){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const n=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-n);const y0=new Date(Date.UTC(x.getUTCFullYear(),0,1));return [x.getUTCFullYear(),Math.ceil(((x-y0)/864e5+1)/7)]}
+function wk(w){w=+w;const [yr,now]=isoWk(new Date());if(w===now)return 'this week';if(w===now-1)return 'last week';
+  const y=w>now?yr-1:yr;const j4=new Date(Date.UTC(y,0,4));const mon=new Date(j4.getTime()-((j4.getUTCDay()+6)%7)*864e5+(w-1)*7*864e5);return 'week of '+mon.getUTCDate()+' '+MON3[mon.getUTCMonth()]}
+const START=/(^\s*|[.:·!?•|]\s+|\(\s*|\n\s*)$/;
+const RULES=[
+  [/\bDM3, the last note,/g,'DM3'],
+  [/\bDM([123])(s?)\b/g,(m,d,pl,off,str)=>{const w=DMW[d][pl?1:0];return START.test(str.slice(0,off))?cap1(w):w}],
+  [/\bStage: Connect sent\b/g,'Stage: Invite pending'],
+  [/\bConnect sent to\b/g,'Invite sent to'],[/\bConnect sent\b/g,'Invite sent'],[/\b([Mm])ark connect sent\b/g,'$1ark invite sent'],[/\bconnect sent\b/g,'invite sent'],
+  [/\bsent a connect\b/g,'sent an invite'],[/\ba connect\b/g,'an invite'],
+  [/\bConnect with this note\b/g,'Invite with this note'],[/\bConnect with (?=\S)/g,'Invite '],
+  [/\b([Tt])o connect with\b/g,'$1o invite'],[/\b([Tt])o connect\b/g,'$1o invite'],[/\bConnect queued\b/g,'Invite queued'],
+  [/\bConnects\b/g,'Invites'],[/\bconnects\b/g,'invites'],[/\bConnect\b(?! Gmail)/g,'Invite'],[/\b(\d+|blank|queued|no) connect\b/g,'$1 invite'],
+  [/\bExec track\b/g,'Exec outreach'],[/\bexec track\b/g,'exec outreach'],
+  [/^Invited( \d+)$/,'Invite pending$1'],
+  [/\bwk ?(\d{1,2})\b/gi,(m,w,off,str)=>{const t=wk(w);return START.test(str.slice(0,off))?cap1(t):t}],
+  [/^(\d+) MIN$/,'$1 min']];
+const HIT=/DM[123]|onnect|xec|wk ?\d|Invited|^[A-Z][A-Z ]+$|\d MIN$/;
+function lbl(s){try{if(!s||!HIT.test(s))return s;const t=s.trim();if(EXACT[t])return s.replace(t,EXACT[t]);if(CAPS.has(t))return s.replace(t,cap1(t.toLowerCase()));
+  let o=s;for(const [a,b] of RULES)o=o.replace(a,b);return o}catch(e){err('lbl',e);return s}}
+V.lbl=lbl;
+const ATTR=['aria-label','title','placeholder'];
+function skip(el){try{return !!(el&&el.closest&&el.closest(SKIP))}catch(e){return true}}
+function txt(n){const p=n.parentElement;if(!p||skip(p))return;const v=n.nodeValue,w=lbl(v);if(w!==v){n.nodeValue=w;V.n++}}
+function attrs(el){if(skip(el))return;for(const k of ATTR){const v=el.getAttribute(k);if(v){const w=lbl(v);if(w!==v)el.setAttribute(k,w)}}}
+function walk(r){if(!r)return;if(r.nodeType===3)return txt(r);if(r.nodeType!==1||skip(r))return;
+  if(r.hasAttribute&&ATTR.some(k=>r.hasAttribute(k)))attrs(r);
+  const tw=document.createTreeWalker(r,5,{acceptNode:n=>n.nodeType===1?(n.matches(SKIP)?2:3):1});let n;
+  while(n=tw.nextNode())txt(n);
+  r.querySelectorAll('[aria-label],[title],[placeholder]').forEach(attrs)}
+function run(ms){for(const m of ms){try{if(m.type==='characterData')txt(m.target);else if(m.type==='attributes')attrs(m.target);else m.addedNodes.forEach(walk)}catch(e){err('mo',e)}}}
+try{walk(document.body);new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTR})}catch(e){err('init',e)}
 })();
 </script>
 </body>
