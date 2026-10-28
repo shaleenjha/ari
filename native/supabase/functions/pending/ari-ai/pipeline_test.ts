@@ -71,7 +71,7 @@ Deno.test('pipeline: research that hits max_tokens fails once, is not retried in
 
 Deno.test('brief builder: labels by rule, brief_upsert checks pass, dashes and location words refused', () => {
   const b = buildBrief({ person: { id: 'P1', research_brief: { summary: 'S.', angles: ['a', 'b'] } }, account: { id: 'acc', company: 'Ostrevanthe Co' },
-    research: [{ source_url: 'https://e.com/1', dated: '2026-10-01', fact: 'Launched X' }, { source_url: 'http://e.com/2', dated: null, fact: 'Hiring' }],
+    research: [{ source_url: 'https://e.com/news/1', dated: '2026-10-01', fact: 'Launched X' }, { source_url: 'http://e.com/2', dated: null, fact: 'Hiring' }],
     people: [{ person_id: 'P1', name: 'N', title: 'VP Security' }] }, new Date('2026-10-28'));
   assertEquals(b.why_now.map((w) => `${w.kind}/${w.label}`), ['trigger/Verified', 'context/Inference']);
   assertEquals(checkBrief(b), []); assertEquals(b.committee[0].people[0].priority, 'P1');
@@ -189,9 +189,151 @@ Deno.test('review51: CJK, space-free and punctuated name parts are blocked', () 
   // inner punctuation: O'Brien matches "OBrien" and "O'Brien"; the 1-letter "O" piece neither blocks all nor matches alone
   assertEquals(kind("Sean O'Brien", ["O'Brien leads security", 'OBrien joined', 'Ostrevanthe Co opened an O-ring plant']), ['blocked', 'blocked', 'eligible']);
   assertEquals(kind('Jean-Luc Picard', ['Luc presented', 'Jean-Luc said', 'JeanLuc said', 'Ostrevanthe Co expanded']), ['blocked', 'blocked', 'blocked', 'eligible']);
-  // a middle initial is a part too short to match safely -> conservative block of every claim
-  assertEquals(kind('Dana J. Whitfield', ['Ostrevanthe Co raised $50M']), ['blocked']);
+  // Oct 28 2026: a middle initial is ignored for matching (it used to block every claim); the name itself still blocks
+  assertEquals(kind('Dana J. Whitfield', ['Ostrevanthe Co raised $50M', 'Whitfield spoke']), ['eligible', 'blocked']);
   // Hangul / kana names (no spaces between words) are substring-matched too
   assertEquals(kind('김민준', ['김민준이 발표했다', 'Ostrevanthe Co expanded']), ['blocked', 'eligible']);
   assertEquals(kind('さくら たなか', ['たなかさくらが登壇', 'Ostrevanthe Co expanded']), ['blocked', 'eligible']);
+});
+
+// ---- Oct 28 2026 Phase B fixes ------------------------------------------------------------------------------------------------
+import { looksLikePersonName, stripInitials } from '../_shared/ai/factcheck.ts';
+import { triggerSource } from '../_shared/ai/brief.ts';
+
+Deno.test('phaseB fix 1: dm1 stopped at max_tokens -> job failed "stop_reason max_tokens", ONE ops alert, nothing saved, no DM1-ready', async () => {
+  const f = fakeDb(); const order: string[] = [];
+  const p: Provider = { name: 'anthropic', complete(req) {
+    if (req.clientTools?.some((t) => t.name === 'save_research')) {
+      order.push('research');
+      return Promise.resolve({ provider: 'anthropic', model: req.model, text: '', tokensIn: 3000, tokensOut: 800, toolCalls: 2, citations: [],
+        searchUrls: ['https://example.com/news/vault'], toolUses: [{ id: 't', name: 'save_research', input: RESEARCH }], stopReason: 'tool_use' });
+    }
+    order.push('dm1');
+    assertEquals([req.maxTokens, req.effort], [3000, 'low']);                  // the fixed route reaches the provider
+    return Promise.resolve({ provider: 'anthropic', model: req.model, tokensIn: 3122, tokensOut: 3000, toolCalls: 0, citations: [], stopReason: 'max_tokens',
+      text: 'Hi Synthetic, saw the vault launch.\n@@META@@\n{"rationale":"r","source_facts":[{"fact":"a"},' });
+  } };
+  await enqueueResearch(f.db, 'P1');
+  await runPipeline(f.db, { ledger: ledgerFor(f.db), providers: { anthropic: p } });
+  assertEquals(f.st.pjobs.map((j) => `${j.stage}:${j.status}`), ['research:done', 'brief:done', 'dm1:failed']);
+  assertEquals(f.st.pjobs[2].error, 'draft: stop_reason max_tokens');
+  assertEquals(order, ['research', 'dm1']);                                   // no blind retry of the cut draft
+  assertEquals([...f.st.alerts.keys()], ['ops:pipeline:3']);
+  assertEquals(f.st.people.get('P1').dm, null); assertEquals(f.st.outbox.size, 0);
+  assertEquals(f.st.calls.at(-1).status, 'invalid');
+});
+
+const facts = (xs: string[]) => xs.map((fact) => ({ fact, source: 'https://news.example/x' }));
+const pick = (xs: string[], people: string[] = [], name = 'Dana Whitfield') => selectClaims({ dm_text: '', company: 'Norquiveth', domain: 'norquiveth.example',
+  contact: { name, title: 'VP Security' }, people, source_facts: facts(xs) });
+
+Deno.test('phaseB fix 3: a claim naming ANY person is dropped (other executives, known people, role holders); company facts still go', () => {
+  const r = pick([
+    'Comparably lists Avery Quinlan as VP, Information Security at Norquiveth',      // other exec, name + role
+    'Norquiveth named Morgan Hale General Counsel in August 2020',                // other exec, name only
+    'Jordan Pike oversees privacy at Norquiveth',                                 // known person on file
+    "Norquiveth's Chief Privacy Officer described a dual data model",                 // role holder, unnamed
+    'Norquiveth co-founder spoke at HLTH 2026',                                        // founder
+    'Dr. Lee joined the Norquiveth advisory group',                                    // honorific
+    'Norquiveth restructured about 220 roles in May 2026',                             // company-level: eligible
+    'UpGuard flagged infostealer malware on systems associated with Norquiveth in October 2026', // company-level: eligible
+  ], ['Jordan Pike']);
+  assertEquals(r.decisions.map((d) => d.decision), [
+    'blocked: names a person (person role)', 'blocked: names a person (person role)', 'blocked: names a person (known person)',
+    'blocked: names a person (person role)', 'blocked: names a person (person role)', 'blocked: names a person (person name)',
+    'eligible: public company-level claim', 'eligible: public company-level claim']);
+  // the exact body sent carries no person name at all
+  const bodies = JSON.stringify(r.eligible.map((e) => decisionBody('Norquiveth', 'norquiveth.example', e.claim)));
+  for (const n of ['Dana', 'Whitfield', 'Quinlan', 'Hale', 'Pike', 'Lee', 'Avery', 'Morgan', 'Jordan']) assert(!bodies.includes(n), n);
+});
+
+Deno.test('phaseB fix 3: name-shape detector ignores company words, months and common capitalised words', () => {
+  const co = new Set(['norquiveth']);
+  assertEquals(looksLikePersonName('Norquiveth Names Morgan Hale as General Counsel', co), true);
+  assertEquals(looksLikePersonName('Avery K. Quinlan leads InfoSec', co), true);
+  assertEquals(looksLikePersonName('Norquiveth offers Ixterlane Credit Monitoring after the CRM incident', co), false);
+  assertEquals(looksLikePersonName('In October 2026 Norquiveth launched ProviderConnect with DeepIntent', co), false);
+  assertEquals(looksLikePersonName('Norquiveth is a HIPAA Business Associate under the Privacy Rule', co), false);
+  assertEquals(looksLikePersonName("Norquiveth's May 2026 restructuring cut about 220 roles", co), false);
+});
+
+Deno.test('phaseB fix 3: middle initials are ignored for matching (no block-all) but still caught inside claims', () => {
+  // "Dana J. Whitfield" no longer blocks every claim (review #51 side effect)
+  assertEquals(nameParts('Dana J. Whitfield').unfoldable, false);
+  assertEquals(nameParts('Dana J. Whitfield').parts.includes('J.'), false);
+  const r = pick(['Norquiveth restructured about 220 roles in May 2026', 'Dana J. Whitfield spoke at RSA', 'Dana Whitfield spoke at RSA',
+    'D. Whitfield presented', 'J. Smith of Norquiveth presented'], [], 'Dana J. Whitfield');
+  assertEquals(r.decisions.map((d) => d.decision.split(' (')[0]), ['eligible: public company-level claim', 'blocked: mentions the contact',
+    'blocked: mentions the contact', 'blocked: mentions the contact', 'blocked: names a person']);
+  // the initial alone is not a match token: a stray "J" or "J." in a company claim is not the contact
+  assertEquals(pick(['Norquiveth Series J. round closed in 2019 for $50M'], [], 'Dana J. Whitfield').decisions[0].decision, 'eligible: public company-level claim');
+  // contact given WITHOUT the initial still catches a claim written WITH it (initials stripped from the claim)
+  assertEquals(pick(['Dana J. Whitfield joined Norquiveth']).decisions[0].decision, 'blocked: mentions the contact');
+  assertEquals(stripInitials('Dana J. Whitfield joined'), 'Dana Whitfield joined');
+  // a one-character Han part is a real name part, not an initial: still block-all
+  assertEquals(nameParts('李 明').unfoldable, true);
+  // a name of initials only cannot be matched: block all
+  assertEquals(pick(['Norquiveth restructured about 220 roles in May 2026'], [], 'D. W.').decisions[0].decision, 'blocked: contact name cannot be matched safely');
+});
+
+Deno.test('phaseB fix 3: pipeline passes every account contact to the fact filter; a claim naming one never reaches Parallel', async () => {
+  const f = fakeDb(); const sent: unknown[] = [];
+  const p: Provider = { name: 'anthropic', complete(req) {
+    if (req.clientTools?.some((t) => t.name === 'save_research')) return Promise.resolve({ provider: 'anthropic', model: req.model, text: '', tokensIn: 1,
+      tokensOut: 1, toolCalls: 0, citations: [], searchUrls: ['https://example.com/news/vault'], toolUses: [{ id: 't', name: 'save_research', input: RESEARCH }], stopReason: 'tool_use' });
+    return Promise.resolve({ provider: 'anthropic', model: req.model, tokensIn: 1, tokensOut: 1, toolCalls: 0, citations: [], stopReason: 'end_turn',
+      text: draftReply(DM, { source_facts: [{ fact: 'Ostrevanthe Co launched a patient data vault on 2026-09-15', source: 'https://example.com/news/vault' },
+        { fact: 'Synthetic Person presented the vault at a summit', source: 'https://example.com/news/summit' },
+        { fact: 'Ostrevanthe Co hired Riley Stone to run the vault', source: 'https://example.com/news/hire' }] }) });
+  } };
+  await enqueueResearch(f.db, 'P1');
+  await runPipeline(f.db, { ledger: ledgerFor(f.db), providers: { anthropic: p } },
+    { factPost: (b: unknown) => { sent.push(b); return Promise.resolve({ answers: { verdict: { type: 'choice', choice: 'true', confidence: 0.9 } } }); } });
+  assertEquals(f.st.pjobs.at(-1).stage + ':' + f.st.pjobs.at(-1).status, 'fact_check:done');
+  assertEquals(sent.length, 1);
+  const body = JSON.stringify(sent);
+  for (const n of ['Synthetic', 'Person', 'Riley', 'Stone']) assert(!body.includes(n), n);
+  const fc = f.st.checks.find((c) => c.kind === 'fact_check');
+  assertEquals(fc.result.decisions.map((d: { decision: string }) => d.decision.split(':')[0]), ['eligible', 'blocked', 'blocked']);
+});
+
+Deno.test('phaseB fix 4: only dated news, filings, press releases and job posts are triggers', () => {
+  assertEquals(triggerSource('https://www.sec.gov/Archives/edgar/data/1412408/x8k.htm'), 'filing');
+  assertEquals(triggerSource('https://www.businesswire.com/news/home/20261001/en/Norquiveth-Launches-X'), 'press_release');
+  assertEquals(triggerSource('https://www.norquiveth.example/newsroom/norquiveth-launches-x/'), 'press_release');
+  assertEquals(triggerSource('https://boards.greenhouse.io/norquiveth/jobs/123'), 'job_post');
+  assertEquals(triggerSource('https://www.linkedin.com/jobs/view/123'), 'job_post');
+  assertEquals(triggerSource('https://www.fiercehealthcare.com/health-tech/norquiveth-cuts-220'), 'news');
+  assertEquals(triggerSource('https://example.org/2026/10/12/norquiveth-layoffs'), 'news');
+  // never a trigger: policy / terms, product, directory, vendor-risk scan, policy tracker, company profile, plain pages
+  for (const u of ['https://tostracker.app/document/norquiveth-privacy', 'https://www.norquiveth.example/privacy-policy/', 'https://www.norquiveth.example/platform/intake',
+    'https://www.upguard.com/security-report/norquiveth', 'https://www.comparably.com/companies/norquiveth/executive-team',
+    'https://www.crunchbase.com/organization/norquiveth', 'https://www.norquiveth.example/about/', 'https://www.emeryreddy.com/blog/data-breach/norquiveth-data-breach',
+    'http://www.sec.gov/insecure']) assertEquals(triggerSource(u), null, u);
+  assertEquals(triggerSource('https://example.org/news/x', "Norquiveth's privacy policy says it signs BAAs"), null);
+});
+
+Deno.test('phaseB fix 4: brief keeps policy / product / undated pages as context; a real dated trigger is chosen and checked', () => {
+  const ctx = (research: { source_url: string; dated: string | null; fact: string }[]) => buildBrief({ person: { id: 'P1', research_brief: { summary: 'S.', angles: ['a'] } },
+    account: { id: 'acc', company: 'Norquiveth' }, research, people: [{ person_id: 'P1', name: 'N', title: 'VP Security' }] }, new Date('2026-10-28'));
+  // the Oct 28 staging case: a privacy-policy capture dated Oct 5 and a vendor-risk scan dated Oct 2 -> both context, no trigger
+  const b1 = ctx([{ source_url: 'https://www.upguard.com/security-report/norquiveth', dated: '2026-10-02', fact: 'UpGuard flags infostealer malware' },
+    { source_url: 'https://tostracker.app/document/norquiveth-privacy', dated: '2026-10-05', fact: "Norquiveth's privacy policy says it signs BAAs" },
+    { source_url: 'https://www.norquiveth.example/blog-x/', dated: null, fact: 'Undated blog' }]);
+  assertEquals(b1.why_now.map((w) => w.kind), ['context', 'context', 'context']);
+  assertEquals(b1.why_now.map((w) => w.label), ['Verified', 'Verified', 'Inference']);     // label rule unchanged (url + date)
+  assert(b1.quick_check[0].why.startsWith('No dated news, filing, press release or job post found')); assertEquals(b1.quick_check[0].answer, 1);
+  assertEquals(checkBrief(b1), []);
+  // a dated press release + a dated job post + an old news item: the newest real trigger leads; old news is context
+  const b2 = ctx([{ source_url: 'https://www.norquiveth.example/privacy-policy/', dated: '2026-10-20', fact: 'Policy updated' },
+    { source_url: 'https://www.businesswire.com/news/home/20260915/en/Norquiveth-X', dated: '2026-09-15', fact: 'Norquiveth launched X' },
+    { source_url: 'https://boards.greenhouse.io/norquiveth/jobs/1', dated: '2026-10-10', fact: 'Norquiveth is hiring a data privacy engineer' },
+    { source_url: 'https://www.fiercehealthcare.com/x', dated: '2025-01-01', fact: 'Old news' }]);
+  assertEquals(b2.why_now.map((w) => `${w.kind}:${w.date}`), ['trigger:2026-10-10', 'trigger:2026-09-15', 'context:2026-10-20', 'context:2025-01-01']);
+  assertEquals(b2.quick_check[0].why, 'Verified trigger (job post) dated 2026-10-10.'); assertEquals(b2.quick_check[0].answer, 0);
+  assertEquals(checkBrief(b2), []);
+  // checkBrief refuses a hand-made brief that calls a policy page or an undated page a trigger
+  const bad = { ...b2, why_now: [{ date: '2026-10-05', kind: 'trigger', label: 'Verified', text: 'Privacy policy', url: 'https://tostracker.app/document/norquiveth-privacy' },
+    { date: '', kind: 'trigger', label: 'Inference', text: 'Undated', url: 'https://www.fiercehealthcare.com/x' }] };
+  assertEquals(checkBrief(bad).filter((e) => e.startsWith('a trigger must be')).length, 2);
 });

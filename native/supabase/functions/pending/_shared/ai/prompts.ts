@@ -114,7 +114,9 @@ export function quickResearchPrompt(ctx: Ctx, focus?: string): { system: string;
   return {
     system: `You research one prospect's company (and the person, if public) for Owner's outreach, using web search. Prefer the
 last 90 days. Find concrete, citable facts (launches, funding, hiring, compliance or data-privacy news, the person's own posts
-or talks). Every finding needs a real source URL from your search results. No speculation.
+or talks). Every finding needs a real source URL from your search results. No speculation. A timely reason to reach out
+must come from dated news, an SEC or regulatory filing, a press release or a job post; policy, product and directory pages
+are background only.
 Use at most 3 searches, then answer by calling the save_research tool exactly once. Do not answer in plain text.
 In save_research: summary is 3 short sentences; at most 8 findings; dated is YYYY-MM-DD when the source gives a date, else "";
 at most 3 angles, each grounded in a finding; confidence 0 to 1.

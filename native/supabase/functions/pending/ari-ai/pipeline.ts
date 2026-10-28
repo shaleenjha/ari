@@ -79,7 +79,9 @@ export async function runStage(db: Db, deps: Deps, job: Any, o: PipelineOpts = {
       const c = await db.rpc<Any>('ari_pipeline_brief_context', { p_contact: contact });
       const meta = ctx?.person?.ai?.dm ?? {};
       const r = await factCheck({ dm_text: ctx?.person?.dm ?? '', source_facts: meta.source_facts ?? [], company: c?.account?.company ?? ctx?.person?.company ?? '',
-        domain: c?.account?.domain ?? '', contact: { name: ctx?.person?.name, title: ctx?.person?.title } }, {
+        domain: c?.account?.domain ?? '', contact: { name: ctx?.person?.name, title: ctx?.person?.title },
+        // every other person Ari knows at the account: claims naming any of them are dropped too (Oct 28 2026)
+        people: (c?.people ?? []).map((x: Any) => String(x?.name ?? '')).filter(Boolean) }, {
         key: o.factKey ?? env('PARALLEL_API_KEY'), post: o.factPost,
         cacheGet: (d, h) => db.rpc('ari_pipeline_fact_get', { p_domain: d, p_hashes: h }).then((x) => (x ?? {}) as Record<string, unknown>),
         cachePut: (d, h, claim, v) => db.rpc('ari_pipeline_fact_put', { p_domain: d, p_hash: h, p_claim: claim, p_verdict: v }).then(() => {}),

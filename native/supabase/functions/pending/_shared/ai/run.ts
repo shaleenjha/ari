@@ -49,12 +49,17 @@ export async function runTask<T>(task: Task, prompt: Prompt, schema: Schema<T>, 
   try {
     resp = await provider(deps, task).complete({ model: r.model, system: prompt.system, messages: [{ role: 'user', content: prompt.user }],
       maxTokens: r.maxTokens, temperature: r.temperature, tools: deps.tools ?? r.tools, maxToolUses: r.maxToolUses, timeoutMs: r.timeoutMs, thinking: r.thinking,
-      cache: 'system' });
+      effort: r.effort, cache: 'system' });
   } catch (e) {
     await deps.ledger.finish(callId, { status: 'error', tokensIn: 0, tokensOut: 0, costUsd: 0, error: errText(e) });
     throw e;
   }
   const cost = costUsd(r.model, resp.tokensIn, resp.tokensOut, resp.toolCalls, resp.cacheRead, resp.cacheWrite);
+  // Oct 28 2026: a cut reply is reported as its stop reason ("stop_reason max_tokens"), never as a JSON parse error
+  if (resp.stopReason && BAD_STOPS.includes(resp.stopReason)) {
+    await deps.ledger.finish(callId, { status: 'invalid', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut, costUsd: cost, error: `stop_reason ${resp.stopReason}` });
+    throw new InvalidOutput(`${task}: stop_reason ${resp.stopReason}`);
+  }
   let parsed: unknown;
   try { parsed = parse(resp.text); } catch (e) {
     await deps.ledger.finish(callId, { status: 'invalid', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut, costUsd: cost, error: errText(e) });
@@ -125,11 +130,12 @@ export async function runDraftStream(task: 'draft' | 'rewrite', prompt: Prompt, 
     return { value: out.value, callId: out.callId };
   }
   const callId = await reserve(task, prompt.system.length + prompt.user.length, deps);
-  let raw = '', sent = 0, tin = 0, tout = 0, cr = 0, cw = 0, metaSeen = false;
+  let raw = '', sent = 0, tin = 0, tout = 0, cr = 0, cw = 0, metaSeen = false, stop: string | undefined;
   try {
     for await (const ev of p.stream({ model: r.model, system: prompt.system, messages: [{ role: 'user', content: prompt.user }],
-      maxTokens: r.maxTokens, temperature: r.temperature, timeoutMs: r.timeoutMs, thinking: r.thinking, cache: 'system' })) {
+      maxTokens: r.maxTokens, temperature: r.temperature, timeoutMs: r.timeoutMs, thinking: r.thinking, effort: r.effort, cache: 'system' })) {
       if (ev.type === 'usage') { tin = ev.tokensIn ?? tin; tout = ev.tokensOut ?? tout; cr = ev.cacheRead ?? cr; cw = ev.cacheWrite ?? cw; continue; }
+      if (ev.type === 'stop') { stop = ev.reason; continue; }
       raw += ev.text;
       if (metaSeen) continue;
       const m = raw.indexOf(META);
@@ -142,6 +148,11 @@ export async function runDraftStream(task: 'draft' | 'rewrite', prompt: Prompt, 
     throw e;
   }
   const cost = costUsd(r.model, tin, tout, 0, cr, cw);
+  // the streaming parser keeps message_delta.stop_reason: a cut stream fails as "stop_reason max_tokens" (nothing saved)
+  if (stop && BAD_STOPS.includes(stop)) {
+    await deps.ledger.finish(callId, { status: 'invalid', tokensIn: tin, tokensOut: tout, costUsd: cost, error: `stop_reason ${stop}` });
+    throw new InvalidOutput(`${task}: stop_reason ${stop}`);
+  }
   let cand: unknown;
   try { cand = splitDraft(raw); } catch (e) {
     await deps.ledger.finish(callId, { status: 'invalid', tokensIn: tin, tokensOut: tout, costUsd: cost, error: errText(e) });

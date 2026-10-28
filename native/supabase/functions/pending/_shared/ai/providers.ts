@@ -68,7 +68,10 @@ export const anthropic: Provider = {
       if (j.type === 'content_block_delta' && j.delta?.type === 'text_delta') yield { type: 'delta', text: String(j.delta.text ?? '') };
       else if (j.type === 'message_start') yield { type: 'usage', tokensIn: Number(j.message?.usage?.input_tokens ?? 0),
         cacheRead: Number(j.message?.usage?.cache_read_input_tokens ?? 0), cacheWrite: Number(j.message?.usage?.cache_creation_input_tokens ?? 0) };
-      else if (j.type === 'message_delta') yield { type: 'usage', tokensOut: Number(j.usage?.output_tokens ?? 0) };
+      else if (j.type === 'message_delta') {
+        yield { type: 'usage', tokensOut: Number(j.usage?.output_tokens ?? 0) };
+        if (typeof j.delta?.stop_reason === 'string') yield { type: 'stop', reason: j.delta.stop_reason };
+      }
       else if (j.type === 'error') throw new Error('anthropic stream error');
     }
   },

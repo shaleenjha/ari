@@ -57,7 +57,9 @@ export interface AiResponse {
 }
 export type StreamEvent =
   | { type: 'delta'; text: string }
-  | { type: 'usage'; tokensIn?: number; tokensOut?: number; toolCalls?: number; cacheRead?: number; cacheWrite?: number };
+  | { type: 'usage'; tokensIn?: number; tokensOut?: number; toolCalls?: number; cacheRead?: number; cacheWrite?: number }
+  /** message_delta.delta.stop_reason (Anthropic): 'end_turn', 'max_tokens', 'refusal', ... The draft path refuses BAD_STOPS. */
+  | { type: 'stop'; reason: string };
 
 export interface Provider {
   name: ProviderName;

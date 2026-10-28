@@ -8,6 +8,7 @@ import { META, rewritePrompt, splitDraft } from './prompts.ts';
 import { parseAnthropic, parseResponsesApi, anthropic } from './providers.ts';
 import { BudgetRefused, InvalidOutput, Ledger, runDraft, runDraftStream, runTask } from './run.ts';
 import { draftReply, scripted } from '../../ari-ai/fakes_test_util.ts';
+import type { Provider } from './types.ts';
 
 Deno.env.set('SUPABASE_URL', 'https://abcdefghijklmnopqrst.supabase.co');
 
@@ -209,4 +210,61 @@ Deno.test('quick_research route: between_tools thinking, low effort, 4000 tokens
   assertEquals(b.thinking, { type: 'between_tools' }); assertEquals(b.output_config, { effort: 'low' }); assertEquals(b.max_tokens, 4000);
   assertEquals(b.tools.map((t: { name: string }) => t.name), ['web_search', 'save_research']); assertEquals(b.tools[1].strict, true);
   assertEquals(b.tool_choice, undefined);            // forced tool_choice is a 400 on Sonnet 5.5: auto + strict tool instead
+});
+
+// ---------------- Oct 28 2026 Phase B fix: DM1 cut at the token cap ----------------
+Deno.test('dm1 fix: draft / rewrite routes have >= 2500 output tokens and effort low; the request body carries the effort', () => {
+  for (const t of ['draft', 'rewrite'] as const) {
+    assert(route(t).maxTokens >= 2500, `${t} maxTokens ${route(t).maxTokens}`);
+    assertEquals(route(t).effort, 'low');
+  }
+  const body = JSON.parse(anthropicBody({ model: 'claude-opus-5-5', system: 's', messages: [{ role: 'user', content: 'u' }], maxTokens: 3000,
+    timeoutMs: 1000, effort: route('draft').effort }, true));
+  assertEquals(body.output_config, { effort: 'low' }); assertEquals(body.max_tokens, 3000); assert(!('thinking' in body) && !('temperature' in body));
+});
+
+Deno.test('dm1 fix: the Anthropic stream parser yields message_delta stop_reason', async () => {
+  const sse = ['event: message_start\ndata: {"type":"message_start","message":{"usage":{"input_tokens":3122}}}',
+    'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hi Dana"}}',
+    'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"max_tokens"},"usage":{"output_tokens":3000}}',
+    'event: message_stop\ndata: {"type":"message_stop"}'].join('\n\n') + '\n\n';
+  Deno.env.set('ANTHROPIC_API_KEY', 'test-key-not-real');
+  setTransport(() => Promise.resolve(new Response(sse, { headers: { 'content-type': 'text/event-stream' } })));
+  const evs = [];
+  for await (const e of anthropic.stream!({ model: 'claude-opus-5-5', system: 's', messages: [{ role: 'user', content: 'u' }], maxTokens: 3000, timeoutMs: 2000 })) evs.push(e);
+  setTransport(null); Deno.env.delete('ANTHROPIC_API_KEY');
+  assertEquals(evs.filter((e) => e.type === 'stop'), [{ type: 'stop', reason: 'max_tokens' }]);
+  assertEquals(evs.find((e) => e.type === 'usage' && e.tokensOut)?.type, 'usage');
+});
+
+Deno.test('dm1 fix: a reply stopped at max_tokens fails as "stop_reason max_tokens" (stream and non-stream), cost booked, never parsed', async () => {
+  const cut = `Hi Dana, saw the UpGuard flag.\n${META}\n{"rationale":"r","source_facts":[{"fact":"a","source":"https://x.example"},`;
+  // streaming: the provider ends with stop max_tokens after a cut meta block
+  const { l, rows } = memLedger();
+  const stream: Provider = { name: 'anthropic', complete: () => Promise.reject(new Error('unused')),
+    async *stream() { yield { type: 'usage', tokensIn: 3122 }; yield { type: 'delta', text: cut }; yield { type: 'usage', tokensOut: 3000 };
+      yield { type: 'stop', reason: 'max_tokens' }; } };
+  const seen: string[] = [];
+  const e1 = await assertRejects(() => runDraftStream('draft', { system: 's', user: 'u' }, { ledger: l, providers: { anthropic: stream } },
+    (t) => { seen.push(t); }), InvalidOutput);
+  assertEquals(e1.message, 'draft: stop_reason max_tokens');
+  assertEquals([rows[0].status, rows[0].error, rows[0].tokensOut], ['invalid', 'stop_reason max_tokens', 3000]);
+  assert(Number(rows[0].costUsd) > 0);
+  // non-streaming (the pipeline's dm1 path): same reason, no JSON parse error
+  const m2 = memLedger();
+  const full: Provider = { name: 'anthropic', complete: (req) => Promise.resolve({ provider: 'anthropic', model: req.model, text: cut, tokensIn: 3122,
+    tokensOut: 3000, toolCalls: 0, citations: [], stopReason: 'max_tokens' }) };
+  const e2 = await assertRejects(() => runDraft('draft', { system: 's', user: 'u' }, { ledger: m2.l, providers: { anthropic: full } }), InvalidOutput);
+  assertEquals(e2.message, 'draft: stop_reason max_tokens');
+  assertEquals([m2.rows[0].status, m2.rows[0].error], ['invalid', 'stop_reason max_tokens']);
+  // a refusal is reported the same way; a clean end_turn still parses
+  const m3 = memLedger();
+  const ref: Provider = { name: 'anthropic', complete: (req) => Promise.resolve({ provider: 'anthropic', model: req.model, text: '', tokensIn: 10,
+    tokensOut: 1, toolCalls: 0, citations: [], stopReason: 'refusal' }) };
+  assertEquals((await assertRejects(() => runDraft('draft', { system: 's', user: 'u' }, { ledger: m3.l, providers: { anthropic: ref } }), InvalidOutput)).message,
+    'draft: stop_reason refusal');
+  const m4 = memLedger();
+  const ok: Provider = { name: 'anthropic', complete: (req) => Promise.resolve({ provider: 'anthropic', model: req.model, tokensIn: 10, tokensOut: 100,
+    toolCalls: 0, citations: [], stopReason: 'end_turn', text: draftReply('Hi Sam, Ostrevanthe Co shipped a vault. Who owns it?') }) };
+  assertEquals((await runDraft('draft', { system: 's', user: 'u' }, { ledger: m4.l, providers: { anthropic: ok } })).value.text, 'Hi Sam, Ostrevanthe Co shipped a vault. Who owns it?');
 });

@@ -58,5 +58,16 @@ begin
   select count(*) into n from notifications where dedupe_key = 'ops:pipeline:' || jid and kind = 'ops_alert'; if n <> 1 then raise exception 'FAIL 6: alert %', n; end if;
   perform ari_pipeline_alert(jid);
   select count(*) into n from notifications where kind = 'ops_alert' and person_id = pid; if n <> 1 then raise exception 'FAIL 6: alert dedupe %', n; end if;
+  -- 7. Oct 28 2026 kick fix: with the budget on, an Accepted insert queues exactly ONE pg_net request in the SAME transaction
+  --    (the old vt <= now() test never saw the message pgmq.send had just stamped with clock_timestamp()). The budget flip and
+  --    the queued request are both undone by the final raise, so nothing is ever sent.
+  if position('clock_timestamp()' in pg_get_functiondef('public.ari_pipeline_kick()'::regprocedure)) = 0 then raise exception 'FAIL 7: kick still compares vt with now()'; end if;
+  update ai_budget set enabled = true where id = 1;
+  select count(*) into n from net.http_request_queue;
+  insert into people(id, name, title, company, account_id, stage, accepted, updated_by)
+  values (pid || 'k', 'Chk Kick', 'Director Security', 'Chk Co 0047', acc, 'Accepted', now(), 'check');
+  if (select count(*) from net.http_request_queue) - n <> 1 then
+    raise exception 'FAIL 7: Accepted insert queued % kick request(s) in the same transaction, want 1', (select count(*) from net.http_request_queue) - n; end if;
+  update ai_budget set enabled = false where id = 1;
   raise exception 'ALL 0047 STAGING CHECKS PASSED';
 end $$;

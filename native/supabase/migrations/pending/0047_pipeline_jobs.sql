@@ -122,7 +122,10 @@ language sql security definer set search_path = public as $$
 create or replace function public.ari_pipeline_kick() returns bigint language plpgsql security definer set search_path = public as $$
 begin
   if not exists (select 1 from ai_budget where id = 1 and enabled) then return null; end if;
-  if not exists (select 1 from pgmq.q_ari_pipeline where vt <= now()) then return null; end if;
+  -- clock_timestamp(), not now(): pgmq.send stamps vt with clock_timestamp(), which is LATER than now() (= transaction start),
+  -- so with now() a message sent in the same transaction never looked visible and the kick never fired (staging Oct 28 2026:
+  -- work waited up to 60 s for the cron). The http request itself is queued by pg_net and sent only after commit.
+  if not exists (select 1 from pgmq.q_ari_pipeline where vt <= clock_timestamp()) then return null; end if;
   return net.http_post(url := (select value from app_config where key = 'gmail_fn_base') || '/ari-ai',
     headers := jsonb_build_object('content-type', 'application/json', 'x-ari-hook', public.ari_ai_hook()),
     body := '{"internal":"pipeline"}'::jsonb, timeout_milliseconds := 5000);

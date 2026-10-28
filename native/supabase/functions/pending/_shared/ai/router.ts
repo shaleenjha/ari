@@ -26,8 +26,11 @@ export const ROUTES: Record<Task, Route> = {
   // import fix options: pick which people-database candidate is the CSV row's person (judgment, so a cheap model)
   match_profile: { provider: 'anthropic', model: 'claude-haiku-5-5', maxTokens: 250, timeoutMs: 12_000, thinking: 'off' },
   // Opus: every draft (DM1/2/3, rewrites, reply drafts; motion drafts and connect notes must route through 'draft')
-  draft: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 900, timeoutMs: 45_000, stream: true },
-  rewrite: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 900, timeoutMs: 45_000, stream: true },
+  // Oct 28 2026 fix (staging Phase B: DM1 stopped at exactly 900/900 out tokens, meta JSON cut, $0.03 lost): Opus 5.5 spends
+  // hidden adaptive-thinking tokens before the text, so 900 was too small once research + brief ride in the prompt. 3000 tokens
+  // of headroom (billed on use; reservation ~$0.10) and effort low (fewer thinking tokens, faster first text).
+  draft: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 3000, timeoutMs: 45_000, stream: true, effort: 'low' },
+  rewrite: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 3000, timeoutMs: 45_000, stream: true, effort: 'low' },
   reply_draft: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 1000, timeoutMs: 45_000 },
   // Sonnet + Anthropic web search: inline quick research
   // Oct 28 2026 fix (staging e2e: 1,675 out tokens > 1500 cap, reply cut before the JSON, $0.11 lost): no up-front thinking,

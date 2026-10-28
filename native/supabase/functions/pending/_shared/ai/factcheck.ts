@@ -1,7 +1,7 @@
 // Fact-check stage (PENDING, Oct 28 2026; Owner: Parallel = YES, public company-level claims ONLY).
 // What may leave Ari: the company name, its website domain, and a claim about the COMPANY that came from public web research
-// (a DM1 source fact whose source is an https url). Never: the contact's name or title, CRM notes, AE / deal data, or the
-// seller's own pitch text. The filter below decides that in code and logs every decision; the exact payload sent is returned
+// (a DM1 source fact whose source is an https url). Never: ANY person's name or role (the contact, other executives the
+// research found, founders; Owner, Oct 28 2026), the contact's title, CRM notes, AE / deal data, or the seller's own pitch text. The filter below decides that in code and logs every decision; the exact payload sent is returned
 // so the job row records it. Verdicts are cached by (company_domain, claim_hash) so other contacts at the same account do
 // not pay again. Parallel Decisions API: POST https://api.parallel.ai/v1/decisions, header x-api-key (docs checked Oct 28).
 // A verdict only FLAGS (needs_review); it never edits or strikes a draft.
@@ -13,6 +13,8 @@ export interface FactInput {
   company: string;
   domain: string;
   contact: { name?: string; title?: string };
+  /** every OTHER person name Ari knows for this account (contacts on file, brief committee). Any claim naming one is dropped. */
+  people?: string[];
   seller?: string;
 }
 export interface Decision { item: string; decision: string }
@@ -51,6 +53,13 @@ const NOT_LN = /[^\p{L}\p{N}]/gu;
 /** Letters and numbers only, folded ("(Dee)" -> "dee", "李 明" -> "李明", "O'Brien" -> "obrien"). */
 export const core = (s: string) => fold(s).replace(NOT_LN, '');
 
+/** A middle initial ("J", "J.") in a Latin-style script. Oct 28 2026: it is ignored for matching (alone it would match any
+ *  stray letter, and treating it as unmatchable blocked EVERY claim for "Dana J. Whitfield"). A one-character Han / kana /
+ *  Hangul part is NOT an initial: it is a real name part and still makes the name unmatchable (block all). */
+export const isInitial = (tk: string) => /^\p{L}\.?$/u.test(tk.normalize('NFC')) && !NO_SPACE.test(tk);
+/** Claim text with initials taken out ("Dana J. Whitfield" -> "Dana Whitfield"), so the whole-name checks still match it. */
+export const stripInitials = (s: string) => s.normalize('NFC').replace(/(?<![\p{L}\p{N}])\p{Lu}\.?(?=\s+\p{Lu})/gu, ' ').replace(/\s+/g, ' ');
+
 /** Name parts worth matching (review #51). The name is split on whitespace; each part is matched as written (outer
  *  punctuation trimmed: "(Dee)" -> "Dee") and with inner punctuation removed ("O'Brien" -> "OBrien"), plus its hyphen /
  *  apostrophe / dot pieces of 2+ letters ("Jean-Luc" -> "Jean", "Luc"). `spaceless` is the whole name with every non
@@ -58,8 +67,10 @@ export const core = (s: string) => fold(s).replace(NOT_LN, '');
  *  removed. `unfoldable` = some whitespace part has fewer than 2 letters/numbers left (an initial "J.", a one-character CJK
  *  part "李", a part of only marks or symbols): such a name cannot be matched safely, so every claim is blocked. */
 export function nameParts(name: string): { parts: string[]; spaceless: string; unfoldable: boolean } {
-  const n = name.normalize('NFC').trim(); if (!n) return { parts: [], spaceless: '', unfoldable: false };
-  const tokens = n.split(/\s+/).filter(Boolean);
+  const full = name.normalize('NFC').trim(); if (!full) return { parts: [], spaceless: '', unfoldable: false };
+  const tokens = full.split(/\s+/).filter((tk) => tk && !isInitial(tk));          // initials ignored (Oct 28 2026)
+  if (!tokens.length) return { parts: [], spaceless: '', unfoldable: true };       // a name of initials only: block all
+  const n = tokens.join(' ');
   const unfoldable = tokens.some((tk) => [...core(tk)].length < 2);
   const trimP = (s: string) => s.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
   const parts: string[] = [];
@@ -73,7 +84,8 @@ export function nameParts(name: string): { parts: string[]; spaceless: string; u
 }
 
 /** true when the claim names the contact in any matched form. */
-export function mentionsName(text: string, np: { parts: string[]; spaceless: string }): boolean {
+export function mentionsName(raw: string, np: { parts: string[]; spaceless: string }): boolean {
+  const text = stripInitials(raw);
   if (np.parts.some((p) => NO_SPACE.test(p) ? forms(text).some((t) => forms(p).some((x) => x && t.includes(x))) : mentions(text, p))) return true;
   // space-free whole name: "李明" for "李 明", "DanaWhitfield" / "dana-whitfield" for "Dana Whitfield". Substring on purpose:
   // a false hit only blocks a claim (safe side). Needs 4+ characters (or a no-space script) so it cannot hit by chance.
@@ -82,24 +94,85 @@ export function mentionsName(text: string, np: { parts: string[]; spaceless: str
   return forms(text).some((t) => t.replace(NOT_LN, '').includes(s)) || core(text).includes(s);
 }
 
+// ---- any person, not just the contact (Owner, Oct 28 2026: only company-level facts go to Parallel) ----
+// A claim that names or describes ANY person is dropped, whoever it is (the contact, another executive the research found,
+// a founder, a board member). Three nets, any one blocks: (1) a name Ari knows (contact + people on file + brief committee);
+// (2) a person role or appointment word (CEO, Chief ... Officer, General Counsel, VP, founder, "appointed", ...): a claim
+// about a role holder is about a person, named or not; (3) a name-shaped run of capitalised words ("Morgan Hale",
+// "Avery K. Quinlan", "Dr. Lee") that is not the company name and not a common capitalised word. False hits only drop a
+// claim (safe side); a dropped claim is logged in decisions with its reason.
+const ROLE = /(?<![\p{L}\p{N}])(ceo|cfo|cto|cio|ciso|coo|cpo|cmo|cro|cso|cdo|chief\s+[\p{L} &-]{0,40}?officer|general counsel|vice president|s?e?vp|president|founder|co-?founder|chair(man|woman|person)?|board member|board of directors|director|head of|executive|exec|spokes(person|man|woman)|appoint(s|ed|ment)?|named as|promot(ed|es)|steps? down|stepped down|resign(s|ed)?|retir(es|ed)|hired as|joins as|joined as)(?![\p{L}\p{N}])/iu;
+const HONORIFIC = /(?<![\p{L}\p{N}])(mr|mrs|ms|mx|dr|prof|sir|dame)\.?\s+\p{Lu}/u;
+// capitalised words that commonly start or fill a non-name phrase (kept short; a miss here only drops a claim)
+const COMMON = new Set(('january february march april may june july august september october november december jan feb mar apr jun jul aug ' +
+  'sep sept oct nov dec monday tuesday wednesday thursday friday saturday sunday the a an and or of in on at for to by with from its it ' +
+  'this that these those new north south east west united states america american europe european asia global national federal state ' +
+  'inc corp corporation co company ltd llc plc group holdings health healthcare care medical hospital patient patients data security ' +
+  'privacy cloud service services platform software systems system solutions technology technologies network networks digital ' +
+  'report reports policy policies notice credit monitoring business associate agreement act rule law office department agency ' +
+  'commission exchange securities stock nasdaq nyse annual quarter quarterly fiscal year form filing release press news newsroom ' +
+  'information management officer partners partner capital fund series round series ai machine learning api app apps labs lab ' +
+  'center centre university institute foundation association council board team teams community program programs project index ' +
+  'insights research survey study vendor risk breach incident attack malware ransomware infostealer customer customers product ' +
+  'products launch launched announces announced expands expanded acquires acquired acquisition merger partnership public private ' +
+  'general street journal times post daily weekly magazine wire newswire business').split(' '));
+const TITLE_WORD = /^\p{Lu}[\p{Ll}\p{M}'\u2019-]+$/u;
+/** true when the claim carries a name-shaped run: 2+ capitalised words (an initial "J." may sit between them) that are not the
+ *  company's own words and not common capitalised words. */
+export function looksLikePersonName(text: string, companyWords: Set<string> = new Set()): boolean {
+  if (HONORIFIC.test(text)) return true;
+  const toks = text.normalize('NFC').split(/[\s,;:()"\u201c\u201d]+/).map((w) => w.replace(/['\u2019]s$/u, '').replace(/[.!?]+$/u, ''));
+  let run = 0, initial = false;
+  for (const raw of toks) {
+    if (!raw) { run = 0; initial = false; continue; }
+    if (/^\p{Lu}$/u.test(raw)) { initial = true; continue; }                       // an initial ("J.") joins the run it sits in
+    const w = fold(raw);
+    const nameish = TITLE_WORD.test(raw) && !COMMON.has(w) && !companyWords.has(w);
+    run = nameish ? run + 1 + (initial && run === 0 ? 1 : 0) : 0;                    // "J. Smith" counts as a name
+    initial = false;
+    if (run >= 2) return true;
+  }
+  return false;
+}
+export type PersonHit = 'contact' | 'known person' | 'person role' | 'person name';
+/** Why a claim is about a person, or null when it is company-level. */
+export function personHit(claim: string, contact: { parts: string[]; spaceless: string }, others: { parts: string[]; spaceless: string }[],
+  companyWords: Set<string>): PersonHit | null {
+  if (mentionsName(claim, contact)) return 'contact';
+  if (others.some((np) => mentionsName(claim, np))) return 'known person';
+  if (ROLE.test(claim)) return 'person role';
+  if (looksLikePersonName(claim, companyWords)) return 'person name';
+  return null;
+}
+const wordsOf = (s: string) => new Set(s.split(/[^\p{L}\p{N}]+/u).filter(Boolean).map(fold));
+
 /** Pick the claims that MAY be sent. Pure; every item gets a logged decision. */
 export function selectClaims(f: FactInput): { eligible: { claim: string; source: string }[]; decisions: Decision[] } {
   const decisions: Decision[] = [], eligible: { claim: string; source: string }[] = [];
   const np = nameParts(f.contact.name ?? '');
+  const others = (f.people ?? []).filter((n) => typeof n === 'string' && n.trim()).map(nameParts);
+  const companyWords = new Set([...wordsOf(f.company ?? ''), ...wordsOf((f.domain ?? '').replace(/\.[a-z]+$/i, ''))]);
   const title = (f.contact.title ?? '').trim();
   const seller = f.seller ?? 'Thrandvex';
+  const reason = (c: string, src: string): string | null => {
+    const low = fold(c);
+    if (!c) return 'empty';
+    if (!/^https:\/\//i.test(src)) return 'blocked: not from public web research (record field or no url)';
+    if (np.unfoldable) return 'blocked: contact name cannot be matched safely';
+    if (others.some((o) => o.unfoldable)) return 'blocked: a known person name cannot be matched safely';
+    if (mentionsName(c, np)) return 'blocked: mentions the contact';
+    if (title && forms(c).some((t) => forms(title).some((x) => t.includes(x)))) return 'blocked: mentions the contact title';
+    if (mentions(c, seller)) return 'blocked: seller pitch';
+    if (/(?<![\p{L}\p{N}])(ae|account executive|deal|opportunity|pipeline|crm|crm|meeting with us|our call)(?![\p{L}\p{N}])/u.test(low)) return 'blocked: sales or CRM data';
+    const h = personHit(c, np, others, companyWords);
+    if (h) return `blocked: names a person (${h})`;
+    if (c.length > 400) return 'blocked: too long to be one claim';
+    if (eligible.length >= MAX_CLAIMS) return 'skipped: claim cap';
+    return null;
+  };
   for (const sf of f.source_facts ?? []) {
-    const c = String(sf.fact ?? '').trim(), low = fold(c), src = String(sf.source ?? '');
-    const why = !c ? 'empty'
-      : !/^https:\/\//i.test(src) ? 'blocked: not from public web research (record field or no url)'
-      : np.unfoldable ? 'blocked: contact name cannot be matched safely'
-      : mentionsName(c, np) ? 'blocked: mentions the contact'
-      : title && forms(c).some((t) => forms(title).some((x) => t.includes(x))) ? 'blocked: mentions the contact title'
-      : mentions(c, seller) ? 'blocked: seller pitch'
-      : /(?<![\p{L}\p{N}])(ae|account executive|deal|opportunity|pipeline|crm|crm|meeting with us|our call)(?![\p{L}\p{N}])/u.test(low) ? 'blocked: sales or CRM data'
-      : c.length > 400 ? 'blocked: too long to be one claim'
-      : eligible.length >= MAX_CLAIMS ? 'skipped: claim cap'
-      : null;
+    const c = String(sf.fact ?? '').trim(), src = String(sf.source ?? '');
+    const why = reason(c, src);
     decisions.push({ item: c.slice(0, 160), decision: why ?? 'eligible: public company-level claim' });
     if (!why) eligible.push({ claim: c, source: src });
   }
