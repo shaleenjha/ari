@@ -1,0 +1,279 @@
+name: ci
+# Oct 21 2026 (Owner): Actions minutes hit 90%. Each job runs only when its own area changed;
+# markdown/docs-only pushes run nothing. workflow_dispatch always runs everything.
+# Oct 24 2026: every job has a timeout so a hung step cannot eat the monthly minutes.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**/*.md', 'docs/**', 'app/docs/**']
+  pull_request:
+    paths-ignore: ['**/*.md', 'docs/**', 'app/docs/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-titles:
+    name: commit titles (Area - what changes, PRs only)
+    # Pushes to main already pass this check in scripts/git_sync.sh; PR branches (claude/*) do not.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
+      - name: check every PR commit title
+        env: { BASE: "${{ github.event.pull_request.base.sha }}", HEAD: "${{ github.event.pull_request.head.sha }}" }
+        run: |
+          bad=0
+          while IFS= read -r sha; do
+            t=$(git log -1 --format=%s "$sha"); b=$(git log -1 --format=%B "$sha")
+            if ! [[ "$t" =~ ^[A-Z][A-Za-z0-9]*(\ [A-Za-z0-9]+)?:\ .+ ]] || (( ${#t} > 72 )); then echo "::error::$sha title must be 'Area: what changes', 72 chars max: $t"; bad=1; fi
+            if grep -qi '^Co-Authored-By:' <<<"$b"; then echo "::error::$sha has a Co-Authored-By trailer"; bad=1; fi
+          done < <(git rev-list --no-merges "$BASE..$HEAD")
+          exit $bad
+
+  changes:
+    name: changes (which areas changed)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions: { contents: read, pull-requests: read }
+    outputs:
+      web: ${{ steps.f.outputs.web == 'true' || github.event_name == 'workflow_dispatch' }}
+      jobs: ${{ steps.f.outputs.jobs == 'true' || github.event_name == 'workflow_dispatch' }}
+      sql: ${{ steps.f.outputs.sql == 'true' || github.event_name == 'workflow_dispatch' }}
+      scripts: ${{ steps.f.outputs.scripts == 'true' || github.event_name == 'workflow_dispatch' }}
+      functions: ${{ steps.f.outputs.functions == 'true' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: f
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            web: ['.github/workflows/ci.yml', 'app/web/**']
+            jobs: ['.github/workflows/ci.yml', 'app/jobs/**']
+            sql: ['.github/workflows/ci.yml', 'app/db/**', 'native/supabase/**']
+            scripts: ['.github/workflows/ci.yml', 'scripts/**']
+            functions: ['.github/workflows/ci.yml', 'native/supabase/functions/**']
+
+  web:
+    needs: changes
+    name: web (typecheck, unit, build)
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults: { run: { working-directory: app/web } }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  jobs:
+    needs: changes
+    name: jobs (typecheck, runtime timeout/fencing, gmail fetch/parse/shadow unit)
+    if: needs.changes.outputs.jobs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults: { run: { working-directory: app/jobs } }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/jobs/package-lock.json }
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run typecheck
+      - run: npm test
+
+  drafts-eval:
+    needs: changes
+    name: drafts-eval (Quill style harness, synthetic personas)
+    if: needs.changes.outputs.jobs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults: { run: { working-directory: app/jobs } }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/jobs/package-lock.json }
+      - run: npm ci
+      - run: npm run eval:drafts
+
+  sql:
+    needs: changes
+    name: sql (schema, RLS matrix, task commands, job queue + fencing, gmail ingest)
+    if: needs.changes.outputs.sql == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env: { PGHOST: localhost, PGPORT: 5432, PGUSER: postgres, PGPASSWORD: postgres }
+    steps:
+      - uses: actions/checkout@v7
+      - run: bash app/db/run_tests.sh
+
+  sql-prod-shape:
+    needs: changes
+    permissions: { issues: write, contents: read }
+    name: sql-prod-shape (pending 0033-0040 on the prod schema shape, rollbacks, before/after probes)
+    if: needs.changes.outputs.sql == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env: { PGHOST: localhost, PGPORT: 5432, PGUSER: postgres, PGPASSWORD: postgres }
+    steps:
+      - uses: actions/checkout@v7
+      - name: postgresql-client-17 (pg_dump must match the server major)
+        run: |
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
+      - run: set -o pipefail; PATH=/usr/lib/postgresql/17/bin:$PATH bash native/supabase/migrations/pending/test/run_local.sh 2>&1 | tee prodshape.log
+      - if: failure()
+        env: { GH_TOKEN: "${{ github.token }}", GH_REPO: "${{ github.repository }}" }
+        run: |
+          { echo "sql-prod-shape log, run ${{ github.run_id }}"; echo '```'; tail -n 150 prodshape.log | head -c 60000; echo '```'; } > b.md
+          gh issue edit 1 --body-file b.md || gh issue comment 1 --body-file b.md
+
+  functions:
+    needs: changes
+    name: functions (edge functions, deno type check + every offline test)
+    if: needs.changes.outputs.functions == 'true' || needs.changes.outputs.sql == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.9.7 }   # pinned; bump on purpose, not by drift
+      # ari-push and ari-backup predate strict typing (plain-JS style, pre-existing errors); they are parse-checked only.
+      - run: deno check native/supabase/functions/pending/ari-worker-token/index.ts native/supabase/functions/pending/ari-gmail-oauth/index.ts native/supabase/functions/pending/ari-gmail-ingest/index.ts
+      # Every *_test.ts / *.test.ts under functions/ (incl. _shared), listed explicitly: directory discovery missed files.
+      # Passes with a notice when none exist.
+      - name: deno test (all edge function tests)
+        run: |
+          mapfile -t T < <(find native/supabase/functions -type f \( -name '*_test.ts' -o -name '*.test.ts' \) | sort)
+          if [ ${#T[@]} -eq 0 ]; then echo "::notice::no edge function tests found"; exit 0; fi
+          printf '%s\n' "${T[@]}"
+          deno test --allow-env --allow-read "${T[@]}"
+      - run: python3 native/supabase/functions/pending/check_no_legacy_keys.py   # S1 R7: named sb_secret keys, apikey only
+
+  scripts:
+    needs: changes
+    name: scripts (python unit)
+    if: needs.changes.outputs.scripts == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - run: python3 scripts/test_hygiene_scan.py
+      - run: python3 scripts/test_offsite_certs.py   # S1 R3: multi-recipient CMS, nightly recipient check, .cms restore (throwaway certs)
+      - run: python3 scripts/test_book_prune.py   # S1 R4: Book prune refuses mass deletes (>20 rows or >5%)
+      - run: python3 scripts/test_log_repair.py   # S1 R6: accept_ingest repair-log retired (0038 drops its RPC)
+      - run: python3 scripts/test_gmail_step.py   # spec 04 fault #1: code-owned Gmail cursor (monotonic, frozen on failure, skip after 3)
+      - run: python3 scripts/test_git_sync_pull.py   # v18.17.10: pull-first git sync (mocked GitHub API)
+      - run: python3 scripts/test_git_push_branch.py   # S1 job fencing PR: review-branch push, never main, never deletes (mocked GitHub API)
+      - run: python3 scripts/test_ari_token.py   # S1 R7: worker broker token fetch, cache, 401 re-fetch; off by default (mocked)
+      - run: python3 scripts/test_ingest_labels.py   # spec 09 step 1: event labels idempotent, no PII, approx flag, 0044 vocab parity
+
+  anti-slop-static:
+    needs: changes
+    name: anti-slop-static (S2 package verify, copy rules, CSS rules, raw hex, query-unbounded; blocking)
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    defaults: { run: { working-directory: app/web } }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      # S2 (v18.17.0): the design package checks (_build/verify.py) ported to scripts/tokens/verify.py: contrast from the
+      # final tokens.css, tokens.css == gen(tokens.json), 4 px grid and radius set, no raw hex anywhere in src/.
+      - run: npm ci && npm run lint:slop
+
+  design-lint:
+    name: design-lint (hit targets, dead taps, contrast, rendered copy, Today height, fonts/gradients/glows; 360/390/412 px, Chromium + WebKit; blocking)
+    needs: [changes, web, anti-slop-static]
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    # 10 was hit on v18.13.7 (9 min on v18.13.6) before the read-only scenarios; the time budget only, no rule changes.
+    timeout-minutes: 20
+    defaults: { run: { working-directory: app/web } }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run lint:design
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with: { name: design-lint-report, path: app/web/test-results, retention-days: 7 }
+
+  e2e:
+    name: e2e (Playwright 360/390/412 px, Chromium + WebKit; auth hygiene; verify-mobile artifact)
+    needs: [changes, web]
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults: { run: { working-directory: app/web } }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/web/package-lock.json }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run e2e
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with: { name: playwright-report, path: app/web/test-results, retention-days: 7 }
+      # verify-mobile (v18.15.0): skeleton + populated screenshots, CLS, LCP (Chromium throttled), console errors for Today,
+      # Replies, Report on WebKit iPhone 14 + Chromium Pixel 7. Fixture data only. Reuses dist/ and the installed browsers.
+      - id: verify
+        name: verify-mobile (screenshots + CLS/LCP/errors, fixture data)
+        timeout-minutes: 3
+        env: { PW_PREBUILT: '1' }
+        run: npm run verify:mobile
+      - if: always() && steps.verify.outcome != 'skipped'
+        name: verify-mobile summary (table to step summary + verify-mobile.json)
+        run: npm run verify:summary
+      - if: always() && steps.verify.outcome != 'skipped'
+        uses: actions/upload-artifact@v7
+        with: { name: verify-mobile, path: app/web/test-results/verify-mobile, retention-days: 14, if-no-files-found: warn }
+
+  failure-report:
+    name: failure-report (posts failed-step logs to issue "CI failure log" so Hark can read them)
+    needs: [web, jobs, drafts-eval, sql, sql-prod-shape, functions, scripts, anti-slop-static, design-lint, e2e]
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions: { actions: read, issues: write, contents: read }
+    env: { GH_TOKEN: "${{ github.token }}", GH_REPO: "${{ github.repository }}" }
+    steps:
+      - run: |
+          gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"' > summary.txt || true
+          : > failed.log; for id in $(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.conclusion=="failure") | .databaseId'); do gh api "repos/$GH_REPO/actions/jobs/$id/logs" | sed 's/^/x\tx\t/' >> failed.log || true; done
+          { echo "Run ${{ github.run_id }} on ${{ github.sha }}"; echo '```'; cat summary.txt; echo '```'; echo '```'; cut -f3- failed.log | sed -E 's/^[0-9T:.-]+Z //' | grep -v '^\s*$' | tail -n 220 | head -c 60000; echo '```'; } > body.md
+          n=$(gh issue list --state all --search 'in:title "CI failure log"' --json number --jq '.[0].number')
+          if [ -z "$n" ]; then gh issue create --title "CI failure log" --body-file body.md; else gh issue comment "$n" --body-file body.md; fi

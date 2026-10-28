@@ -1,0 +1,57 @@
+name: Claude Code
+
+# Locked down Oct 21 2026 (Owner, from Claude relay R-20261021-06) after a Hark relay comment on PR #2 that
+# contained "@claude" started run 39513445005. The job now needs BOTH an "@claude" mention AND the
+# label "claude-ok" on the issue or PR (Owner applies it by hand; Hark never does), and it runs on the
+# workflow's own GITHUB_TOKEN scoped below instead of the Claude GitHub App token, so it can read the repo
+# and post its reply comment but cannot push branches, edit workflows or mint an OIDC token.
+# Relay rule (plans/relay-protocol.md): never put @claude in a relay comment.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned, labeled]
+  pull_request_review:
+    types: [submitted]
+
+permissions: {}
+
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(github.event.issue.labels.*.name, 'claude-ok')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(github.event.pull_request.labels.*.name, 'claude-ok')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') &&
+        contains(github.event.pull_request.labels.*.name, 'claude-ok')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'claude-ok') &&
+        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write          # the reply / tracking comment on issues
+      pull-requests: write   # the reply / tracking comment on PRs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}   # job-scoped token above; no App token, so no id-token: write
+          claude_args: |
+            --allowedTools "Bash(deno check:*)"
