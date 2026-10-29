@@ -1,5 +1,5 @@
-/* Ari service worker (v18.4; v18.13.4: app shell fetched with no-store, cache renamed so every phone drops old copies; v18.13.5: Kelvarrow by Thrandvex in what it shows; v18.13.6: cache renamed for the iPhone fixes; v18.13.7: Kelvarrow icons, cache renamed; v18.14.2: Kyte name and icons, cache renamed). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
-const V='ari-v18.14.6',LOGOS='ari-logos-1',ACKS='ari-acks';
+/* Ari service worker (v18.4; v18.13.4: app shell fetched with no-store, cache renamed so every phone drops old copies; v18.13.5: Kelvarrow by Thrandvex in what it shows; v18.13.6: cache renamed for the iPhone fixes; v18.13.7: Kelvarrow icons, cache renamed; v18.14.2: Kyte name and icons, cache renamed; v18.14.7: plain push words, old digest count dropped). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
+const V='ari-v18.14.7',LOGOS='ari-logos-1',ACKS='ari-acks';
 const SHELL=['/ops','/ari-supabase.js?v17','/ari-fonts.css','/ari-geist.woff2','/ari-geistmono.woff2','/kelvarrow-192.png','/kelvarrow-512.png','/ari.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==LOGOS&&k!==ACKS).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -20,7 +20,13 @@ self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;c
 self.addEventListener('push',e=>{let d={};try{d=e.data?e.data.json():{}}catch(x){d={title:'Kyte',body:e.data?e.data.text():''}}
   /* v18.13.5: server push copy still says the old name; show the product name (prospect names such as "Ari ..." are left alone) */
   const kn=t=>String(t||'').replace(/\bHark\b/g,'Kyte').replace(/\b(Open|in|from) (Ari|Kelvarrow)\b/g,'$1 Kyte').replace(/\b(Ari|Kelvarrow) update\b/g,'Kyte update').replace(/^(Ari|Kelvarrow)$/,'Kyte');
-  const title=kn(d.title)||'Kyte';d.body=kn(d.body);
+  /* v18.14.7 (Owner Oct 29): plain words, the app's own labels (First message, Follow-up, Last note); never "follow-ups" for first
+     messages. The old 21:00 digest counted something other than Today, so until the server sends "N moves ready" it shows no number. */
+  const pl=t=>String(t||'').replace(/^(\d+) follow-ups? due tonight$/,'Tonight\u2019s moves are ready').replace(/^(\d+) DM1s ready\b/,'$1 first messages ready')
+    .replace(/^(\d+) DM2s drafted\b/,'$1 follow-ups ready').replace(/^(\d+) DM3s drafted\b/,'$1 last notes ready').replace(/^DM1 (ready|drafted)\b/,'First message ready')
+    .replace(/^DM2 (ready|drafted)\b/,'Follow-up ready').replace(/^DM3 (ready|drafted)\b/,'Last note ready').replace(/\bTheir DM1 draft is ready\b/,'Their first message is drafted').replace(/\bTheir DM1 drafts are ready\b/,'Their first messages are drafted');
+  const pb=(t,b)=>/^\d+ follow-ups? due tonight$/.test(String(t||''))&&/\bDM\d\b/.test(String(b||''))?'Open Kyte to see them.':pl(b);
+  const title=pl(kn(d.title))||'Kyte';d.body=pb(kn(d.title),kn(d.body));
   /* always show (Safari revokes a subscription whose pushes show nothing), then tell the backend this device showed it (v18.2.3) */
   const tag=String(d.tag||d.kind||'ari');
   e.waitUntil(self.registration.showNotification(title,{body:d.body||'',tag,renotify:!!d.tag,icon:'/kyte-192.png',badge:'/kyte-badge-96.png',timestamp:typeof d.ts==='number'?d.ts:(d.ts?Date.parse(d.ts)||Date.now():Date.now()),data:{url:d.url||'/ops'}})

@@ -80,3 +80,16 @@ n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_ai_%' or pro
 [ "$n" = "0000" ] || { echo "FAIL 0041 rollback left objects ($n)"; exit 1; }; echo "0041 ROLLBACK CHECK PASSED"
 api "$PEND/0041_ai_layer.sql"; echo "applied 0041 again after the rollback"
 $P -f "$HERE/checks_after_0041.sql" 2>&1 | grep -E "PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+
+# 0048 push digest = Today's move total (PENDING), on top of the above. Added Oct 29 2026. checks_after_0048.sql is prod-safe:
+# synthetic rows, ends in a deliberate raise ("ALL 0048 CHECKS PASSED ..."), so its psql exit is non-zero by design.
+chk48() { local o; o=$($P -f "$HERE/checks_after_0048.sql" 2>&1 || true); echo "$o" | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+  grep -q "ALL 0048 CHECKS PASSED" <<<"$o" || { echo "FAIL 0048 checks"; exit 1; }; }
+api "$PEND/0048_push_moves_digest.sql"; echo "applied 0048"
+chk48
+api "$PEND/0048_push_moves_digest.sql"; echo "re-applied 0048 (idempotence): no error"
+api "$PEND/0048_push_moves_digest_rollback.sql"; api "$PEND/0048_push_moves_digest_rollback.sql"; echo "rolled back 0048 (twice)"
+n=$($P -At -c "select count(*) from pg_proc where proname in ('ari_move_total','ari_move_push_copy','ari_norm_co')")$($P -At -c "select count(*) from pg_proc where proname = 'ari_due_digest' and prosrc like '%follow-up%due tonight%'")$($P -At -c "select count(*) from supabase_migrations.schema_migrations where version = '0048'")
+[ "$n" = "010" ] || { echo "FAIL 0048 rollback ($n)"; exit 1; }; echo "0048 ROLLBACK CHECK PASSED"
+api "$PEND/0048_push_moves_digest.sql"; echo "applied 0048 again after the rollback"
+chk48

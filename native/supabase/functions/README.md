@@ -100,3 +100,9 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
    caught by the 10-minute fallback.
 7. Off switch: `gcloud pubsub subscriptions delete ari-gmail-push-sub` (the watch lapses in 7 days); everything AI stops at once with
    `update ai_budget set enabled = false`.
+
+## ari-push copy (Oct 29 2026, prepared, NOT deployed)
+`ari-push/index.ts` and `pending/ari-push/index.ts`: the summary words for batches of 4+ say Kyte and the app's labels
+("5 first messages ready", "Their first messages are drafted in Kyte.") instead of "DM1s ready ... in Ari". Copy only; transport,
+auth and grouping unchanged. The web service worker (v18.14.7) already rewrites the old words on the phone, so this is not urgent.
+

@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.6"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.7"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -7434,8 +7434,9 @@ function tcol(){if(meta)meta.content=TC[root.dataset.theme]||'#E7E2D9'}tcol();ne
 
 /* ---------- notifications (only while Ari is open or in the background; real push comes with the native app) ---------- */
 window.ariV16N=null;let prevDue=-1;
-function notifyCheck(){if(!('Notification' in window)||Notification.permission!=='granted')return;const due=Q.filter(q=>/REPLY|DM/.test(q.tag)).length;
-  if(prevDue>=0&&due>prevDue&&document.hidden){navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.showNotification('Kyte',{body:`${due} LinkedIn follow-up${due===1?' is':'s are'} waiting for you.`,icon:'/kyte-192.png',badge:'/kyte-badge-96.png',tag:'ari-due'})).catch(()=>{})}prevDue=due}
+function notifyCheck(){if(!('Notification' in window)||Notification.permission!=='granted')return;let due=Q.filter(q=>/REPLY|DM/.test(q.tag)).length,send=due,reps=0;
+  /* v18.14.7: Today's shared move total (badge, hero, 1 of N) and the server push's words */try{if(window.ariV1812&&ariV1812.items){const L=ariV1812.items();due=L.length;send=L.filter(x=>x.k!=='withdraw').length;reps=L.filter(x=>x.grp==='r').length}}catch(e){}
+  if(prevDue>=0&&due>prevDue&&document.hidden){const m=Math.max(1,Math.round(send*1.2));navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.showNotification(`${due} move${due===1?'':'s'} ready`,{body:send?`About ${m} minute${m===1?'':'s'}.${reps?' Replies first.':''}`:'Old invites to tidy up.',icon:'/kyte-192.png',badge:'/kyte-badge-96.png',tag:'ari-due'})).catch(()=>{})}prevDue=due}
 const _apply=apply;
 
 /* =========================================================

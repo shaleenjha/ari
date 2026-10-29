@@ -81,18 +81,20 @@ export async function sendPush(sub, payload, cfg, opts = {}) {
 // names only when the titles really carry distinct names (push_show_names on).
 const KIND_WORD = { accepted: ["accept", "accepts"], replied: ["reply", "replies"], meeting: ["meeting", "meetings"],
   research_done: ["brief ready", "briefs ready"], draft_due: ["draft ready", "drafts ready"], test: ["test", "tests"] };
+// v18.14.7 (Owner Oct 29 2026): Kyte by name and the app's own labels in what the phone shows (First message, Follow-up, Last
+// note), never DM1/DM2/DM3. The keys stay: they are the generic titles notifications_privacy() writes.
 const GENERIC_TITLE = { "New reply on LinkedIn": "new replies on LinkedIn", "New connection accepted": "new connections accepted",
-  "Meeting set": "meetings set", "Brief ready": "briefs ready", "DM1 ready": "DM1s ready", "DM2 drafted": "DM2s drafted",
-  "DM3 drafted": "DM3s drafted", "Draft ready": "drafts ready", "Ari update": "updates in Ari" };
-const GENERIC_BODY = { replied: "Open Ari to answer them.", accepted: "Their DM1 drafts are ready in Ari.", meeting: "Open Ari to see the details.",
-  research_done: "They are waiting in Ari.", draft_due: "Ready for your review in Ari." };
+  "Meeting set": "meetings set", "Brief ready": "briefs ready", "DM1 ready": "first messages ready", "DM2 drafted": "follow-ups ready",
+  "DM3 drafted": "last notes ready", "Draft ready": "drafts ready", "Ari update": "updates in Kyte" };
+const GENERIC_BODY = { replied: "Open Kyte to answer them.", accepted: "Their first messages are drafted in Kyte.", meeting: "Open Kyte to see the details.",
+  research_done: "They are waiting in Kyte.", draft_due: "Ready for your review in Kyte." };
 export function summarize(kind, list) {
   const n = list.length, titles = list.map((r) => String(r.title || "").trim());
   const allGeneric = titles.every((t) => t in GENERIC_TITLE || t === "");
   const uniq = [...new Set(titles)];
   if (allGeneric || uniq.length < n) {
     const title = uniq.length === 1 && GENERIC_TITLE[uniq[0]] ? `${n} ${GENERIC_TITLE[uniq[0]]}` : `${n} ${KIND_WORD[kind]?.[1] ?? "updates"}`;
-    return { title, body: GENERIC_BODY[kind] ?? "Open Ari to see them." };
+    return { title, body: GENERIC_BODY[kind] ?? "Open Kyte to see them." };
   }
   const names = [...new Set(titles.map((t) => t.replace(/^(Research done: |Brief ready: |DM\d (ready|drafted) for |Meeting set( with|:) )/, "").replace(/ (accepted|replied)$/, "")))];
   return { title: `${n} new ${KIND_WORD[kind]?.[1] ?? kind}`, body: names.slice(0, 4).join(", ") + (names.length > 4 ? ` and ${names.length - 4} more` : "") };

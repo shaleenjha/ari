@@ -27,6 +27,15 @@
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
 
+## 0048 push digest = Today's move total (Oct 29 2026): WRITTEN, NOT APPLIED ANYWHERE
+Owner's 21:00 IST push said "27 follow-ups due tonight / 20 DM1, 7 DM3. Ready when you are." while Today counts moves another way.
+`0048_push_moves_digest.sql` adds `ari_move_total(date)` (the client's ariV1812.items() rules in SQL, parts returned),
+`ari_move_push_copy(jsonb)` (title "N moves ready", body "About M minutes. Replies first.", Today's hero line) and `ari_norm_co(text)`
+(normCo), and points `ari_due_digest()` at them. Same cron job, kind and dedupe key. Function changes only. Rollback
+`0048_push_moves_digest_rollback.sql` restores the 0002 digest byte for byte. Checks `test/checks_after_0048.sql` (one statement,
+synthetic rows, deliberate raise: `ALL 0048 CHECKS PASSED` = pass); CI runs apply, checks, re-apply, rollback x2, apply, checks in
+`test/run_local.sh`. Prod: needs a short-lived PAT from Owner (runbook work/oct29/push_fix/README.md, not in the repo).
+
 ## 0046 draft assumptions (Oct 28 2026): STAGING ONLY, not on prod
 Spec plans/assumptions-to-confirm.md (Owner option C, 13:32 IST); runbook docs/runbooks/draft-assumptions.md. Files:
 `0046_draft_assumptions.sql`, `0046_draft_assumptions_rollback.sql` (refuses while confirmed/struck items exist unless
