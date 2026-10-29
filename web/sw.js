@@ -1,5 +1,5 @@
-/* Ari service worker (v18.4; v18.13.4: app shell fetched with no-store, cache renamed so every phone drops old copies; v18.13.5: Kelvarrow by Thrandvex in what it shows; v18.13.6: cache renamed for the iPhone fixes; v18.13.7: Kelvarrow icons, cache renamed). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
-const V='ari-v18.14.1',LOGOS='ari-logos-1',ACKS='ari-acks';
+/* Ari service worker (v18.4; v18.13.4: app shell fetched with no-store, cache renamed so every phone drops old copies; v18.13.5: Kelvarrow by Thrandvex in what it shows; v18.13.6: cache renamed for the iPhone fixes; v18.13.7: Kelvarrow icons, cache renamed; v18.14.2: Kyte name and icons, cache renamed). Scope "/". Only Ari's own routes are handled; everything else passes through (Supabase). */
+const V='ari-v18.14.2',LOGOS='ari-logos-1',ACKS='ari-acks';
 const SHELL=['/ops','/ari-supabase.js?v17','/ari-fonts.css','/ari-geist.woff2','/ari-geistmono.woff2','/kelvarrow-192.png','/kelvarrow-512.png','/ari.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==LOGOS&&k!==ACKS).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -7,7 +7,7 @@ const isAri=p=>p==='/ops'||p==='/ops.html';
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
   /* app shell: network first, cached copy when offline (the app then shows its last data from local storage) */
   if(u.origin===location.origin&&isAri(u.pathname)){
-    e.respondWith(fetch(r.url,{cache:'no-store',credentials:'same-origin'}).then(res=>{if(res.redirected)return Response.redirect(res.url,302);if(res.ok){const cp=res.clone();caches.open(V).then(c=>c.put('/ops',cp))}return res}).catch(()=>caches.match('/ops',{ignoreSearch:true}).then(m=>m||new Response('<!doctype html><meta name=viewport content="width=device-width"><body style="font:16px system-ui;padding:40px;background:#1C2F9E;color:#F4EFE6">Kelvarrow is offline and has nothing cached yet. Open it once with a connection.</body>',{headers:{'Content-Type':'text/html'}}))));return}
+    e.respondWith(fetch(r.url,{cache:'no-store',credentials:'same-origin'}).then(res=>{if(res.redirected)return Response.redirect(res.url,302);if(res.ok){const cp=res.clone();caches.open(V).then(c=>c.put('/ops',cp))}return res}).catch(()=>caches.match('/ops',{ignoreSearch:true}).then(m=>m||new Response('<!doctype html><meta name=viewport content="width=device-width"><body style="font:16px system-ui;padding:40px;background:#1C2F9E;color:#F4EFE6">Kyte is offline and has nothing cached yet. Open it once with a connection.</body>',{headers:{'Content-Type':'text/html'}}))));return}
   /* Ari's static files: cache first */
   if(u.origin===location.origin&&/^\/((ari|kelvarrow)[-.][^/]*)$/.test(u.pathname)){e.respondWith(caches.match(r).then(m=>m||fetch(r).then(res=>{if(res.ok){const cp=res.clone();caches.open(V).then(c=>c.put(r,cp))}return res})));return}
   /* company logos (favicon service): cache first, kept across builds, capped */
@@ -17,13 +17,13 @@ self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;c
   /* everything else (the Sheet API, LinkedIn, the old Outbound HQ app): straight to the network */
 });
 /* web push from the ari-push edge function: {title, body, url, tag, kind, ts} */
-self.addEventListener('push',e=>{let d={};try{d=e.data?e.data.json():{}}catch(x){d={title:'Kelvarrow',body:e.data?e.data.text():''}}
+self.addEventListener('push',e=>{let d={};try{d=e.data?e.data.json():{}}catch(x){d={title:'Kyte',body:e.data?e.data.text():''}}
   /* v18.13.5: server push copy still says the old name; show the product name (prospect names such as "Ari ..." are left alone) */
-  const kn=t=>String(t||'').replace(/\bHark\b/g,'Kelvarrow').replace(/\b(Open|in|from) Ari\b/g,'$1 Kelvarrow').replace(/\bAri update\b/g,'Kelvarrow update').replace(/^Ari$/,'Kelvarrow');
-  const title=kn(d.title)||'Kelvarrow';d.body=kn(d.body);
+  const kn=t=>String(t||'').replace(/\bHark\b/g,'Kyte').replace(/\b(Open|in|from) (Ari|Kelvarrow)\b/g,'$1 Kyte').replace(/\b(Ari|Kelvarrow) update\b/g,'Kyte update').replace(/^(Ari|Kelvarrow)$/,'Kyte');
+  const title=kn(d.title)||'Kyte';d.body=kn(d.body);
   /* always show (Safari revokes a subscription whose pushes show nothing), then tell the backend this device showed it (v18.2.3) */
   const tag=String(d.tag||d.kind||'ari');
-  e.waitUntil(self.registration.showNotification(title,{body:d.body||'',tag,renotify:!!d.tag,icon:'/kelvarrow-192.png',badge:'/kelvarrow-badge-96.png',timestamp:typeof d.ts==='number'?d.ts:(d.ts?Date.parse(d.ts)||Date.now():Date.now()),data:{url:d.url||'/ops'}})
+  e.waitUntil(self.registration.showNotification(title,{body:d.body||'',tag,renotify:!!d.tag,icon:'/kyte-192.png',badge:'/kyte-badge-96.png',timestamp:typeof d.ts==='number'?d.ts:(d.ts?Date.parse(d.ts)||Date.now():Date.now()),data:{url:d.url||'/ops'}})
     .then(()=>ack(tag)).catch(()=>ack('show-failed:'+tag)))});
 /* v18.4: the worker no longer calls Supabase with the public key (anon). It keeps a small receipt ("this phone showed the push")
    in its own cache and tells any open Ari window, which stamps it with the signed-in session (rpc ari_push_ack as authenticated). */
