@@ -15,10 +15,11 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.2"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.3"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
+<script>/* v18.14.3 t5: switch and theme before the first paint */(function(){try{var L=localStorage,m=location.search.match(/[?&]ui5=([^&#]*)/);if(m){var v=decodeURIComponent(m[1]);if(v==='1'||v==='on')L.setItem('ari-ui5','1');else if(v==='0'||v==='off')L.removeItem('ari-ui5')}if(L.getItem('ari-ui5')!=='1')return;var p=L.getItem('ari-k5-theme')||'system',d=p==='black'||(p==='system'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);var h=document.documentElement;h.classList.add('t5on');h.setAttribute('data-k5',d?'black':'light');var t=document.querySelector('meta[name=theme-color]');if(t)t.content=d?'#000000':'#FFFFFF';var c=document.querySelector('meta[name=color-scheme]');if(c)c.content='light dark'}catch(e){}})();</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Kyte">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4089,6 +4090,382 @@ html.t4on #v171set>.t4advb{margin-top:24px;min-height:56px;width:100%;border:0;b
 html.t4on #v171set>.t4advb:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 html.t4on #v171set.t4advon>.t4advb .v181ch{transform:rotate(90deg)}
 html.t4on #v171set>#t4set{order:0}
+/* =====================================================================
+   v18.14.3 Kyte phone-first redesign (t5), part 1: tokens, themes, type, rhythm, calm urgency, motion.
+   Everything is scoped under html.t5on (on with ?ui5=1, remembered on the device; ?ui5=0 turns it off).
+   Light = Editorial with ink L2. Black = B4 cool porcelain. Theme: System (default) / Light / Black in Settings.
+   Spec: work/oct29/phone_layout_audit/AUDIT.md, DECISIONS.md, ink_options/NOTES.md.
+   ===================================================================== */
+html.t5on{
+  --k-cap:.8125rem;--k-body:1rem;--k-title:1.1875rem;
+  --k-large:clamp(1.4375rem,1.308rem + .553vw,1.75rem);
+  --k-display:clamp(2.125rem,1.866rem + 1.105vw,2.75rem);
+  --k-sp1:4px;--k-sp2:8px;--k-sp3:12px;--k-sp4:16px;--k-sp6:24px;--k-sp8:32px;--k-sp12:48px;
+  --k-r1:6px;--k-r2:12px;--k-g:20px;--k-hit:48px;
+  --k-std:cubic-bezier(.2,0,0,1);--k-acc:cubic-bezier(.3,0,.8,.15);
+  --k-springA:linear(0,.041,.138,.259,.386,.506,.614,.705,.781,.842,.889,.925,.952,.971,.984,.993,.999,1.002,1.004,1.005,1.005,1.004,1.003,1,1);
+  --k-springB:linear(0,.04,.131,.243,.358,.466,.562,.645,.715,.774,.821,.859,.89,.914,.934,.949,.96,.97,.977,.982,.986,.99,.992,.994,1);
+  --ds-hit:48px;--hit:48px;
+}
+/* Light: Editorial, Thrandvex ink + Kyte indigo (L2). White page, rules over sections, no card boxes. */
+html.t5on[data-k5="light"]{color-scheme:light;
+  --bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F4F4F8;--ink:#2D2C4D;--ink2:#53536D;--ink3:#6E6D88;
+  --line:#E9E9F2;--line2:#C9C8D9;--fill:#F4F4F8;--acc:#2A4274;--on-acc:#FFFFFF;--inv:#FFFFFF;--tint:#EEF0F6;--danger:#B3261E;--glass:#FFFFFF;
+  --ari-rim:rgba(45,44,77,.55);--ari-cs:rgba(45,44,77,.12);--t3-danger:#2D2C4D;--t3-ban:#F4F4F8;--t3-edge:#6E6D88;
+  --k-hl:#2A4274;--k-link:#2A4274;--k-btn:#2A4274;--k-onbtn:#FFFFFF;--k-rule:#2D2C4D;--k-err:#B3261E;
+  --k-card:transparent;--k-cardbd:transparent;--k-cardr:0px;--k-cardpad:0px;--k-rb:6px;
+  --k-chart:#C2C1EB;--k-band:#E9E9F2;--k-bar:#E9E9F2;--k-fun:#2D2C4D;--k-scrim:rgba(45,44,77,.32);--k-sheet:#FFFFFF}
+/* Black: B4 cool porcelain. True black page, #0A0B10 cards with a hairline, elevation by surface step. */
+html.t5on[data-k5="black"]{color-scheme:dark;
+  --bg:#000000;--bg2:#0A0B10;--bg3:#14161F;--ink:#E6E8F0;--ink2:#A6ABBF;--ink3:#8B90A6;
+  --line:#23263A;--line2:#3A3E55;--fill:#14161F;--acc:#8FA3F0;--on-acc:#0B0D18;--inv:#0A0B10;--tint:#151B2E;--danger:#FF6B5E;--glass:#000000;
+  --ari-rim:rgba(230,232,240,.55);--ari-cs:rgba(230,232,240,.12);--t3-danger:#E6E8F0;--t3-ban:#14161F;--t3-edge:#8B90A6;
+  --k-hl:#8FA3F0;--k-link:#8FA3F0;--k-btn:#3E5CC4;--k-onbtn:#FFFFFF;--k-rule:#23263A;--k-err:#FF6B5E;
+  --k-card:#0A0B10;--k-cardbd:#23263A;--k-cardr:12px;--k-cardpad:16px;--k-rb:12px;
+  --k-chart:#3A4A86;--k-band:#1A2240;--k-bar:#1A1D2B;--k-fun:#A6ABBF;--k-scrim:rgba(0,0,0,.6);--k-sheet:#14161F}
+
+/* ---------- type: 5 sizes in rem (13/16/19/23/34), 2 weights; the root follows the iPhone text size ---------- */
+@supports (font:-apple-system-body){html.t5on{font:-apple-system-body}}
+html.t5on body{font-size:var(--k-body);line-height:1.45;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html.t5on,html.t5on body{background:var(--bg)!important;color:var(--ink)}
+html.t5on b,html.t5on strong,html.t5on h1,html.t5on h2,html.t5on h3,html.t5on th{font-weight:600}
+html.t5on .cap{font-size:var(--k-cap)!important;line-height:1.4!important;letter-spacing:0!important;text-transform:none!important;font-weight:400}
+html.t5on .v18n,html.t5on .num,html.t5on [data-v18n],html.t5on .t5num{font-variant-numeric:tabular-nums}
+html.t5on :focus-visible{outline:2px solid var(--k-link)!important;outline-offset:2px}
+
+/* ---------- header: one title, no mascot; the menu stays ---------- */
+html.t5on .chrome{background:var(--bg)!important}
+html.t5on #v1813ttl{font-size:var(--k-large)!important;line-height:1.2!important;font-weight:600!important;letter-spacing:-.015em;color:var(--ink)!important}
+html.t5on #hdAri{order:5;width:48px!important;height:48px!important;min-width:48px!important;margin-left:4px;border-radius:24px}
+html.t5on #hdAri>.arif{display:none!important}
+html.t5on #hdAri .t5me{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--line2);color:var(--ink2)}
+html.t5on #hdAri .t5me svg{width:18px;height:18px}
+.t5me{display:none}
+html.t5on .chrome .row1 .who{order:1;flex:1;min-width:0}
+html.t5on #v1828nav{order:4}
+html.t5on #v1828nav,html.t5on #v1828nav *{color:var(--ink2)!important}
+
+/* ---------- tab bar: no badge, 13 px labels, 24 px icons, rule on top ---------- */
+html.t5on .tbar{background:var(--bg)!important;border-top:1px solid var(--line)!important}
+html.t5on[data-k5="light"] .tbar{border-top-color:var(--k-rule)!important}
+html.t5on .tbi .dot,html.t5on .tbi .bd{display:none!important}
+html.t5on .tbi,html.t5on #v18134sb{min-height:56px!important;color:var(--ink3)!important;font-weight:400!important}
+html.t5on .tbi .v163tl,html.t5on #v18134sb .v163tl{font-size:var(--k-cap)!important;font-weight:400!important;line-height:1.3!important}
+html.t5on .tbi.on,html.t5on .tbi.on .v163tl{color:var(--ink)!important;font-weight:600!important}
+html.t5on .tbi svg,html.t5on #v18134sb svg{width:24px!important;height:24px!important}
+
+/* ---------- surfaces: radii 6 / 12; cards become rules (light) or hairline cards (black) ---------- */
+html.t5on .v1813card,html.t5on .v171card,html.t5on .v18c,html.t5on .t3card,html.t5on .t3list,html.t5on .v1813acct{
+  background:var(--k-card)!important;box-shadow:none!important;border:1px solid var(--k-cardbd)!important;border-radius:var(--k-cardr)!important}
+html.t5on[data-k5="light"] .v1813card,html.t5on[data-k5="light"] .v171card,html.t5on[data-k5="light"] .v18c{border-width:0!important;border-top:1px solid var(--k-rule)!important;padding-left:0!important;padding-right:0!important}
+html.t5on button,html.t5on .press{border-radius:var(--k-rb)}
+
+/* ---------- calm urgency: no red or amber states; order and words carry priority ---------- */
+html.t5on .v181hs.b-cooling,html.t5on .v171chip.v181hc.b-cooling,html.t5on .v182hch.b-cooling,html.t5on .v182hch.b-cold,
+html.t5on .v181hs.b-cold,html.t5on .v171chip.v181hc.b-cold{background:none!important;color:var(--ink3)!important;box-shadow:none!important;border:0!important}
+html.t5on .v182mt .m-cold b,html.t5on .v181red,html.t5on .t3drop,html.t5on .t3verdict b.bad{color:var(--ink)!important}
+html.t5on .v181dist i.b-cooling,html.t5on .v181lg i.b-cooling,html.t5on .v181dist i.b-cold,html.t5on .v181lg i.b-cold{background:var(--line2)!important}
+html.t5on #v181cold .ic,html.t5on #v181cold em{background:none!important;color:var(--ink2)!important}
+html.t5on .v182fr.leak .fb182 i{background:var(--k-fun)!important}
+html.t5on .v182fr.leak em,html.t5on .v182fr.leak b{color:var(--ink)!important;font-weight:600!important}
+html.t5on .v182lk2{background:none!important;border:0!important;box-shadow:none!important;padding-left:0!important;color:var(--ink)!important}
+html.t5on .v182lk2 b{color:var(--ink)!important}
+html.t5on .t3ban .t3dot{background:var(--k-hl)!important}
+html.t5on em.v18d{background:none!important;color:var(--ink3)!important;box-shadow:none!important;font-style:normal;font-weight:400!important;padding:0!important}
+html.t5on .v182n.over{color:var(--ink)!important;font-weight:600!important}
+html.t5on .v184dot.amb,html.t5on .v184dot.red,html.t5on .v184wk i.amb,html.t5on .v184wk i.red,html.t5on .v184wk i.amb b,html.t5on .v184wk i.red b{background:var(--line2)!important;color:var(--ink2)!important}
+html.t5on .v184warn,html.t5on .fxcap{color:var(--ink2)!important;font-weight:400!important}
+html.t5on .v184st .d.off{background:var(--line2)!important}
+html.t5on .v182qo span.no{box-shadow:inset 0 0 0 1px var(--line2)!important;color:var(--ink)!important;background:none!important}
+html.t5on .v182why.no{color:var(--ink)!important}
+html.t5on #pr,html.t5on .t5streak{display:none!important}
+html.t5on .rec .rd{background:var(--k-err)!important;animation:none!important}
+html.t5on .sw.on,html.t5on .v181set .sw.on{background:var(--k-btn)!important;background-image:none!important}
+/* real errors keep red, one token */
+html.t5on .v186err,html.t5on .v186none span,html.t5on .v171li .err,html.t5on .v1811flag,html.t5on .v1811miss{color:var(--k-err)!important}
+
+/* ---------- 11 pt floor and 48 px hits on the shared controls ---------- */
+html.t5on .apver{font-size:var(--k-cap)!important;letter-spacing:0!important}
+html.t5on .v171seg{padding:2px!important;border-radius:var(--k-r1)!important;background:var(--bg3)!important}
+html.t5on .v171seg span{min-height:44px!important;display:grid!important;place-items:center;border-radius:4px!important;font-size:var(--k-cap)!important}
+html.t5on .v171seg span.on{background:var(--bg)!important;color:var(--ink)!important;box-shadow:inset 0 0 0 1px var(--line2)!important}
+html.t5on .v171btn{min-height:44px!important;border-radius:var(--k-rb)!important}
+
+/* ---------- motion: 150 to 250 ms springs, press scale, never loops; reduced motion = short fades ---------- */
+html.t5on .press,html.t5on button,html.t5on .t5row{transition:transform 160ms var(--k-std),background-color 160ms var(--k-std),opacity 160ms var(--k-std)}
+html.t5on .press:active,html.t5on button:active,html.t5on .t5row:active{transform:scale(.98);transition-duration:100ms}
+@supports not (transition-timing-function:linear(0,1)){html.t5on{--k-springA:cubic-bezier(.2,0,0,1);--k-springB:cubic-bezier(.2,0,0,1)}}
+@media (prefers-reduced-motion:reduce){
+  html.t5on *,html.t5on *:before,html.t5on *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:120ms!important;transition-property:opacity,background-color,color!important}
+  html.t5on .press:active,html.t5on button:active,html.t5on .t5row:active{transform:none!important}}
+/* ===== v18.14.3 t5 part 2: Today, contact page, Report, Settings, sheet, tablet and desktop ===== */
+/* ---------- Today: one next move, then Your call rows, then the Up next list ---------- */
+html.t5on #ready{padding-left:var(--k-g)!important;padding-right:var(--k-g)!important}
+html.t5on .v1813h1{font-size:var(--k-body)!important;line-height:1.3!important;font-weight:400!important;color:var(--ink2)!important;letter-spacing:0!important;display:flex;align-items:baseline;gap:8px;margin:0!important}
+html.t5on .v1813h1>span{font-size:var(--k-display)!important;line-height:1.05!important;font-weight:600!important;letter-spacing:-.025em;color:var(--k-hl)!important;font-variant-numeric:tabular-nums}
+html.t5on .v1813sub{font-size:var(--k-cap)!important;line-height:1.4!important;color:var(--ink2)!important;margin-top:4px!important}
+html.t5on .v1813sub .f{display:none!important}
+html.t5on .v1813bar{height:2px!important;margin-top:12px!important;background:var(--line)!important;border-radius:1px!important}
+html.t5on .v1813bar i{background:var(--k-hl)!important;border-radius:1px!important}
+html.t5on .v1813card{padding:var(--k-cardpad)!important;margin-top:24px!important}
+html.t5on[data-k5="light"] .v1813card{padding-top:12px!important}
+html.t5on .v1813hero .r2{justify-content:flex-start!important;gap:0!important}
+html.t5on .v1813tg{font-size:var(--k-cap)!important;line-height:1.4!important;letter-spacing:0!important;text-transform:none!important;font-weight:400!important;color:var(--ink2)!important}
+html.t5on .v1813tg.acc{color:var(--k-hl)!important;font-weight:600!important}
+html.t5on .v1813tg.acc:before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--k-hl);margin:0 8px 2px 0;vertical-align:middle}
+html.t5on .v1813hero .r2 .v1813tg+.v1813tg:before{content:'·';margin:0 6px;color:var(--ink3)}
+html.t5on .v1813hero h2{font-size:var(--k-title)!important;line-height:1.25!important;font-weight:600!important;margin-top:8px!important;color:var(--ink)!important}
+html.t5on .v1813hero .co{font-size:var(--k-cap)!important;line-height:1.4!important;color:var(--ink2)!important;margin-top:2px}
+html.t5on .v1813hero .why{font-size:var(--k-body)!important;line-height:1.45!important;color:var(--ink2)!important;margin-top:12px!important;-webkit-line-clamp:3!important}
+html.t5on .v1813pri,html.t5on .t3pri,html.t5on .v1812pri{min-height:48px!important;border-radius:var(--k-rb)!important;background:var(--k-btn)!important;color:var(--k-onbtn)!important;font-size:var(--k-body)!important;font-weight:600!important;line-height:1.25!important}
+html.t5on .v1813pri.v1813quiet{background:var(--bg3)!important;color:var(--ink)!important}
+html.t5on .v1813sec{margin:32px 0 0!important;padding-top:12px;align-items:baseline}
+html.t5on[data-k5="light"] .v1813sec{border-top:1px solid var(--k-rule)}
+html.t5on .v1813sec b,html.t5on .v1813sec span{font-size:var(--k-cap)!important;letter-spacing:0!important;text-transform:none!important;line-height:1.4!important}
+html.t5on .v1813sec b{color:var(--k-hl)!important;font-weight:600!important}
+html.t5on[data-k5="black"] .v1813sec b{color:var(--ink2)!important}
+html.t5on .v1813sec span{color:var(--ink3)!important;font-weight:400!important}
+/* Your call: rows that open a sheet; the two original buttons stay in the page, hidden, and the sheet clicks them */
+html.t5on .v1813call.t5call{display:grid!important;grid-template-columns:minmax(0,1fr) 20px;align-items:center;column-gap:12px;min-height:60px;margin:0!important;padding:10px var(--k-cardpad)!important;border-radius:0!important;border:0!important;border-bottom:1px solid var(--line)!important;background:none!important;cursor:pointer}
+html.t5on[data-k5="black"] .v1813call.t5call{background:var(--k-card)!important;border:1px solid var(--k-cardbd)!important;border-top-width:0!important}
+html.t5on[data-k5="black"] .v1813sec+.v1813call.t5call{border-top-width:1px!important;border-radius:12px 12px 0 0!important;margin-top:8px!important}
+html.t5on .v1813call.t5call .q{grid-column:1;font-size:var(--k-body)!important;line-height:1.35!important;font-weight:600!important;color:var(--ink)!important}
+html.t5on .v1813call.t5call .co{grid-column:1;font-size:var(--k-cap)!important;line-height:1.4!important;color:var(--ink2)!important;margin:2px 0 0!important}
+html.t5on .v1813call.t5call .v1813two{display:none!important}
+html.t5on .v1813call.t5call .t5chev{grid-column:2;grid-row:1/span 2;color:var(--ink3);justify-self:end}
+.t5chev{display:none}
+html.t5on .t5chev{display:block}
+/* Up next: one list, fixed row shape (monogram 32, name 16/600, one caption, a neutral time phrase) */
+html.t5on .v1813grid{display:block!important;margin:8px 0 0!important}
+html.t5on[data-k5="black"] .v1813grid{background:var(--k-card);border:1px solid var(--k-cardbd);border-radius:12px;overflow:hidden}
+html.t5on .v1813grid>li{contain-intrinsic-size:auto 60px!important}
+html.t5on .v1812row.v1813tile{display:grid!important;grid-template-columns:32px minmax(0,1fr) auto!important;grid-template-rows:auto auto;column-gap:12px!important;row-gap:0!important;align-items:center!important;min-height:60px!important;padding:8px 0!important;border-radius:0!important;background:none!important;position:relative}
+html.t5on[data-k5="black"] .v1812row.v1813tile{padding:8px 16px!important}
+html.t5on .v1813grid>li+li .v1813tile:before{content:'';position:absolute;top:0;left:44px;right:0;border-top:1px solid var(--line)}
+html.t5on[data-k5="black"] .v1813grid>li+li .v1813tile:before{left:60px}
+html.t5on .v1813tile .t5mono{grid-column:1;grid-row:1/span 2;width:32px;height:32px;border-radius:var(--k-r1);display:grid;place-items:center;font-size:var(--k-cap);font-weight:600;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2)}
+html.t5on[data-k5="black"] .v1813tile .t5mono{background:var(--bg3);box-shadow:none;color:var(--ink2)}
+html.t5on .v1813tile b{grid-column:2;grid-row:1;font-size:var(--k-body)!important;line-height:1.35!important;font-weight:600!important;color:var(--ink)}
+html.t5on .v1813tile .t5sub{grid-column:2;grid-row:2;display:block;font-size:var(--k-cap);line-height:1.4;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+html.t5on .v1813tile .v1813st,html.t5on .v1813tile>.s{display:none!important}
+html.t5on .v1813tile .t5when{display:block;grid-column:3;grid-row:1/span 2;font-size:var(--k-cap);line-height:1.4;color:var(--ink3);white-space:nowrap}
+.t5mono,.t5sub,.t5when{display:none}
+html.t5on .v1813more{border-radius:var(--k-rb)!important;border-style:solid!important;border-color:var(--line)!important}
+html.t5on .v1813line{min-height:48px!important;font-size:var(--k-body)!important;color:var(--ink2)!important}
+/* the two read-and-engage blocks: plain sections with rule headers, list rows */
+html.t5on #v182today .v171card{margin-top:32px!important;padding:12px var(--k-cardpad) 0!important}
+html.t5on #v182today .v18111hd{font-size:var(--k-cap)!important;min-height:44px}
+html.t5on #v182today .v18111hd>span:first-child{color:var(--k-hl)!important;font-weight:600!important}
+html.t5on[data-k5="black"] #v182today .v18111hd>span:first-child{color:var(--ink2)!important}
+html.t5on .v182rd,html.t5on .v182mi{min-height:60px!important;gap:12px!important}
+html.t5on .v182rd .v171lg,html.t5on .v182mi .v171lg{width:32px!important;height:32px!important;min-width:32px!important;border-radius:var(--k-r1)!important;background:none!important;box-shadow:inset 0 0 0 1px var(--line2)!important;color:var(--ink)!important;font-size:var(--k-cap)!important}
+html.t5on .v182rd .qm b,html.t5on .v182mi .qm b{font-size:var(--k-body)!important;font-weight:600!important;color:var(--ink)!important}
+html.t5on .v182rd .qm span,html.t5on .v182mi .qm span{font-size:var(--k-cap)!important;color:var(--ink2)!important}
+html.t5on #v18134more{min-height:48px!important;font-size:var(--k-body)!important;color:var(--ink2)!important}
+
+/* ---------- contact page: who, where in the sequence, the next move; one primary, thumb-low ---------- */
+html.t5on #ov{background:var(--bg)!important}
+html.t5on #ovR{display:none!important}
+html.t5on #ovBack{min-width:48px;min-height:48px;display:flex!important;align-items:center;gap:4px;color:var(--k-link)!important}
+html.t5on #ovCap{font-size:var(--k-body)!important;color:var(--ink2)!important;font-weight:400!important;letter-spacing:0!important;text-transform:none!important}
+html.t5on #ovb .v18134av{display:none!important}
+html.t5on #ovb .pfn{font-size:var(--k-large)!important;line-height:1.2!important;font-weight:600!important;letter-spacing:-.015em;color:var(--ink)!important}
+html.t5on #ovb .pfr{font-size:var(--k-body)!important;line-height:1.45!important;color:var(--ink2)!important;margin-top:4px}
+html.t5on #ovb .v18134lk{display:block;font-size:var(--k-body)!important;font-weight:600!important;color:var(--k-link)!important;min-height:44px;padding:0!important;background:none!important;text-align:left}
+html.t5on #ovb .lad{display:inline-flex!important;gap:6px!important;align-items:center;height:auto!important;margin:12px 8px 0 0!important;vertical-align:middle}
+html.t5on #ovb .lad i{flex:none!important;width:6px!important;height:6px!important;border-radius:50%!important;background:var(--line2)!important}
+html.t5on #ovb .lad i.d,html.t5on #ovb .lad i.on{background:var(--ink)!important}
+html.t5on #ovb .ladl{display:none!important}
+html.t5on #ovb .t5stg{display:inline;font-size:var(--k-cap);color:var(--ink2);vertical-align:middle}
+.t5stg{display:none}
+html.t5on #ovb .v18134why{background:none!important;box-shadow:none!important;border:0!important;padding:0!important;margin-top:16px!important}
+html.t5on #ovb .v18134why p{font-size:var(--k-body)!important;line-height:1.45!important;color:var(--ink)!important}
+html.t5on #ovb .v18134sec{margin-top:32px!important;border:0!important}
+html.t5on #ovb .v4h{min-height:44px;align-items:center}
+html.t5on #ovb .v4h b{font-size:var(--k-cap)!important;font-weight:600!important;color:var(--k-hl)!important;letter-spacing:0!important;text-transform:none!important}
+html.t5on[data-k5="black"] #ovb .v4h b{color:var(--ink2)!important}
+html.t5on #ovb .v18134all{min-height:44px;font-size:var(--k-cap)!important;font-weight:600!important;color:var(--k-link)!important;background:none!important}
+html.t5on[data-k5="light"] #ovb .v18134sec{border-top:1px solid var(--k-rule)!important;padding-top:4px}
+html.t5on #ovb .v171card{padding:var(--k-sp4)!important;border:1px solid var(--line)!important;border-radius:12px!important;background:var(--k-card)!important}
+html.t5on[data-k5="light"] #ovb .v171card{border-top:1px solid var(--line)!important;padding:16px!important}
+html.t5on #ovb .v171card>.cap{display:none!important}
+html.t5on #ovb .v171sig p{font-size:var(--k-body)!important;font-weight:600!important;color:var(--ink)!important}
+html.t5on #ovb .v171sig .d,html.t5on #ovb .v171src{font-size:var(--k-cap)!important;color:var(--ink2)!important}
+html.t5on #ovb .v163cap{font-size:var(--k-cap)!important;color:var(--ink2)!important}
+html.t5on #ovb .v163msg,html.t5on #ovb .v18101ta{font-size:var(--k-body)!important;line-height:1.45!important;border:1px solid var(--line)!important;border-radius:12px!important;background:var(--k-card)!important;color:var(--ink)!important;box-shadow:none!important}
+html.t5on #ovb .v18101meta,html.t5on #ovb .v18101cc,html.t5on #ovb .v18101hint{font-size:var(--k-cap)!important;color:var(--ink3)!important}
+html.t5on #ovb .v163row{justify-content:flex-end;gap:8px}
+html.t5on #ovb .v163btn.sec,html.t5on #ovb .v163btn.ghost{min-height:48px!important;background:none!important;box-shadow:none!important;border:0!important;color:var(--k-link)!important;font-size:var(--k-body)!important;font-weight:600!important;padding:0 12px!important}
+html.t5on #ovb .v163btn.sec svg{display:none}
+html.t5on #ovb .v18134row{min-height:60px!important;gap:12px!important;border:1px solid var(--line)!important;border-radius:12px!important;background:var(--k-card)!important;padding:8px 16px!important}
+html.t5on #ovb .v18134row .v18134mg{width:32px!important;height:32px!important;min-width:32px!important;border-radius:var(--k-r1)!important;background:var(--bg3)!important;color:var(--ink2)!important;font-size:var(--k-cap)!important}
+html.t5on #ovb .v18134row .tx b{font-size:var(--k-body)!important;font-weight:600!important}
+html.t5on #ovb .v18134row .tx small{font-size:var(--k-cap)!important;color:var(--ink2)!important}
+html.t5on #ovb .tt2{font-size:var(--k-body)!important}html.t5on #ovb .ts{font-size:var(--k-cap)!important;color:var(--ink3)!important}
+html.t5on #ovBar{background:var(--bg)!important;border-top:1px solid var(--line)!important}
+html.t5on #ovBar .pfbar.t4bar{grid-template-columns:1fr 48px!important;padding:8px var(--k-g)!important;background:var(--bg)!important}
+html.t5on #ovBar .b.pri{min-height:48px!important;border-radius:var(--k-rb)!important;background:var(--k-btn)!important;color:var(--k-onbtn)!important;font-size:var(--k-body)!important;font-weight:600!important}
+html.t5on #ovBar .b.pri svg{display:none}
+html.t5on #ovBar .t4dots{min-height:48px!important;min-width:48px!important;border-radius:var(--k-rb)!important;background:var(--bg3)!important}
+
+/* ---------- Report: hero, funnel, 8 weeks, then More ---------- */
+html.t5on #v18rep>.v18hd,html.t5on #v18per,html.t5on #v18flt{display:none!important}
+html.t5on #report:not(.t5mo) #v1812rp{display:none!important}
+#t5rph{display:none}
+html.t5on #t5rph{display:block;margin:4px 0 0}
+html.t5on #t5rph .t5rr{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.t5seg{display:inline-flex;gap:2px;padding:2px;border-radius:var(--k-r1);background:var(--bg3)}
+.t5seg button{min-height:44px;min-width:64px;padding:0 12px;border:0;border-radius:4px;background:none;color:var(--ink2);font:400 var(--k-cap)/1.3 var(--sans);cursor:pointer}
+.t5seg button[aria-pressed="true"]{background:var(--bg);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--line2)}
+.t5pick{display:inline-flex;align-items:center;gap:6px;min-height:48px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0;border:0;background:none;color:var(--ink2);font:400 var(--k-body)/1.3 var(--sans);text-align:left;cursor:pointer}
+.t5pick svg{width:12px;height:12px;flex:none}
+.t5blk{margin-top:28px;padding-top:12px}
+html.t5on[data-k5="light"] .t5blk{border-top:1px solid var(--k-rule)}
+html.t5on[data-k5="black"] .t5blk{background:var(--k-card);border:1px solid var(--k-cardbd);border-radius:12px;padding:16px}
+.t5bh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;min-height:24px}
+.t5bh b{font-size:var(--k-cap);font-weight:600;color:var(--k-hl)}
+.t5bh span{font-size:var(--k-cap);color:var(--ink3)}
+.t5hero{display:block;width:100%;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer;min-height:48px}
+.t5hn{display:flex;align-items:baseline;gap:10px;margin-top:8px}
+.t5hn b{font-size:var(--k-display);line-height:1.05;font-weight:600;letter-spacing:-.025em;color:var(--k-hl);font-variant-numeric:tabular-nums}
+.t5hn span{font-size:var(--k-body);color:var(--ink2)}
+.t5tb{position:relative;height:8px;margin-top:16px;background:var(--k-bar);overflow:hidden}
+.t5tb .bd{position:absolute;top:0;bottom:0;background:var(--k-band)}
+html.t5on[data-k5="light"] .t5tb .bd{background:#DCDCEC}
+.t5tb .fl{position:absolute;left:0;top:0;bottom:0;background:var(--k-hl);transition:width 240ms cubic-bezier(0,0,0,1)}
+.t5tb .tk{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.t5say{margin-top:12px;font-size:var(--k-body);line-height:1.45;color:var(--ink2)}
+.t5fr{display:block;width:100%;padding:8px 0 4px;border:0;background:none;color:var(--ink);text-align:left;cursor:pointer;min-height:56px}
+.t5fr .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:var(--k-body)}
+.t5fr .t b{font-weight:600;font-variant-numeric:tabular-nums}
+.t5fr .t b small{font-size:var(--k-body);font-weight:400;color:var(--ink2)}
+.t5fr .br{display:block;height:6px;margin-top:8px;background:var(--k-bar);position:relative}
+.t5fr .br i{position:absolute;left:0;top:0;bottom:0;background:var(--k-fun)}
+.t5fr.m .br i{background:var(--k-hl)}
+.t5wk{position:relative;display:flex;align-items:flex-end;gap:8px;height:112px;margin-top:16px}
+.t5wk .bd{position:absolute;left:0;right:0;background:var(--k-band)}
+.t5wk i{position:relative;flex:1;background:var(--k-chart);min-height:2px}
+.t5wk i.now{background:var(--k-hl)}
+.t5wl{display:flex;justify-content:space-between;margin-top:8px;font-size:var(--k-cap);color:var(--ink3)}
+.t5more{margin-top:28px;padding-top:4px}
+html.t5on[data-k5="light"] .t5more{border-top:1px solid var(--k-rule)}
+.t5more>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:56px;list-style:none;cursor:pointer;color:var(--ink)}
+.t5more>summary::-webkit-details-marker{display:none}
+.t5more>summary b{font-size:var(--k-body);font-weight:600;color:var(--k-hl)}
+.t5more>summary span{font-size:var(--k-cap);color:var(--ink3);flex:1;margin-left:8px}
+.t5more>summary:after{content:'›';color:var(--ink3);font-size:20px;transition:transform 180ms var(--k-std)}
+.t5more[open]>summary:after{transform:rotate(90deg)}
+html.t5on .t5more .v18c{margin-top:16px!important}
+html.t5on #v18cards .v18cap{font-size:var(--k-cap)!important;letter-spacing:0!important;text-transform:none!important}
+html.t5on #v18cards .v18cap>span:first-child{color:var(--ink)!important;font-weight:600!important}
+html.t5on #v18cards .v18tag{display:none!important}
+html.t5on #v18cards .v18n{font-weight:600!important}
+html.t5on #v18cards .v18hint,html.t5on #v18cards small{font-size:var(--k-cap)!important}
+html.t5on #v18cards .v18mr .l{font-size:var(--k-body)!important;font-weight:600!important}
+html.t5on #v18cards .v18g i,html.t5on #v18cards .fb182 i{background:var(--k-fun)!important}
+html.t5on #v18cards .v18ins .arif{display:none!important}
+
+/* ---------- Settings: Appearance first; captions plain ---------- */
+html.t5on #v171set>.t5look{display:block!important;order:7!important;border-top:0!important}
+html.t5on #v171set>.t5lookcap{display:flex!important;order:6!important;margin-top:8px!important}
+html.t5on #v171set>.t4cap .cap,html.t5on .apcap .cap{color:var(--k-hl)!important;font-weight:600!important}
+html.t5on[data-k5="black"] #v171set>.t4cap .cap{color:var(--ink2)!important}
+html.t5on .aprow{min-height:56px}
+html.t5on .aprow b{font-size:var(--k-body)!important;font-weight:600!important}
+html.t5on .aprow span{font-size:var(--k-cap)!important}
+html.t5on #apTt .kywm{fill:var(--k-hl)!important}
+html.t5on .apseg span{min-height:44px;display:inline-flex!important;align-items:center;font-size:var(--k-cap)!important}
+
+/* ---------- the t5 sheet (Your call decisions, the Report picker) ---------- */
+#t5sheet{position:fixed;inset:0;z-index:2147483000}
+#t5sheet[hidden]{display:none}
+#t5sheet .t5scr{position:absolute;inset:0;background:var(--k-scrim,rgba(0,0,0,.4));animation:t5fade 240ms var(--k-std,ease)}
+#t5sheet .t5pan{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:var(--k-sheet,#fff);color:var(--ink);border-radius:12px 12px 0 0;padding:8px var(--k-g,20px) calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;animation:t5up 240ms var(--k-springA,cubic-bezier(.2,0,0,1))}
+#t5sheet.out .t5pan{animation:t5dn 180ms var(--k-acc,ease-in) forwards}#t5sheet.out .t5scr{opacity:0;transition:opacity 180ms}
+#t5sheet .t5grab{width:36px;height:4px;border-radius:2px;background:var(--line2);margin:4px auto 8px}
+#t5sheet h2{font-size:var(--k-title);line-height:1.25;font-weight:600;margin:0}
+#t5sheet p{font-size:var(--k-body);line-height:1.45;color:var(--ink2);margin:0 0 8px}
+#t5sheet .t5lbl{font-size:var(--k-cap);font-weight:600;color:var(--ink2);margin-top:8px}
+#t5sheet .t5bt{display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 16px;border:1px solid var(--line2);border-radius:var(--k-rb,12px);background:none;color:var(--ink);font:600 var(--k-body)/1.25 var(--sans);cursor:pointer}
+#t5sheet .t5bt.pri{background:var(--k-btn);border-color:var(--k-btn);color:var(--k-onbtn)}
+#t5sheet .t5bt.q{border-color:transparent;color:var(--k-link)}
+#t5sheet .t5two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#t5sheet .t5four{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+#t5sheet .t5four .t5bt{padding:0;font-weight:400;font-size:var(--k-cap)}
+#t5sheet .t5four .t5bt[aria-pressed="true"]{font-weight:600;border-color:var(--ink)}
+@keyframes t5up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes t5dn{to{transform:translateY(100%)}}
+@keyframes t5fade{from{opacity:0}to{opacity:1}}
+
+/* ---------- tablet and desktop: no stranded phone tab bar; a left rail and a wider column ---------- */
+@media (min-width:768px){
+  html.t5on{--v18133tb:0px!important;--tbh:0px!important;--padb:48px!important}
+  html.t5on #tbar#tbar{position:fixed!important;max-width:none!important;transform:none!important;top:0!important;bottom:0!important;left:0!important;right:auto!important;width:200px!important;height:auto!important;flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important;gap:4px;padding:calc(24px + env(safe-area-inset-top)) 12px 24px!important;border-top:0!important;border-right:1px solid var(--line)!important}
+  html.t5on[data-k5="light"] #tbar#tbar{border-right-color:var(--line)!important}
+  html.t5on #tbar .tbi,html.t5on #tbar #v18134sb{flex:none!important;flex-direction:row!important;justify-content:flex-start!important;gap:12px!important;min-height:48px!important;padding:0 12px!important;border-radius:var(--k-r1)!important;width:100%}
+  html.t5on .tbi .v163tl,html.t5on #v18134sb .v163tl{font-size:var(--k-body)!important}
+  html.t5on .tbi.on{background:var(--bg3)!important}
+  html.t5on #app{max-width:640px!important;margin-left:max(216px,calc(200px + (100vw - 200px - 640px)/2))!important;margin-right:auto!important}
+  html.t5on #ready,html.t5on #report{padding-bottom:48px!important}
+}
+
+/* ---------- fixes after the first look ---------- */
+html.t5on .tbar #v18134sb .v163tl,html.t5on .tbar .tbi .v163tl{font-size:var(--k-cap)!important}
+html.t5on #v18rep .t5hero,html.t5on #v18rep .t5fr{display:block!important;width:100%}
+html.t5on #v18rep .t5pick{display:inline-flex!important}
+html.t5on #v18cards>.t5blk{order:0}html.t5on #v18cards>.t5more{order:50}html.t5on #v18cards>#v1871ad{order:60!important;margin-top:16px!important}
+html.t5on #report:not(.t5mo) #v18cards>#v1871ad{display:none!important}
+html.t5on #report#report:not(.t5mo)>#v1812rp#v1812rp{display:none!important}
+html.t5on #report#report:not(.t5mo)>:not(#v18rep):not(#v1812rp){display:none!important}
+html.t5on .t5pick>span{overflow:hidden;text-overflow:ellipsis}
+html.t5on #ovb .v171card .v171sig{border-top:0!important;padding-top:0!important;margin-top:0!important}
+html.t5on #ovb .v18134row{margin:0!important;width:100%}
+html.t5on #ovb a.v171src{display:inline-flex;align-items:center;min-height:44px}
+html.t5on .apseg{background:var(--bg3)!important;border-radius:var(--k-r1)!important;padding:2px!important;box-shadow:none!important}
+html.t5on .apseg span{border-radius:4px!important;color:var(--ink2)!important;font-weight:400!important;background:none!important;box-shadow:none!important;justify-content:center}
+html.t5on .apseg span.on{background:var(--bg)!important;color:var(--ink)!important;font-weight:600!important;box-shadow:inset 0 0 0 1px var(--line2)!important}
+html.t5on .apseg i,html.t5on .apseg .ind{display:none!important}
+/* accounts: neutral monograms, no count chip colour */
+html.t5on .v1813acct .v171lg,html.t5on .v1813acct .v18134mg{width:32px!important;height:32px!important;min-width:32px!important;border-radius:var(--k-r1)!important;background:var(--bg3)!important;color:var(--ink2)!important;font-size:var(--k-cap)!important}
+html.t5on .t4cnt{background:none!important;box-shadow:none!important;padding:0!important;color:var(--ink3)!important;font-weight:400!important;font-size:var(--k-cap)!important;min-height:0!important}
+/* 13 px floor on the cards under More and the pull label */
+html.t5on .pl2,html.t5on #v1871ad .v1871h b,html.t5on #v1871ad .v1871h span,html.t5on #v18cards .v18cap>span,html.t5on #v18cards em,html.t5on .v182al,html.t5on .skc-r span,html.t5on .skc-hl,html.t5on .skc-ft,html.t5on .skc-wr span,html.t5on #v18cards .v18f span,html.t5on #v18cards .v18f em,html.t5on #v18cards .v18as span,html.t5on #v18cards .v18as small,html.t5on #v18cards .v18as em,html.t5on #v18cards td,html.t5on #v18cards th{font-size:var(--k-cap)!important;letter-spacing:0!important;text-transform:none!important}
+html.t5on .v182fr,html.t5on .v18f,html.t5on .v18as,html.t5on .v18mr,html.t5on .v18sp{min-height:48px!important}
+/* focus page + monograms everywhere: neutral tiles, the one primary button in Kyte indigo */
+html.t5on .fxpri{background:var(--k-btn)!important;color:var(--k-onbtn)!important;border-radius:var(--k-rb)!important;min-height:48px!important}
+html.t5on .v18134mg,html.t5on .v171lg.mono{background:var(--bg3)!important;color:var(--ink2)!important;box-shadow:none!important;border-radius:var(--k-r1)!important}
+html.t5on .v18134mg i,html.t5on .v171lg.mono i{color:var(--ink2)!important}
+html.t5on .v18101hint,html.t5on .v18101cc,html.t5on .dt{font-size:var(--k-cap)!important}
+/* ---------- Owner's phone, Oct 29: drafts, one count, accounts ---------- */
+html.t5on .t5gone{display:none!important}
+html.t5on .v163draft .v18111off{display:none!important}
+html.t5on .v163draft:has(.v18111rd) .msg,html.t5on .v163draft:has(.v18111rd) .v163msg{opacity:1!important}
+html.t5on .v18111rd{background:none!important;border:0!important;border-left:2px solid var(--k-hl)!important;border-radius:0!important;padding:4px 0 4px 12px!important;font-size:var(--k-cap)!important;line-height:1.4!important;color:var(--ink2)!important}
+html.t5on .v18111rd b{color:var(--ink)!important;font-weight:600!important}
+html.t5on .v18111rd .v18111sp{display:none!important}
+html.t5on .v163scan .v163rad{display:none!important}
+html.t5on #v1812st .v1813h1[data-t5n]{font-size:0!important}
+html.t5on #v1812st .v1813h1[data-t5n]>span{display:none!important}
+html.t5on #v1812st .v1813h1[data-t5n]:before{content:attr(data-t5n);font-size:var(--k-display);line-height:1.05;font-weight:600;letter-spacing:-.025em;color:var(--k-hl);font-variant-numeric:tabular-nums}
+html.t5on #v1812st .v1813h1[data-t5n]:after{content:attr(data-t5l);font-size:var(--k-body);line-height:1.3;font-weight:400;color:var(--ink2)}
+html.t5on{-webkit-text-size-adjust:100%}
+html.t5on{text-size-adjust:100%}
+html.t5on .v1813acct .nm b{font-size:var(--k-body)!important;font-weight:600!important;line-height:1.35!important}
+html.t5on .v1813acct .nm span{font-size:var(--k-cap)!important;color:var(--ink2)!important}
+html.t5on .v1813acct .ppl .m b{font-size:var(--k-body)!important;line-height:1.35!important;font-weight:600!important}
+html.t5on .v1813acct .ppl .m span{font-size:var(--k-cap)!important;line-height:1.4!important}
+html.t5on .v1813acct .ppl .av{display:none!important}
+html.t5on .v1813acct .ppl .item{min-height:56px!important;font-size:var(--k-body)!important}
+html.t5on .v1813acct .ppl .item .v1813st,html.t5on .v1813acct .stages .v1813st{background:none!important;box-shadow:none!important;border:0!important;padding:0!important;height:auto!important;border-radius:0!important;color:var(--ink3)!important;font-size:var(--k-cap)!important;font-weight:400!important;white-space:nowrap}
+html.t5on .v1813acct .stages{display:block!important;font-size:var(--k-cap);line-height:1.4;color:var(--ink3);margin-top:4px}
+html.t5on .v1813acct .stages .v1813st{display:inline!important}
+html.t5on .v1813acct .stages .v1813st+.v1813st:before{content:' · '}
+html.t5on .v1813acct .nx{font-size:var(--k-cap)!important;color:var(--ink2)!important}
+html.t5on .v1813acct .nx em{font-style:normal;font-weight:600;color:var(--k-link)!important}
+html.t5on .v1813acct .ah{min-height:48px}
+html.t5on .chrome{transition:box-shadow 160ms var(--k-std)}
+html.t5on.t5scr .chrome{box-shadow:0 1px 0 var(--line)!important}
+html.t5on .v1813acct{scroll-margin-top:96px}
 </style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -6465,6 +6842,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.14.3',d:'Oct 29',items:['A calmer, phone-first Kyte is built and switched off for now. One next move on Today, a meetings-first Report, a lighter person page','Light and Black themes. Settings, then Appearance: System, Light or Black','Bigger text that follows your iPhone text size, and every button is easy to tap']},
  {v:'v18.14.2',d:'Oct 29',items:['Kelvarrow is now Kyte, with a new mark at the top, on your Home Screen and in the browser tab','The calmer pages are on for everyone: one button on a person’s page, shorter About and Settings, the same latest signal on the person and account pages','A new loading mark: the creases draw in while your list loads']},
  {v:'v18.14.1',d:'Oct 28',items:['Calmer pages are built and switched off for now. Try them on this phone: Settings, then Calmer pages','A person’s page has one button and a ••• for the rest. The tab bar is slimmer','The person page and the account page show the same latest signal, and the trigger age counts from the newest one','Account cards show the next step and one count. About and Settings are shorter','A new Kelvarrow mark, shown only at the top and on Kelvarrow’s pick']},
  {v:'v18.14.0',d:'Oct 28',items:['A calmer Today and Report are built and switched off for now. They turn on after your phone check, or try them on this phone from Settings','New Today: one count, one card with one fact and one button, then the next three. Briefs sit in the same list. Sync news only shows up when something is wrong','New Report: are you on pace for meetings, one funnel that follows the same people, and the three things to do next. The old cards sit under More']},
@@ -9455,7 +9833,7 @@ function render(D,why){const c=$('#v18cards');if(!c||!D)return;
   const pane=$('#report'),st=pane?pane.scrollTop:0;
   {const old=(window.ariV182&&!D.partial?ariV182.repTop(D):'')+parts.map(p=>p[1]).join('')+(window.ariV182&&!D.partial?ariV182.repEnd(D):'');
    /* v18.14.0: report_v3 puts On pace / Funnel / Do this next first and keeps every old card, unchanged, under More */
-   c.innerHTML=(window.ariT3&&ariT3.report()&&!D.partial)?ariT3.repHTML(D,old,{C,fmtR,istD,dow,at:V18.at}):old}try{window.ariV182&&ariV182.markMore()}catch(e){}
+   c.innerHTML=(window.ariT5&&ariT5.on()&&!D.partial)?ariT5.repHTML(D,(window.ariT3&&ariT3.report())?ariT3.repHTML(D,old,{C,fmtR,istD,dow,at:V18.at}):old,{C,goals,tap,diff,istD,dow}):(window.ariT3&&ariT3.report()&&!D.partial)?ariT3.repHTML(D,old,{C,fmtR,istD,dow,at:V18.at}):old}try{window.ariV182&&ariV182.markMore()}catch(e){}
   const sp=c.querySelector(`[data-v18card="${I.spot}"]`);if(sp)sp.classList.add('v18spot'),sp.querySelector('.v18cap>span').insertAdjacentHTML('beforeend','<i class="v18tag">Spotlight</i>');
   try{ariFill(c)}catch(e){}
   if(pane)pane.scrollTop=st;
@@ -13996,6 +14374,156 @@ function boot(){apply();watch();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(readFlags,900)});
   setInterval(()=>{if(!document.hidden){paintSet();if(T.on())soon()}},1500)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
+})();
+</script>
+<script>/* =====================================================================
+   v18.14.3 Kyte phone-first redesign (t5). Notes: work/oct29/ui5/README.md. Spec: work/oct29/phone_layout_audit/AUDIT.md.
+   Switch: ?ui5=1 turns it on for this device (localStorage ari-ui5), ?ui5=0 turns it off. Off = v18.14.2, unchanged.
+   Theme: Settings > Appearance: System (default, prefers-color-scheme) / Light / Black (localStorage ari-k5-theme).
+   Nothing here reads or writes data: every action is an existing button, clicked. The Report hero, funnel and
+   8-week chart read the numbers the Report already loaded (report_dashboard S, W and wm).
+   ===================================================================== */
+(function(){'use strict';const G=window;if(G.ariT5)return;const H=document.documentElement;
+const LK='ari-ui5',TK='ari-k5-theme';
+const T=G.ariT5={v:'v18.14.3',errs:[],passes:0};
+const err=(k,e)=>{if(T.errs.length<30)T.errs.push(k+': '+String(e&&e.message||e).slice(0,140))};
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const bz=n=>{try{navigator.vibrate&&navigator.vibrate(n||8)}catch(e){}};
+const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}return null};
+try{const m=location.search.match(/[?&]ui5=([^&#]*)/);if(m){const v=decodeURIComponent(m[1]);if(v==='1'||v==='on')LS(LK,'1');else if(v==='0'||v==='off')LS(LK,null)}}catch(e){}
+T.on=()=>LS(LK)==='1';
+T.pref=()=>{const p=LS(TK)||'system';return ['system','light','black'].includes(p)?p:'system'};
+const MQ=G.matchMedia?matchMedia('(prefers-color-scheme: dark)'):{matches:false};
+T.theme=()=>{const p=T.pref();return p==='black'||(p==='system'&&MQ.matches)?'black':'light'};
+T.setPref=p=>{LS(TK,p==='system'?null:p);bz(8);apply()};
+function meta(){const th=$('meta[name=theme-color]'),cs=$('meta[name=color-scheme]');const on=T.on(),bk=on&&T.theme()==='black';
+  if(th&&on){const c=bk?'#000000':'#FFFFFF';if(th.content!==c)th.content=c}if(cs){const c=on?'light dark':'light';if(cs.content!==c)cs.content=c}}
+function apply(){const on=T.on();H.classList.toggle('t5on',on);if(on){const t=T.theme();if(H.dataset.k5!==t)H.dataset.k5=t}else if(H.dataset.k5)delete H.dataset.k5;meta();pass()}
+T.apply=apply;
+try{(MQ.addEventListener?MQ.addEventListener('change',apply):MQ.addListener&&MQ.addListener(apply))}catch(e){}
+new MutationObserver(()=>{if(T.on())meta()}).observe(H,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- days in IST, for the neutral time phrases ---------- */
+const istD=t=>new Date((t==null?Date.now():t)+19800000).toISOString().slice(0,10);
+const dayOf=v=>{if(!v)return '';const x=Date.parse(v);return isNaN(x)?String(v).slice(0,10):istD(x)};
+const ago=v=>{const d=dayOf(v);if(!/^\d{4}-\d\d-\d\d$/.test(d))return null;return Math.max(0,Math.round((Date.parse(istD()+'T12:00:00Z')-Date.parse(d+'T12:00:00Z'))/864e5))};
+const days=n=>n===1?'1 day':n+' days';
+function when(it){try{const p=it&&it.p||{};
+  if(it.k==='withdraw'){const n=ago(p.connect_sent);return n==null?'Invite pending':'Pending '+days(n)}
+  if(it.k==='reply'||it.k==='relay'){const n=ago(p.replied||p.reply_at);return n==null||n===0?'Replied today':'Replied '+days(n)+' ago'}
+  if(it.tag==='DM1'||/^first/i.test(it.tag||'')){const n=ago(p.accepted);return n?days(n)+' waiting':'Due today'}
+  return 'Due today'}catch(e){return 'Due today'}}
+
+/* ---------- header: a quiet person glyph instead of the mascot (same button: Settings and Ask) ---------- */
+const ME='<span class="t5me" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="9" r="3.5"/><path d="M5.5 19c1.4-3 3.8-4.5 6.5-4.5s5.1 1.5 6.5 4.5"/></svg></span>';
+function header(){const h=$('#hdAri');if(h&&!h.querySelector('.t5me'))h.insertAdjacentHTML('beforeend',ME)}
+
+/* ---------- Today ---------- */
+function today(){const q=$('#v1812q');if(!q)return;let L=null;const items=()=>{if(L)return L;try{L=(G.ariV1812&&ariV1812.items&&ariV1812.items())||[]}catch(e){L=[]}return L};
+  $$('.v1813tile',q).forEach(b=>{const i=+b.dataset.v1812i,it=items()[i]||{};const st=(b.querySelector('.v1813st')||{}).textContent||'',co=(b.querySelector('.s')||{}).textContent||'';
+    const key=i+'|'+st+'|'+co+'|'+(b.querySelector('b')||{}).textContent;if(b.dataset.t5===key)return;b.dataset.t5=key;
+    $$('.t5mono,.t5sub,.t5when',b).forEach(x=>x.remove());
+    const m=document.createElement('span');m.className='t5mono';m.setAttribute('aria-hidden','true');m.textContent=(co.trim()[0]||(it.name||'?')[0]||'?').toUpperCase();b.insertBefore(m,b.firstChild);
+    const s=document.createElement('span');s.className='t5sub';s.textContent=[st.trim(),co.trim()].filter(Boolean).join(' · ');b.appendChild(s);
+    const w=document.createElement('span');w.className='t5when';w.textContent=when(it);b.appendChild(w)});
+  $$('.v1813call',q).forEach(c=>{if(c.classList.contains('t5call'))return;c.classList.add('t5call');c.setAttribute('role','button');c.tabIndex=0;c.setAttribute('aria-haspopup','dialog');
+    c.insertAdjacentHTML('beforeend','<span class="t5chev" aria-hidden="true">›</span>')});
+  $$('.v1813sec>b',q).forEach(b=>{if(/^needs your call$/i.test(b.textContent.trim()))b.textContent='Your call'})}
+function callSheet(c){const q=(c.querySelector('.q')||{}).textContent||'',co=(c.querySelector('.co')||{}).textContent||'';const bs0=$$('.v1813two button',c);
+  /* re-find the button at tap time: Today re-renders often, so a held reference can be stale */
+  const bs=bs0.map((b,i)=>Object.assign(()=>{const cc=$$('#v1812q .v1813call').find(x=>((x.querySelector('.q')||{}).textContent||'')===q);return cc?$$('.v1813two button',cc)[i]:null},{dataset:b.dataset,textContent:b.textContent}));
+  sheet(`<h2>${E(q)}</h2>${co?`<p>${E(co)}</p>`:''}<div class="t5two">${bs.map((b,i)=>`<button type="button" class="t5bt${b.dataset.rv==='lead'||(i===bs.length-1&&!b.dataset.rv)?' pri':''}" data-t5i="${i}">${E(b.textContent.trim())}</button>`).join('')}</div><button type="button" class="t5bt q" data-t5x="1">Cancel</button>`,bs,c,q)}
+
+/* ---------- contact page: dot stepper + one line ---------- */
+function contact(){const o=$('#ovb');if(!o)return;const lad=o.querySelector('.lad');if(!lad)return;const t=(lad.getAttribute('aria-label')||'').replace(/^stage:\s*/i,'');
+  let s=lad.nextElementSibling&&lad.nextElementSibling.classList.contains('t5stg')?lad.nextElementSibling:null;
+  if(!s){s=document.createElement('span');s.className='t5stg';lad.after(s)}if(s.textContent!==t)s.textContent=t}
+
+/* ---------- Settings: Appearance ---------- */
+function settings(){const s=$('#v171set');if(!s)return;let cap=s.querySelector(':scope>.t5lookcap'),row=s.querySelector(':scope>.t5look');
+  if(!cap){cap=document.createElement('div');cap.className='t4cap apcap t5lookcap';cap.dataset.k='look';cap.innerHTML='<span class="cap">Appearance</span>';s.appendChild(cap)}
+  if(!row){row=document.createElement('div');row.className='t4cap aprow v181blk t5look';row.dataset.k='look2';s.appendChild(row)}
+  const p=T.pref(),k=p+'|'+T.theme();if(row.dataset.t5===k)return;row.dataset.t5=k;
+  row.innerHTML=`<div><b>Theme</b><span>${p==='system'?'Follows your phone, now '+(T.theme()==='black'?'Black':'Light'):p==='black'?'Black on every screen':'Light on every screen'}</span></div><div class="v171seg" role="radiogroup" aria-label="Theme">${[['system','System'],['light','Light'],['black','Black']].map(([v,l])=>`<span class="press${v===p?' on':''}" role="radio" tabindex="0" aria-checked="${v===p}" data-t5th="${v}">${l}</span>`).join('')}</div>`}
+
+/* ---------- Report: one Week/Month switch, one range and AE picker ---------- */
+const CH='<svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 4h8L6 9z"/></svg>';
+function per(){const b=$('#v18per button.on');return b?b.dataset.v18u:''}
+function rlabel(){const r=$('#v18rng');let t=r?r.textContent:'';t=t.replace(/\s*·\s*Updated.*$/,'').trim();return t||'Pick a range'}
+function report(){const rep=$('#v18rep'),c=$('#v18cards');if(!rep||!c)return;let h=$('#t5rph');
+  if(!h){h=document.createElement('div');h.id='t5rph';rep.insertBefore(h,c)}
+  const u=per(),k=u+'|'+rlabel();if(h.dataset.t5!==k){h.dataset.t5=k;
+    h.innerHTML=`<div class="t5rr"><button type="button" class="t5pick" data-t5pick="1" aria-haspopup="dialog"><span>${E(rlabel())}</span>${CH}</button><div class="t5seg" role="group" aria-label="Period">${[['week','Week'],['month','Month']].map(([v,l])=>`<button type="button" data-t5u="${v}" aria-pressed="${u===v}">${l}</button>`).join('')}</div></div>`}
+  const pane=$('#report'),d=c.querySelector('details.t5more');if(pane)pane.classList.toggle('t5mo',!!(d&&d.open));
+  if(!T.wk&&u==='day'&&pane&&pane.getClientRects().length){T.wk=1;let done=null;try{done=sessionStorage.getItem('ari-t5-wk')}catch(e){}
+    if(!done){try{sessionStorage.setItem('ari-t5-wk','1')}catch(e){}const w=$('#v18per [data-v18u="week"]');if(w)setTimeout(()=>w.click(),0)}}}
+function pickSheet(from){const u=per(),stp=($('#v18flt .v18sl span')||{}).textContent||'',ae=($('#v18flt .v18aeb span')||{}).textContent||'All AEs';
+  const P=[['day','Day'],['week','Week'],['month','Month'],['range','Range']];const refs=[];const btn=(el,html,cls)=>{refs.push(el);return `<button type="button" class="t5bt ${cls||''}" data-t5i="${refs.length-1}"${el?'':' disabled'}>${html}</button>`};
+  const per4=P.map(([v,l])=>{const el=$(`#v18per [data-v18u="${v}"]`);refs.push(el);return `<button type="button" class="t5bt" aria-pressed="${u===v}" data-t5i="${refs.length-1}">${l}</button>`}).join('');
+  sheet(`<h2>Range and AE</h2><div class="t5lbl">Period</div><div class="t5four">${per4}</div><div class="t5lbl">${E(stp.trim()||'This period')}</div><div class="t5two">${btn($('#v18flt [data-v18step="-1"]'),'Earlier')}${btn($('#v18flt [data-v18step="1"]'),'Later')}</div>${btn($('#v18day'),'Pick a date','q')}<div class="t5lbl">AE</div>${btn($('#v18flt .v18aeb'),E(ae.trim()))}<button type="button" class="t5bt q" data-t5x="1">Done</button>`,refs,from,'Range and AE',true)}
+/* Report hero + funnel + 8 weeks; every old card, unchanged, under More (rendered by the Report module's render()) */
+T.repHTML=(D,old,h)=>{try{const S=D.S,W=D.W||D.S,G=h.goals(D),L=h.diff(D.r.from,D.r.to)+1,day=L<7,t=D.t||h.istD();
+  const src=day?W:S,mv=h.C(src,'meeting'),mg=day?[3,4]:G.meeting,lo=Math.max(1,Math.round(mg[0])),hi=Math.max(lo,Math.round(mg[1]));
+  const live=D.r.to>=t&&D.r.from<=t,wkLive=day||(D.p==='this_week'||(live&&L===7));
+  const what=day||wkLive?'this week':D.p==='this_month'?'this month':L===7?'that week':'in this range';
+  let say='';if(mv>hi)say=`Above the target ${what}.`;else if(mv>=lo)say=`Inside the target ${what}.`;else if(wkLive){const dw=h.dow(t);const left=4-dw;const need=lo-mv;say=`${left<0?'The working week is done.':left===0?'Last working day.':left===1?'One working day left.':left+' working days left.'} ${need===1?'One more reaches the target.':need+' more reach the target.'}`}else say=`${lo-mv} short of the target ${what}.`;
+  const sc=Math.max(hi*1.25,mv,1),pc=x=>(Math.min(1,x/sc)*100).toFixed(1);
+  const hero=`<section class="t5blk" data-t5b="hero"><div class="t5bh"><b>Meetings booked</b><span>target ${lo} to ${hi}</span></div><button type="button" class="t5hero" ${h.tap('meeting',day?{p:'this_week'}:{})} aria-label="${mv} meetings ${what}, target ${lo} to ${hi}. Show the meetings"><div class="t5hn"><b class="t5num">${mv}</b><span>of ${lo} to ${hi} ${what}</span></div><div class="t5tb" aria-hidden="true"><i class="bd" style="left:${pc(lo)}%;width:${(pc(hi)-pc(lo)).toFixed(1)}%"></i><i class="fl" style="width:${pc(mv)}%"></i><i class="tk" style="left:${pc(lo)}%"></i><i class="tk" style="left:calc(${pc(hi)}% - 2px)"></i></div></button><p class="t5say">${E(say)}</p></section>`;
+  const R=(S&&S.rates)||{},v=k=>h.C(S,k);const st=[['connect','Invites sent',''],['accept','Accepted',R.accept_rate!=null&&v('connect')?Math.round(R.accept_rate):(v('connect')?Math.round(v('accept')/v('connect')*100):null)],['reply','Replied',R.reply_rate!=null?Math.round(R.reply_rate):null],['meeting','Meetings','']];
+  const mx=Math.max(1,...st.map(s=>v(s[0])));const per2=day?'Today':what.charAt(0).toUpperCase()+what.slice(1);
+  const fun=`<section class="t5blk" data-t5b="funnel"><div class="t5bh"><b>${E(per2)}, invite to meeting</b></div>${st.map(([k,l,r])=>`<button type="button" class="t5fr${k==='meeting'?' m':''}" ${h.tap(k)}><span class="t"><span>${l}</span><b>${v(k)}${r!==''&&r!=null?` <small>· ${r}%</small>`:''}</b></span><span class="br" aria-hidden="true"><i style="width:${(v(k)?Math.max(1.5,v(k)/mx*100):0).toFixed(1)}%"></i></span></button>`).join('')}</section>`;
+  const wm=(D.wm||[]).map(x=>({d:String(x.bucket_start||'').slice(0,10),n:+x.value||0})).filter(x=>x.d).slice(-8);let wk='';
+  if(wm.length>=2){const top=Math.max(5,...wm.map(x=>x.n))*1.1,y=n=>(n/top*100).toFixed(1);const cur=wm[wm.length-1];const d0=wm[0].d;const fd=s=>{const d=new Date(s+'T12:00:00Z');return d.getUTCDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]};
+    wk=`<section class="t5blk" data-t5b="weeks"><div class="t5bh"><b>Meetings per week</b><span>target 3 to 4</span></div><div class="t5wk" role="img" aria-label="Meetings per week, last ${wm.length} weeks: ${wm.map(x=>x.n).join(', ')}. Target 3 to 4."><i class="bd" style="bottom:${y(3)}%;height:${(y(4)-y(3))}%"></i>${wm.map((x,i)=>`<i class="${i===wm.length-1?'now':''}" style="height:${Math.max(1.5,+y(x.n))}%"></i>`).join('')}</div><div class="t5wl"><span>${E(fd(d0))}</span><span>this week · ${cur.n}</span></div></section>`}
+  T.wkShown=!!wk;
+  const fix=String(old).replace(/Where it leaks/g,'Invite to meeting').replace(/The leak: /g,'Lowest step: ').replace(/>Going cold</g,'>Waiting on you<').replace(/Biggest drop:?\s*/g,'');
+  return hero+fun+wk+`<details class="t5more"${T.more?' open':''}><summary><b>More</b><span>By AE, activity, accounts and every earlier card</span></summary>${fix}</details>`}catch(e){err('rep',e);return old}};
+
+/* ---------- the sheet ---------- */
+let REFS=[],FROM=null;
+function sheet(inner,refs,from,label,keepOpen){let m=$('#t5sheet');if(!m){m=document.createElement('div');m.id='t5sheet';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');document.body.appendChild(m)}
+  m.setAttribute('aria-label',label||'Choose');m.classList.remove('out');REFS=refs||[];FROM=from||null;
+  m.innerHTML=`<div class="t5scr" data-t5x="1"></div><div class="t5pan"><div class="t5grab" aria-hidden="true"></div>${inner}</div>`;m.hidden=false;H.classList.add('t5sheeton');
+  setTimeout(()=>{const f=m.querySelector('.t5bt');f&&f.focus({preventScroll:true})},40)}
+function close(){const m=$('#t5sheet');if(!m||m.hidden)return;const rm=G.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const end=()=>{m.hidden=true;m.classList.remove('out');H.classList.remove('t5sheeton');try{FROM&&FROM.focus({preventScroll:true})}catch(e){}};if(rm)end();else{m.classList.add('out');setTimeout(end,180)}}
+T.close=close;
+document.addEventListener('click',e=>{if(!T.on())return;const t=e.target;let b;
+  if(t.closest('#t5sheet [data-t5x]')){e.preventDefault();close();return}
+  if((b=t.closest('#t5sheet [data-t5i]'))){e.preventDefault();const el=REFS[+b.dataset.t5i];bz(8);
+    if(el&&el.id==='v18day'){close();setTimeout(()=>{try{el.showPicker?el.showPicker():(el.focus(),el.click())}catch(x){try{el.focus();el.click()}catch(y){}}},200);return}
+    const tgt=typeof el==='function'?el():el;close();if(tgt&&tgt.isConnected){try{tgt.click()}catch(x){err('act',x)}}else err('act','gone');return}
+  if((b=t.closest('.v1813call.t5call'))&&!t.closest('.v1813two')){e.preventDefault();e.stopPropagation();bz(6);callSheet(b);return}
+  if((b=t.closest('#t5rph [data-t5u]'))){const el=$(`#v18per [data-v18u="${b.dataset.t5u}"]`);if(el&&!el.classList.contains('on')){bz(6);el.click()}return}
+  if((b=t.closest('#t5rph [data-t5pick]'))){bz(6);pickSheet(b);return}
+  if((b=t.closest('[data-t5th]'))){T.setPref(b.dataset.t5th);return}},true);
+document.addEventListener('keydown',e=>{if(!T.on())return;if(e.key==='Escape'&&H.classList.contains('t5sheeton')){e.preventDefault();e.stopPropagation();close();return}
+  const a=document.activeElement;if((e.key==='Enter'||e.key===' ')&&a&&a.matches&&a.matches('.v1813call.t5call,[data-t5th]')){e.preventDefault();a.click()}},true);
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('t5more')){T.more=d.open;const p=$('#report');if(p)p.classList.toggle('t5mo',d.open);if(d.open)try{G.ariV18&&ariV18.more&&ariV18.more()}catch(x){}}},true);
+
+
+/* ---------- drafts: one status at a time (Owner's phone, Oct 29 10:22-10:27) ----------
+   A draft on screen + a redraft in flight = one quiet line above it, never the drafting card under it.
+   Copy stays on and copies exactly the text shown (the current draft, or your edit) until the new draft lands. */
+const RDT='The new draft replaces this one when it lands. Until then, anything you copy is the text above.';
+function drafts(){$$('.v163draft').forEach(box=>{const m=box.querySelector('[data-msg]');const has=!!(m&&String(m.value!=null&&m.tagName==='TEXTAREA'?m.value:m.textContent).trim());
+  const scans=$$('.v163scan',box);if(!has){return}
+  if(scans.length){scans.forEach(x=>x.classList.add('t5gone'));if(!box.querySelector('.v18111rd')){const tgt=box.querySelector('.v163cap');const b=document.createElement('div');b.className='v18111rd t5rd';b.setAttribute('role','status');b.innerHTML='<span><b>Kyte is redrafting.</b> '+E(RDT)+'</span>';if(tgt)tgt.after(b);else box.insertBefore(b,box.firstChild)}}
+  const rd=box.querySelector('.v18111rd:not(.t5rd)');if(rd){const sp=rd.querySelector('span:not(.v18111sp)');if(sp&&!/Your edit stays/.test(sp.textContent)&&sp.dataset.t5!=='1'){sp.dataset.t5='1';sp.innerHTML='<b>Kyte is redrafting.</b> '+E(RDT)}}})}
+
+/* ---------- one count for the queue: the same total the focus pager shows ("1 of N") ---------- */
+function counts(){const h=$('#v1812st .v1813h1');if(!h)return;let n=null;try{n=(G.ariV1812&&ariV1812.items&&ariV1812.items()||[]).length}catch(e){}
+  if(n==null||!h.querySelector('span'))return;const l=n===1?'move':'moves';if(h.dataset.t5n!==String(n))h.dataset.t5n=String(n);if(h.dataset.t5l!==l)h.dataset.t5l=l;const a=n+' '+l;if(h.getAttribute('aria-label')!==a)h.setAttribute('aria-label',a)}
+
+/* ---------- a hairline under the header once a page scrolls, so cards read as scrolling under it ---------- */
+document.addEventListener('scroll',e=>{if(!T.on())return;const t=e.target;if(!t||t.nodeType!==1||!t.classList||!t.classList.contains('pane'))return;H.classList.toggle('t5scr',t.scrollTop>4)},true);
+
+/* ---------- the pass ---------- */
+function pass(){if(!T.on())return;T.passes++;[['header',header],['today',today],['counts',counts],['drafts',drafts],['contact',contact],['settings',settings],['report',report]].forEach(([k,f])=>{try{f()}catch(e){err(k,e)}})}
+let qd=0;const mo=new MutationObserver(()=>{if(qd||!T.on())return;qd=requestAnimationFrame(()=>{qd=0;pass()})});
+function boot(){apply();mo.observe(document.body,{childList:true,subtree:true})}
+if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
 })();
 </script>
 </body>
