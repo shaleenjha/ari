@@ -27,6 +27,14 @@
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
 
+## 0050 Kyte decline line (Oct 30 2026): WRITTEN, rehearsed locally, NOT APPLIED ANYWHERE; ships with 0049
+Owner (Oct 30 04:47 IST, option A): Kyte never names Ari, Den, Hark, Kelvarrow or any system or vendor; the decline is exactly
+"I can't help with that here." `0050_kyte_decline_line.sql` changes only the result string of `queue_block_app_change()` (0019, live on prod
+since Oct 17: app-change Queue rows are closed at write time with "That's handled in Hark, not here."). Same match, status, definer,
+search_path and grants; trigger untouched. Rollback `0050_kyte_decline_line_rollback.sql` restores the 0019 body byte for byte.
+Checks `test/checks_after_0050.sql` (one statement, synthetic queue rows QZ0050*, deliberate raise: `ALL 0050 CHECKS PASSED` = pass).
+run_local.sh: apply, checks, re-apply, rollback x2 (body + ACL fingerprint identical), apply, checks. Prod: with 0049, needs a PAT from Owner.
+
 ## 0049 live Ask Kyte chat (Oct 30 2026): WRITTEN; staging rehearsal only, never prod without Owner + a fresh PAT
 Owner (Oct 30 01:29 IST): "the chat has to be AI driven". ari-ai action `chat` (functions/pending/ari-ai/chat.ts) answers at once, streamed.
 `0049_ai_chat.sql`: ai_calls.task gains 'chat' (constraint rebuilt from whatever the live one allows); `ai_chat` (30 days of turns, owner

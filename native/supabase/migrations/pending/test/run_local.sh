@@ -108,3 +108,17 @@ n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_ai_chat_%'")
 [ "$n" = "0000" ] && [ "$(c49)" = "$before49" ] || { echo "FAIL 0049 rollback ($n)"; exit 1; }; echo "0049 ROLLBACK CHECK PASSED"
 api "$PEND/0049_ai_chat.sql"; echo "applied 0049 again after the rollback"
 chk49
+
+# 0050 Kyte decline line (PENDING, ships with 0049), on top of the above. Added Oct 30 2026. checks_after_0050.sql is prod-safe:
+# synthetic queue rows, ends in a deliberate raise ("ALL 0050 CHECKS PASSED ..."). Rollback restores the 0019 body byte for byte.
+chk50() { local o; o=$($P -f "$HERE/checks_after_0050.sql" 2>&1 || true); echo "$o" | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+  grep -q "ALL 0050 CHECKS PASSED" <<<"$o" || { echo "FAIL 0050 checks"; exit 1; }; }
+f50() { $P -At -c "select md5(prosrc || coalesce(proacl::text, '') || prosecdef::text || coalesce(proconfig::text, '')) from pg_proc where oid = 'public.queue_block_app_change()'::regprocedure"; }
+before50=$(f50)
+api "$PEND/0050_kyte_decline_line.sql"; echo "applied 0050"
+chk50
+api "$PEND/0050_kyte_decline_line.sql"; echo "re-applied 0050 (idempotence): no error"
+api "$PEND/0050_kyte_decline_line_rollback.sql"; api "$PEND/0050_kyte_decline_line_rollback.sql"; echo "rolled back 0050 (twice)"
+[ "$(f50)" = "$before50" ] && [ "$($P -At -c "select count(*) from supabase_migrations.schema_migrations where version = '0050'")" = "0" ] || { echo "FAIL 0050 rollback"; exit 1; }; echo "0050 ROLLBACK CHECK PASSED"
+api "$PEND/0050_kyte_decline_line.sql"; echo "applied 0050 again after the rollback"
+chk50

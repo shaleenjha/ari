@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.9"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.10"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -217,8 +217,8 @@ window.ARI0=model(cached&&cached.data||{});
 window.ARI_MEM={
  intro:'We’ve met. You just don’t know me in this form yet.',
  timeline:[
-  ['Den','I started life as Den, a prototype on your phone. You renamed me, and every trace of Den went with it.'],
-  ['The pebble','You could have had your Claude’s visor robot. You picked the pebble instead, because I needed real character.'],
+  ['Kyte by Thrandvex','I’m Kyte by Thrandvex, and my mark is a kite. I prepare; you send.'],
+  ['The pebble','You could have had a visor robot. You picked the pebble instead, because I needed real character.'],
   ['The ring','My ring sits below me, not above. A halo read as angelic, and I’m not.'],
   ['A mouth','You asked for a mouth, tongue and all. I use it sparingly.'],
   ['It should pop','You said the app should pop, so everything got springs, squash and stretch.'],
@@ -6680,7 +6680,7 @@ window.ariV14={
   ack:()=> 'This is the one place for changes to the app. Describe what you want different, as roughly as you like, and I’ll note it with the screen you mean.',
   head:h=>{h.innerHTML='<span class="cap">About · change the app</span><div class="it">Change the app</div><div class="is">Requests here go to Kyte. Nothing else in the app takes them, so nothing gets lost.</div>';return h},
   respond(txt,att,c){
-    if((c&&c.entity_type==='app')||/(change|redesign|fix|tweak|update|edit)\s+(the\s+|this\s+)?(app|ui|design|screen|layout|button|prompt)\b|feature request|add a feature|bug in (the )?app|supabase|vercel|github|\brepo\b|api key|service.role|system prompt|scheduled task|\bcron\b|tech stack|source code|how (are|were|is) (you|ari|kelvarrow|kyte|this app) (built|made|run|hosted|coded)|(your|ari.?s|kelvarrow.?s|kyte.?s|the app.?s) (database|backend|server|tables|code|prompts?|keys|instructions)\b/i.test(String(txt||'')))return {a:'App changes are not made in here. I stick to your outreach.'};
+    if((c&&c.entity_type==='app')||/(change|redesign|fix|tweak|update|edit)\s+(the\s+|this\s+)?(app|ui|design|screen|layout|button|prompt)\b|feature request|add a feature|bug in (the )?app|supabase|vercel|github|\brepo\b|api key|service.role|system prompt|scheduled task|\bcron\b|tech stack|source code|how (are|were|is) (you|ari|kelvarrow|kyte|this app) (built|made|run|hosted|coded)|(your|ari.?s|kelvarrow.?s|kyte.?s|the app.?s) (database|backend|server|tables|code|prompts?|keys|instructions)\b/i.test(String(txt||'')))return {a:'I can\'t help with that here.'};
     return null}};
 function openChange(from){const a=q1(from);a&&ari13.ringPulse(a,1);buzz(M.haptic.select)} /* v18.5: no change-the-app thread; app changes are handled in Hark */
 
@@ -7479,8 +7479,9 @@ function chatHistory(){const C=window.ariChat;if(!C)return;(M.queue||[]).filter(
   const st=posted.get(q.id);if(q.result&&!st.r){st.r=true;C.postMsg({who:'ari',html:E(q.result),ctx:null,day,time:''})}})}
 V16.sentIds=new Set();
 function memAnswer(low){const T=window.ARI_MEM.timeline;
-  if(/\bden\b|name|called/.test(low))return T[0][1];
-  if(/robot|visor|claude|pebble|look like|why (do )?you look/.test(low))return T[1][1]+' '+T[2][1];
+  if(/\b(den|hark|kelvarrow|claude|anthropic)\b/.test(low))return 'I can\'t help with that here.';
+  if(/name|called/.test(low))return T[0][1];
+  if(/robot|visor|pebble|look like|why (do )?you look/.test(low))return T[1][1]+' '+T[2][1];
   if(/mouth|tongue/.test(low))return T[3][1];
   if(/pop|motion|animat/.test(low))return T[4][1];
   if(/trick|easter/.test(low))return T[5][1]+' They’re on my page, under Today.';
@@ -7489,7 +7490,7 @@ function memAnswer(low){const T=window.ARI_MEM.timeline;
   return ''}
 const _v14r=window.ariV14&&ariV14.respond;
 if(window.ariV14)ariV14.respond=function(txt,att,c){const low=String(txt||'').toLowerCase(),app=c&&c.entity_type==='app';
-  if(app||/(change|redesign|fix|tweak|update|edit)\s+(the\s+|this\s+)?(app|ui|design|screen|layout|button|prompt)\b|feature request|add a feature|bug in (the )?app|supabase|vercel|github|\brepo\b|api key|service.role|system prompt|scheduled task|\bcron\b|tech stack|source code|how (are|were|is) (you|ari|kelvarrow|kyte|this app) (built|made|run|hosted|coded)|(your|ari.?s|kelvarrow.?s|kyte.?s|the app.?s) (database|backend|server|tables|code|prompts?|keys|instructions)\b/i.test(String(txt||'')))return {a:'App changes are not made in here. I stick to your outreach.'}; /* v18.5: never filed, never sent to the queue */
+  if(app||/(change|redesign|fix|tweak|update|edit)\s+(the\s+|this\s+)?(app|ui|design|screen|layout|button|prompt)\b|feature request|add a feature|bug in (the )?app|supabase|vercel|github|\brepo\b|api key|service.role|system prompt|scheduled task|\bcron\b|tech stack|source code|how (are|were|is) (you|ari|kelvarrow|kyte|this app) (built|made|run|hosted|coded)|(your|ari.?s|kelvarrow.?s|kyte.?s|the app.?s) (database|backend|server|tables|code|prompts?|keys|instructions)\b/i.test(String(txt||'')))return {a:'I can\'t help with that here.'}; /* v18.5: never filed, never sent to the queue */
   const ctxs=c?` [context: ${[c.screen,c.entity_type,c.label].filter(Boolean).join(' / ')}]`:'';
   if(att)return {a:'Attachments stay on this phone for now. Type what matters and I’ll take it from there.'};
   const local=memAnswer(low);
@@ -11581,7 +11582,7 @@ new MutationObserver(()=>{if(document.querySelector('[data-v1881gm]:not([data-v1
 (function(){
   var A='Ans'+'hu',S='Son'+'ia';
   var R=[
-    [/That[’']s handled in Hark, not here\.?/g,'App changes are not made in here.'],
+    [/That[’']s handled in Hark, not here\.?/g,'I can\'t help with that here.'],
     [/\bHark\b/g,'Kyte'],
     [/\bAri(?=[’']s\b|:| (is|was|will|won[’']t|could|can|does|doesn[’']t|has|keeps|asks|reads|drafts?|drafted|finds|found|moved|edit|picks|spotted|sends|writes|hands|looks)\b)/g,'Kyte'],
     [/\b(from|by|with|to|in|asked|Asked|Open|open) Ari\b/g,'$1 Kyte'],
