@@ -251,7 +251,9 @@ Deno.test('phaseB fix 3: name-shape detector ignores company words, months and c
   const co = new Set(['norquiveth']);
   assertEquals(looksLikePersonName('Norquiveth Names Morgan Hale as General Counsel', co), true);
   assertEquals(looksLikePersonName('Avery K. Quinlan leads InfoSec', co), true);
-  assertEquals(looksLikePersonName('Norquiveth offers Ixterlane Credit Monitoring after the CRM incident', co), false);
+  // review #54 (fail-closed): a run with any unknown capitalised word is dropped, even when it is really a product name
+  assertEquals(looksLikePersonName('Norquiveth offers Ixterlane Credit Monitoring after the CRM incident', co), true);
+  assertEquals(looksLikePersonName('Norquiveth offers Credit Monitoring after the CRM incident', co), false);
   assertEquals(looksLikePersonName('In October 2026 Norquiveth launched ProviderConnect with DeepIntent', co), false);
   assertEquals(looksLikePersonName('Norquiveth is a HIPAA Business Associate under the Privacy Rule', co), false);
   assertEquals(looksLikePersonName("Norquiveth's May 2026 restructuring cut about 220 roles", co), false);

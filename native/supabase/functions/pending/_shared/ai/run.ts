@@ -168,19 +168,26 @@ export async function runDraftStream(task: 'draft' | 'rewrite', prompt: Prompt, 
 }
 
 /** One turn of a multi-turn tool loop (deep research orchestrator). Budget-guarded and booked like any call; the caller
- *  executes the returned toolUses and appends tool_result blocks for the next turn. */
+ *  executes the returned toolUses and appends tool_result blocks for the next turn. Review #54 follow-up (Oct 29 2026): a
+ *  turn cut at max_tokens / refused / out of context is NOT a finished turn (its tool_use may be lost, and the loop would wrap
+ *  up early as if done). Like the other routes it is booked invalid "stop_reason <x>" and thrown, so jobs.ts fails the step. */
 export async function runTurn(task: Task, system: string, messages: AiMessage[], clientTools: ClientTool[], deps: Deps): Promise<AiResponse> {
   const r = route(task);
   const chars = system.length + JSON.stringify(messages).length;
   const callId = await reserve(task, chars, deps);
+  let resp: AiResponse;
   try {
-    const resp = await provider(deps, task).complete({ model: r.model, system, messages, maxTokens: r.maxTokens, temperature: r.temperature,
-      clientTools, timeoutMs: r.timeoutMs, thinking: r.thinking, cache: 'conversation' });
-    await deps.ledger.finish(callId, { status: 'ok', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut,
-      costUsd: costUsd(r.model, resp.tokensIn, resp.tokensOut, resp.toolCalls, resp.cacheRead, resp.cacheWrite) });
-    return resp;
+    resp = await provider(deps, task).complete({ model: r.model, system, messages, maxTokens: r.maxTokens, temperature: r.temperature,
+      clientTools, timeoutMs: r.timeoutMs, thinking: r.thinking, effort: r.effort, cache: 'conversation' });
   } catch (e) {
     await deps.ledger.finish(callId, { status: 'error', tokensIn: 0, tokensOut: 0, costUsd: 0, error: errText(e) });
     throw e;
   }
+  const cost = costUsd(r.model, resp.tokensIn, resp.tokensOut, resp.toolCalls, resp.cacheRead, resp.cacheWrite);
+  if (resp.stopReason && BAD_STOPS.includes(resp.stopReason)) {
+    await deps.ledger.finish(callId, { status: 'invalid', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut, costUsd: cost, error: `stop_reason ${resp.stopReason}` });
+    throw new InvalidOutput(`${task}: stop_reason ${resp.stopReason}`);
+  }
+  await deps.ledger.finish(callId, { status: 'ok', tokensIn: resp.tokensIn, tokensOut: resp.tokensOut, costUsd: cost });
+  return resp;
 }

@@ -70,6 +70,14 @@ export function triggerSource(url: string, text = ''): TriggerSource | null {
   return null;
 }
 
+/** The ONE trigger judgment both buildBrief and checkBrief use (review #54): the fact is normalized exactly as the brief stores
+ *  it (clean(fact, 500): dashes to commas, whitespace collapsed, capped), so build and check can never disagree on a row
+ *  (a raw "privacy\npolicy" used to pass build as a trigger and then fail check). */
+export const whyNowText = (fact: unknown) => clean(fact, 500);
+export function judgeTrigger(url: string, fact: unknown): TriggerSource | null {
+  return url ? triggerSource(url, whyNowText(fact)) : null;
+}
+
 export function priorityOf(title = ''): 'P1' | 'P2' | 'P3' {
   if (/\b(ciso|cio|cto|chief|vp|vice president|head)\b/i.test(title)) return 'P1';
   if (/\b(director|principal|lead)\b/i.test(title)) return 'P2';
@@ -92,8 +100,9 @@ export function buildBrief(c: BriefIn, today = new Date()): Brief {
     const date = isoDate(r.dated);
     const age = date ? (today.getTime() - Date.parse(date)) / 864e5 : NaN;
     const fresh = !!date && age >= -2 && age <= TRIGGER_DAYS;
-    const src = url ? triggerSource(url, String(r.fact ?? '')) : null;
-    return { row: { date, kind: fresh && src ? 'trigger' : 'context', label: url && date ? 'Verified' : 'Inference', text: clean(r.fact, 500), url }, src };
+    const text = whyNowText(r.fact);
+    const src = judgeTrigger(url, text);
+    return { row: { date, kind: fresh && src ? 'trigger' : 'context', label: url && date ? 'Verified' : 'Inference', text, url }, src };
   });
   // triggers first (newest first), then context in research order; the brief keeps 6
   const trig = all.filter((x) => x.row.kind === 'trigger').sort((a, b) => b.row.date.localeCompare(a.row.date));
@@ -137,7 +146,7 @@ export function checkBrief(b: Brief): string[] {
   for (const w of b.why_now ?? []) {
     if (!['Verified', 'Inference', 'Hypothesis'].includes(w.label)) errs.push('why_now label must be Verified/Inference/Hypothesis');
     if (w.label === 'Verified' && w.kind === 'trigger' && !(w.url && w.date)) errs.push('a Verified trigger needs a date and a url');
-    if (w.kind === 'trigger' && !(w.date && w.url && triggerSource(w.url, w.text ?? ''))) {
+    if (w.kind === 'trigger' && !(w.date && w.url && judgeTrigger(w.url, w.text ?? ''))) {
       errs.push('a trigger must be dated news, a filing, a press release or a job post: ' + String(w.url || w.text).slice(0, 80));
     }
     if (w.url && !/^https:\/\//.test(w.url)) errs.push('url must be https');

@@ -98,9 +98,8 @@ export function mentionsName(raw: string, np: { parts: string[]; spaceless: stri
 // A claim that names or describes ANY person is dropped, whoever it is (the contact, another executive the research found,
 // a founder, a board member). Three nets, any one blocks: (1) a name Ari knows (contact + people on file + brief committee);
 // (2) a person role or appointment word (CEO, Chief ... Officer, General Counsel, VP, founder, "appointed", ...): a claim
-// about a role holder is about a person, named or not; (3) a name-shaped run of capitalised words ("Morgan Hale",
-// "Avery K. Quinlan", "Dr. Lee") that is not the company name and not a common capitalised word. False hits only drop a
-// claim (safe side); a dropped claim is logged in decisions with its reason.
+// about a role holder is about a person, named or not; (3) a name-shaped token or run (fail-closed, review #54, below);
+// (4) a personal pronoun. False hits only drop a claim (safe side); a dropped claim is logged in decisions with its reason.
 const ROLE = /(?<![\p{L}\p{N}])(ceo|cfo|cto|cio|ciso|coo|cpo|cmo|cro|cso|cdo|chief\s+[\p{L} &-]{0,40}?officer|general counsel|vice president|s?e?vp|president|founder|co-?founder|chair(man|woman|person)?|board member|board of directors|director|head of|executive|exec|spokes(person|man|woman)|appoint(s|ed|ment)?|named as|promot(ed|es)|steps? down|stepped down|resign(s|ed)?|retir(es|ed)|hired as|joins as|joined as)(?![\p{L}\p{N}])/iu;
 const HONORIFIC = /(?<![\p{L}\p{N}])(mr|mrs|ms|mx|dr|prof|sir|dame)\.?\s+\p{Lu}/u;
 // capitalised words that commonly start or fill a non-name phrase (kept short; a miss here only drops a claim)
@@ -116,25 +115,63 @@ const COMMON = new Set(('january february march april may june july august septe
   'insights research survey study vendor risk breach incident attack malware ransomware infostealer customer customers product ' +
   'products launch launched announces announced expands expanded acquires acquired acquisition merger partnership public private ' +
   'general street journal times post daily weekly magazine wire newswire business').split(' '));
-const TITLE_WORD = /^\p{Lu}[\p{Ll}\p{M}'\u2019-]+$/u;
-/** true when the claim carries a name-shaped run: 2+ capitalised words (an initial "J." may sit between them) that are not the
- *  company's own words and not common capitalised words. */
+// Review #54 (Oct 29 2026): the name net is FAIL-CLOSED. When the code cannot tell whether a capitalised token is a person,
+// the claim is dropped (a dropped claim costs one fact check; a leaked name breaks the rule). It catches:
+//  (a) a run of 2+ capitalised tokens (Title Case, ALL CAPS, CamelCase, initials, with name particles such as von / van / de /
+//      al / bin / le / da inside) when ANY token in the run is not a known safe word. A safe word (COMMON, the company's own
+//      words, a known acronym) no longer breaks or hides a run: "Grant Post", "May Chen" and "Hale Norquiveth" all block;
+//  (b) a particle-joined token ("al-Rashid", "d'Souza", "bin-Salman") on its own;
+//  (c) a SINGLE unknown capitalised token right after said / says / told / tells / by / led / from / named / per / quoted /
+//      according to (particles skipped), or right before a speech verb ("Hale told", "HALE said");
+//  (d) any letter of a script without capital letters (Han, kana, Hangul, Arabic, Devanagari, Thai, ...): shape cannot be judged.
+// Only a run made entirely of safe words passes ("Business Associate", "Privacy Rule", "Series J."). Trade-off, on purpose:
+// a product name next to an unknown word ("Ixterlane Credit Monitoring") is now dropped too.
+const PARTICLES = new Set('von van de del della der den di da du dos das al el bin ibn bint le la ter ten zu af'.split(' '));
+const PARTICLE_JOINED = /^(von|van|de|del|der|di|da|du|al|el|bin|ibn|bint|le|la|d|o)[-\u2010\u2011'\u2019]\p{Lu}/u;
+// acronyms that are not names (ALL-CAPS words are otherwise treated as possible names: "MORGAN HALE")
+const ACRONYMS = new Set(('hipaa hitrust hitech soc iso nist pci dss gdpr ccpa cpra phi pii ehr emr sec hhs ocr fda cms onc ftc doj fbi cisa eu uk us usa ' +
+  'ipo saas paas iaas baa sso mfa iam api sdk llm ai ml it hr usd eur gbp q1 q2 q3 q4 fy aws gcp b2b b2c kpi roi esg').split(' '));
+const CUE_BEFORE = new Set('said says told tells by led from named per quoted quoting'.split(' '));
+const CUE_AFTER = new Set(('said says told tells stated states noted notes added adds explained explains wrote writes confirmed confirms argued argues ' +
+  'claimed claims warned warns testified recalled commented admitted acknowledged emphasized emphasised believes believed thinks thought ' +
+  'recommended posted tweeted spoke speaks presented presents').split(' '));
+/** a letter in a script that has no upper / lower case (Lo): a name there has no shape to check */
+const UNCASED = /\p{Lo}/u;
+const capitalised = (w: string) => /^\p{Lu}/u.test(w) || PARTICLE_JOINED.test(w);
+const isInitialTok = (w: string) => /^\p{Lu}$/u.test(w);
+
+/** true when the claim may carry a person's name (see the rules above). Fail-closed: unsure = true. */
 export function looksLikePersonName(text: string, companyWords: Set<string> = new Set()): boolean {
   if (HONORIFIC.test(text)) return true;
-  const toks = text.normalize('NFC').split(/[\s,;:()"\u201c\u201d]+/).map((w) => w.replace(/['\u2019]s$/u, '').replace(/[.!?]+$/u, ''));
-  let run = 0, initial = false;
-  for (const raw of toks) {
-    if (!raw) { run = 0; initial = false; continue; }
-    if (/^\p{Lu}$/u.test(raw)) { initial = true; continue; }                       // an initial ("J.") joins the run it sits in
-    const w = fold(raw);
-    const nameish = TITLE_WORD.test(raw) && !COMMON.has(w) && !companyWords.has(w);
-    run = nameish ? run + 1 + (initial && run === 0 ? 1 : 0) : 0;                    // "J. Smith" counts as a name
-    initial = false;
-    if (run >= 2) return true;
+  if (UNCASED.test(text.normalize('NFC'))) return true;
+  const toks = text.normalize('NFC').split(/[\s,;:()"\u201c\u201d\u2014\u2013]+/).map((w) => w.replace(/['\u2019]s$/u, '').replace(/^['\u2018\u2019]+|['\u2018\u2019]+$/gu, '').replace(/[.!?]+$/u, ''));
+  const safe = (w: string) => { const f = fold(w); return COMMON.has(f) || companyWords.has(f) || ACRONYMS.has(f); };
+  const unknownCap = (w: string) => !!w && capitalised(w) && !isInitialTok(w) && !safe(w);
+  // (a) + (b): runs of capitalised tokens; particles may sit inside a run
+  let size = 0, unknown = false;
+  const close = () => { const hit = size >= 2 && unknown; size = 0; unknown = false; return hit; };
+  for (let i = 0; i < toks.length; i++) {
+    const w = toks[i];
+    if (w && PARTICLE_JOINED.test(w)) return true;
+    if (w && capitalised(w)) { size++; if (unknownCap(w)) unknown = true; continue; }
+    if (w && PARTICLES.has(w) && size > 0 && toks[i + 1] && capitalised(toks[i + 1])) continue;   // "Ludwig van Beethoven"
+    if (w && PARTICLES.has(w) && size === 0 && toks[i + 1] && unknownCap(toks[i + 1])) { size = 1; continue; } // "de Souza"
+    if (close()) return true;
+  }
+  if (close()) return true;
+  // (c): a lone unknown capitalised token next to a speech / agency cue
+  const low = toks.map((w) => fold(w));
+  for (let i = 0; i < toks.length; i++) {
+    if (!unknownCap(toks[i])) continue;
+    let j = i - 1; while (j >= 0 && PARTICLES.has(low[j])) j--;
+    if (j >= 0 && (CUE_BEFORE.has(low[j]) || (low[j] === 'to' && low[j - 1] === 'according'))) return true;
+    if (i + 1 < toks.length && CUE_AFTER.has(low[i + 1])) return true;
   }
   return false;
 }
-export type PersonHit = 'contact' | 'known person' | 'person role' | 'person name';
+// claims about a company say "it" / "its"; a personal pronoun means the claim is about a person
+const PRONOUN = /(?<![\p{L}\p{N}])(he|she|him|his|her|hers|himself|herself)(?![\p{L}\p{N}])/iu;
+export type PersonHit = 'contact' | 'known person' | 'person role' | 'person name' | 'person pronoun';
 /** Why a claim is about a person, or null when it is company-level. */
 export function personHit(claim: string, contact: { parts: string[]; spaceless: string }, others: { parts: string[]; spaceless: string }[],
   companyWords: Set<string>): PersonHit | null {
@@ -142,6 +179,7 @@ export function personHit(claim: string, contact: { parts: string[]; spaceless: 
   if (others.some((np) => mentionsName(claim, np))) return 'known person';
   if (ROLE.test(claim)) return 'person role';
   if (looksLikePersonName(claim, companyWords)) return 'person name';
+  if (PRONOUN.test(claim)) return 'person pronoun';
   return null;
 }
 const wordsOf = (s: string) => new Set(s.split(/[^\p{L}\p{N}]+/u).filter(Boolean).map(fold));
