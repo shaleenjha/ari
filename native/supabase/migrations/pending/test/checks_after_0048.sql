@@ -21,7 +21,7 @@ begin
   raise notice 'ok 1 functions, ledger, grants';
 
   -- 2. normCo parity with web/ops.html (values worked through the JS by hand)
-  if public.ari_norm_co('Ixterlane Health, Inc. (US)') <> 'acmehealth' then raise exception 'FAIL 2: %', public.ari_norm_co('Ixterlane Health, Inc. (US)'); end if;
+  if public.ari_norm_co('Zq Sample Health, Inc. (US)') <> 'zqsamplehealth' then raise exception 'FAIL 2: %', public.ari_norm_co('Zq Sample Health, Inc. (US)'); end if;
   if public.ari_norm_co('https://www.zeta.io') <> 'zeta' then raise exception 'FAIL 2: %', public.ari_norm_co('https://www.zeta.io'); end if;
   if public.ari_norm_co('The Foo Labs & Co') <> 'fooand' then raise exception 'FAIL 2: %', public.ari_norm_co('The Foo Labs & Co'); end if;
   if public.ari_norm_co(null) <> '' then raise exception 'FAIL 2: null'; end if;
