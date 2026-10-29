@@ -5,6 +5,7 @@
 import { Deps } from '../_shared/ai/run.ts';
 import { BudgetRefused } from '../_shared/ai/run.ts';
 import { classifyAccept, draftDm1 } from './actions.ts';
+import { copyCheck } from '../_shared/ai/copycheck.ts';
 import { Db } from './db.ts';
 import { enqueueResearch } from './pipeline.ts';
 
@@ -15,10 +16,12 @@ export interface Pending { accepts: Accept[]; dm1_needed: string[] }
 export async function dm1ForPerson(db: Db, deps: Deps, person: string, mode: 'dm1_auto' | 'manual'): Promise<string> {
   if (!(await db.rpc<boolean>('ari_ai_trigger_claim', { p_kind: 'dm1', p_ref: person }))) return 'duplicate';
   try {
-    const r = await draftDm1(db, deps, person, mode);
+    // same copy check gate as the pipeline DM1 (Oct 29 2026): one redraft on a failure; a draft that still fails is saved
+    // needs_review and NOT announced as ready
+    const r = await draftDm1(db, deps, person, mode, undefined, undefined, { check: (t) => copyCheck(t, 'dm1') });
     const status = r.saved ? (r.draft?.needs_review ? 'needs_review' : 'done') : 'skipped';
-    await db.rpc('ari_ai_trigger_done', { p_kind: 'dm1', p_ref: person, p_status: status, p_detail: r.reason });
-    if (r.saved) await db.rpc('ari_ai_notify_dm_ready', { p_person: person });
+    await db.rpc('ari_ai_trigger_done', { p_kind: 'dm1', p_ref: person, p_status: status, p_detail: r.reason ?? (r.gate && !r.gate.pass ? 'copy check failed after redraft' : null) });
+    if (r.saved && r.gate?.pass !== false) await db.rpc('ari_ai_notify_dm_ready', { p_person: person });
     return status;
   } catch (e) {
     await db.rpc('ari_ai_trigger_done', { p_kind: 'dm1', p_ref: person, p_status: 'error', p_detail: errMsg(e) }).catch(() => {});

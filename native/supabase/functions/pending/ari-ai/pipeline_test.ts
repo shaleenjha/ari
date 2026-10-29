@@ -11,7 +11,9 @@ import type { AiRequest, Provider } from '../_shared/ai/types.ts';
 Deno.env.set('SUPABASE_URL', 'https://abcdefghijklmnopqrst.supabase.co');
 const RESEARCH = { summary: 'Ostrevanthe Co launched a patient data vault in September.', confidence: 0.8, angles: ['vault launch', 'privacy hiring'],
   findings: [{ fact: 'Ostrevanthe Co launched a patient data vault on 2026-09-15', source_url: 'https://example.com/news/vault', dated: '2026-09-15' }] };
-const DM = 'Hi Synthetic, saw Ostrevanthe Co launched its patient data vault in September. Who owns tokenization for it on your side?';
+// Oct 29 2026: the fixture DM1 follows the AE guide shape (the server copy check now gates DM1 before "DM1 ready")
+const DM = 'Synthetic, quick one. Ostrevanthe Co keeps patient records in its new intake app, and that is where hospital security reviews stall. We keep them out. Worth 15 minutes?';
+const DM_OLD = 'Hi Synthetic, saw Ostrevanthe Co launched its patient data vault in September. Who owns tokenization for it on your side?';
 
 function provider(order: string[]) {
   const seen: AiRequest[] = [];
@@ -79,9 +81,12 @@ Deno.test('brief builder: labels by rule, brief_upsert checks pass, dashes and l
 });
 
 Deno.test('copy check (server subset): flags seller line, meeting ask, dash; passes a clean DM1', () => {
-  assertEquals(copyCheck(DM, 'dm1').pass, true);
-  const bad = copyCheck('Thanks for connecting, Dana. At Thrandvex we help. Open to a 15 min call next week \u2014 ok?', 'dm1');
+  assertEquals(copyCheck(DM_OLD, 'dm1', { v1Only: true }).pass, true);
+  const bad = copyCheck('Thanks for connecting, Dana. At Thrandvex we help. Open to a 15 min call next week \u2014 ok?', 'dm1', { v1Only: true });
   assert(bad.flags.some((f) => f.startsWith('R3')) && bad.flags.some((f) => f.startsWith('M1')) && bad.flags.includes('R11 dash'));
+  // the AE guide (default for dm kinds since Oct 29 2026): the guide-shaped DM1 passes, the old open-question shape does not
+  assertEquals(copyCheck(DM, 'dm1').flags, []);
+  assert(!copyCheck(DM_OLD, 'dm1').pass);
 });
 
 Deno.test('fact check filter: only https-sourced company claims; never the contact, title, seller or CRM text', () => {

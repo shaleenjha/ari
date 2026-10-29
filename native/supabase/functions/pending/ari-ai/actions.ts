@@ -4,6 +4,7 @@
 import { ClassifyOut, cleanFindings, Infer, ReplyDraftsOut, ResearchOut, TriageClassOut, triageKeysOk } from '../_shared/ai/schema.ts';
 import { classifyAcceptPrompt, CHIPS, Ctx, draftDm1Prompt, quickResearchPrompt, replyDraftsPrompt, rewritePrompt, SAVE_RESEARCH, triagePrompt } from '../_shared/ai/prompts.ts';
 import { Deps, Draft, InvalidOutput, runDraft, runDraftStream, runTask, runToolTask } from '../_shared/ai/run.ts';
+import { CopyResult, dm1FixInstruction } from '../_shared/ai/copycheck.ts';
 import { Db } from './db.ts';
 import { BookPerson, ImportRow, resolveImport } from '../_shared/import/resolve.ts';
 import { defaultLookup } from '../_shared/import/brave.ts';
@@ -63,17 +64,43 @@ export async function rewrite(db: Db, deps: Deps, body: Record<string, unknown>,
 }
 
 // ---------------- draft_dm1 (app tap, manual "Accepted" mark, or the event path) ----------------
+/** Server copy check gate for auto DM1s (Oct 29 2026, staging finding 2). `check` is the full server copy check (v1 subset +
+ *  AE style guide). A failing first draft is redrafted ONCE with the flagged rules; if the redraft still fails, the draft is
+ *  saved marked needs_review with the flags, and the caller must not raise "DM1 ready" for it. */
+export interface Dm1Gate { check: (text: string) => CopyResult; style?: 'A' | 'B' }
+export interface GateResult { pass: boolean; flags: string[]; redrafted: boolean; first_flags: string[]; rules_version: string; redraft_error?: string }
+
 export async function draftDm1(db: Db, deps: Deps, person: string, mode: 'dm1_auto' | 'manual', onDelta?: (t: string) => Promise<void>,
-  brief?: Record<string, unknown>) {
+  brief?: Record<string, unknown>, gate?: Dm1Gate) {
   const base = await db.rpc<Ctx>('ari_ai_context', { p_person: person, p_account: null });
   const ctx: Ctx = brief ? { ...base, brief } : base;           // pipeline: the server brief rides along as data
   if (ctx?.person?.dm1_sent) return { draft: null, saved: false, reason: 'already_sent' };
   const p = draftDm1Prompt(ctx);
   const d = { ...deps, refs: { personId: person, accountId: ctx?.account?.id ?? null, requestKey: `dm1:${person}` } };
   const out = onDelta ? await runDraftStream('draft', p, d, onDelta, nameCtx(ctx)) : await runDraft('draft', p, d, nameCtx(ctx));
+  let draft: Draft = out.value, callId = out.callId, g: GateResult | undefined;
+  const callIds = [out.callId];
+  if (gate && !onDelta) {
+    const first = gate.check(draft.text);
+    g = { pass: first.pass, flags: first.flags, redrafted: false, first_flags: first.flags, rules_version: first.rules_version };
+    if (!first.pass) {
+      try {
+        const fix = { system: p.system, user: `${p.user}\n<fix>\n${dm1FixInstruction(first.flags, gate.style)}\n<draft>\n${draft.text.slice(0, 1200)}\n</draft>\n</fix>` };
+        const again = await runDraft('draft', fix, { ...d, refs: { ...d.refs, requestKey: `dm1:${person}:redraft` } }, nameCtx(ctx));
+        callIds.push(again.callId);
+        const second = gate.check(again.value.text);
+        draft = again.value; callId = again.callId;
+        g = { ...g, pass: second.pass, flags: second.flags, redrafted: true, rules_version: second.rules_version };
+      } catch (e) {
+        // the redraft itself failed (cut reply, budget, network): keep the first draft, flagged, so DM1 is never lost
+        g = { ...g, redraft_error: String((e as Error)?.message ?? e).slice(0, 160) };
+      }
+    }
+    if (!g.pass) draft = { ...draft, needs_review: true };
+  }
   const saved = await db.rpc<{ saved: boolean; reason?: string }>('ari_ai_save_draft', { p_person: person, p_slot: 'dm',
-    p_text: out.value.text, p_meta: metaOf(out.value, { call_id: out.callId }), p_expect: ctx?.person?.dm ?? null, p_mode: mode });
-  return { draft: out.value, saved: !!saved?.saved, reason: saved?.reason ?? null, call_id: out.callId };
+    p_text: draft.text, p_meta: metaOf(draft, { call_id: callId, ...(g ? { copy_gate: g, call_ids: callIds } : {}) }), p_expect: ctx?.person?.dm ?? null, p_mode: mode });
+  return { draft, saved: !!saved?.saved, reason: saved?.reason ?? null, call_id: callId, gate: g };
 }
 
 // ---------------- quick_research (inline; Sonnet + web search, answer through the strict save_research tool) ----------------
