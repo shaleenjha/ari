@@ -278,6 +278,8 @@ Deno.test('http: a 4xx carries the provider message (keys redacted) and is not r
   catch (e) {
     if (!(e instanceof HE)) throw e;
     if (n !== 1) throw new Error('4xx retried');
-    if (!/credit balance is too low/.test(e.message) || /abcdefghij/.test(e.message)) throw new Error('message: ' + e.message);
+    // review #71: the provider text rides only on .detail (redacted); .message is host + status
+    if (e.message !== 'api.anthropic.com 400') throw new Error('message: ' + e.message);
+    if (!/credit balance is too low/.test(e.detail) || /abcdefghij/.test(e.detail)) throw new Error('detail: ' + e.detail);
   } finally { st(null); }
 });

@@ -1,5 +1,6 @@
 // Live AI layer (PENDING). One call = reserve budget -> provider call -> parse -> validate -> book the real cost.
 // The ledger (ai_calls + the budget check, migration 0041) is injected so tests run with no database.
+import { HttpError } from './http.ts';
 import { PROVIDERS } from './providers.ts';
 import { costUsd, reserveUsd, route } from './router.ts';
 import { DraftOut, extractJson, Infer, Schema } from './schema.ts';
@@ -38,7 +39,15 @@ export async function reserve(task: Task, promptChars: number, deps: Deps): Prom
   return res.callId;
 }
 
-export const errText = (e: unknown) => String((e as Error)?.message ?? e).replace(/(sk|xai|key)[-_][A-Za-z0-9_-]{8,}/gi, '[redacted]').slice(0, 200);
+const REDACT = /(sk|xai|key|sb_secret|sb_publishable|Bearer)[-_ ][A-Za-z0-9_.-]{6,}/gi;
+/** Ledger text (ai_calls.error, never sent to the app): the message plus, for a provider HTTP error, the provider's own text. */
+export const errText = (e: unknown) => {
+  const m = String((e as Error)?.message ?? e);
+  return (e instanceof HttpError && e.detail ? `${m}: ${e.detail}` : m).replace(REDACT, '[redacted]').slice(0, 200);
+};
+/** Text for anything the app can read (fact-check verdicts, trigger detail): a provider HTTP error keeps only its status. */
+export const safeErr = (e: unknown, max = 200) =>
+  e instanceof HttpError ? `provider ${e.status}` : String((e as Error)?.message ?? e).replace(REDACT, '[redacted]').slice(0, max);
 
 /** Non-streaming task with JSON output validated against `schema`. `parse` turns the raw text into the candidate object. */
 export async function runTask<T>(task: Task, prompt: Prompt, schema: Schema<T>, deps: Deps,

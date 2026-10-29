@@ -123,7 +123,7 @@ export async function runChat(system: string, messages: AiMessage[], deps: Deps,
   const now = io.now ?? (() => Date.now()); const t0 = io.t0 ?? now();
   const callId = await reserve('chat', system.length + JSON.stringify(messages).length, deps);
   const p = provider(deps, 'chat');
-  const cs = new ChatStream(guard.deny);
+  const cs = new ChatStream(guard.deny, (guard.entities ?? []).map((e) => e?.name).filter((n): n is string => typeof n === 'string'));
   let tin = 0, tout = 0, cr = 0, cw = 0, stop: string | undefined, first: number | null = null;
   const emit = async (t: string) => { if (!t) return; if (first === null) first = now() - t0; await io.onDelta(t); };
   const req = { model: r.model, system, messages, maxTokens: r.maxTokens, timeoutMs: r.timeoutMs, thinking: r.thinking, effort: r.effort,

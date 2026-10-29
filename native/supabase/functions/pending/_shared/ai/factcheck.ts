@@ -6,6 +6,7 @@
 // not pay again. Parallel Decisions API: POST https://api.parallel.ai/v1/decisions, header x-api-key (docs checked Oct 28).
 // A verdict only FLAGS (needs_review); it never edits or strikes a draft.
 import { guardedFetch } from './http.ts';
+import { safeErr } from './run.ts';
 
 export interface FactInput {
   dm_text: string;
@@ -402,7 +403,7 @@ export async function factCheck(f: FactInput, d: FactDeps) {
       const v = readVerdict(await post(payloads[i]));
       if (CHECKED.has(v.verdict)) await d.cachePut(domain, c.hash, c.claim, v);
       return [c.hash, v] as const;
-    } catch (e) { return [c.hash, { verdict: 'error', confidence: null, citations: [], error: String((e as Error)?.message ?? e).slice(0, 120) }] as const; }
+    } catch (e) { return [c.hash, { verdict: 'error', confidence: null, citations: [], error: safeErr(e, 120) }] as const; }   // review #71: status only
   }));
   const all: Record<string, unknown> = { ...cached, ...Object.fromEntries(fresh) };
   const verdicts = claims.map((c) => ({ claim: c.claim, source: c.source, claim_hash: c.hash, cached: !!cached[c.hash], ...(all[c.hash] as object) }));

@@ -3,7 +3,7 @@
 // 10-minute cron as the fallback. Idempotent: ai_triggers ('accept', gmail msg id) and ('dm1', person id) are claimed
 // once in the database before any model call, so a redelivered Pub/Sub message or an overlapping cron run does nothing.
 import { Deps } from '../_shared/ai/run.ts';
-import { BudgetRefused } from '../_shared/ai/run.ts';
+import { BudgetRefused, safeErr } from '../_shared/ai/run.ts';
 import { classifyAccept, draftDm1 } from './actions.ts';
 import { copyCheck } from '../_shared/ai/copycheck.ts';
 import { Db } from './db.ts';
@@ -64,4 +64,4 @@ export async function processPending(db: Db, deps: Deps, limit = 10): Promise<Re
   return out;
 }
 
-const errMsg = (e: unknown) => String((e as Error)?.message ?? e).slice(0, 200);
+const errMsg = (e: unknown) => safeErr(e, 200);   // review #71: a provider error keeps only its status here

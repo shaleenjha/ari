@@ -15,3 +15,4 @@ Priority: 1 = could break a backup, deploy or rollback, or hides a failure; 2 = 
 - [open] 2 | #50 | native/supabase/migrations/pending/0047_pipeline_jobs.sql (ari_pipeline_brief_write) | low (backlog): the SQL brief check lacks brief_upsert.py's location words and "P.S." rule, though the comment says the rules match | add `Bengaluru|Bangalore|India| IST|P\.S\.` to the SQL check (same contract both sides)
 
 ## Fixed
+- [fixed in commit "Chat: mask snapshot names in output guard" (Oct 30 2026)] 1 | #71 | native/supabase/functions/pending/_shared/ai/factcheck.ts:405, ari-ai/events.ts:67 | low (security): fact-check verdict / trigger detail stored the provider error text | HttpError.message is host + status only, provider text only on .detail and only run.ts errText (ledger) adds it; factcheck and events use safeErr ("provider <status>")

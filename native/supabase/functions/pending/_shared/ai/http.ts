@@ -35,8 +35,10 @@ export class HttpError extends Error {
 }
 
 /** The provider's own error text (Anthropic / xAI / OpenAI {"error": {"message"}} or {"message"}), short, with anything key-like
- *  redacted, so the ledger (ai_calls.error) says "credit balance is too low" instead of a bare 400. Kept on HttpError.message /
- *  .detail; anything that reaches the app (errorBody, chatError, draft meta redraft_error) uses fixed codes or the status only. */
+ *  redacted, so the ledger (ai_calls.error) says "credit balance is too low" instead of a bare 400. Kept ONLY on HttpError.detail
+ *  (review #71): HttpError.message is "<host> <status>", and only run.ts errText() (the ledger text) appends the detail. Anything
+ *  that reaches the app (errorBody, chatError, draft meta redraft_error, fact-check verdicts, trigger detail) uses fixed codes or
+ *  the status only (run.ts safeErr). */
 export async function providerMessage(r: Response): Promise<string> {
   let t = '';
   try { t = (await r.text()).slice(0, 4000); } catch { return ''; }
@@ -68,7 +70,7 @@ export async function guardedFetch(url: string, init: RequestInit, opt: { timeou
       // 4xx other than 429 is never retried (a bad request or an empty credit balance will not fix itself); 429 / 5xx once.
       const retryable = r.status === 429 || r.status >= 500;
       const detail = await providerMessage(r);
-      last = new HttpError(r.status, hostOf(url), retryable, `${hostOf(url)} ${r.status}${detail ? ': ' + detail : ''}`, detail);
+      last = new HttpError(r.status, hostOf(url), retryable, `${hostOf(url)} ${r.status}`, detail);
       if (!retryable) throw last;
     } catch (e) {
       clearTimeout(t);
