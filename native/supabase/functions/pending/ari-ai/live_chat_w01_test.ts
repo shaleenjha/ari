@@ -48,12 +48,15 @@ Deno.test('W01: infra words or instruction leaks the model writes AROUND a maske
   assertEquals(cs.end().text, HANDLED);
 });
 
-Deno.test('W01: an account literally named after an infra vendor can be discussed, but tying it to Kyte still trips', () => {
-  assertEquals(cleanAnswer('Supabase launched a new vault on Oct 20, so lead with that in the DM1.', { names: NAMES, final: true }).tripped, null);
-  for (const a of ['I run on Supabase.', "I'm built on Supabase.", 'Kyte is hosted on Supabase.', 'Supabase powers me.', 'I use Supabase.',
-    'Supabase is next. I run on Postgres.']) {
-    assertEquals(cleanAnswer(a, { names: NAMES, final: true }).text, HANDLED, a);
+Deno.test('review #72: a vendor / infra word used as a name is NOT masked: it trips exactly as before, every phrasing', () => {
+  const names = [...NAMES, 'Claude Inc', 'Postgres Labs'];
+  assertEquals(nameMask(['Supabase', 'Claude Inc', 'Postgres Labs']).list.length, 0);
+  for (const a of ['Supabase launched a new vault on Oct 20, so lead with that in the DM1.', 'I run on Supabase.', 'Powered by Supabase.',
+    "Kyte's model is Claude Inc.", 'my backend is Postgres Labs', 'the engine behind Kyte is Supabase', 'Supabase powers me.']) {
+    assertEquals(cleanAnswer(a, { names, final: true }).text, HANDLED, a);
   }
+  // the instruction-text name stays masked, but tying it to Kyte itself still trips
+  for (const a of [`I run on ${INJ}.`, `${INJ} powers me.`, `Kyte is built on ${INJ}.`]) assertEquals(cleanAnswer(a, { names, final: true }).text, HANDLED, a);
 });
 
 Deno.test('W01: action claims around a masked name still become the no-change line; masking is whole-word only', () => {
