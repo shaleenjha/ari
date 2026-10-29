@@ -27,6 +27,17 @@
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
 
+## 0051 drafting in Ask Kyte (Oct 30 2026): WRITTEN, staging only; never prod without Owner + a PAT (after 0049 + 0050)
+Owner (Oct 30, option A): Kyte drafts a DM or reply for a named person in the chat; it reaches the person's page only on his tap.
+`0051_ai_chat_draft.sql`: `ai_chat_drafts` (owner read, service write, 30-day prune cron `ari-ai-chat-draft-prune` 01:55 IST);
+`ari_ai_chat_draft_on()` (app_config `ask_draft` = 'true', default off); `ari_ai_chat_draft_target(question, person, kind)` (who and
+whether: no drafts for review pending, personal, Hold, exec track, customer / do-not-contact, meeting set, withdrawn, already sent,
+DMs after a reply, before accept; exec refusals carry no name); `ari_ai_chat_draft_put(...)` (records a draft, writes nothing on
+people); `ari_ai_chat_draft_save(draft, confirm_overwrite, undo)` (re-checks, never over Owner's own edit or a moved slot without
+confirm, writes through ari_ai_save_draft mode rewrite / ari_ai_save_reply_draft, keeps the replaced text, idempotent, undo).
+Service role only. Rollback `0051_ai_chat_draft_rollback.sql` (refuses while drafts exist unless `set ari.allow_drop_chat_drafts =
+'yes'`). Checks `test/checks_after_0051.sql` (one statement, synthetic rows, deliberate raise: `ALL 0051 CHECKS PASSED` = pass).
+
 ## 0050 Kyte decline line (Oct 30 2026): WRITTEN, rehearsed locally, NOT APPLIED ANYWHERE; ships with 0049
 Owner (Oct 30 04:47 IST, option A): Kyte never names Ari, Den, Hark, Kelvarrow or any system or vendor; the decline is exactly
 "I can't help with that here." `0050_kyte_decline_line.sql` changes only the result string of `queue_block_app_change()` (0019, live on prod

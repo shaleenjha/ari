@@ -122,3 +122,17 @@ api "$PEND/0050_kyte_decline_line_rollback.sql"; api "$PEND/0050_kyte_decline_li
 [ "$(f50)" = "$before50" ] && [ "$($P -At -c "select count(*) from supabase_migrations.schema_migrations where version = '0050'")" = "0" ] || { echo "FAIL 0050 rollback"; exit 1; }; echo "0050 ROLLBACK CHECK PASSED"
 api "$PEND/0050_kyte_decline_line.sql"; echo "applied 0050 again after the rollback"
 chk50
+
+# 0051 drafting in Ask Kyte (PENDING, staging only), on top of 0049 + 0050. Added Oct 30 2026. checks_after_0051.sql: synthetic rows,
+# the ask_draft switch flipped inside the transaction, ends in a deliberate raise ("ALL 0051 CHECKS PASSED ...").
+chk51() { local o; o=$($P -f "$HERE/checks_after_0051.sql" 2>&1 || true); echo "$o" | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+  grep -q "ALL 0051 CHECKS PASSED" <<<"$o" || { echo "FAIL 0051 checks"; exit 1; }; }
+o51() { $P -At -c "select (select count(*) from pg_proc where proname like 'ari_ai_chat_draft%') || '' || (select count(*) from pg_class where relname = 'ai_chat_drafts') || (select count(*) from cron.job where jobname = 'ari-ai-chat-draft-prune') || (select count(*) from supabase_migrations.schema_migrations where version = '0051')"; }
+api "$PEND/0051_ai_chat_draft.sql"; echo "applied 0051"
+chk51
+api "$PEND/0051_ai_chat_draft.sql"; echo "re-applied 0051 (idempotence): no error"
+[ "$(o51)" = "4111" ] || { echo "FAIL 0051 objects ($(o51))"; exit 1; }
+api "$PEND/0051_ai_chat_draft_rollback.sql"; api "$PEND/0051_ai_chat_draft_rollback.sql"; echo "rolled back 0051 (twice)"
+[ "$(o51)" = "0000" ] || { echo "FAIL 0051 rollback ($(o51))"; exit 1; }; echo "0051 ROLLBACK CHECK PASSED"
+api "$PEND/0051_ai_chat_draft.sql"; echo "applied 0051 again after the rollback"
+chk51

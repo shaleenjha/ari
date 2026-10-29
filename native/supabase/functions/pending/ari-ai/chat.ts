@@ -9,17 +9,25 @@
 // Order: input check -> rate limit (ari_ai_chat_begin, 20 a minute / 300 a day) -> askGuard (HANDLED, $0, no model) -> read-only
 // snapshot (ari_ai_chat_context) -> spend reservation -> streamed Sonnet answer through the output guard -> book the cost ->
 // record the turn. Nothing else is written; there is no path from here that changes Owner's data or sends anything.
+// Drafting (Oct 30 2026, behind app_config ask_draft): after askGuard, an ask to write / draft / redo a message for a named person
+// becomes a draft card (chat_draft.ts): an extra SSE `draft` event {draft_id, person_id, name, first_name, kind, text, needs_review,
+// flags, edited, replaces} before `done` (done carries the same object as `draft`). The draft is only RECORDED (ai_chat_drafts);
+// it reaches the person's page only through action chat_draft_save on Owner's tap. Ineligible asks get one polite line, $0.
 import { askGuard, HANDLED, MAX_CHAT } from '../_shared/ai/chat_guard.ts';
 import type { Entity } from '../_shared/ai/chat_guard.ts';
 import { BudgetRefused, chatMessages, chatSystem, InvalidOutput, runChat, sanitizeSnapshot, Turn } from '../_shared/ai/chat.ts';
 import type { Deps } from '../_shared/ai/run.ts';
 import { BadRequest } from './actions.ts';
 import type { Db } from './db.ts';
+import { draftAsk } from '../_shared/ai/chat_draft.ts';
+import { ChatDraftCard, chatDraftTurn, findTarget, Target } from './chat_draft.ts';
 
 export class RateLimited extends Error { constructor(public reason: string, public retryS: number) { super(reason); } }
 
-export interface ChatDone { text: string; status: 'ok' | 'handled'; entities: unknown[]; turn_id: number; first_ms: number | null; total_ms: number }
-export interface ChatSink { delta: (t: string) => void | Promise<void>; replace: (t: string) => void | Promise<void> }
+export interface ChatDone { text: string; status: 'ok' | 'handled'; entities: unknown[]; turn_id: number; first_ms: number | null; total_ms: number;
+  draft?: ChatDraftCard | null }
+export interface ChatSink { delta: (t: string) => void | Promise<void>; replace: (t: string) => void | Promise<void>;
+  draft?: (d: ChatDraftCard) => void | Promise<void> }
 
 const PERSON_ID = /^P[A-Z0-9]{1,20}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -63,6 +71,22 @@ export async function chat(db: Db, deps: Deps, body: Record<string, unknown>, si
     return { text: HANDLED, status: 'handled', entities: [], turn_id: turn, first_ms: ms, total_ms: ms };
   }
   try {
+    const ask = draftAsk(text);
+    if (ask) {
+      const h = (b.history ?? []).slice(-2).reverse();
+      const earlier = [...h.map((x) => x?.q ?? ''), h[0]?.a ?? ''].join('\n');
+      const t: Target = await findTarget(db, text, ask.kind, person, earlier);
+      if (t.reason !== 'disabled') {
+        const r = await chatDraftTurn(db, deps, t, text, turn);
+        if (r.card && sink.draft) await sink.draft(r.card);
+        await sink.delta(r.text);
+        const ms = now() - t0;
+        await finish(r.text, 'ok', r.callId, ms);
+        const ents = r.card ? [{ kind: 'person', id: r.card.person_id, name: r.card.name, start: r.text.indexOf(r.card.name), end: r.text.indexOf(r.card.name) + r.card.name.length }]
+          .filter((e) => e.name && e.start >= 0) : [];
+        return { text: r.text, status: 'ok', entities: ents, turn_id: turn, first_ms: ms, total_ms: ms, draft: r.card };
+      }
+    }
     // deno-lint-ignore no-explicit-any
     const ctx: any = await db.rpc('ari_ai_chat_context', { p_question: lookupText(text, b.history ?? []), p_person: person, p_account: account });
     const deny: string[] = Array.isArray(ctx?.guard?.deny_names) ? ctx.guard.deny_names.filter((x: unknown) => typeof x === 'string') : [];
@@ -95,7 +119,7 @@ export function chatSse(db: Db, deps: Deps, body: Record<string, unknown>, h: Re
     async start(c) {
       let open = true;
       const send = (ev: string, data: unknown) => { if (open) try { c.enqueue(enc.encode(`event: ${ev}\ndata: ${JSON.stringify(data)}\n\n`)); } catch { open = false; } };
-      try { const r = await chat(db, deps, body, { delta: (t) => send('delta', { t }), replace: (t) => send('replace', { t }) }); send('done', r); }
+      try { const r = await chat(db, deps, body, { delta: (t) => send('delta', { t }), replace: (t) => send('replace', { t }), draft: (d) => send('draft', d) }); send('done', r); }
       catch (e) { send('error', chatError(e).body); }
       finally { try { c.close(); } catch { /* client gone */ } }
     },
