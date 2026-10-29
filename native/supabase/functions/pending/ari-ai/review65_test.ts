@@ -17,14 +17,14 @@ const base = (source_facts: { fact: string; source: string }[], research = RESEA
 const decide = (source_facts: { fact: string; source: string }[], research = RESEARCH) => selectClaims(base(source_facts, research)).decisions.map((d) => d.decision);
 
 Deno.test('review #65 (a): the CRM / vendor word passes only when the claim itself cites a research site', () => {
-  const crm = 'Quillfeather is reviewing third-party risk after a breach in its CRM environment';
+  const vendorClaim = 'Quillfeather is reviewing third-party risk after a breach in its CRM environment';
   const crm = 'Quillfeather moved its support desk to a new CRM platform in 2026';
   // cited to a research row's host (www. ignored, any path on that host): passes the CRM rule
-  assertEquals(decide([{ fact: crm, source: 'https://breachdesk.example/other/page' }, { fact: crm, source: 'https://www.breachdesk.example/databreaches/quillfeather' }]),
+  assertEquals(decide([{ fact: vendorClaim, source: 'https://breachdesk.example/other/page' }, { fact: crm, source: 'https://www.breachdesk.example/databreaches/quillfeather' }]),
     [ELIGIBLE, ELIGIBLE]);
   // the same research is on file, but the claim's own source is NOT a research site: blocked, even though the research says
   // "CRM platform" and "CRM environment" (the account-wide lift review #65 found)
-  assertEquals(decide([{ fact: crm, source: 'https://notes.example/crm/opportunity/77' }, { fact: crm, source: 'https://quillfeather.example.evil.example/x' }]),
+  assertEquals(decide([{ fact: vendorClaim, source: 'https://notes.example/crm/opportunity/77' }, { fact: crm, source: 'https://quillfeather.example.evil.example/x' }]),
     [CRM, CRM]);
   // Owner's own CRM text: no url / a record field / plain http never pass (the url rule comes first)
   assertEquals(decide([{ fact: crm, source: 'crm:account.notes' }, { fact: crm, source: '' }]).every((d) => d.startsWith('blocked: not from public web research')), true);
@@ -32,7 +32,7 @@ Deno.test('review #65 (a): the CRM / vendor word passes only when the claim itse
   // a research row with no https url (brief summary / angles) adds no host
   assertEquals(decide([{ fact: crm, source: 'https://summary.example/x' }], [...RESEARCH, { source_url: '', fact: 'Uses a CRM platform.' }, { source_url: 'http://summary.example/x', fact: 'x' }]), [CRM]);
   // with no research at all, every CRM / vendor word blocks
-  assertEquals(decide([{ fact: crm, source: 'https://www.breachdesk.example/databreaches/quillfeather' }], []), [CRM]);
+  assertEquals(decide([{ fact: vendorClaim, source: 'https://www.breachdesk.example/databreaches/quillfeather' }], []), [CRM]);
   // generic sales words still block whatever the source
   assertEquals(decide([{ fact: 'Quillfeather has an open deal in the pipeline', source: 'https://www.breachdesk.example/databreaches/quillfeather' }]), [CRM]);
 });
