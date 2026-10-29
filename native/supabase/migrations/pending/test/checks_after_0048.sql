@@ -18,6 +18,9 @@ begin
   end loop;
   if (select prosrc from pg_proc where oid = 'public.ari_due_digest()'::regprocedure) ~* 'follow-up|DM1|ready when you are' then
     raise exception 'FAIL 1: ari_due_digest still has the old words'; end if;
+  if (select prosrc from pg_proc where oid = 'public.ari_move_total(date)'::regprocedure) ~ '''WITHDRAW''|withdraws'
+     or (select prosrc from pg_proc where oid = 'public.ari_move_push_copy(jsonb)'::regprocedure) ~* 'old invites' then
+    raise exception 'FAIL 1: the move total still counts invite withdrawals (retired Oct 29)'; end if;
   raise notice 'ok 1 functions, ledger, grants';
 
   -- 2. normCo parity with web/ops.html (values worked through the JS by hand)
@@ -32,8 +35,8 @@ begin
   if c ->> 'title' <> '13 moves ready' or c ->> 'body' <> 'About 12 minutes. Replies first.' then raise exception 'FAIL 3: %', c; end if;
   c := public.ari_move_push_copy('{"total":1,"to_send":1,"replies":0}');
   if c ->> 'title' <> '1 move ready' or c ->> 'body' <> 'About 1 minute.' then raise exception 'FAIL 3: %', c; end if;
-  c := public.ari_move_push_copy('{"total":3,"to_send":0,"replies":0}');
-  if c ->> 'title' <> '3 moves ready' or c ->> 'body' <> 'Old invites to tidy up.' then raise exception 'FAIL 3: %', c; end if;
+  c := public.ari_move_push_copy('{"total":3,"to_send":3,"replies":0}');
+  if c ->> 'title' <> '3 moves ready' or c ->> 'body' <> 'About 4 minutes.' then raise exception 'FAIL 3: %', c; end if;
   raise notice 'ok 3 push words';
 
   -- 4. the count follows the client's rules (deltas from synthetic rows on a far day)
@@ -52,7 +55,7 @@ begin
     ('P99999904810', 'Zq Check Ten',   'Zq Check Cap',  'DM1 sent',       'lead',     'Direct',          '2098-12-20', '2098-12-01', '2099-01-01', null, null, null, null, null, '', null),  -- 5th at one company: capped
     ('P99999904811', 'Zq Check Eleven','Zq Check Solo', 'DM2 sent',       'lead',     'Direct',          '2098-12-01', '2098-11-20', '2098-12-20', '2099-01-05', null, null, null, null, '', null), -- Last note (d2+7 = Jan 12)
     ('P99999904812', 'Zq Check Twelve','Zq Check Solo', 'DM2 sent',       'lead',     'Direct',          '2098-12-01', '2098-11-20', '2098-12-20', '2099-01-12', null, null, null, null, '', null), -- Jan 19: not yet
-    ('P99999904813', 'Zq Check Thirteen','Zq Check Solo','Connect sent',  'lead',     'Direct',          null, '2098-12-30', null, null, null, null, null, null, '', null),                  -- 16 days: withdraw
+    ('P99999904813', 'Zq Check Thirteen','Zq Check Solo','Connect sent',  'lead',     'Direct',          null, '2098-12-30', null, null, null, null, null, null, '', null),                  -- 16 days: no (withdraw retired Oct 29)
     ('P99999904814', 'Zq Check Fourteen','Zq Check Solo','Connect sent',  'lead',     'Direct',          null, '2099-01-10', null, null, null, null, null, null, '', null),                  -- 5 days: no
     ('P99999904815', 'Zq Check Fifteen','Zq Check Solo', 'Replied',       'lead',     'Direct',          '2098-12-01', '2098-11-20', '2098-12-05', null, '2099-01-14', null, null, null, '', null), -- Reply
     ('P99999904816', 'Zq Check Sixteen','Zq Check Solo', 'Accepted',      'lead',     'Direct',          '2099-01-10', '2099-01-01', null, null, null, '2099-01-20', null, null, '', null),  -- snoozed: no
@@ -66,11 +69,11 @@ begin
   if (a ->> 'dm1')::int - (b ->> 'dm1')::int <> 1 then raise exception 'FAIL 4: first messages +% (want 1) %', (a ->> 'dm1')::int - (b ->> 'dm1')::int, a; end if;
   if (a ->> 'dm2')::int - (b ->> 'dm2')::int <> 4 then raise exception 'FAIL 4: follow-ups +% (want 4, capped) %', (a ->> 'dm2')::int - (b ->> 'dm2')::int, a; end if;
   if (a ->> 'dm3')::int - (b ->> 'dm3')::int <> 1 then raise exception 'FAIL 4: last notes +% (want 1) %', (a ->> 'dm3')::int - (b ->> 'dm3')::int, a; end if;
-  if (a ->> 'withdraws')::int - (b ->> 'withdraws')::int <> 1 then raise exception 'FAIL 4: withdraws +% (want 1) %', (a ->> 'withdraws')::int - (b ->> 'withdraws')::int, a; end if;
+  if a ? 'withdraws' then raise exception 'FAIL 4: withdraws still counted %', a; end if;
   if (a ->> 'replies')::int - (b ->> 'replies')::int <> 1 then raise exception 'FAIL 4: replies +% (want 1) %', (a ->> 'replies')::int - (b ->> 'replies')::int, a; end if;
   if (a ->> 'connects')::int - (b ->> 'connects')::int <> 0 then raise exception 'FAIL 4: connects +% (want 0) %', (a ->> 'connects')::int - (b ->> 'connects')::int, a; end if;
-  if (a ->> 'total')::int - (b ->> 'total')::int <> 8 or (a ->> 'to_send')::int - (b ->> 'to_send')::int <> 7 then
-    raise exception 'FAIL 4: total +% / to send +% (want 8 / 7) %', (a ->> 'total')::int - (b ->> 'total')::int, (a ->> 'to_send')::int - (b ->> 'to_send')::int, a; end if;
+  if (a ->> 'total')::int - (b ->> 'total')::int <> 7 or (a ->> 'to_send')::int - (b ->> 'to_send')::int <> 7 or (a ->> 'total') <> (a ->> 'to_send') then
+    raise exception 'FAIL 4: total +% / to send +% (want 7 / 7, total = to send) %', (a ->> 'total')::int - (b ->> 'total')::int, (a ->> 'to_send')::int - (b ->> 'to_send')::int, a; end if;
   raise notice 'ok 4 move total follows Today (% before, % after)', b ->> 'total', a ->> 'total';
 
   -- 5. the 21:00 digest end to end: one row, the same number, plain words (rolled back with everything else)

@@ -1,19 +1,22 @@
 -- 0048 push digest = Today's move total (Owner Oct 29 2026). WRITTEN, NOT APPLIED ANYWHERE.
+-- Revised Oct 29 ~22:30 IST: invite withdraw retired by Owner ("stop the withdraw feature"); old invites are no longer a move,
+-- so the total is replies + messages + today's invites only, matching web/ops.html v18.14.8 items().
 -- Why: the 21:00 IST digest (cron ari-due-digest -> ari_due_digest()) counted every accepted person without a first message,
 -- plus DM2/DM3 by their stored due dates only, and said "27 follow-ups due tonight / 20 DM1, 7 DM3. Ready when you are."
 -- The app's Today counts something else: ariV1812.items() in web/ops.html (the Today tab badge, "1 of N" and the ui5 hero all
 -- read it). This migration makes the push read the same total with the same rules, and speak plain words:
---   title  "<N> move(s) ready"              N = the move total (replies + messages + today's invites + old invites to withdraw)
+--   title  "<N> move(s) ready"              N = the move total (replies + messages + today's invites)
 --   body   "About <M> minutes. Replies first."   M = max(1, round(1.2 x moves to send)), the Today hero line; "Replies first."
---          only when a reply is waiting. When only old invites remain: "Old invites to tidy up."
--- What it mirrors (web/ops.html v18.14.6, model() + ariModel wrapper + ariV1812 items()), per person (not deleted, has a name,
+--          only when a reply is waiting. Every move is one to send (no withdraw moves since v18.14.8).
+-- What it mirrors (web/ops.html v18.14.8, model() + ariModel wrapper + ariV1812 items()), per person (not deleted, has a name,
 -- not review 'personal'):
 --   effective stage: queue 'send to founder' / 'take back from founder' (latest 200 queue rows, the oldest action wins, as the
 --   client's forEach does), else the exec track (stage or route naming the exec, lane founder/exec), else 'Hold' when the
 --   person's company matches (normCo) an account with meeting_status 'set' and they have not replied or met.
 --   one item: pending review, Hold/exec stage, meeting, withdrawn or skipped -> none; replied -> Reply; DM3 sent -> none;
 --   DM2 sent -> Last note when dm3_due (or DM2 + 7 days) <= day; DM1 sent -> Follow-up when dm2_due (or DM1 + 4) <= day;
---   accepted -> First message; invite sent -> Withdraw when 14+ days old; snoozed past the day -> none; exec-track -> none.
+--   accepted -> First message; invite sent -> none (waiting on the accept; withdraw retired); snoozed past the day -> none;
+--   exec-track -> none.
 --   Follow-ups at most 4 per company per day. Connects come only from Today's invites (ari_today15) less skipped/sent/exec.
 --   Reply items for people who already have an open relay reply (ari_replies_open) count once, as the relay row.
 --   Timestamps are compared as their UTC date (the client reads the first 10 characters of the ISO string).
@@ -95,7 +98,7 @@ it as (
               when d2 is not null then case when coalesce(dm3_due, d2 + 7) <= (select sd from cfg) then 'DM3' end
               when d1 is not null then case when coalesce(dm2_due, d1 + 4) <= (select sd from cfg) then 'DM2' end
               when ac is not null then 'DM1'
-              when cs is not null then case when (select sd from cfg) - cs >= 14 then 'WITHDRAW' end
+              when cs is not null then null                     -- waiting on the accept (invite withdraw retired Oct 29)
               when est ~* 'connect queued' or est = '' then case when connect_day <= (select sd from cfg) then 'CONNECT' end
          end as tag
   from st
@@ -120,14 +123,13 @@ n as (
          (select count(*) from q where tag = 'DM1')::int as dm1,
          coalesce((select sum(n) from dm2), 0)::int as dm2,
          (select count(*) from q where tag = 'DM3')::int as dm3,
-         (select count(*) from con)::int as connects,
-         (select count(*) from q where tag = 'WITHDRAW')::int as withdraws
+         (select count(*) from con)::int as connects
 )
 select jsonb_build_object(
   'day', (select sd from cfg),
-  'total', relay + reply + dm1 + dm2 + dm3 + connects + withdraws,
+  'total', relay + reply + dm1 + dm2 + dm3 + connects,
   'to_send', relay + reply + dm1 + dm2 + dm3 + connects,
-  'replies', relay + reply, 'dm1', dm1, 'dm2', dm2, 'dm3', dm3, 'connects', connects, 'withdraws', withdraws)
+  'replies', relay + reply, 'dm1', dm1, 'dm2', dm2, 'dm3', dm3, 'connects', connects)
 from n;
 $$;
 
@@ -136,9 +138,8 @@ create or replace function public.ari_move_push_copy(p jsonb) returns jsonb
 language sql immutable set search_path = public as $$
   select jsonb_build_object(
     'title', x.n || ' move' || case when x.n = 1 then '' else 's' end || ' ready',
-    'body', case when x.s > 0 then 'About ' || x.m || ' minute' || case when x.m = 1 then '' else 's' end || '.'
-                                   || case when x.r > 0 then ' Replies first.' else '' end
-                 else 'Old invites to tidy up.' end)
+    'body', 'About ' || x.m || ' minute' || case when x.m = 1 then '' else 's' end || '.'
+            || case when x.r > 0 then ' Replies first.' else '' end)
   from (select coalesce((p ->> 'total')::int, 0) as n, coalesce((p ->> 'to_send')::int, 0) as s,
                coalesce((p ->> 'replies')::int, 0) as r,
                greatest(1, round(coalesce((p ->> 'to_send')::numeric, 0) * 1.2))::int as m) x;

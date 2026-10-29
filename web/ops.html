@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.7"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.8"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -151,7 +151,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
     else if(d2){if(d3due<=sd)item={tag:'DM3',kind:'dm3',why:'DM2 went out '+rel(d2,sd)+' with no reply. Last, polite note.',msg:p.dm3_text||'',field:'dm3_text',due:d3due};else{next='DM3 on '+nice(d3due);COMING.push([d3due,p,'DM3'])}}
     else if(d1){if(d2due<=sd)item={tag:'DM2',kind:'dm2',why:'DM1 went out '+rel(d1,sd)+', no reply. A new reason, never a bump.',msg:p.dm2_text||'',field:'dm2_text',due:d2due};else{next='DM2 on '+nice(d2due);COMING.push([d2due,p,'DM2'])}}
     else if(ac){if(d1due<=sd)item={tag:'DM1',kind:'dm1',why:'Accepted '+rel(ac,sd)+'. '+(a.hook?'The reason: '+window.ariPlain(a.hook):''),msg:p.dm||'',field:'dm',due:d1due,rs:rs};else{next='DM1 on '+nice(d1due);COMING.push([d1due,p,'DM1'])}}
-    else if(cs){var age=diffD(sd,cs);if(age>=14)item={tag:'WITHDRAW',kind:'withdraw',why:'Invite sent '+short(cs)+', '+age+' days with no accept. Withdraw it on LinkedIn, then tick.',msg:'',field:''};else{next='Waiting on accept · day '+age+' of 14';WAIT.push({p:p,age:age})}}
+    else if(cs){var age=diffD(sd,cs);/* v18.14.8: invite withdraw retired (Owner Oct 29) */next='Waiting on accept · day '+age+(age<14?' of 14':'');WAIT.push({p:p,age:age})}
     else if(/connect queued/i.test(stage)||!stage){var cd=dOnly(p.connect_day);if(cd&&cd<=sd){item={tag:'CONNECT',kind:'connect',why:(cd<sd?'Carried over from '+nice(cd)+'. ':'')+'Send a blank connect. '+(p.role?p.role.replace(/\.$/,'')+'.':''),msg:'',field:'',due:cd}}else next=cd?'Connect on '+nice(cd):'Not scheduled yet'}
     if(item&&snoozed){next='Snoozed until '+nice(snz);COMING.push([snz,p,item.tag]);item=null}
     if(item){item.n=p.name;item.c=[p.title,acct].filter(Boolean).join(' · ');item.id=p.id;item.url=liHttps(p.linkedin_url);item.acc=item.tag==='REPLY'?1:0;item.p=p;Q.push(item);next=next||({CONNECT:'Send the connect',DM1:'Send DM1',DM2:'Send DM2',DM3:'Send DM3',WITHDRAW:'Withdraw the invite',REPLY:'Answer the reply'})[item.tag]}
@@ -201,7 +201,7 @@ function model(d,opt){opt=opt||{};var sd=shiftDate();
   var FACTS=[];
   FACTS.push(all.c?all.c+' connects out in total, '+all.a+' accepted. '+(all.a?'That’s '+ar+'%.':'Accepts usually take a few days, so the quiet is normal.'):'Nothing sent yet, which means every number from here is yours.');
   FACTS.push(people.length+' people across '+Object.keys(byA).length+' accounts in the Sheet, '+HOLD.length+' of them parked on hold or on the exec track.');
-  if(WAIT.length)FACTS.push(WAIT.length+' invites are waiting on an accept. The oldest is on day '+Math.max.apply(null,WAIT.map(function(w){return w.age}))+' of fourteen.');
+  if(WAIT.length){var wmx=Math.max.apply(null,WAIT.map(function(w){return w.age}));FACTS.push(WAIT.length+' invites are waiting on an accept. '+(wmx<14?'The oldest is on day '+wmx+' of fourteen.':'The oldest has waited '+wmx+' days.'))}
   FACTS.push('I never press send. Every message that leaves goes out under your thumb.');
   return {FOUNDER:FOUNDER,PERS:PERS,PEND:PEND,sd:sd,Q:Q,FU:FU,BG:BG,PF:PF,ACC:ACC,LOG:LOG,WK:WK,M8:M8,X8:X8,FACTS:FACTS,WAIT:WAIT,HOLD:HOLD,COMING:COMING,queue:queue,brief:d&&d.brief||{},
     stats:{pend:PEND.length,all:all,ar:ar,tw:tw,lw:lw,cToday:cToday,sentToday:sentToday,fuDue:fuDue,dm1:dm1,rep:rep,doneToday:doneToday.length,streak:streak,people:people.length},
@@ -7300,13 +7300,13 @@ followIn=function(){if(fuShown)return;fuShown=true;const pane=$('#follow');if(!p
   pane.innerHTML=`<span class="cap">Cadence · ${M.WAIT.length+FU.length+due.length+BG.length} in motion</span>
   <div class="h">${due.length?W(due.length)+' due tonight.':'Nothing due tonight.'}<br><span class="dim">${due.filter(q=>q.msg).length===due.length?(due.length?'Every draft is written.':'I’ll write each one before it’s due.'):W(due.filter(q=>!q.msg).length)+' still need a draft.'}</span></div>
   <div class="rule"><div style="display:flex;justify-content:space-between"><span class="cap">The cadence</span><span class="cap">Days after DM1</span></div><div class="cad" id="cad"><div class="ln"><b></b></div></div>
-   <div class="rulet">DM1 when they accept, DM2 four days later, DM3 a week after DM2, then done. Each brings a new reason rather than a bump. Invites with no accept after fourteen days get withdrawn.</div></div>
+   <div class="rulet">DM1 when they accept, DM2 four days later, DM3 a week after DM2, then done. Each brings a new reason rather than a bump.</div></div>
   <div class="strip" id="fstrip"><div><div class="v" data-n="${M.WAIT.length}">0</div><span class="cap">Awaiting accept</span></div><div><div class="v acc" data-n="${due.length}">0</div><span class="cap">Due tonight</span></div><div><div class="v" data-n="${FU.length}">0</div><span class="cap">Next 7 days</span></div><div><div class="v" data-n="${BG.length}">0</div><span class="cap">Background</span></div></div>
   <div class="sec"><span class="cap">Due tonight</span><span class="cap">${due.length}</span></div><div class="list" id="fuDue">${due.length?'':`<p class="wit">${M.WAIT.length?'Nothing yet. The first DM1s unlock when accepts come in.':'Nothing in sequence yet.'}</p>`}</div>
   <div class="sec"><span class="cap">Coming up</span><span class="cap">Next 7 days</span></div><div class="list" id="fuList">${FU.length?'':'<p class="wit">Nothing scheduled this week.</p>'}</div>
   <div class="sec"><span class="cap">Waiting on accept</span><span class="cap">${M.WAIT.length}</span></div><p class="wit" style="margin-top:var(--s2)">Tap Accepted when LinkedIn says yes. Kyte also reads the accept emails and marks them on its run.</p><div class="list" id="fuWait"></div>
   <div class="sec"><span class="cap">In the background</span><span class="cap">${BG.length}</span></div><div class="list" id="bgList">${BG.length?'':'<p class="wit">Nobody has finished a sequence yet.</p>'}</div>`;
-  const nodes=[[0,'DM1','day 0'],[4,'DM2','day 4'],[11,'DM3','day 11'],[14,'Withdraw','invite day 14']],cad=$('#cad');
+  const nodes=[[0,'DM1','day 0'],[4,'DM2','day 4'],[11,'DM3','day 11']],cad=$('#cad');
   nodes.forEach(([d,l,s2],i)=>{const e=document.createElement('div');e.className='nd'+(i>2?' bg':'');e.style.left=`calc(6px + ${[0,30,52,100][i]}% * .97)`;e.innerHTML=`<i></i><span>${l}<em>${s2}</em></span>`;cad.appendChild(e);A(e.querySelector('i'),[{transform:'scale(0)'},{transform:'scale(1)'}],POP,200+i*140)});
   A(cad.querySelector('.ln b'),[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{d:900,e:'cubic-bezier(.22,1,.36,1)'},150);
   $$('#fstrip .v').forEach((v,i)=>countUp(v,+v.dataset.n,200+i*80));
@@ -7315,7 +7315,7 @@ followIn=function(){if(fuShown)return;fuShown=true;const pane=$('#follow');if(!p
   let day='',h='';FU.forEach(f=>{if(f.day!==day){day=f.day;h+=`<div class="dayh"><span>${E(day)}</span><span>${FU.filter(x=>x.day===day).length}</span></div>`}
     h+=`<div class="fu" data-n="${E(f.n)}"><div class="av">${initials(f.n)}</div><div style="min-width:0"><div class="nm">${E(f.n)}</div><div class="sub"><span class="co" style="margin:0">${E(f.c.split(' · ').pop())} · ${f.step}</span><span class="dots">${f.dots.map(d=>`<i class="${d===1?'d':d===2?'n':''}"></i>`).join('')}</span></div></div><span class="st ${f.st}">${f.st==='rd'?'READY':'DRAFT DUE'}</span></div>`});
   $('#fuList').insertAdjacentHTML('beforeend',h);
-  $('#fuWait').innerHTML=M.WAIT.sort((a,b)=>b.age-a.age).map(w=>`<div class="fu" data-n="${E(w.p.name)}"><div class="av">${initials(w.p.name)}</div><div style="min-width:0"><div class="nm">${E(w.p.name)}</div><div class="co">${E(w.p.company)} · day ${w.age} of 14</div></div><span class="v16acc press" data-acc="${E(w.p.id)}">Accepted</span></div>`).join('')||'<p class="wit">No invites out.</p>';
+  $('#fuWait').innerHTML=M.WAIT.sort((a,b)=>b.age-a.age).map(w=>`<div class="fu" data-n="${E(w.p.name)}"><div class="av">${initials(w.p.name)}</div><div style="min-width:0"><div class="nm">${E(w.p.name)}</div><div class="co">${E(w.p.company)} · day ${w.age}${w.age<14?' of 14':''}</div></div><span class="v16acc press" data-acc="${E(w.p.id)}">Accepted</span></div>`).join('')||'<p class="wit">No invites out.</p>';
   $('#bgList').insertAdjacentHTML('beforeend',BG.map(b=>row(b.n,`${b.c} · ${b.why}`,`<span class="st bk2">${E(b.back.toUpperCase())}</span>`)).join(''));
   $$('#follow .fu').forEach((e,i)=>{e.onclick=ev=>{if(ev.target.closest('[data-acc],.ask'))return;openFile(e.dataset.n,e)};if(i<12)A(e,[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],SOFT,300+Math.min(i,12)*30)});
   $$('#follow [data-acc]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();if(b.classList.contains('on'))return;buzz([8,30,10]);b.classList.add('on');b.textContent='✓ Accepted';const id=b.dataset.acc,p=(DATA.people||[]).find(x=>x.id===id);
@@ -7434,9 +7434,9 @@ function tcol(){if(meta)meta.content=TC[root.dataset.theme]||'#E7E2D9'}tcol();ne
 
 /* ---------- notifications (only while Ari is open or in the background; real push comes with the native app) ---------- */
 window.ariV16N=null;let prevDue=-1;
-function notifyCheck(){if(!('Notification' in window)||Notification.permission!=='granted')return;let due=Q.filter(q=>/REPLY|DM/.test(q.tag)).length,send=due,reps=0;
-  /* v18.14.7: Today's shared move total (badge, hero, 1 of N) and the server push's words */try{if(window.ariV1812&&ariV1812.items){const L=ariV1812.items();due=L.length;send=L.filter(x=>x.k!=='withdraw').length;reps=L.filter(x=>x.grp==='r').length}}catch(e){}
-  if(prevDue>=0&&due>prevDue&&document.hidden){const m=Math.max(1,Math.round(send*1.2));navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.showNotification(`${due} move${due===1?'':'s'} ready`,{body:send?`About ${m} minute${m===1?'':'s'}.${reps?' Replies first.':''}`:'Old invites to tidy up.',icon:'/kyte-192.png',badge:'/kyte-badge-96.png',tag:'ari-due'})).catch(()=>{})}prevDue=due}
+function notifyCheck(){if(!('Notification' in window)||Notification.permission!=='granted')return;let due=Q.filter(q=>/REPLY|DM/.test(q.tag)).length,reps=0;
+  /* v18.14.7: Today's shared move total (badge, hero, 1 of N) and the server push's words */try{if(window.ariV1812&&ariV1812.items){const L=ariV1812.items();due=L.length;reps=L.filter(x=>x.grp==='r').length}}catch(e){}
+  if(prevDue>=0&&due>prevDue&&document.hidden){const m=Math.max(1,Math.round(due*1.2));navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.showNotification(`${due} move${due===1?'':'s'} ready`,{body:`About ${m} minute${m===1?'':'s'}.${reps?' Replies first.':''}`,icon:'/kyte-192.png',badge:'/kyte-badge-96.png',tag:'ari-due'})).catch(()=>{})}prevDue=due}
 const _apply=apply;
 
 /* =========================================================
@@ -8315,11 +8315,11 @@ function pipeHTML(m){const s=m.stats||{},due=m.Q.filter(q=>/DM1|DM2|DM3|WITHDRAW
   return `<div class="sec v163sech"><span class="cap">Pipeline</span><span class="cap">${inMotion} in motion</span></div>
    <div class="v163stats"><div><b>${m.WAIT.length}</b><span>Awaiting accept</span></div><div class="acc"><b>${due}</b><span>Due tonight</span></div><div><b>${m.FU.length}</b><span>Next 7 days</span></div><div><b>${m.BG.length}</b><span>Background</span></div></div>
    <div class="v163cad"><div class="v163cadh"><span class="cap">The cadence</span><span class="cap">Days after DM1</span></div>
-    <div class="v163cadl"><i style="left:0%"></i><i style="left:28.6%"></i><i style="left:50%"></i><i class="bg" style="left:100%"></i><b></b></div>
-    <div class="v163cadt"><span style="left:0%"><b>DM1</b>day 0</span><span style="left:28.6%"><b>DM2</b>day 4</span><span style="left:78.6%"><b>DM3</b>day 11</span><span class="r" style="left:100%"><b>Withdraw</b>invite day 14</span></div>
-    <p>DM1 when they accept, DM2 four days later, DM3 a week after DM2, then done. Each brings a new reason, never a bump. Invites with no accept after fourteen days get withdrawn.</p></div>
+    <div class="v163cadl"><i style="left:0%"></i><i style="left:28.6%"></i><i style="left:50%"></i><b></b></div>
+    <div class="v163cadt"><span style="left:0%"><b>DM1</b>day 0</span><span style="left:28.6%"><b>DM2</b>day 4</span><span style="left:78.6%"><b>DM3</b>day 11</span></div>
+    <p>DM1 when they accept, DM2 four days later, DM3 a week after DM2, then done. Each brings a new reason, never a bump.</p></div>
    <div class="sec"><span class="cap">Coming up</span><span class="cap">Next 7 days · ${m.FU.length}</span></div><div class="list">${fuRows||'<p class="wit">Nothing scheduled this week.</p>'}</div>
-   <div class="sec"><span class="cap">Waiting on accept</span><span class="cap">${wait.length}</span></div><div class="list">${wait.slice(0,WMAX).map(w=>row(w.p,[w.p.company||'No account',`day ${w.age}/14`])).join('')||'<p class="wit">No invites out.</p>'}</div>
+   <div class="sec"><span class="cap">Waiting on accept</span><span class="cap">${wait.length}</span></div><div class="list">${wait.slice(0,WMAX).map(w=>row(w.p,[w.p.company||'No account',`day ${w.age}${w.age<14?'/14':''}`])).join('')||'<p class="wit">No invites out.</p>'}</div>
    ${wait.length>WMAX?`<div class="v162more press" id="v163wall">Show all ${wait.length}</div>`:''}
    ${m.BG.length?`<div class="sec v18111bg"><span class="cap">In the background</span><span class="cap">${m.BG.length}</span></div><div class="list">${m.BG.map(b=>{const p=(PF[b.n]||{}).p;return p?row(p,[b.c,b.back]):''}).join('')}</div>`:''}`}
 function renderPipe(){const m=window.ariM;if(!m||!m.WAIT)return;let box=$('#v163pipe');const done=$('#done');
@@ -10320,10 +10320,10 @@ let hP=null,sP=null;
 function loadHealth(force){if(!force&&V181.health&&Date.now()-V181.hAt<120e3)return Promise.resolve(V181.health);if(hP)return hP;
   hP=rpc('account_health').then(d=>{V181.health=d||[];V181.hAt=Date.now();idx();decorate();return V181.health}).catch(e=>{V181.errs.push('health '+e.message);return V181.health}).finally(()=>{hP=null});return hP}
 function loadStale(force){if(!force&&V181.stale&&Date.now()-V181.sAt<60e3)return Promise.resolve(V181.stale);if(sP)return sP;
-  sP=rpc('ari_stale').then(d=>{V181.stale=d||[];V181.sAt=Date.now();renderStaleRow();if(SP&&SP.classList.contains('on'))stalePage();return V181.stale}).catch(e=>{V181.errs.push('stale '+e.message);return V181.stale}).finally(()=>{sP=null});return sP}
+  sP=rpc('ari_stale').then(d=>{V181.stale=(d||[]).filter(x=>x&&x.kind!=='connect_withdraw');V181.sAt=Date.now();renderStaleRow();if(SP&&SP.classList.contains('on'))stalePage();return V181.stale}).catch(e=>{V181.errs.push('stale '+e.message);return V181.stale}).finally(()=>{sP=null});return sP}
 V181.loadHealth=loadHealth;V181.loadStale=loadStale;
 V181.setHealth=d=>{V181.health=d||[];V181.hAt=Date.now();idx();decorate()};
-V181.setStale=d=>{V181.stale=d||[];V181.sAt=Date.now();renderStaleRow();if(SP&&SP.classList.contains('on'))stalePage()};
+V181.setStale=d=>{V181.stale=(d||[]).filter(x=>x&&x.kind!=='connect_withdraw');V181.sAt=Date.now();renderStaleRow();if(SP&&SP.classList.contains('on'))stalePage()};
 let HI={id:new Map(),k:new Map()};
 function idx(){HI={id:new Map(),k:new Map()};(V181.health||[]).forEach(h=>{if(h.account_id)HI.id.set(h.account_id,h);HI.k.set(NCo(h.account),h);if(h.account_key)HI.k.set(NCo(h.account_key),h)})}
 const hOf=(name,id)=>(id&&HI.id.get(id))||HI.k.get(NCo(name))||null;
@@ -10952,7 +10952,7 @@ function actions(ae){const aeOk=o=>!ae||(ae==='Unassigned'?!AEX(o):AEX(o)===ae);
   const dm2=P.filter(p=>p.dm1_sent&&!p.dm2_sent&&!p.replied&&dd(String(p.dm1_sent).slice(0,10),t)>=4);
   const conn=P.filter(p=>!p.connect_sent&&!p.accepted&&/connect/i.test(p.stage||'')&&(!p.connect_day||String(p.connect_day)<=t));
   const rep=P.filter(p=>p.replied&&!p.meeting);
-  const pend2=P.filter(p=>pend(p)&&dd(String(p.connect_sent).slice(0,10),t)>=14);
+  const pend2=[];/* v18.14.8: invite withdraw retired (Owner Oct 29) */
   const A=(DATA().accounts||[]).filter(a=>aeOk(a.owner));const eng=A.filter(a=>/engaged/i.test(stOf(a))&&!/set|held/i.test(a.meeting_status||'')).map(a=>Object.assign({},a,{stage:stOf(a)}));const held=A.filter(a=>/meeting held/i.test(stOf(a))).map(a=>Object.assign({},a,{stage:stOf(a)}));
   return {noDm1,dm2,conn,rep,pend2,eng,held}}
 V182.actions=actions;
@@ -10985,7 +10985,7 @@ function repTop(D){try{if(!D||!D.S)return '';const fae=D.F&&D.F.ae||'';const W=(
 function momentum(D){try{const H=((D&&D.health)||(D&&D.F&&D.F.ae?[]:(window.ariV181&&ariV181.health))||[]).filter(h=>h.band!=='Parked'&&+h.people>0);if(!H.length)return '';
   const g={moving:[],stuck:[],cold:[]};H.forEach(h=>{const q=h.days_quiet==null?99:+h.days_quiet;if(h.band==='Cold'||q>=10)g.cold.push(h);else if(q<=3&&+h.score>=45&&(+h.accepted>0||+h.replied>0))g.moving.push(h);else g.stuck.push(h)});
   const cur=V182.mom||(g.moving.length?'moving':'stuck');const L=g[cur].slice().sort((a,b)=>cur==='moving'?b.score-a.score:a.score-b.score).slice(0,5);
-  const NX={moving:'Keep the thread going: the next DM or a second person',stuck:'Touch someone new or send the email step',cold:'Withdraw stale invites, then a fresh angle'};
+  const NX={moving:'Keep the thread going: the next DM or a second person',stuck:'Touch someone new or send the email step',cold:'A fresh angle, or someone new at the account'};
   return `<section class="v18c v182keep v182o4 qin" data-v18card="v182mo"><div class="v18cap"><span>Account momentum</span><span>Right now · ${H.length}</span></div>
    <div class="v182mt" role="tablist">${[['moving','Moving'],['stuck','Stuck'],['cold','Cold']].map(([k,l])=>`<span class="press ${cur===k?'on':''} m-${k}" data-v182mo="${k}" role="tab" aria-selected="${cur===k}"><b>${g[k].length}</b>${l}</span>`).join('')}</div>
    <p class="v182mut">${E1(NX[cur])}</p>
