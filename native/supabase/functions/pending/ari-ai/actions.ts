@@ -1,6 +1,7 @@
 // ari-ai (PENDING). The five app actions. Each one reads ONE person's (or one reply's) context, runs the routed model task,
 // validates the output and writes ONLY to that person's draft / research fields or that reply's drafts. Nothing here sends a
 // message anywhere: there is no LinkedIn client, and the host allowlist in _shared/ai/http.ts refuses linkedin.com.
+import { HttpError } from '../_shared/ai/http.ts';
 import { ClassifyOut, cleanFindings, Infer, ReplyDraftsOut, ResearchOut, TriageClassOut, triageKeysOk } from '../_shared/ai/schema.ts';
 import { classifyAcceptPrompt, CHIPS, Ctx, draftDm1Prompt, quickResearchPrompt, replyDraftsPrompt, rewritePrompt, SAVE_RESEARCH, triagePrompt } from '../_shared/ai/prompts.ts';
 import { Deps, Draft, InvalidOutput, runDraft, runDraftStream, runTask, runToolTask } from '../_shared/ai/run.ts';
@@ -93,7 +94,8 @@ export async function draftDm1(db: Db, deps: Deps, person: string, mode: 'dm1_au
         g = { ...g, pass: second.pass, flags: second.flags, redrafted: true, rules_version: second.rules_version };
       } catch (e) {
         // the redraft itself failed (cut reply, budget, network): keep the first draft, flagged, so DM1 is never lost
-        g = { ...g, redraft_error: String((e as Error)?.message ?? e).slice(0, 160) };
+        // review #70: a provider error keeps only its status here (this meta reaches the app); its text stays in the ledger
+        g = { ...g, redraft_error: e instanceof HttpError ? `provider ${e.status}` : String((e as Error)?.message ?? e).slice(0, 160) };
       }
     }
     if (!g.pass) draft = { ...draft, needs_review: true };

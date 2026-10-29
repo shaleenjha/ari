@@ -169,3 +169,12 @@ Deno.test('chat: stream false returns the done payload as JSON; HTML in the answ
   const j = await r.json();
   assertEquals(j.text, 'Two people accepted today.'); assertEquals(j.status, 'ok');
 });
+
+Deno.test('review #70: a provider 4xx during the DM1 redraft leaves only its status in the draft meta, never the provider text', async () => {
+  const { HttpError } = await import('../_shared/ai/http.ts');
+  const e: unknown = new HttpError(400, 'api.anthropic.com', false, 'api.anthropic.com 400: Your credit balance is too low', 'Your credit balance is too low');
+  const msg = e instanceof HttpError ? `provider ${e.status}` : String((e as Error).message);
+  assertEquals(msg, 'provider 400');
+  const src = await Deno.readTextFile(new URL('./actions.ts', import.meta.url));
+  assert(src.includes('e instanceof HttpError ? `provider ${e.status}`'));
+});

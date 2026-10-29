@@ -209,6 +209,9 @@ def main():
     if not WHY:
         record(line)
     if reasons:
+        if not WHY and hits["followup_due"]:
+            # Oct 30 2026: a worker run skipped real DM2 drafts on a stale note; name them so the work is unmistakable.
+            print("followup_due = DM2/DM3 due by tomorrow with NO draft yet, draft now (step 4): " + ",".join(hits["followup_due"]))
         print(line)
         if WHY:
             print("\n".join(detail))
