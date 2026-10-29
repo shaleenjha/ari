@@ -268,3 +268,16 @@ Deno.test('dm1 fix: a reply stopped at max_tokens fails as "stop_reason max_toke
     toolCalls: 0, citations: [], stopReason: 'end_turn', text: draftReply('Hi Sam, Ostrevanthe Co shipped a vault. Who owns it?') }) };
   assertEquals((await runDraft('draft', { system: 's', user: 'u' }, { ledger: m4.l, providers: { anthropic: ok } })).value.text, 'Hi Sam, Ostrevanthe Co shipped a vault. Who owns it?');
 });
+
+Deno.test('http: a 4xx carries the provider message (keys redacted) and is not retried; ledger-safe text', async () => {
+  const { setTransport: st, guardedFetch: gf, HttpError: HE } = await import('./http.ts');
+  let n = 0;
+  st(() => { n++; return Promise.resolve(new Response(JSON.stringify({ type: 'error', error: { type: 'invalid_request_error',
+    message: 'Your credit balance is too low to access the API. key sk-ant-abcdefghijklmnop' } }), { status: 400 })); });
+  try { await gf('https://api.anthropic.com/v1/messages', { method: 'POST' }, { timeoutMs: 1000, retries: 1 }); throw new Error('no throw'); }
+  catch (e) {
+    if (!(e instanceof HE)) throw e;
+    if (n !== 1) throw new Error('4xx retried');
+    if (!/credit balance is too low/.test(e.message) || /abcdefghij/.test(e.message)) throw new Error('message: ' + e.message);
+  } finally { st(null); }
+});

@@ -41,6 +41,10 @@ export const ROUTES: Record<Task, Route> = {
   // Oct 29 2026 (review #54 follow-up): 4000 tokens of headroom and effort low, same reason as draft / quick_research (a turn cut
   // at the cap loses its tool_use); runTurn now refuses max_tokens / refusal / context-window stops.
   deep_research: { provider: 'anthropic', model: 'claude-opus-5-5', maxTokens: 4000, timeoutMs: 60_000, effort: 'low' },
+  // Live Ask Kyte (Oct 30 2026, Owner: "the chat has to be AI driven"): Sonnet, no up-front thinking, effort low, 800 tokens is
+  // ample for 1 to 3 sentences, streamed; no provider retry (a timed-out stream may already be billed; the app falls back).
+  chat: { provider: 'anthropic', model: 'claude-sonnet-5-5', maxTokens: 800, timeoutMs: 30_000, stream: true, thinking: 'between_tools',
+    effort: 'low', retries: 0 },
   signal_search: { provider: 'xai', model: 'grok-4.7', maxTokens: 1500, timeoutMs: 45_000, tools: ['x_search', 'web_search'],
     temperature: 0 },
 };

@@ -3,7 +3,7 @@
 // Owner, Oct 23 2026 15:11 IST: ALL drafting on claude-opus-5-5 (draft, rewrite, reply_draft; future motion drafts and connect
 // notes use the 'draft' route too). Haiku only classifies (classify = accept match, triage = reply intent). quick_research on
 // Sonnet + web search. deep_research = Opus orchestrating, with Grok 4.7 (x_search / web_search) as its tool (signal_search).
-export type Task = 'classify' | 'triage' | 'match_profile' | 'draft' | 'rewrite' | 'reply_draft' | 'quick_research' | 'deep_research' | 'signal_search';
+export type Task = 'classify' | 'triage' | 'match_profile' | 'draft' | 'rewrite' | 'reply_draft' | 'quick_research' | 'deep_research' | 'signal_search' | 'chat';
 export type ProviderName = 'anthropic' | 'xai' | 'openai';
 export type Tool = 'web_search' | 'x_search';
 

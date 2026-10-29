@@ -93,3 +93,18 @@ n=$($P -At -c "select count(*) from pg_proc where proname in ('ari_move_total','
 [ "$n" = "010" ] || { echo "FAIL 0048 rollback ($n)"; exit 1; }; echo "0048 ROLLBACK CHECK PASSED"
 api "$PEND/0048_push_moves_digest.sql"; echo "applied 0048 again after the rollback"
 chk48
+
+# 0049 live Ask Kyte chat (PENDING), on top of 0041 + 0048. Added Oct 30 2026. checks_after_0049.sql is staging-safe: synthetic rows,
+# ends in a deliberate raise ("ALL 0049 CHECKS PASSED ..."). Rollback restores ai_calls_task_check byte for byte.
+chk49() { local o; o=$($P -f "$HERE/checks_after_0049.sql" 2>&1 || true); echo "$o" | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+  grep -q "ALL 0049 CHECKS PASSED" <<<"$o" || { echo "FAIL 0049 checks"; exit 1; }; }
+c49() { $P -At -c "select pg_get_constraintdef(oid) from pg_constraint where conname = 'ai_calls_task_check'"; }
+before49=$(c49)
+api "$PEND/0049_ai_chat.sql"; echo "applied 0049"
+chk49
+api "$PEND/0049_ai_chat.sql"; echo "re-applied 0049 (idempotence): no error"
+api "$PEND/0049_ai_chat_rollback.sql"; api "$PEND/0049_ai_chat_rollback.sql"; echo "rolled back 0049 (twice)"
+n=$($P -At -c "select count(*) from pg_proc where proname like 'ari_ai_chat_%'")$($P -At -c "select count(*) from pg_class where relname = 'ai_chat'")$($P -At -c "select count(*) from cron.job where jobname = 'ari-ai-chat-prune'")$($P -At -c "select count(*) from supabase_migrations.schema_migrations where version = '0049'")
+[ "$n" = "0000" ] && [ "$(c49)" = "$before49" ] || { echo "FAIL 0049 rollback ($n)"; exit 1; }; echo "0049 ROLLBACK CHECK PASSED"
+api "$PEND/0049_ai_chat.sql"; echo "applied 0049 again after the rollback"
+chk49

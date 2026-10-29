@@ -12,6 +12,8 @@ export const SERVICE_RPCS = [
   // 0047 pipeline job line
   'ari_pipeline_enqueue', 'ari_pipeline_read', 'ari_pipeline_start', 'ari_pipeline_finish', 'ari_pipeline_brief_context',
   'ari_pipeline_brief_write', 'ari_pipeline_save_checks', 'ari_pipeline_fact_get', 'ari_pipeline_fact_put',
+  // 0049 live Ask Kyte: rate limit + turn record, read-only snapshot
+  'ari_ai_chat_begin', 'ari_ai_chat_finish', 'ari_ai_chat_context',
 ] as const;
 export type ServiceRpc = typeof SERVICE_RPCS[number];
 

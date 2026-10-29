@@ -23,14 +23,14 @@ export class InvalidOutput extends Error {}
 export interface Prompt { system: string; user: string }
 export type Draft = Infer<typeof DraftOut> & { style_score?: number; style_flags?: string[] };
 
-function provider(deps: Deps, task: Task): Provider {
+export function provider(deps: Deps, task: Task): Provider {
   const r = route(task);
   const p = (deps.providers ?? PROVIDERS)[r.provider];
   if (!p) throw new Error(`provider ${r.provider} missing`);
   return p;
 }
 
-async function reserve(task: Task, promptChars: number, deps: Deps): Promise<number> {
+export async function reserve(task: Task, promptChars: number, deps: Deps): Promise<number> {
   const r = route(task);
   const est = reserveUsd(task, promptChars, deps.steps ?? 1);
   const res = await deps.ledger.reserve({ task, provider: r.provider, model: r.model, estUsd: est, ...(deps.refs ?? {}) });
@@ -38,7 +38,7 @@ async function reserve(task: Task, promptChars: number, deps: Deps): Promise<num
   return res.callId;
 }
 
-const errText = (e: unknown) => String((e as Error)?.message ?? e).replace(/(sk|xai|key)[-_][A-Za-z0-9_-]{8,}/gi, '[redacted]').slice(0, 200);
+export const errText = (e: unknown) => String((e as Error)?.message ?? e).replace(/(sk|xai|key)[-_][A-Za-z0-9_-]{8,}/gi, '[redacted]').slice(0, 200);
 
 /** Non-streaming task with JSON output validated against `schema`. `parse` turns the raw text into the candidate object. */
 export async function runTask<T>(task: Task, prompt: Prompt, schema: Schema<T>, deps: Deps,

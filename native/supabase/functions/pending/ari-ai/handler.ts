@@ -8,6 +8,7 @@
 //     deep_research  {person_id, focus?}             returns {job_id}; the task card follows ai_jobs (Grok, multi-step)
 //     triage_reply   {reply_id}                      Haiku classifies intent; Opus drafts book, answer, soft
 //     import_resolve {rows: [{name, company, title?, location?, linkedin_url?}] (max 100)}  returns the prepared import plan, writes nothing
+//     chat           {text, context?, stream?}      live Ask Kyte (chat.ts): SSE delta / replace / done, 1 to 3 sentences, read-only
 //     job_stream     {job_id, since?}                SSE live feed of a deep research job: `progress` per event
 //                                                    (query / read / finding / status / error), then `done`; `reconnect` {since}
 //   Internal (x-ari-hook = vault ari_ai_hook_secret): {internal: "process"} from the 10-min cron and ari-gmail-push;
@@ -24,8 +25,9 @@ import { Db, RpcError } from './db.ts';
 import { processPending } from './events.ts';
 import { enqueueDeep, runJob } from './jobs.ts';
 import { enqueueResearch, runPipeline } from './pipeline.ts';
+import { chat, chatError, chatSse } from './chat.ts';
 
-export const ACTIONS = ['rewrite', 'draft_dm1', 'quick_research', 'deep_research', 'triage_reply', 'import_resolve', 'job_stream'] as const;
+export const ACTIONS = ['rewrite', 'draft_dm1', 'quick_research', 'deep_research', 'triage_reply', 'import_resolve', 'job_stream', 'chat'] as const;
 const STREAMABLE = new Set(['rewrite', 'draft_dm1']);
 const MAX_BODY = 8_192;
 const MAX_IMPORT_BODY = 65_536;          // a 100-row CSV; only import_resolve may use it
@@ -127,6 +129,13 @@ export async function handle(req: Request, env: Env): Promise<Response> {
   };
 
   if (action === 'job_stream') return jobStream(env, body, h);
+  if (action === 'chat') {
+    if (body.stream === false) {
+      try { return json(await chat(env.db, env.deps, body, { delta: () => {}, replace: () => {} }), 200, h); }
+      catch (e) { const r = chatError(e); return json(r.body, r.status, h); }
+    }
+    return chatSse(env.db, env.deps, body, h);
+  }
   if (body.stream === true && STREAMABLE.has(action)) return sse(run, h);
   try { return json(await run(), 200, h); }
   catch (e) { const r = errorBody(e); return json(r.body, r.status, h); }

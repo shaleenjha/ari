@@ -31,7 +31,19 @@ function safeEnv(k: string): string | undefined {
 }
 
 export class HttpError extends Error {
-  constructor(public status: number, public host: string, public retryable: boolean, msg: string) { super(msg); }
+  constructor(public status: number, public host: string, public retryable: boolean, msg: string, public detail = '') { super(msg); }
+}
+
+/** The provider's own error text (Anthropic / xAI / OpenAI {"error": {"message"}} or {"message"}), short, with anything key-like
+ *  redacted, so the ledger says "credit balance is too low" instead of a bare 400. Never returned to the app (errorBody maps errors
+ *  to fixed codes). */
+export async function providerMessage(r: Response): Promise<string> {
+  let t = '';
+  try { t = (await r.text()).slice(0, 4000); } catch { return ''; }
+  let m = t;
+  try { const j = JSON.parse(t); m = j?.error?.message ?? j?.message ?? (typeof j?.error === 'string' ? j.error : '') ?? ''; } catch { /* not JSON */ }
+  return String(m).replace(/\s+/g, ' ').replace(/(sk|xai|key|sb_secret|sb_publishable|Bearer)[-_ ][A-Za-z0-9_.-]{6,}/gi, '[redacted]')
+    .replace(/<[^>]*>/g, ' ').trim().slice(0, 160);
 }
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -53,9 +65,10 @@ export async function guardedFetch(url: string, init: RequestInit, opt: { timeou
       const r = await impl(url, { ...init, signal: ac.signal });
       clearTimeout(t);                     // a stream's idle timeout is the reader's job (providers.ts readSse)
       if (r.ok) return r;
+      // 4xx other than 429 is never retried (a bad request or an empty credit balance will not fix itself); 429 / 5xx once.
       const retryable = r.status === 429 || r.status >= 500;
-      await r.body?.cancel().catch(() => {});
-      last = new HttpError(r.status, hostOf(url), retryable, `${hostOf(url)} ${r.status}`);
+      const detail = await providerMessage(r);
+      last = new HttpError(r.status, hostOf(url), retryable, `${hostOf(url)} ${r.status}${detail ? ': ' + detail : ''}`, detail);
       if (!retryable) throw last;
     } catch (e) {
       clearTimeout(t);

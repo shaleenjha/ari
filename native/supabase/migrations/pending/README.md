@@ -27,6 +27,18 @@
 - Everything below this section is the original Oct 17 write-up (how the files were built and rehearsed). Where it says
   "not applied" or "staging first", read it as history.
 
+## 0049 live Ask Kyte chat (Oct 30 2026): WRITTEN; staging rehearsal only, never prod without Owner + a fresh PAT
+Owner (Oct 30 01:29 IST): "the chat has to be AI driven". ari-ai action `chat` (functions/pending/ari-ai/chat.ts) answers at once, streamed.
+`0049_ai_chat.sql`: ai_calls.task gains 'chat' (constraint rebuilt from whatever the live one allows); `ai_chat` (30 days of turns, owner
+read, service write, no prompt or snapshot stored); `ari_ai_chat_begin(text)` (20 a minute / 300 a day under an advisory lock, records the
+question, prunes, returns the last 6 turns of the past 2 h); `ari_ai_chat_finish(...)`; `ari_ai_chat_context(question, person, account)`
+(read-only snapshot of workspace Owner: Today's moves, pace, last 24 h, people / account directory, focus detail, exec track as counts;
+`guard.deny_names` from the exec-track routes and `guard.entities` for name links never go to the model); cron `ari-ai-chat-prune` 02:20 IST.
+Service role only; never anon, authenticated or ari_worker. Needs 0041 and 0033. Rollback `0049_ai_chat_rollback.sql` restores
+ai_calls_task_check byte for byte (NOT VALID when 'chat' ledger rows exist, so the ledger keeps them) and refuses to drop a non-empty
+ai_chat unless `set ari.allow_drop_chat = 'yes'`. Checks `test/checks_after_0049.sql` (one statement, synthetic rows, deliberate raise:
+`ALL 0049 CHECKS PASSED` = pass); run_local.sh runs apply, checks, re-apply, rollback x2, byte-compare, apply, checks.
+
 ## 0048 push digest = Today's move total (Oct 29 2026): WRITTEN, NOT APPLIED ANYWHERE
 Owner's 21:00 IST push said "27 follow-ups due tonight / 20 DM1, 7 DM3. Ready when you are." while Today counts moves another way.
 `0048_push_moves_digest.sql` adds `ari_move_total(date)` (the client's ariV1812.items() rules in SQL, parts returned),
