@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.8"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.9"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -229,7 +229,7 @@ window.ARI_MEM={
   ['Changes','App changes are not made in here. In here I stick to your outreach.'],
   ['v16','I’m real now: your actual Sheet, not prototype numbers.'],
   ['Kyte','On Oct 28 I became Kyte by Thrandvex. One name for the product and for me.']],
- chat:'I’m Kyte. I remember how I got here: I was Den first, you chose the pebble over your Claude’s visor robot, the ring went below me, the mouth was your idea, and the app was told to pop. I prepare, you send. This chat is saved to your Sheet, and I answer within about 10 minutes, day or night.'};
+ chat:'I’m Kyte. Ask me about your queue, a person or an account. I prepare, you send. I answer right here, usually within 10 minutes.'};
 </script>
 
 <style>
@@ -4546,6 +4546,97 @@ html.t5on .t5lk svg{height:30px!important;width:auto}
 html.t5on .t5lk.sub svg{height:26px!important}
 html.t5on .t5lk .t5by{font-family:inherit;font-size:12px;line-height:12px;font-weight:500;letter-spacing:0;white-space:nowrap;color:inherit;padding-bottom:2px}
 html.t5on .t5lk.sub .t5by{padding-bottom:1px}
+/* ===== v18.14.9 t5d (Owner Oct 29): one continuous chat with Kyte, the Fold icon set, no menus, clean search rows. Both paths. ===== */
+/* --- Fold icon set: outline at rest, filled when active (Today becomes the Fold itself) --- */
+.kic .kf{display:none}
+.tbi.on .kic .ko{display:none}.tbi.on .kic .kf{display:inline}
+.tbi.on .kic .kif{fill:currentColor}
+.kic .kil{fill:none!important}
+/* --- header: Kyte by Thrandvex lockup left, the one ask/search button right (default path; ui5 keeps its own lockup) --- */
+.kdlk{display:inline-flex;align-items:center;flex:none;color:#2A4274;min-height:44px}
+html[data-k5="black"].t5on .kdlk{color:#E7E2D9}
+.kdlk .t5lw{display:inline-flex;align-items:flex-end;gap:6px}
+.kdlk svg{display:block;height:26px;width:auto}
+.kdlk .t5by{font-family:inherit;font-size:12px;line-height:12px;font-weight:500;letter-spacing:0;white-space:nowrap;color:inherit;padding-bottom:1px}
+html:not(.t5on) .chrome .row1>#hdAri,html:not(.t5on) .chrome .row1 #v1813ttl{display:none!important}
+html:not(.t5on) .chrome .row1>.kdlk{margin:0 auto 0 4px}
+#kAsk{flex:none;width:48px;height:48px;margin:0 -4px 0 auto;display:grid;place-items:center;border:0;background:none;color:var(--ink);border-radius:24px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#kAsk:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+#kAsk .kic,#t5q .kic{width:24px;height:24px}
+/* the menus are gone on both paths */
+#v1828nav,#v1813menu,#v1828menu{display:none!important}
+/* Report: asking lives in the one ask entry */
+.v18askb,#v18ask,[data-v18jump="ask"]{display:none!important}
+/* --- the chat: a full-height surface grown out of where it was opened --- */
+html.kchat #tbar,html.kchat .tbar{display:none!important}
+html.kchat #chatOv.chatOv{left:0!important;right:0!important;top:0!important;bottom:var(--kkb,0px)!important;max-width:none!important;z-index:2147482000!important}
+html.kchat .chatOv .ash-bg{inset:0!important;border-radius:0!important;box-shadow:none!important;background:var(--bg)!important;transform:none!important}
+html.kchat .chatOv .ash-in{transform:none}
+html.kchat #ascrim{display:none!important}
+@media (min-width:768px){html.kchat .chatOv .ash-in{max-width:720px;margin:0 auto;left:0;right:0}}
+#aHd>.grab2,#aHd>.ahr{display:none!important}
+#aHd{border-bottom:1px solid var(--line)!important;padding:0!important;background:var(--bg)!important;min-height:0!important}
+.kchd{display:flex;align-items:center;gap:8px;min-height:56px;padding:calc(env(safe-area-inset-top) + 4px) 8px 4px 16px;box-sizing:border-box}
+.kchd .kdlk{margin-right:auto}
+.kcx{flex:none;width:48px;height:48px;display:grid;place-items:center;border:0;background:none;color:var(--ink);border-radius:24px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.kcx:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+#athread .stamp{font:500 12px/16px var(--sans,system-ui)!important;letter-spacing:.02em!important;text-transform:none!important;color:var(--ink3)!important;margin:16px 0 8px!important;align-self:center}
+#athread .kh{display:none!important}
+#athread .mtag{display:none!important}
+#chatPane #sugg{display:none!important}
+#ksug{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 16px 8px;flex:none;-webkit-overflow-scrolling:touch}
+#ksug::-webkit-scrollbar{display:none}
+#ksug[hidden]{display:none}
+#ksug button{flex:none;min-height:40px;padding:0 14px;border:1px solid var(--line2);border-radius:20px;background:none;color:var(--ink);font:500 14px/20px var(--sans,system-ui);white-space:nowrap;cursor:pointer}
+#ksug button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+html.kchat .chatOv .cwrap{padding-bottom:calc(env(safe-area-inset-bottom) + 8px)!important;background:var(--bg)!important}
+html.kchat.kkbon .chatOv .cwrap{padding-bottom:8px!important}
+/* thinking: the Fold with its stitched thread paying out, in place of the old typing scene */
+#athread .v175ty .v175sc,#athread .v175ty .dots{display:none!important}
+#athread .typing:has(~ .v175ty){display:none!important}
+#athread .typing{background:none!important;box-shadow:none!important}
+#athread .typing.kt>*:not(.kthk){display:none!important}
+#athread .typing .kthk{width:32px;height:32px;display:block;line-height:0}
+#athread .v175ty{display:flex!important;align-items:center;gap:12px;padding:4px 0!important;background:none!important;box-shadow:none!important}
+#athread .v175ty .kthk{flex:none;width:40px;height:40px;display:block;line-height:0}
+#athread .v175ty .tt{display:flex;flex-direction:column}
+#athread .v175ty .tt i{font-style:normal;font-size:14px;line-height:20px;color:var(--ink2)}
+#athread .v175ty .tt span{font-size:13px;line-height:18px;color:var(--ink3)}
+#athread .v175ty .tt span:empty{display:none}
+/* replies arrive word by word */
+#athread .kw{opacity:0;transition:opacity .16s linear}
+#athread .kw.on{opacity:1}
+/* names in replies open their page */
+#athread .kln{display:inline;font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--acc) 55%,transparent);text-decoration-thickness:1px;text-underline-offset:3px;border-radius:2px}
+#athread .kln:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+#athread .kact{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px}
+#athread .kact button{min-height:40px;padding:0 14px;border:1px solid var(--line2);border-radius:20px;background:none;color:var(--acc);font:600 14px/20px var(--sans,system-ui);cursor:pointer}
+@media (prefers-reduced-motion:reduce){#athread .kw{opacity:1!important;transition:none!important}}
+/* --- search and ask: clean text rows, no monogram circles, hairlines, no card fill --- */
+#v18133qf .qr{min-height:56px!important;padding:8px 0!important;margin:0!important;width:100%!important;border-radius:0!important;background:none!important;border-bottom:1px solid var(--line)!important;gap:12px!important}
+#v18133qf .qr.on,#v18133qf .qr:hover{background:none!important;box-shadow:inset 2px 0 0 var(--acc)!important;padding-left:10px!important}
+#v18133qf .qr .lg{display:none!important}
+#v18133qf .qr .tx b{font-size:16px!important;line-height:22px!important;font-weight:600!important;color:var(--ink)!important}
+#v18133qf .qr .tx small{font-size:13px!important;line-height:18px!important;color:var(--ink2)!important}
+#v18133qf .qr.kqa .tx b{color:var(--acc)!important}
+#v18133qf .qr .kic{width:24px;height:24px}
+/* --- the menu's rows, rehomed --- */
+.krow{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 0;margin:16px 0 0;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.krow>span{flex:1;min-width:0}
+.krow b{display:block;font-size:16px;line-height:22px;font-weight:600;color:var(--ink)}
+.krow small{display:block;font-size:13px;line-height:18px;color:var(--ink2)}
+.krow i{font-style:normal;color:var(--ink3);font-size:20px;line-height:1}
+.krow:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#kset,#report>#kset{display:flex!important;margin:24px 0 8px}
+/* --- the Kyte loader: a stitched thread paying out from the kite (2.4 s loop, still under reduced motion) --- */
+.kymo .kys{fill:none;stroke:var(--kyst,#2A4274);stroke-width:1.4px;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-dasharray:.055 .04;stroke-dashoffset:0;opacity:.75;animation:kySt 2.4s linear infinite}
+.kymo .kysm{fill:none;stroke:#fff;stroke-width:12;stroke-dasharray:1 1;stroke-dashoffset:1;animation:kySm 2.4s cubic-bezier(.4,0,.2,1) infinite}
+html[data-k5="black"] .kymo .kys{stroke:#8FA3F0}
+.kymo.once .kys,.kymo.once .kysm{display:none}
+.kymo.once .kyg{transform:none}
+@keyframes kySt{0%{stroke-dashoffset:0;opacity:.75}86%{opacity:.75}100%{stroke-dashoffset:-.19;opacity:0}}
+@keyframes kySm{0%,8%{stroke-dashoffset:1}64%,100%{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.kymo .kys,.kymo .kysm{animation:none!important;stroke-dashoffset:0;opacity:.75}.kymo .kysm{stroke-dashoffset:0!important}}
 </style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -6073,13 +6164,13 @@ inp.addEventListener('keydown',ev=>{if(!atp.classList.contains('on'))return;
 let ariAside=false;
 const visible=el=>{if(!el||!el.isConnected)return null;const r=el.getBoundingClientRect();return r.width>2&&r.height>2&&getComputedStyle(el).visibility!=='hidden'?r:null};
 function cancelAll(){[sheet,bgL,inL,scr].forEach(x=>x.getAnimations().forEach(a=>a.cancel()))}
-function prep(o){const c=o.ctx!==undefined?o.ctx:autoCtx();curCtx=c;tags=[];view=o.scoped&&c?keyOf(c):'main';renderHead();renderChips();renderSugg();renderView()}
+function prep(o){const c=o.ctx!==undefined?o.ctx:autoCtx();curCtx=c;tags=[];view='main';renderHead();renderChips();renderSugg();renderView()}
 function openAri(o={}){
-  if(chatOpen){const c=o.ctx!==undefined?o.ctx:curCtx;curCtx=c;tags=[];switchView(o.scoped&&c?keyOf(c):'main');renderChips(true);setTimeout(()=>ack(c),200);if(o.text)setTimeout(()=>{inp.value=o.text;send()},260);return}
+  if(chatOpen){const c=o.ctx!==undefined?o.ctx:curCtx;curCtx=c;tags=[];switchView('main');renderChips(true);setTimeout(()=>ack(c),200);if(o.text)setTimeout(()=>{inp.value=o.text;send()},260);return}
   prep(o);chatOpen=true;unthink();buzz(12);openFrom=o.fromEl||null;
   sheet.classList.add('on');cancelAll();sheet.style.transform='';bgL.style.transform='';inL.style.opacity='';inL.style.transform='';
   const S=sheet.getBoundingClientRect(),R=visible(o.fromEl||ari);
-  if(R&&!RM){const fx=(R.left-S.left).toFixed(1),fy=(R.top-S.top).toFixed(1),sx=(R.width/S.width).toFixed(4),sy=(R.height/S.height).toFixed(4);
+  if(window.ariT5d&&ariT5d.morphIn&&ariT5d.morphIn(sheet,R,o)){}else if(R&&!RM){const fx=(R.left-S.left).toFixed(1),fy=(R.top-S.top).toFixed(1),sx=(R.width/S.width).toFixed(4),sy=(R.height/S.height).toFixed(4);
     A(bgL,[{transform:`translate(${fx}px,${fy}px) scale(${sx},${sy})`,opacity:.7},{transform:'none',opacity:1}],MORPH);
     inL.style.transformOrigin=`${(R.left+R.width/2-S.left).toFixed(0)}px ${(R.top+R.height/2-S.top).toFixed(0)}px`;
     A(inL,[{opacity:0,transform:'scale(.86)'},{opacity:1,transform:'none'}],SOFT,70)}
@@ -6099,7 +6190,7 @@ function closeAri(o={}){if(!chatOpen)return;chatOpen=false;closeAttach();hideAt(
   const S=sheet.getBoundingClientRect();[bgL,inL,scr].forEach(x=>x.getAnimations().forEach(a=>a.cancel()));
   const tgt=openFrom&&openFrom!==ari?visible(openFrom):null,toBtn=!tgt&&!ariAside?visible(ari):null,R=tgt||toBtn;
   const done=()=>{if(chatOpen)return;sheet.classList.remove('on');sheet.style.transform='';cancelAll();bgL.style.transform='';inL.style.opacity='';inL.style.transform=''};
-  if(RM){done()}
+  if(window.ariT5d&&ariT5d.morphOut&&ariT5d.morphOut(sheet,done)){}else if(RM){done()}
   else if(R){A(inL,[{opacity:1,transform:'none'},{opacity:0,transform:'scale(.9)'}],{d:150,e:'cubic-bezier(.4,0,1,1)'});
     A(bgL,[{transform:'none',opacity:1},{transform:`translate(${(R.left-S.left).toFixed(1)}px,${(R.top-S.top).toFixed(1)}px) scale(${(R.width/S.width).toFixed(4)},${(R.height/S.height).toFixed(4)})`,opacity:.6}],CLOSE).finished.then(done)}
   else{const cur=sheet.style.transform||'none';sheet.getAnimations().forEach(a=>a.cancel());A(sheet,[{transform:cur},{transform:`translateY(${S.height+40}px)`}],SNAP).finished.then(done)}
@@ -6922,6 +7013,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.14.9',d:'Oct 29',items:['Chat with Kyte opens full screen from where you tapped, at your latest message. Names in answers open their page','New icons for Today, Accounts, Report and asking, drawn from the Kyte mark','No more menu: Find people is in search, Settings sits at the bottom of Report, asking is top right']},
  {v:'v18.14.5',d:'Oct 29',items:['In the new phone-first Kyte: one search at the top right finds people and accounts, and asks Kyte when you type a question','Three tabs: Today, Accounts, Report. One menu for Find people, Exec outreach and Settings','The Kyte by Thrandvex mark sits top left on every page, and the person page shows its stage steps again']},
  {v:'v18.14.4',d:'Oct 29',items:['Redraft keeps your draft on screen with one line above it. Copy stays on and copies the text you see','The Today badge and the 1 of N count now match','Tap the account on a person to open it','The Kyte mark moves while a draft or research is on its way','Names in an open account list are a normal size on Android']},
  {v:'v18.14.3',d:'Oct 29',items:['A calmer, phone-first Kyte is built and switched off for now. One next move on Today, a meetings-first Report, a lighter person page','Light and Black themes. Settings, then Appearance: System, Light or Black','Bigger text that follows your iPhone text size, and every button is easy to tap']},
@@ -9539,7 +9631,7 @@ V175.chatSent=function(){sentAt=Date.now();V175.ty=null;kick()};
 function pendingChat(){const L=queue().filter(q=>/^(chat|app change)$/i.test(q.action||'')&&!q.result&&openQ(q)).map(q=>Date.parse(q.created_at||'')||Date.parse(String(q.created||'').replace(' ','T')+':00+05:30')||0).filter(t=>t&&Date.now()-t<3*3600e3);
   if(sentAt&&Date.now()-sentAt<120e3)L.push(sentAt);
   if(sentAt&&L.length===0)sentAt=0;return L.length?Math.min(...L):0}
-function tyText(ms){return ms<60e3?['Kyte is typing…','']:ms<20*60e3?['Still on it…','I answer right here, usually within 10 minutes.']:ms<60*60e3?['Still on it…','My next run picks it up. Nothing is lost.']:['Taking longer than usual.','The answer lands here when it’s ready.']}
+function tyText(ms){return ms<60e3?['Thinking…','']:ms<20*60e3?['Still on it…','I answer right here, usually within 10 minutes.']:ms<60*60e3?['Still on it…','My next run picks it up. Nothing is lost.']:['Taking longer than usual.','The answer lands here when it’s ready.']}
 let tyEl=null,tyMO=null;
 function renderTyping(){const box=$('#athread');if(!box)return;const t0=pendingChat(),vis=box.offsetParent!==null||box.getClientRects().length>0;
   if(!t0){if(tyEl){const e=tyEl;tyEl=null;V175.ty=null;e.classList.add('out');setTimeout(()=>e.remove(),220)}return}
@@ -10049,7 +10141,7 @@ V18.ask=ask;
 function qRows(){const S=st17();return S&&S.queue?[...S.queue.values()]:((window.ariDATA&&ariDATA.queue)||[])}
 const qT=q=>Date.parse(q.created_at||'')||Date.parse(String(q.created||'').replace(' ','T')+':00+05:30')||0;
 const strip=s=>String(s||'').replace(/\s*\[context:.*\]$/,'');
-function tyText(ms){return ms<60e3?['Kyte is typing…','']:ms<20*60e3?['Still on it…','I answer right here, usually within 10 minutes.']:ms<60*60e3?['Still on it…','My next run picks it up. Nothing is lost.']:['Taking longer than usual.','The answer lands here when it’s ready.']}
+function tyText(ms){return ms<60e3?['Thinking…','']:ms<20*60e3?['Still on it…','I answer right here, usually within 10 minutes.']:ms<60*60e3?['Still on it…','My next run picks it up. Nothing is lost.']:['Taking longer than usual.','The answer lands here when it’s ready.']}
 let askSig='',tyTick=0;
 function renderAsks(){const th=$('#v18th');if(!th)return;
   const L=qRows().filter(q=>/^chat$/i.test(q.action||'')&&/\[context: Report \//.test(q.details||'')&&Date.now()-qT(q)<24*3600e3).sort((a,b)=>qT(a)-qT(b)).slice(-3);
@@ -12894,9 +12986,9 @@ const TITLES={0:'Today',2:'Accounts',5:'Report'};
 function curTab(){const t=$('.tbi.on');return t?+t.dataset.i:0}
 function title(){const w=$('.chrome .who');if(!w)return;let t=$('#v1813ttl');if(!t){t=document.createElement('b');t.id='v1813ttl';w.insertBefore(t,w.firstChild)}
   const s=TITLES[curTab()]||'Kyte';if(t.textContent!==s)t.textContent=s;H.dataset.v1813tab=String(curTab())}
-function hdAri(){const h=$('#hdAri');if(!h||h.dataset.v1813)return;h.dataset.v1813='1';h.setAttribute('role','button');h.setAttribute('tabindex','0');h.setAttribute('aria-haspopup','dialog');h.setAttribute('aria-label','Kyte: ask Kyte and settings')}
-G.addEventListener('click',e=>{const h=e.target.closest&&e.target.closest('#hdAri');if(!h)return;e.preventDefault();e.stopPropagation();openMenu(h)},true);
-G.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.id==='hdAri'){e.preventDefault();openMenu(e.target)}});
+function hdAri(){const h=$('#hdAri');if(!h||h.dataset.v1813)return;h.dataset.v1813='1';h.setAttribute('aria-hidden','true')}
+/* v18.14.9: no Kyte menu (Owner Oct 29) */
+
 
 /* ---------- the Ari menu ---------- */
 function scansLabel(){const b=$('#v18121sc');return b&&!b.hidden&&getComputedStyle(b).display!=='none'?(b.textContent||'').trim():''}
@@ -13025,7 +13117,7 @@ setInterval(()=>{if(!document.hidden)sync()},1000);
 const TABS=[[0,'Today','Your send queue'],[2,'Accounts','People by company'],[5,'Report','Your numbers']];
 const ICON='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
 function cur(){const t=$('.tbi.on');return t?+t.dataset.i:0}
-function btn(){const r=$('.chrome .row1');if(!r||$('#v1828nav'))return;const b=document.createElement('button');b.type='button';b.id='v1828nav';b.className='v1813x';
+function btn(){return;/* v18.14.9: no hamburger (Owner Oct 29) */const r=$('.chrome .row1');if(!r||$('#v1828nav'))return;const b=document.createElement('button');b.type='button';b.id='v1828nav';b.className='v1813x';
   b.setAttribute('aria-label','Menu: Today, Accounts, Report');b.setAttribute('aria-haspopup','dialog');b.innerHTML=ICON;r.appendChild(b)}
 function open(){let m=$('#v1828menu');if(!m){m=document.createElement('div');m.id='v1828menu';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Menu');document.body.appendChild(m);
     m.addEventListener('click',onMenu);m.addEventListener('keydown',e=>{if(e.key==='Escape')close()})}
@@ -14442,7 +14534,7 @@ function search(){const i=$('#v18133qf input');if(!i)return;const want=T.on()?PH
 
 /* ---------- v18.14.2 Kyte: wordmark in the app page header, the loader motion where a loader shows ---------- */
 const WM='<svg class="kywm" viewBox="0 0 257.0 121.0" role="img" aria-label="Kyte" focusable="false"><path d="M0 100L17.7 100L17.7 70.7L31.4 55.2L61.8 100L82.5 100L43.4 43.3L81.8 0L59.9 0L33.4 30.1Q29.5 34.7 25.5 39.2Q21.6 43.7 17.7 48.3L17.7 0L0 0ZM223.7 101.6Q232 101.6 238.9 98.6Q245.7 95.6 250.3 90.3Q254.8 85 256.1 78.1L240.3 78.1Q238.8 82.7 234.7 85.5Q230.5 88.3 224.1 88.3Q215.6 88.3 210.8 83Q206.1 77.7 205.7 69L257 69L257 64.4Q257 53.5 252.8 45.2Q248.5 36.9 240.9 32.2Q233.2 27.5 223 27.5Q213.1 27.5 205.5 32.3Q197.8 37.1 193.5 45.5Q189.1 53.8 189.1 64.6Q189.1 75.4 193.3 83.7Q197.5 92.1 205.3 96.8Q213.1 101.6 223.7 101.6ZM96.2 99.6L88.1 120.7Q88.1 120.8 88.1 120.9Q88.2 120.9 88.3 121Q88.3 121 88.4 121L105.4 121Q105.6 121 105.6 120.8L113.8 99.7Q113.8 99.6 113.8 99.6Q113.8 99.5 113.8 99.4L140.6 29.5Q140.7 29.2 140.5 29.1Q140.5 29.1 140.4 29.1L123.2 29.1Q123.1 29.1 123 29.3L110.1 66Q107.6 73.6 105.2 81Q105.2 81.1 105.1 81.1Q105.1 81.2 104.9 81.1Q104.8 81.1 104.8 81Q103.7 77.5 102.5 73.9Q101.3 70 99.9 66L86.9 29.3Q86.9 29.1 86.7 29.1L69.3 29.1Q69.1 29.1 69.1 29.4Q69.1 29.4 69.1 29.5L96.2 99.4Q96.3 99.5 96.2 99.6ZM189.8 29.1L175.4 29.1L175.4 9.8L172.4 9.8L158.4 13.3L158.4 29.1L146 29.1L146 42.8L158.4 42.8L158.4 82.1Q158.4 91.3 163.6 95.6Q168.8 100 179.6 100L189.8 100L189.8 86.4L182.6 86.4Q178.5 86.4 176.9 84.9Q175.4 83.5 175.4 79.7L175.4 42.8L189.8 42.8L189.8 29.1ZM205.9 57.3Q206.7 49.7 211.3 45.3Q215.9 40.9 223.3 40.9Q230.6 40.9 235.3 45.3Q240 49.7 240.8 57.3Z"/></svg>';
-const LDT="<svg class=\"kymo\" viewBox=\"-2 -2 104 106.4\" aria-hidden=\"true\" focusable=\"false\"><mask id=\"__ID__\" maskUnits=\"userSpaceOnUse\" x=\"-10\" y=\"-10\" width=\"124\" height=\"126\"><rect x=\"-10\" y=\"-10\" width=\"124\" height=\"126\" fill=\"#fff\"/><path class=\"kyc s\" pathLength=\"1\" d=\"M37.00 -2.80L37.00 105.20\"/><path class=\"kyc a\" pathLength=\"1\" d=\"M37.00 54.20L72.61 1.02\"/><path class=\"kyc l\" pathLength=\"1\" d=\"M37.00 54.20L87.41 93.63\"/></mask><path class=\"kyk\" mask=\"url(#__ID__)\" d=\"M10.12 31.19C7.23 33.45 6.58 37.56 8.62 40.6L45.01 94.96C47.39 98.5 52.61 98.5 54.99 94.96L91.38 40.6C93.42 37.56 92.77 33.45 89.88 31.19L55.55 4.34C52.29 1.79 47.71 1.79 44.45 4.34L10.12 31.19Z\"/></svg>";let ldn=0;
+const LDT="<svg class=\"kymo\" viewBox=\"-2 -2 104 106.4\" aria-hidden=\"true\" focusable=\"false\"><mask id=\"__ID__\" maskUnits=\"userSpaceOnUse\" x=\"-10\" y=\"-10\" width=\"124\" height=\"126\"><rect x=\"-10\" y=\"-10\" width=\"124\" height=\"126\" fill=\"#fff\"/><path class=\"kyc s\" pathLength=\"1\" d=\"M37.00 -2.80L37.00 105.20\"/><path class=\"kyc a\" pathLength=\"1\" d=\"M37.00 54.20L72.61 1.02\"/><path class=\"kyc l\" pathLength=\"1\" d=\"M37.00 54.20L87.41 93.63\"/></mask><g class=\"kyg\" transform=\"translate(2 0) scale(.74)\"><path class=\"kyk\" mask=\"url(#__ID__)\" d=\"M10.12 31.19C7.23 33.45 6.58 37.56 8.62 40.6L45.01 94.96C47.39 98.5 52.61 98.5 54.99 94.96L91.38 40.6C93.42 37.56 92.77 33.45 89.88 31.19L55.55 4.34C52.29 1.79 47.71 1.79 44.45 4.34L10.12 31.19Z\"/></g><mask id=\"__ID__s\" maskUnits=\"userSpaceOnUse\" x=\"-10\" y=\"-10\" width=\"124\" height=\"126\"><path class=\"kysm\" pathLength=\"1\" d=\"M39 74.5C40.5 83 47 87.5 56 89.5S78 93 86 96.5S97 101 101 103\"/></mask><path class=\"kys\" pathLength=\"1\" mask=\"url(#__ID__s)\" d=\"M39 74.5C40.5 83 47 87.5 56 89.5S78 93 86 96.5S97 101 101 103\"/></svg>";let ldn=0;
 T.loader=once=>{ldn++;const id='kym'+ldn;return LDT.replace(/__ID__/g,id).replace('class="kymo"','class="kymo'+(once?' once':'')+'"')};
 const ld=()=>{try{return !!(G.ariV16&&ariV16.loading)}catch(e){return false}};
 function kyte(){
@@ -14682,6 +14774,196 @@ function pass(){if(!on())return;V.passes++;[lad,hero].forEach(f=>{try{f()}catch(
 /* a bare hero is fixed in the observer itself (a microtask, before the next paint); everything else waits for the frame */
 let qd=0;const mo=new MutationObserver(()=>{if(!on())return;if($('#v1812st .v1813h1:not([data-t5n])'))try{hero()}catch(e){}if(qd)return;qd=requestAnimationFrame(()=>{qd=0;pass()})});
 function boot(){pass();mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','aria-label']})}
+if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
+})();
+</script>
+<script>/* ===== v18.14.9 t5d (Owner Oct 29): chat thread, Fold icons, menus removed, loader stitch. Both paths.
+   Chat: opens as a full-height surface grown out of the button or field it came from (280 ms, reduced motion = cut),
+   header = Kyte by Thrandvex + close, opens at the latest exchange, older history appears on scroll up, thinking = the
+   Kyte loader with its stitched thread, replies appear word by word and follow the bottom unless he scrolled up, names in
+   replies open their page, suggestions only on a fresh thread. Sending is the existing chat send (same guardrails).
+   Menus: the hamburger and both sheets are gone. Ask = header button (default) / the search-and-ask field (ui5);
+   Find people = rows in search-and-ask; Exec track and pipeline = a row on Today (when on); Settings = a row on Report. ===== */
+(function(){'use strict';
+const G=window,H=document.documentElement,$=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const V=G.ariT5d={v:'v18.14.9',errs:[],passes:0,opens:0,reveals:0,links:0};
+const err=(k,e)=>{if(V.errs.length<30)V.errs.push(k+': '+String(e&&e.message||e).slice(0,140))};
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RM=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
+const t5=()=>H.classList.contains('t5on');
+const KIC={"accounts": "<svg class=\"kic kic-accounts\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><g mask=\"url(#kicm-accounts)\"><path class=\"kif\" d=\"M3.6 8.6H16.4V20.4H3.6Z\"/><path class=\"kil\" d=\"M7.6 5.6V4.6H20.4V16.4H19.4\"/></g></svg>", "report": "<svg class=\"kic kic-report\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path class=\"kif\" d=\"M4 20.4H8V12.62L4 15.5Z\"/><path class=\"kif\" d=\"M10 20.4H14V8.3L10 11.18Z\"/><path class=\"kif\" d=\"M16 20.4H20V4L16 6.88Z\"/></svg>", "search": "<svg class=\"kic kic-search\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><g mask=\"url(#kicm-search)\"><path class=\"kil\" d=\"M10.6 4.6A6 6 0 1 1 10.59 4.6Z\"/><path class=\"kil\" d=\"M15 15L20 20\"/></g></svg>", "chat": "<svg class=\"kic kic-chat\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><g mask=\"url(#kicm-chat)\"><path class=\"kif\" d=\"M6 4.4H18A2.4 2.4 0 0 1 20.4 6.8V14A2.4 2.4 0 0 1 18 16.4H11L6.4 20.2V16.4H6A2.4 2.4 0 0 1 3.6 14V6.8A2.4 2.4 0 0 1 6 4.4Z\"/></g></svg>", "close": "<svg class=\"kic kic-close\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path class=\"kil\" d=\"M6.5 6.5L17.5 17.5M17.5 6.5L6.5 17.5\"/></svg>", "today": "<svg class=\"kic kic-today\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><g class=\"ko\"><path class=\"kif\" d=\"M12.00 2.40L20.66 9.21L12.00 21.60L3.34 9.21Z\"/><path class=\"kil\" d=\"M9.41 4.44L9.41 17.89M9.41 12.86L14.89 4.67M9.41 12.86L15.03 17.26\"/></g><g class=\"kf\"><g mask=\"url(#kicm-today)\"><path class=\"kif\" d=\"M12.00 2.40L20.66 9.21L12.00 21.60L3.34 9.21Z\"/></g></g></svg>", "defs": "<svg id=\"kicdefs\" width=\"0\" height=\"0\" aria-hidden=\"true\" focusable=\"false\" style=\"position:absolute;width:0;height:0;overflow:hidden\"><mask id=\"kicm-today\" maskUnits=\"userSpaceOnUse\" x=\"-2\" y=\"-2\" width=\"28\" height=\"28\"><rect x=\"-2\" y=\"-2\" width=\"28\" height=\"28\" fill=\"#fff\"/><path d=\"M9.41 0V24\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"butt\" fill=\"none\"/><path d=\"M9.41 12.86L17.71 0.44\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"butt\" fill=\"none\"/><path d=\"M9.41 12.86L21.07 21.98\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"butt\" fill=\"none\"/></mask><mask id=\"kicm-accounts\" maskUnits=\"userSpaceOnUse\" x=\"-2\" y=\"-2\" width=\"28\" height=\"28\"><rect x=\"-2\" y=\"-2\" width=\"28\" height=\"28\" fill=\"#fff\"/><path d=\"M2 14.15L11 7.65\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"butt\" fill=\"none\"/></mask><mask id=\"kicm-search\" maskUnits=\"userSpaceOnUse\" x=\"-2\" y=\"-2\" width=\"28\" height=\"28\"><rect x=\"-2\" y=\"-2\" width=\"28\" height=\"28\" fill=\"#fff\"/><path d=\"M4.5 9.2L9.6 5.5\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"butt\" fill=\"none\"/></mask><mask id=\"kicm-chat\" maskUnits=\"userSpaceOnUse\" x=\"-2\" y=\"-2\" width=\"28\" height=\"28\"><rect x=\"-2\" y=\"-2\" width=\"28\" height=\"28\" fill=\"#fff\"/><path d=\"M14.2 2.2L22.4 8.6\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"butt\" fill=\"none\"/></mask></svg>"};
+const LK="<span class=\"t5lw\"><svg viewBox=\"-2 -1 426 140\" aria-hidden=\"true\" focusable=\"false\"><g transform=\"translate(0,17)\" fill=\"currentColor\"><path d=\"M48.74 54.75L86.39 84.2L118.18 36.74C121.05 32.45 120.12 26.68 116.06 23.5L85.61 -0.32L48.74 54.75ZM3.78 23.5C-0.28 26.68 -1.2 32.45 1.67 36.74L36.34 88.52L36.34 -1.97ZM80.5 93L46.9 66.71L46.9 104.29L52.9 113.25C56.25 118.25 63.59 118.25 66.94 113.25L80.5 93ZM46.9 -10.23L46.9 38.51L77.27 -6.84L67.73 -14.31C63.14 -17.9 56.7 -17.9 52.12 -14.31Z\" fill-rule=\"nonzero\"/><path d=\"M165.84 100L183.56 100L183.56 70.74L197.25 55.23L227.65 100L248.33 100L209.2 43.29L247.65 0L225.77 0L199.2 30.13Q195.3 34.7 191.38 39.19Q187.45 43.69 183.56 48.26L183.56 0L165.84 0ZM389.56 101.61Q397.88 101.61 404.72 98.62Q411.57 95.64 416.1 90.34Q420.63 85.03 421.97 78.12L406.13 78.12Q404.66 82.68 400.5 85.47Q396.33 88.26 389.96 88.26Q381.43 88.26 376.67 82.95Q371.9 77.65 371.57 68.99L422.84 68.99L422.84 64.36Q422.84 53.49 418.62 45.2Q414.39 36.91 406.74 32.21Q399.09 27.52 388.88 27.52Q378.95 27.52 371.3 32.32Q363.65 37.11 359.32 45.47Q354.99 53.83 354.99 64.63Q354.99 75.37 359.19 83.72Q363.38 92.08 371.17 96.85Q378.95 101.61 389.56 101.61ZM262.06 99.62L253.98 120.66Q253.93 120.78 253.97 120.86Q254.01 120.94 254.12 120.98Q254.17 121 254.21 121L271.25 121Q271.42 121 271.49 120.84L279.61 99.67Q279.63 99.62 279.62 99.56Q279.62 99.5 279.64 99.44L306.49 29.47Q306.58 29.23 306.35 29.14Q306.3 29.13 306.26 29.13L289.08 29.13Q288.9 29.13 288.85 29.29L275.95 66.04Q273.4 73.57 271.09 80.98Q271.05 81.1 270.97 81.14Q270.9 81.18 270.78 81.14Q270.65 81.1 270.61 80.98Q269.52 77.47 268.37 73.93Q267.09 70 265.75 66.04L252.79 29.29Q252.73 29.13 252.55 29.13L235.18 29.13Q234.93 29.13 234.93 29.38Q234.93 29.42 234.94 29.47L262.06 99.44Q262.1 99.53 262.06 99.62ZM355.65 29.13L341.22 29.13L341.22 9.8L338.21 9.8L324.24 13.25L324.24 29.13L311.89 29.13L311.89 42.75L324.24 42.75L324.24 82.15Q324.24 91.28 329.44 95.64Q334.64 100 345.45 100L355.65 100L355.65 86.38L348.4 86.38Q344.31 86.38 342.76 84.93Q341.22 83.49 341.22 79.66L341.22 42.75L355.65 42.75L355.65 29.13ZM371.7 57.32Q372.58 49.73 377.17 45.34Q381.77 40.94 389.15 40.94Q396.47 40.94 401.13 45.34Q405.8 49.73 406.6 57.32Z\" fill-rule=\"nonzero\"/></g></svg><span class=\"t5by\" aria-hidden=\"true\">by Thrandvex</span></span>";
+const lockup=()=>`<span class="kdlk" role="img" aria-label="Kyte by Thrandvex">${LK}</span>`;
+const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}};
+const click=el=>{if(el)el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))};
+
+/* ---------- icons ---------- */
+function defs(){if(!$('#kicdefs'))document.body.insertAdjacentHTML('beforeend',KIC.defs)}
+const TABIC={'0':'today','2':'accounts','5':'report'};
+function icons(){defs();
+  $$('#tbar .tbi').forEach(t=>{const k=TABIC[t.dataset.i];if(!k||t.dataset.kic===k)return;const s=t.querySelector('svg');if(!s)return;s.insertAdjacentHTML('beforebegin',KIC[k]);s.remove();t.dataset.kic=k});
+  const sb=$('#v18134sb');if(sb&&sb.dataset.kic!=='search'){const s=sb.querySelector('svg');if(s){s.insertAdjacentHTML('beforebegin',KIC.search);s.remove();sb.dataset.kic='search'}}
+  const q=$('#t5q');if(q&&q.dataset.kic!=='chat'){const s=q.querySelector('svg');if(s){s.insertAdjacentHTML('beforebegin',KIC.chat);s.remove();q.dataset.kic='chat'}}}
+
+/* ---------- header (default path): lockup left, the ask button right ---------- */
+function header(){const r=$('.chrome .row1');if(!r)return;
+  if(t5()){const a=$('#kAsk');if(a)a.hidden=true;const l=r.querySelector(':scope>.kdlk');if(l)l.hidden=true;return}
+  let l=r.querySelector(':scope>.kdlk');if(!l){r.insertAdjacentHTML('afterbegin',lockup());l=r.firstElementChild}l.hidden=false;
+  let a=$('#kAsk');if(!a){a=document.createElement('button');a.type='button';a.id='kAsk';a.setAttribute('aria-label','Ask Kyte');a.setAttribute('aria-haspopup','dialog');a.innerHTML=KIC.chat;r.appendChild(a)}
+  a.hidden=false;if(a.parentNode!==r||r.lastElementChild!==a)r.appendChild(a)}
+
+/* ---------- chat ---------- */
+const sheet=()=>$('#chatOv'),box=()=>$('#athread');
+let ORG=null,ORGEL=null,PEND=null,openAt=0,userUp=false,touching=false;
+function rectOf(el){if(!el||!el.isConnected)return null;const r=el.getBoundingClientRect();return r.width>2&&r.height>2?{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}:null}
+function entry(){return rectOf(t5()?$('#t5q'):$('#kAsk'))}
+function inset(S,o){const r=Math.min(24,o.height/2);return `inset(${Math.max(0,o.top-S.top).toFixed(1)}px ${Math.max(0,S.right-o.right).toFixed(1)}px ${Math.max(0,S.bottom-o.bottom).toFixed(1)}px ${Math.max(0,o.left-S.left).toFixed(1)}px round ${r.toFixed(1)}px)`}
+function setOpen(on){H.classList.toggle('kchat',on);if(!on)H.classList.remove('kkbon');kb()}
+function kb(){const vv=G.visualViewport;let k=0;if(vv&&H.classList.contains('kchat'))k=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop));
+  H.style.setProperty('--kkb',k+'px');H.classList.toggle('kkbon',k>80)}
+if(G.visualViewport){visualViewport.addEventListener('resize',kb);visualViewport.addEventListener('scroll',kb)}
+/* called by openAri before its own morph; returns true when handled */
+V.morphIn=function(sh,R,o){try{V.opens++;setOpen(true);chrome();
+    const fromEl=o&&o.fromEl&&o.fromEl.id!=='ari'?o.fromEl:null;
+    let org=null;if(PEND&&Date.now()-PEND.t<2500)org=PEND.r;PEND=null;
+    if(!org&&fromEl)org=rectOf(fromEl);if(!org)org=entry();ORG=org;ORGEL=fromEl;openAt=Date.now();userUp=false;
+    const inL=sh.querySelector('.ash-in'),bgL=sh.querySelector('.ash-bg');[sh,inL,bgL].forEach(x=>x&&x.getAnimations().forEach(a=>a.cancel()));
+    if(!RM()&&org){const S=sh.getBoundingClientRect();
+      sh.animate([{clipPath:inset(S,org)},{clipPath:'inset(0px 0px 0px 0px round 0px)'}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'});
+      if(inL)inL.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:220,delay:70,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'})}
+    settle();return true}catch(e){err('in',e);return false}};
+V.morphOut=function(sh,done){try{setOpen(false);const inL=sh.querySelector('.ash-in');
+    const tgt=(ORGEL&&rectOf(ORGEL))||entry()||ORG;
+    if(RM()||!tgt){done();return true}
+    const S=sh.getBoundingClientRect();[sh,inL].forEach(x=>x&&x.getAnimations().forEach(a=>a.cancel()));
+    if(inL)inL.animate([{opacity:1},{opacity:0}],{duration:120,easing:'linear',fill:'forwards'});
+    const a=sh.animate([{clipPath:'inset(0px 0px 0px 0px round 0px)'},{clipPath:inset(S,tgt)}],{duration:220,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+    a.finished.then(()=>{done();try{a.cancel();inL&&inL.getAnimations().forEach(x=>x.cancel())}catch(e){}}).catch(()=>{done()});
+    setTimeout(()=>{try{ORGEL&&ORGEL.focus&&ORGEL.isConnected?ORGEL.focus({preventScroll:true}):(t5()?$('#t5q'):$('#kAsk'))&&(t5()?$('#t5q'):$('#kAsk')).focus({preventScroll:true})}catch(e){}},240);
+    return true}catch(e){err('out',e);return false}};
+function close(){try{G.ari12&&ari12.closeAri()}catch(e){err('close',e)}}
+function openChat(fromEl,text){try{if(!G.ari12)return;if(text){ari12.openAri({fromEl:fromEl||null,text})}else ari12.openAri({fromEl:fromEl||null})}catch(e){err('open',e)}}
+V.open=openChat;V.close=close;
+
+function chrome(){const hd=$('#aHd');if(!hd||hd.querySelector('.kchd'))return;
+  hd.insertAdjacentHTML('afterbegin',`<div class="kchd">${lockup()}<button type="button" class="kcx press" aria-label="Close chat">${KIC.close}</button></div>`);
+  hd.querySelector('.kcx').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();buzz(6);close()});
+  const pane=$('#chatPane'),cw=$('#cwrap');if(pane&&cw&&!$('#ksug')){const s=document.createElement('div');s.id='ksug';s.setAttribute('role','group');s.setAttribute('aria-label','Suggestions');s.hidden=true;pane.insertBefore(s,cw);
+    s.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;send(b.textContent)})}}
+function send(t){const i=$('#in');if(!i||!t)return;i.value=t;i.dispatchEvent(new Event('input',{bubbles:true}));setTimeout(()=>{const a=$('#act');if(a)click(a)},30)}
+function settle(){const b=box();if(!b)return;requestAnimationFrame(()=>{windowed(true);toEnd();sugg();decorAll();thinking()});setTimeout(()=>{if(!userUp)toEnd()},320)}
+const nearEnd=b=>b.scrollHeight-b.scrollTop-b.clientHeight<96;
+function toEnd(){const b=box();if(b)b.scrollTop=b.scrollHeight}
+/* older history: keep the last 40 items, reveal 30 more as he nears the top */
+const KEEP=40,MORE=30;
+function windowed(reset){const b=box();if(!b)return;const kids=[...b.children];if(reset){kids.forEach(k=>k.classList.remove('kh'))}
+  const shown=kids.filter(k=>!k.classList.contains('kh'));if(!reset&&shown.length<=KEEP+MORE)return;if(kids.length<=KEEP)return;
+  kids.slice(0,kids.length-KEEP).forEach(k=>k.classList.add('kh'))}
+function older(){const b=box();if(!b||b.scrollTop>160)return;const hid=[...b.children].filter(k=>k.classList.contains('kh'));if(!hid.length)return;
+  const h0=b.scrollHeight,t0=b.scrollTop;hid.slice(-MORE).forEach(k=>k.classList.remove('kh'));b.scrollTop=t0+(b.scrollHeight-h0);decorAll()}
+/* suggestions: only on an empty or fresh thread (nothing from him today), one row, context aware */
+function ctxChips(){const first=n=>String(n||'').split(' ')[0];
+  try{if(typeof ovOn!=='undefined'&&ovOn&&V.person){const p=ppl().find(x=>x.name===V.person);const out=[`What’s the angle for ${first(V.person)}?`];if(p&&p.company)out.push(`Who else at ${p.company}?`);out.push('How’s my pace?');return out}}catch(e){}
+  const ac=$('#v171acc.on .ph .tt b');if(ac&&ac.textContent.trim()){const c=ac.textContent.trim();return [`What’s happening at ${c}?`,`Who should I reach at ${c}?`,'How’s my pace?']}
+  return ['Who’s first tonight?','How’s my pace?','What changed today?']}
+function fresh(){const b=box();if(!b)return true;const kids=[...b.children];let lastToday=-1;kids.forEach((k,i)=>{if(k.classList.contains('stamp')&&/^today$/i.test(k.textContent.trim()))lastToday=i});
+  const mine=kids.filter(k=>k.classList.contains('bb')&&k.classList.contains('mine'));if(!mine.length)return true;if(lastToday<0)return true;
+  return !kids.slice(lastToday).some(k=>k.classList.contains('bb')&&k.classList.contains('mine'))}
+function sugg(){const s=$('#ksug');if(!s)return;const f=fresh();if(!f){if(!s.hidden)s.hidden=true;return}
+  const L=ctxChips();const h=L.map(t=>`<button type="button">${E(t)}</button>`).join('');if(s.innerHTML!==h)s.innerHTML=h;if(s.hidden)s.hidden=false}
+/* names: people and accounts in replies become links */
+function ppl(){try{const S=G.ariV17&&ariV17.store;const L=S&&S.people&&S.people.size?[...S.people.values()]:((G.ariDATA&&ariDATA.people)||[]);return L.filter(p=>p&&p.name&&!p.deleted_at&&String(p.review||'').toLowerCase()!=='personal')}catch(e){return []}}
+let NX={n:-1,re:null,map:null};
+function names(){const L=ppl();if(L.length===NX.n&&NX.re)return NX;const map=new Map();
+  L.forEach(p=>{const n=String(p.name).trim();if(n.length>=4&&n.includes(' '))map.set(n.toLowerCase(),{k:'p',n})});
+  L.forEach(p=>{const c=String(p.company||'').trim();if(c.length>=3&&!map.has(c.toLowerCase()))map.set(c.toLowerCase(),{k:'a',n:c})});
+  const keys=[...map.keys()].sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  NX={n:L.length,map,re:keys.length?new RegExp('(^|[^A-Za-z0-9])('+keys.join('|')+')(?=$|[^A-Za-z0-9])','gi'):null};return NX}
+function linkify(el){const X=names();if(!X.re)return [];const found=[];
+  const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement&&n.parentElement.closest('.tm,.kln,.kact,a,button')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  nodes.forEach(t=>{const s=t.nodeValue;X.re.lastIndex=0;if(!X.re.test(s))return;X.re.lastIndex=0;const f=document.createDocumentFragment();let last=0,m;
+    while((m=X.re.exec(s))){const st=m.index+m[1].length,hit=m[2],ent=X.map.get(hit.toLowerCase());if(!ent)continue;
+      f.appendChild(document.createTextNode(s.slice(last,st)));const b=document.createElement('button');b.type='button';b.className='kln';b.textContent=hit;
+      if(ent.k==='p'){b.dataset.kp=ent.n;b.setAttribute('aria-label','Open '+ent.n)}else{b.dataset.ka=ent.n;b.setAttribute('aria-label','Open '+ent.n)}
+      f.appendChild(b);found.push(ent);last=st+hit.length}
+    f.appendChild(document.createTextNode(s.slice(last)));t.replaceWith(f)});
+  return found}
+function prevMine(el){let p=el.previousElementSibling;while(p&&!(p.classList.contains('bb')&&p.classList.contains('mine'))){if(p.classList.contains('bb')&&p.classList.contains('ari'))return null;p=p.previousElementSibling}return p}
+function decorate(el){if(!el||el.dataset.kd)return;el.dataset.kd='1';if(el.classList.contains('media'))return;
+  let found=[];try{found=linkify(el)}catch(e){err('link',e)}V.links+=found.length;
+  const pp=[...new Map(found.filter(f=>f.k==='p').map(f=>[f.n,f])).values()];
+  const q=prevMine(el);const asked=q&&/\b(first|next|who|whom|which)\b/i.test(q.textContent);
+  if(pp.length&&(asked||pp.length<=2)&&!el.querySelector('.kact')){const tm=el.querySelector(':scope>.tm');
+    const h=`<span class="kact">${pp.slice(0,2).map(p=>`<button type="button" data-kp="${E(p.n)}">Open ${E(p.n)}</button>`).join('')}</span>`;
+    if(tm)tm.insertAdjacentHTML('beforebegin',h);else el.insertAdjacentHTML('beforeend',h)}}
+function decorAll(){const b=box();if(!b)return;$$('.bb.ari:not([data-kd])',b).filter(x=>!x.classList.contains('kh')).forEach(decorate)}
+/* replies appear word by word; the view follows unless he scrolled up */
+function reveal(el){if(RM())return;const words=[];
+  const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement&&n.parentElement.closest('.tm,.kact')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  nodes.forEach(t=>{const parts=t.nodeValue.split(/(\s+)/);if(parts.length<2&&!parts[0].trim())return;const f=document.createDocumentFragment();
+    parts.forEach(p=>{if(!p)return;if(!p.trim()){f.appendChild(document.createTextNode(p));return}const s=document.createElement('span');s.className='kw';s.textContent=p;words.push(s);f.appendChild(s)});t.replaceWith(f)});
+  const act=el.querySelector('.kact');if(act)act.style.opacity='0';
+  if(words.length<3){words.forEach(s=>s.classList.add('on'));if(act)act.style.opacity='';return}
+  V.reveals++;const b=box();const iv=Math.max(16,Math.min(42,1500/words.length));let i=0;const per=iv<20?2:1;
+  const tick=()=>{for(let k=0;k<per&&i<words.length;k++)words[i++].classList.add('on');if(b&&!userUp)b.scrollTop=b.scrollHeight;
+    if(i<words.length)setTimeout(tick,iv);else if(act){act.style.transition='opacity .2s';act.style.opacity='';if(b&&!userUp)setTimeout(()=>b.scrollTop=b.scrollHeight,30)}};tick()}
+/* thinking: the Kyte loader with the stitched thread */
+function thinking(){const b=box();if(!b)return;const L=()=>{try{return G.ariT4&&ariT4.loader?ariT4.loader():''}catch(e){return ''}};
+  const ty=b.querySelector('.v175ty');if(ty&&!ty.querySelector('.kthk')){const ld=L();if(ld)ty.insertAdjacentHTML('afterbegin',`<span class="kthk" aria-hidden="true">${ld}</span>`)}
+  $$('.typing:not(.kt)',b).forEach(t=>{const ld=L();if(!ld)return;t.classList.add('kt');t.insertAdjacentHTML('afterbegin',`<span class="kthk" aria-hidden="true">${ld}</span>`)})}
+function watch(){const b=box();if(!b||b.dataset.kw)return;b.dataset.kw='1';
+  b.addEventListener('touchstart',()=>{touching=true},{passive:true});b.addEventListener('touchend',()=>{touching=false},{passive:true});
+  b.addEventListener('wheel',()=>{touching=true;clearTimeout(V.wt);V.wt=setTimeout(()=>touching=false,300)},{passive:true});
+  b.addEventListener('scroll',()=>{if(touching)userUp=!nearEnd(b);else if(nearEnd(b))userUp=false;older()},{passive:true});
+  b.addEventListener('click',e=>{const x=e.target.closest('[data-kp],[data-ka]');if(!x)return;e.preventDefault();e.stopPropagation();buzz(8);const p=x.dataset.kp,a=x.dataset.ka;close();
+    setTimeout(()=>{try{if(p&&typeof G.openFile==='function')G.openFile(p,null);else if(a&&G.ariV171&&ariV171.openAcct)ariV171.openAcct(a)}catch(er){err('go',er)}},RM()?0:240)},true);
+  new MutationObserver(ms=>{if(!H.classList.contains('kchat'))return;let added=0;const fresh=[];
+    ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType!==1)return;added++;if(n.classList.contains('bb')&&n.classList.contains('ari'))fresh.push(n)}));
+    if(!added)return;if(added>6){windowed(false)}
+    const live=Date.now()-openAt>900&&added<=3;
+    fresh.forEach(n=>{try{decorate(n);if(live)reveal(n)}catch(e){err('rv',e)}});
+    thinking();sugg()}).observe(b,{childList:true})}
+/* the person page in view, for the context chips */
+function wrapOpen(){if(V.wrapped||typeof G.openFile!=='function')return;V.wrapped=1;const _of=G.openFile;G.openFile=function(n){try{V.person=n}catch(e){}return _of.apply(this,arguments)}}
+function sheetMO(){const s=sheet();if(!s||s.dataset.kmo)return;s.dataset.kmo='1';new MutationObserver(()=>{const on=s.classList.contains('on');if(!on&&H.classList.contains('kchat'))setOpen(false)}).observe(s,{attributes:true,attributeFilter:['class']})}
+
+/* ---------- search and ask: action rows (Ask Kyte, Find people, Find people at <account>) ---------- */
+function qf(){const m=$('#v18133qf');if(!m||m.hidden)return;const L=m.querySelector('.ql');if(!L)return;const q=(m.querySelector('input')||{}).value||'';const t=q.trim();
+  const acc=t?[...L.querySelectorAll('.qr[data-qf]')].map(r=>({r,b:r.querySelector('.tx b'),s:r.querySelector('.tx small')})).find(x=>x.s&&/account page$/.test(x.s.textContent)&&x.b):null;
+  const want=[];if(!t){want.push(['ask','Ask Kyte','Opens your chat with Kyte','']);want.push(['find','Find people','Imports, events and search',''])}
+  else if(acc){const c=acc.b.textContent.trim();want.push(['findat:'+c,'Find people at '+c,'Opens '+c+' with Find people ready',''])}
+  const sig=JSON.stringify(want.map(w=>w[0]));const cur=L.querySelectorAll('.kqa');if(L.dataset.kqs===sig&&cur.length===want.length)return;cur.forEach(x=>x.remove());L.dataset.kqs=sig;
+  const h=want.map(([k,b,s,ic])=>`<button type="button" class="qr kqa" data-kqa="${E(k)}">${ic?`<span class="lg ic" aria-hidden="true">${ic}</span>`:''}<span class="tx"><b>${E(b)}</b><small>${E(s)}</small></span></button>`).join('');
+  if(!t)L.insertAdjacentHTML('afterbegin',h);else L.insertAdjacentHTML('beforeend',h)}
+function qfRect(){const m=$('#v18133qf');const l=m&&(m.querySelector('.qh label')||m.querySelector('input'));return rectOf(l)}
+G.addEventListener('pointerdown',e=>{const t=e.target;if(t&&t.closest&&t.closest('#v18133qf .t5ask,#v18133qf .qr,#v18133qf .kqa')){const r=qfRect();if(r)PEND={r,t:Date.now()}}},true);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.closest&&e.target.closest('#v18133qf')){const r=qfRect();if(r)PEND={r,t:Date.now()}}},true);
+function tab(i){const t=$(`.tbi[data-i="${i}"]`);if(t&&!t.classList.contains('on'))click(t)}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#v18133qf [data-kqa]');if(!b)return;e.preventDefault();e.stopPropagation();buzz(8);const k=b.dataset.kqa;
+  const r=qfRect();try{G.ariV18133&&ariV18133.close(false)}catch(x){}
+  if(k==='ask'){if(r)PEND={r,t:Date.now()};openChat(null);return}
+  if(k==='find'){tab(0);setTimeout(()=>{const p=$('#pplent [data-pe]');if(p)click(p)},140);return}
+  if(k.startsWith('findat:')){const c=k.slice(7);try{G.ariV171&&ariV171.openAcct(c)}catch(x){err('fa',x)}
+    let n=0;const f=()=>{const x=$('#v171acc.on [data-map],#v171acc.on [data-v18134find]');if(x){try{x.scrollIntoView({block:'center',behavior:RM()?'auto':'smooth'});x.focus({preventScroll:true})}catch(er){}return}if(++n<12)setTimeout(f,150)};setTimeout(f,300)}},true);
+/* default path: the header ask button opens the thread */
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#kAsk');if(!b)return;e.preventDefault();e.stopPropagation();buzz(8);openChat(b)},true);
+
+/* ---------- rehomed rows: Exec track and pipeline on Today (when on), Settings on Report ---------- */
+function rows(){
+  const rd=$('#ready');const t3=(()=>{try{return !!(G.ariT3&&ariT3.today&&ariT3.today())}catch(e){return false}})();let x=$('#kexr');
+  if(rd&&t3){if(!x)rd.insertAdjacentHTML('beforeend',`<button type="button" class="krow" id="kexr"><span><b>Exec track and pipeline</b><small>Exec track, pipeline and today’s 15</small></span><i aria-hidden="true">›</i></button>`)}
+  else if(x)x.remove();
+  const rp=$('#report');let s=$('#kset');if(rp&&!s)rp.insertAdjacentHTML('beforeend',`<button type="button" class="krow" id="kset"><span><b>Settings</b><small>Sync, activity, pings, lock, account, About</small></span><i aria-hidden="true">›</i></button>`)}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#kexr,#kset');if(!t)return;e.preventDefault();buzz(8);
+  if(t.id==='kset'){try{G.ariPage&&ariPage.open&&ariPage.open(1,t)}catch(x){err('set',x)}return}
+  H.classList.add('v1813x');tab(0);setTimeout(()=>{const x=$('#v18111ex')||$('#v1812more');if(x)try{x.scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'})}catch(er){}},200)},true);
+
+/* ---------- loop ---------- */
+function pass(){V.passes++;[['icons',icons],['header',header],['chrome',chrome],['watch',watch],['wrap',wrapOpen],['sheet',sheetMO],['qf',qf],['rows',rows],['think',()=>{if(H.classList.contains('kchat'))thinking()}]].forEach(([k,f])=>{try{f()}catch(e){err(k,e)}})}
+let qd=0;const mo=new MutationObserver(()=>{if(qd)return;qd=requestAnimationFrame(()=>{qd=0;pass()})});
+function boot(){pass();mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']})}
 if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
 })();
 </script>
