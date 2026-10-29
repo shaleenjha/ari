@@ -70,6 +70,19 @@ export function triggerSource(url: string, text = ''): TriggerSource | null {
   return null;
 }
 
+// DM1 lead tone (Owner, Oct 30 2026, angle C): a POSITIVE dated trigger (award or list, launch, partnership, funding, hire,
+// expansion) leads DM1. A breach / incident / lawsuit / investigation trigger is used only when no positive one exists, and DM1
+// then frames it as the prospect's forward problem. Negative wins when both match ("launched an investigation"). Code, not a model.
+const NEGATIVE_TEXT = /\b(breach(es|ed)?|data security incident|security incident|incident|hack(ed|ers?)?|ransomware|cyber ?attack|attack(ed)?|leak(ed|s)?|exposed|compromis(e|ed)|unauthori[sz]ed access|lawsuits?|class action|sued|litigation|investigations?|investigat(es|ed|ing)|settlements?|fined|penalt(y|ies)|subpoena(ed)?|outage|layoffs?|laid off|recall(ed)?|securities fraud)\b/i;
+const POSITIVE_TEXT = /\b(awards?|awarded|named (to|one of|a|as)|list|ranking|ranked|recogni[sz]ed|launch(es|ed)?|introduc(es|ed)|unveil(s|ed)?|debut(s|ed)?|available|rolled out|rolls out|partner(s|ed|ship|ships)?|collaborat(es|ed|ion)|integration with|funding|raised|raises|series [a-k]\b|investment|acquir(es|ed)|acquisition|hir(es|ed|ing)|appoint(s|ed)?|joins|joined|expan(ds|ded|sion)|opens|opened|new office|ipo)\b/i;
+export type Tone = 'positive' | 'neutral' | 'negative';
+export function triggerTone(text: unknown): Tone {
+  const t = whyNowText(text);
+  if (NEGATIVE_TEXT.test(t)) return 'negative';
+  return POSITIVE_TEXT.test(t) ? 'positive' : 'neutral';
+}
+const TONE_RANK: Record<Tone, number> = { positive: 0, neutral: 1, negative: 2 };
+
 /** The ONE trigger judgment both buildBrief and checkBrief use (review #54): the fact is normalized exactly as the brief stores
  *  it (clean(fact, 500): dashes to commas, whitespace collapsed, capped), so build and check can never disagree on a row
  *  (a raw "privacy\npolicy" used to pass build as a trigger and then fail check). */
@@ -104,8 +117,10 @@ export function buildBrief(c: BriefIn, today = new Date()): Brief {
     const src = judgeTrigger(url, text);
     return { row: { date, kind: fresh && src ? 'trigger' : 'context', label: url && date ? 'Verified' : 'Inference', text, url }, src };
   });
-  // triggers first (newest first), then context in research order; the brief keeps 6
-  const trig = all.filter((x) => x.row.kind === 'trigger').sort((a, b) => b.row.date.localeCompare(a.row.date));
+  // triggers first: positive, then neutral, then negative (angle C, Oct 30 2026), newest first inside each tone; then context in
+  // research order; the brief keeps 6
+  const trig = all.filter((x) => x.row.kind === 'trigger')
+    .sort((a, b) => TONE_RANK[triggerTone(a.row.text)] - TONE_RANK[triggerTone(b.row.text)] || b.row.date.localeCompare(a.row.date));
   const picked = [...trig, ...all.filter((x) => x.row.kind !== 'trigger')].slice(0, 6);
   const why_now = picked.map((x) => x.row);
   if (!why_now.length) throw new Error('no research rows');
@@ -121,8 +136,9 @@ export function buildBrief(c: BriefIn, today = new Date()): Brief {
     moves: '', people }));
   const top = why_now[0];
   const topSrc = picked[0].src;
+  const tone = top.kind === 'trigger' ? triggerTone(top.text) : 'neutral';
   const why = top.kind === 'trigger'
-    ? `${top.label} trigger (${String(topSrc).replace('_', ' ')}) dated ${top.date}.`
+    ? `${top.label} trigger (${String(topSrc).replace('_', ' ')}) dated ${top.date}.${tone === 'negative' ? ' No positive trigger on file; frame it as their forward problem.' : ''}`
     : `No dated news, filing, press release or job post found; ${top.label} context${top.date ? ' dated ' + top.date : ''}.`;
   return {
     account_id: c.account.id, thesis, why_now, committee, angle: angles[0] ?? '',
@@ -154,7 +170,19 @@ export function checkBrief(b: Brief): string[] {
   return errs;
 }
 
+/** The trigger DM1 should lead with (angle C): the first positive dated trigger, else the first neutral one, else a negative one
+ *  (tone 'negative' tells the prompt to frame it forward, never recap it). null when the brief has no trigger. */
+export function dm1Lead(whyNow: { kind?: string; text?: string; date?: string; url?: string }[]) {
+  const trig = (whyNow ?? []).filter((w) => w?.kind === 'trigger' && w.date);
+  for (const want of ['positive', 'neutral', 'negative'] as Tone[]) {
+    const w = trig.find((x) => triggerTone(x.text) === want);
+    if (w) return { text: String(w.text ?? ''), date: String(w.date ?? ''), url: String(w.url ?? ''), tone: want };
+  }
+  return null;
+}
+
 /** What DM1 may read from the brief (short; the drafter still gets the full research rows through its own context). */
 export function briefForDraft(b: Pick<Brief, 'thesis' | 'angle' | 'why_now'>) {
-  return { thesis: b.thesis, angle: b.angle, why_now: b.why_now.slice(0, 3).map((w) => ({ text: w.text, date: w.date, label: w.label, url: w.url })) };
+  return { thesis: b.thesis, angle: b.angle, dm1_lead: dm1Lead(b.why_now),
+    why_now: b.why_now.slice(0, 3).map((w) => ({ text: w.text, date: w.date, label: w.label, url: w.url })) };
 }

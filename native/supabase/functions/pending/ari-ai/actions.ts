@@ -75,7 +75,7 @@ export async function draftDm1(db: Db, deps: Deps, person: string, mode: 'dm1_au
   const base = await db.rpc<Ctx>('ari_ai_context', { p_person: person, p_account: null });
   const ctx: Ctx = brief ? { ...base, brief } : base;           // pipeline: the server brief rides along as data
   if (ctx?.person?.dm1_sent) return { draft: null, saved: false, reason: 'already_sent' };
-  const p = draftDm1Prompt(ctx);
+  const p = draftDm1Prompt(ctx, gate?.style ?? 'A');
   const d = { ...deps, refs: { personId: person, accountId: ctx?.account?.id ?? null, requestKey: `dm1:${person}` } };
   const out = onDelta ? await runDraftStream('draft', p, d, onDelta, nameCtx(ctx)) : await runDraft('draft', p, d, nameCtx(ctx));
   let draft: Draft = out.value, callId = out.callId, g: GateResult | undefined;

@@ -133,6 +133,25 @@ const PARTICLE_JOINED = /^(von|van|de|del|der|di|da|du|al|el|bin|ibn|bint|le|la|
 // acronyms that are not names (ALL-CAPS words are otherwise treated as possible names: "MORGAN HALE")
 const ACRONYMS = new Set(('hipaa hitrust hitech soc iso nist pci dss gdpr ccpa cpra phi pii ehr emr sec hhs ocr fda cms onc ftc doj fbi cisa eu uk us usa ' +
   'ipo saas paas iaas baa sso mfa iam api sdk llm ai ml it hr usd eur gbp q1 q2 q3 q4 fy aws gcp b2b b2c kpi roi esg').split(' '));
+// SAFE_TERMS (Owner, Oct 30 2026, staging rerun 2): a short fixed list of words that are never a prospect's name, read as safe
+// inside a capitalised run (rule (a)) exactly like COMMON words. They do NOT lift the cue rule (c) ("Georgia said" still blocks)
+// or any other net. Review it by eye; keep it short. Vendors that are also Thrandvex target accounts are left out on purpose.
+//  - SaaS / security / cloud vendors a breach or integration claim names;
+//  - the 50 US states + DC (multi-word states by their words; north / south / west / new are already COMMON);
+//  - agency / regulator words.
+const SAFE_VENDORS = 'crm salesloft drift okta snowflake hubspot workday epic oracle sap aws azure google microsoft amazon slack stripe crowdstrike cloudflare';
+const US_STATES = ('alabama alaska arizona arkansas california colorado connecticut delaware florida georgia hawaii idaho illinois indiana iowa ' +
+  'kansas kentucky louisiana maine maryland massachusetts michigan minnesota mississippi missouri montana nebraska nevada hampshire jersey ' +
+  'mexico york carolina dakota ohio oklahoma oregon pennsylvania rhode island tennessee texas utah vermont virginia washington wisconsin ' +
+  'wyoming district columbia dc');
+const AGENCY = 'ag ags ftc hhs ocr sec cms fda cfpb hipaa gdpr';
+export const SAFE_TERMS = new Set(`${SAFE_VENDORS} ${US_STATES} ${AGENCY}`.split(/\s+/));
+// state words that are also common given names or surnames ("May Washington", "Virginia", "York"): inside a run they count as
+// safe ONLY right after a direction word (north / south / west / new) or when the run also holds an agency word or "dc"
+// ("Washington AG", "Washington DC", "West Virginia"); otherwise they stay unknown, so the run fails closed as before.
+const PERSONISH_STATES = new Set('washington virginia georgia carolina dakota montana indiana tennessee york'.split(' '));
+const STATE_QUALIFIER = new Set('north south west new'.split(' '));
+const RUN_QUALIFIER = new Set([...AGENCY.split(' '), 'dc']);
 const CUE_BEFORE = new Set('said says told tells by led from named per quoted quoting'.split(' '));
 const CUE_AFTER = new Set(('said says told tells stated states noted notes added adds explained explains wrote writes confirmed confirms argued argues ' +
   'claimed claims warned warns testified recalled commented admitted acknowledged emphasized emphasised believes believed thinks thought ' +
@@ -154,16 +173,23 @@ export function looksLikePersonName(text: string, companyWords: Set<string> = ne
   if (UNCASED.test(text.normalize('NFC'))) return true;
   const toks = tokenize(text);
   const safeCore = (w: string) => { const f = fold(w); return COMMON.has(f) || companyWords.has(f) || ACRONYMS.has(f); };
-  const safe = (w: string) => safeCore(w) || brands.has(fold(w));
+  const safe = (w: string) => safeCore(w) || brands.has(fold(w)) || SAFE_TERMS.has(fold(w));
   const unknownCap = (w: string) => !!w && capitalised(w) && !isInitialTok(w) && !safe(w);
-  const cueCap = (w: string) => !!w && capitalised(w) && !isInitialTok(w) && !safeCore(w);   // the cue rule ignores the allowlist
+  const cueCap = (w: string) => !!w && capitalised(w) && !isInitialTok(w) && !safeCore(w);   // the cue rule ignores the allowlist and SAFE_TERMS
   // (a) + (b): runs of capitalised tokens; particles may sit inside a run
-  let size = 0, unknown = false;
-  const close = () => { const hit = size >= 2 && unknown; size = 0; unknown = false; return hit; };
+  let size = 0, unknown = false, personish = false, qualified = false;
+  const close = () => { const hit = size >= 2 && (unknown || (personish && !qualified)); size = 0; unknown = false; personish = false; qualified = false; return hit; };
   for (let i = 0; i < toks.length; i++) {
     const w = toks[i];
     if (w && PARTICLE_JOINED.test(w)) return true;
-    if (w && capitalised(w)) { size++; if (unknownCap(w)) unknown = true; continue; }
+    if (w && capitalised(w)) {
+      size++; const f = fold(w);
+      if (unknownCap(w)) unknown = true;
+      // a name-like state word is safe only right after north / south / west / new (inside the run), or beside an agency word / "dc"
+      else if (PERSONISH_STATES.has(f) && !(i > 0 && size > 1 && STATE_QUALIFIER.has(fold(toks[i - 1])))) personish = true;
+      if (RUN_QUALIFIER.has(f)) qualified = true;
+      continue;
+    }
     if (w && PARTICLES.has(w) && size > 0 && toks[i + 1] && capitalised(toks[i + 1])) continue;   // "Ludwig van Beethoven"
     if (w && PARTICLES.has(w) && size === 0 && toks[i + 1] && unknownCap(toks[i + 1])) { size = 1; continue; } // "de Souza"
     if (close()) return true;

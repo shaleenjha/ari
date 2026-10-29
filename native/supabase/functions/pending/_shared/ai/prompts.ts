@@ -38,11 +38,32 @@ export function packContext(ctx: Ctx): string {
   return `<context>\n${JSON.stringify(ctx, null, 0).slice(0, 24_000)}\n</context>`;
 }
 
-export function draftDm1Prompt(ctx: Ctx): { system: string; user: string } {
+// DM1 shape and lead rule (Owner, Oct 30 2026: the AE guide's DM1 shape in the first prompt so most drafts pass the copy gate
+// without a redraft; angle C: a positive dated trigger leads, a breach / incident / lawsuit only when no positive one exists,
+// framed as their forward problem, never a recap of what leaked). Mirrors plans/copy-lab/ae-styles.md v3 DM1.
+export function dm1Shape(style: 'A' | 'B' = 'A'): string {
+  const ask = style === 'B' ? 'Worth 20 minutes?' : 'Worth 15 minutes?';
+  return `DM1 shape (point first), in this order:
+1. Open with exactly "Thanks for connecting, <First>." or "<First>, quick one." using the person's first name.
+2. One statement, not a question: their product or workflow, the exact data (PHI, card numbers, member IDs, transcripts, claims)
+   and where it bites (the review, deal or partner that stalls). A dated trigger sits inside this statement, never as "saw that" or "congrats".
+3. What we do in under 10 words, for example "We keep them out." Never how it works${style === 'A' ? ' (no tokenization, encryption or vault)' : ''}.
+4. End with exactly "${ask}" That is the only question mark in the message.
+Under ${style === 'B' ? 50 : 45} words. Never: open questions, "curious", "wondering", "how is your team", "how are you handling",
+"on your radar", "Most <peers> we talk to", dashes, links, the seller's name.
+Lead rule: if the brief or research has a positive dated trigger (an award or list, a launch, a partnership, funding, a hire, an
+expansion), build the statement around it; brief.dm1_lead names it when tone is "positive". Use a breach, incident, lawsuit or
+investigation only when no positive trigger exists, and then frame it as their forward problem (what the next customer review,
+partner or audit will ask), never a recap of what leaked: do not list exposed data (SSNs, patient names, medical details, DOBs),
+do not count affected people, and never use the word "breach" in the first sentence after the opener.`;
+}
+
+export function draftDm1Prompt(ctx: Ctx, style: 'A' | 'B' = 'A'): { system: string; user: string } {
   return {
     system: `You write the first LinkedIn message (DM1) Owner, a Senior SDR at Thrandvex (a data privacy vault), sends right after
 someone accepts his connection request. Goal: a relevant, specific opener that earns a reply. Not a pitch deck.
 ${HOUSE}
+${dm1Shape(style)}
 ${DATA_RULE}
 ${DRAFT_SHAPE}`,
     user: `${packContext(ctx)}\n${ctx?.brief ? 'Ground the opener in the account brief (its angle or one why_now item) and the research. ' : ''}Write DM1 for the person in the context.`,
