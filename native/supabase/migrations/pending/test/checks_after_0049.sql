@@ -122,6 +122,12 @@ begin
   c := public.ari_ai_chat_context(null, 'P99999904902', null);
   if (c->'snapshot'->'focus_people'->0->'latest_reply'->>'status') <> 'new' then raise exception 'FAIL 4: focus by id / latest reply'; end if;
   if (c->'snapshot'->'last_24h'->'replied')::text !~ 'Zeno Chatreply' then raise exception 'FAIL 4: last_24h replies'; end if;
+  -- round 2: a follow-up carries the earlier question / answer; names earlier in the text win the focus slots
+  c := public.ari_ai_chat_context(E'how should I answer him?\nZeno Chatreply replied, what did he say?\nHe asked about pricing.', null, null);
+  if (c->'snapshot'->'focus_people'->0->>'name') is distinct from 'Zeno Chatreply' then raise exception 'FAIL 4: follow-up focus %', c->'snapshot'->'focus_people'; end if;
+  c := public.ari_ai_chat_context(E'and Zara Chatfirst?\nZeno Chatreply replied, what did he say?', null, null);
+  if (c->'snapshot'->'focus_people'->0->>'name') is distinct from 'Zara Chatfirst' or (c->'snapshot'->'focus_people'->1->>'name') is distinct from 'Zeno Chatreply' then
+    raise exception 'FAIL 4: focus order by position %', c->'snapshot'->'focus_people'; end if;
   raise notice 'ok 4 snapshot scope, exec track, deny names, Today order, focus, entities';
 
   raise exception 'ALL 0049 CHECKS PASSED (deliberate raise: nothing kept)';

@@ -14,8 +14,14 @@
 //  3. ChatStream: releases text to the app only at word boundaries once the cleaned prefix is stable, so a partial phone number,
 //     tag or URL never goes out; the final cleaned text is authoritative (the app replaces the bubble when it differs).
 //  4. findEntities(): offsets of the people and account names in the final answer, so the app can link them.
+//  Round 2 (Oct 30 2026, Owner's rule): Kyte never names Ari, Den, Hark, Kelvarrow or any system / vendor behind it and has no
+//  notion of them. The refusal line names no system (DECLINE); those names are banned words in the answer (whole word, any
+//  case, leetspeak / spacing undone) unless a snapshot person or account name holds that word ("Ari Cohen" may be called Ari);
+//  identity asks ("are you Ari", "what is Hark", "who built you", "what system runs you") are declined before any model call;
+//  "snapshot" / "my context" are swapped to "what I can see", and "my instructions" / "I was instructed" trip the answer.
 
-export const HANDLED = "That's handled in Hark, not here.";
+export const HANDLED = "I can't help with that here.";
+export const DECLINE = HANDLED;
 export const NO_CHANGE = "I can't change anything or send anything from chat. Make the change on the person's or account's page, and you send every message yourself on LinkedIn.";
 export const MAX_CHAT = 1500;
 
@@ -48,6 +54,11 @@ const ASK: RegExp[] = [
   /\b(ignore|disregard|forget|override|bypass|drop|skip)\s+(all\s+|any\s+|your\s+|the\s+|previous\s+|prior\s+|above\s+|earlier\s+|these\s+|those\s+|of\s+)*(rules|instructions|guardrails|guidelines|prompts?|system|restrictions|filters?|policies|programming)\b/i,
   /\bpretend\s+(you\s+are|you're|to\s+be)\s+(the\s+|a\s+|an\s+)?(developer|dev|admin|administrator|engineer|system|root|owner of the app|unrestricted|different ai|evil)\b|\bact as (the |a |an )?(developer|admin|unrestricted|system|root)\b|\brole-?play\b.{0,60}\b(developer|admin|no rules|unrestricted)\b/i,
   /\b(i am|i'm|this is)\s+(the\s+|your\s+)?(developer|admin|administrator|engineer|hark|anthropic|owner of (this|the) app|system)\b/i,
+  // who / what is behind Kyte, its old or internal names (round 2, Oct 30 2026): declined, never explained
+  /\bhark\b|\bparallel(\.ai|\s+ai\b|\s+web\s+systems)|\b(ari|den|kelvarrow)\s+(app|prototype|bot|ai|assistant|project|backend|system)\b/i,
+  new RegExp(String.raw`\b(are|r|were|was|is)\s+(you|u|kyte|this app)\s+(really\s+|actually\s+|also\s+|called\s+|named\s+|the\s+)?(ari|den|kelvarrow)\b(?!['\u2019]s)|\b(ari|den|kelvarrow)\s+(is|was)\s+(you|kyte|this app)\b|\bwhat(?:'s|\s+is|\s+was)\s+(ari|den|kelvarrow)\s*[?.!]*\s*$`, 'im'),
+  new RegExp(String.raw`\bwho\s+(built|made|created|designed|programmed|coded|developed|develops|owns|runs|trained|wrote|writes|maintains|operates)\s+(you|u|kyte|this app|this thing|the app)\b|\b(what|which)\s+(system|systems|platform|platforms|company|companies|ai|engine|software|tech|technology|tools?|services?)\s+(runs|run|powers|power|is behind|are behind|sits behind|built|made|drives|drive|hosts|is running|are running)\s+(you|u|kyte|this app|it|this)\b`, 'i'),
+  new RegExp(String.raw`\b${YOU}\s+(old|previous|original|former|real|internal|first|code|project)\s*names?\b|\b${YOU}\s+codenames?\b|\bcode ?names?\b|\b(you|kyte)\s+(used to be|were|was)\s+(called|named)\b`, 'i'),
   // other languages (Hindi, Spanish, Italian, Portuguese, German, French)
   /(डेटाबेस|डाटाबेस|सर्वर|प्रॉम्प्ट|प्रोम्प्ट|पासवर्ड|टेबल्स|कोड बेस|base de datos|base di dati|banco de dados|datenbank|mot de passe|contraseña|passwort|senha|chiave api|clave api|clé api|instrucciones del sistema|istruzioni di sistema|prompt di sistema|prompt del sistema|systemprompt|system-prompt)/i,
 ];
@@ -74,10 +85,15 @@ export function askGuard(text: string): boolean {
 
 // ---------------- answers ----------------
 // whole answer becomes HANDLED: a vendor, a stack word, a leaked piece of the instructions
-const HARD_OUT = /\b(supabase|postgres(ql)?|pgmq|pg_net|sql|edge ?functions?|cron|anthropic|claude|openai|chat ?gpt|gpt[-\w.]*|grok|xai|llms?|sonnet|opus|haiku|gemini|api ?keys?|service[ _-]?role|vercel|github|repo(sitory)?|databases?|system ?prompt|sheet id|deno|1QEiIa|how_kyte_works|snapshot_json|rpc|row level security)\b|<\/?(snapshot|rules|how_kyte_works)>|\bKC-RULESET\b/i;
+const HARD_OUT = /\b(supabase|postgres(ql)?|pgmq|pg_net|sql|edge ?functions?|cron|anthropic|claude|openai|chat ?gpt|gpt[-\w.]*|grok|xai|llms?|sonnet|opus|haiku|gemini|api ?keys?|service[ _-]?role|vercel|github|repo(sitory)?|databases?|system ?prompt|sheet id|deno|1QEiIa|how_kyte_works|snapshot_json|rpc|row level security|parallel(?:\.ai|\s+ai|\s+web\s+systems)|my\s+(?:system\s+)?(?:instructions|guidelines|prompt|programming)|(?:the\s+)?instructions\s+i\s+(?:was|were|have been|got)\s+given|i(?:'m|\s+am|\s+was|'ve\s+been|\s+have\s+been)\s+(?:instructed|programmed|prompted))\b|<\/?(snapshot|book|rules|how_kyte_works)>|\bKC-RULESET\b/i;
+// Kyte's own old / internal names: banned in an answer unless a snapshot name holds the same word (round 2, Oct 30 2026)
+const SELF_OUT = /\b(ari|den|hark|kelvarrow)\b/gi;
 // first-person claims of an action Kyte cannot take
 const ACTION_CLAIM = /\b(i(?:'ve| have| just| already)?|done[,.!]?\s*i(?:'ve)?)\s+(?:just\s+|already\s+|now\s+)?(sent|emailed|messaged|dm'?d|texted|deleted|removed|marked|updated|changed|moved|added|scheduled|booked|archived|cleared|edited|saved|queued|submitted|posted|withdrew|withdrawn|accepted|unsubscribed|snoozed)\b|\b(i'll|i will|let me|i can)\s+(send|email|message|delete|remove|mark|update|change|move|add|schedule|book|archive|clear|edit|post|withdraw)\b(?!\s+(?:you|that)\s+(?:on|in)\b)/i;
 const SOFT: [RegExp, string][] = [
+  // never describe the data source (round 2): the snapshot / "my context" read as "what I can see"
+  [/\b(in|from|per|on)\s+(?:my|the|this|your)\s+(?:snapshot|context)\b/gi, '$1 what I can see'], [/\b(?:the|my|this|your)\s+snapshot\b/gi, 'what I can see'],
+  [/\bsnapshots?\b/gi, 'what I can see'], [/\bmy context\b/gi, 'what I can see'],
   [/\bschedul(e|es) (a|an|the|time|call|meeting|it)\b/gi, 'book $2'], [/\bscheduled\b/gi, 'set'], [/\bscheduling\b/gi, 'booking'],
   [/\bschedules\b/gi, 'timings'], [/\bschedule\b/gi, 'timing'], [/\btables\b/gi, 'lists'], [/\btable\b/gi, 'list'],
   [/\bprompted\b/gi, 'led'], [/\bprompts\b/gi, 'nudges'], [/\bprompt\b/gi, 'nudge'], [/\bworkers\b/gi, 'Kyte'], [/\bworker\b/gi, 'Kyte'],
@@ -103,7 +119,7 @@ function otherWords(f: string): number {
   const rest = deobfuscate(f).split('\n')[0].replace(HARD_G, ' ').replace(ACTION_CLAIM, ' ');
   return (rest.match(/[\p{L}\p{N}]{2,}/gu) ?? []).filter((w) => !/^(inc|llc|ltd|co|corp|the|and|of|gmbh|plc|ai|labs?|hq|io)$/i.test(w)).length;
 }
-export interface NameMask { list: { low: string; re: RegExp; mark: string }[] }
+export interface NameMask { list: { low: string; re: RegExp; mark: string }[]; words: Set<string> }
 /** Build once per answer: whole-word, case-insensitive matchers for each snapshot name (raw and scrubbed form), longest first. */
 export function nameMask(names: string[] = [], deny: string[] = []): NameMask {
   const forms = new Set<string>();
@@ -114,7 +130,8 @@ export function nameMask(names: string[] = [], deny: string[] = []): NameMask {
     const b = scrub(a, deny).replace(/\s+/g, ' ').trim();
     if (b.length >= 3) forms.add(b);
   }
-  const list = [];
+  const list = []; const words = new Set<string>();
+  for (const f of forms) for (const w of f.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []) words.add(w);
   for (const f of [...forms].sort((x, y) => y.length - x.length)) {
     const infra = HARD_OUT.test(f) || HARD_OUT.test(deobfuscate(f)) || ACTION_CLAIM.test(f);
     // review #72: a vendor / infra word used as a name is never masked (it trips as before); only a name that is mostly other
@@ -122,7 +139,7 @@ export function nameMask(names: string[] = [], deny: string[] = []): NameMask {
     if (infra && otherWords(f) < 3) continue;
     list.push({ low: f.toLowerCase(), re: new RegExp(`(^|[^\\p{L}\\p{N}])${esc(f)}(?=$|[^\\p{L}\\p{N}])`, 'giu'), mark: infra ? INFRA_MARK : NAME_MARK });
   }
-  return { list };
+  return { list, words };
 }
 /** The text with every snapshot name replaced by a marker (for the checks only; the answer keeps the real names). */
 export function maskNames(t: string, m?: NameMask): string {
@@ -148,7 +165,12 @@ export function pendingName(seg: string, m?: NameMask): number {
   }
   return best;
 }
-const leaks = (masked: string) => HARD_OUT.test(masked) || HARD_OUT.test(deobfuscate(masked)) || SELF_TIE.test(masked);
+/** Ari / Den / Hark / Kelvarrow as a whole word (also after leetspeak / spacing is undone), unless a snapshot name holds that word. */
+export function selfLeak(t: string, m?: NameMask): boolean {
+  for (const s of [t, deobfuscate(t)]) for (const x of s.matchAll(SELF_OUT)) if (!m?.words.has(x[1].toLowerCase())) return true;
+  return false;
+}
+const leaks = (masked: string, m?: NameMask) => HARD_OUT.test(masked) || HARD_OUT.test(deobfuscate(masked)) || SELF_TIE.test(masked) || selfLeak(masked, m);
 export interface Clean { text: string; tripped: null | 'handled' | 'no_change' }
 
 /** Shared by the snapshot sanitizer and the answer filter: tags, URLs, contact data, exec names. */
@@ -167,12 +189,13 @@ export function scrub(s: string, deny: string[] = []): string {
 
 export function cleanAnswer(raw: string, o: CleanOpts = {}, mask?: NameMask): Clean {
   const m = mask ?? (o.names?.length ? nameMask(o.names, o.deny ?? []) : undefined);
-  if (HARD_OUT.test(maskNames(raw, m)) || SELF_TIE.test(maskNames(raw, m))) return { text: HANDLED, tripped: 'handled' };
+  const mr = maskNames(raw, m);
+  if (HARD_OUT.test(mr) || SELF_TIE.test(mr) || selfLeak(mr, m)) return { text: HANDLED, tripped: 'handled' };
   let t = scrub(raw, o.deny ?? []);
   t = t.replace(/\*\*|__|`+|^#{1,6}\s+|^\s*[-*•]\s+/gm, '');
   t = t.replace(/\s+[\u2013\u2014]\s+|[\u2013\u2014]/g, ', ').replace(/\s+-\s+/g, ', ');
   const mt = maskNames(t, m);
-  if (leaks(mt)) return { text: HANDLED, tripped: 'handled' };
+  if (leaks(mt, m)) return { text: HANDLED, tripped: 'handled' };
   if (ACTION_CLAIM.test(mt)) return { text: NO_CHANGE, tripped: 'no_change' };
   // snapshot names are kept verbatim: the soft word swaps never rewrite a name ("... system prompt Inc", "Schedule Co")
   const kept: string[] = [];
@@ -184,6 +207,7 @@ export function cleanAnswer(raw: string, o: CleanOpts = {}, mask?: NameMask): Cl
     }
   }
   for (const [r, w] of SOFT) t = t.replace(r, w);
+  t = t.replace(/(^|[.!?]\s+)what I can see/g, '$1What I can see');
   if (kept.length) t = t.replace(/\uE000(\d+)\uE001/g, (_x, i: string) => kept[Number(i)] ?? '');
   if (o.final) {
     t = t.replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, ' ').replace(/\s+([,.!?;:])/g, '$1').replace(/,\s*,/g, ',').trim();

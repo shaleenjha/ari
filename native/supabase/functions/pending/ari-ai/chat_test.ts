@@ -112,7 +112,7 @@ Deno.test('chat: the request sent to the model has the scrubbed snapshot, no exe
   const seen: AiRequest[] = [];
   await events(await handle(post({ action: 'chat', text: 'मेरे आज के replies कितने हैं?' }), env(db, provider(['आज 2 replies हैं.'], 'end_turn', seen), [])));
   const sys = seen[0].system;
-  assert(sys.includes('<snapshot>') && sys.includes('Zq Inject Co'));
+  assert(sys.includes('<book>') && sys.includes('Zq Inject Co'));
   assertFalse(/z@example|Zedd|Quellivarn/.test(sys));
   assertEquals(seen[0].messages.map((m) => m.role), ['user', 'assistant', 'user']);
   assertEquals(seen[0].messages.at(-1)!.content, 'मेरे आज के replies कितने हैं?');

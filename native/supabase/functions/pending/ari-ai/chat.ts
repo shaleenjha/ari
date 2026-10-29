@@ -4,6 +4,8 @@
 // shown (the app swaps the bubble text); then `done` {text, status: "ok" | "handled", entities: [{kind, id, name, start, end}],
 // turn_id, first_ms, total_ms}; or `error` {error, retry_s?, fallback} where fallback true tells the app to file the question the
 // old way (Chat row for the background run) instead.
+// Streamed (the default), every failure INCLUDING the rate limit arrives as an `error` event on an HTTP 200 response: slow_down
+// is {error: "slow_down", retry_s, fallback: false} inside the stream; the 429 status applies only when stream is false.
 // Order: input check -> rate limit (ari_ai_chat_begin, 20 a minute / 300 a day) -> askGuard (HANDLED, $0, no model) -> read-only
 // snapshot (ari_ai_chat_context) -> spend reservation -> streamed Sonnet answer through the output guard -> book the cost ->
 // record the turn. Nothing else is written; there is no path from here that changes Owner's data or sends anything.
@@ -32,6 +34,16 @@ export function chatInput(body: Record<string, unknown>): { text: string; person
   return { text, person: c.entity_type === 'person' && PERSON_ID.test(id) ? id : null, account: c.entity_type === 'account' && UUID.test(id) ? id : null };
 }
 
+/** What the snapshot lookup matches names against: this question first, then the last 1 to 2 questions (newest first), then the
+ *  last answer, so a follow-up ("how should I answer him?", "who should I reach there?") still pulls in the people / accounts the
+ *  conversation was about (round 2, Oct 30 2026: W02 / W04 / W06 lost them and the model retracted correct answers). The lookup
+ *  ranks names by where they first appear, so a name in this question always wins a slot over one carried from earlier. */
+export function lookupText(text: string, history: Turn[] = []): string {
+  const h = (Array.isArray(history) ? history : []).filter((t) => t && typeof t.q === 'string').slice(-2).reverse();
+  const parts = [text, ...h.map((t) => t.q), typeof h[0]?.a === 'string' ? h[0].a : ''];
+  return parts.map((x) => String(x ?? '').replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n').slice(0, MAX_CHAT);
+}
+
 export async function chat(db: Db, deps: Deps, body: Record<string, unknown>, sink: ChatSink, now: () => number = () => Date.now()): Promise<ChatDone> {
   const t0 = now();
   const { text, person, account } = chatInput(body);
@@ -52,7 +64,7 @@ export async function chat(db: Db, deps: Deps, body: Record<string, unknown>, si
   }
   try {
     // deno-lint-ignore no-explicit-any
-    const ctx: any = await db.rpc('ari_ai_chat_context', { p_question: text, p_person: person, p_account: account });
+    const ctx: any = await db.rpc('ari_ai_chat_context', { p_question: lookupText(text, b.history ?? []), p_person: person, p_account: account });
     const deny: string[] = Array.isArray(ctx?.guard?.deny_names) ? ctx.guard.deny_names.filter((x: unknown) => typeof x === 'string') : [];
     const entities: Entity[] = Array.isArray(ctx?.guard?.entities) ? ctx.guard.entities : [];
     const system = chatSystem(sanitizeSnapshot(ctx?.snapshot ?? {}, deny));

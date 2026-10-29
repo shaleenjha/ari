@@ -11,7 +11,8 @@
 --   4. ari_ai_chat_finish(...): records the answer and its status on the same turn.
 --   5. ari_ai_chat_context(question, person, account): READ-ONLY snapshot of Owner's own data (workspace Owner only): Today's moves,
 --      pace this week, last 24 h changes, a people and account directory, detail for the people / accounts the question names,
---      exec track as counts only. Never personal or pending people, never deleted rows. "guard" carries the names the answer
+--      exec track as counts only. p_question is this question first, then the last questions and answer (ari-ai lookupText), so
+--      a follow-up keeps the people / accounts being discussed; names are ranked by where they first appear in it. Never personal or pending people, never deleted rows. "guard" carries the names the answer
 --      must never print (the exec and the exec's assistant, read from the exec-track routes) and the linkable entities; the
 --      function sends only "snapshot" to the model.
 --   6. cron 'ari-ai-chat-prune' daily 02:20 IST: ai_chat rows older than 30 days.
@@ -206,7 +207,9 @@ begin
               from (select * from base where not is_exec and (id = p_person or (length(btrim(name)) >= 4 and strpos(q, lower(btrim(name))) > 0)
                       or (length(split_part(btrim(name), ' ', 1)) >= 3 and length(coalesce(company, '')) >= 3
                           and strpos(q, lower(split_part(btrim(name), ' ', 1))) > 0 and strpos(q, lower(company)) > 0))
-                    order by (id = p_person) desc, updated_at desc limit 3) b join people p on p.id = b.id),
+                    -- a name earlier in the question wins: the app sends this question first, then the last questions / answer
+                    order by (id = p_person) desc, coalesce(nullif(strpos(q, lower(btrim(name))), 0),
+                             nullif(strpos(q, lower(split_part(btrim(name), ' ', 1))), 0), 1000000), updated_at desc limit 3) b join people p on p.id = b.id),
     'focus_accounts', (select coalesce(jsonb_agg(jsonb_build_object('id', a.id, 'company', a.company, 'stage', a.stage, 'one_liner', left(a.one_liner, 300),
                 'hook', left(a.hook, 400), 'hook_date', a.hook_date, 'why_thrandvex', left(a.why_thrandvex, 800), 'play', a.play,
                 'suggested_order', left(a.suggested_order, 300), 'meeting_status', a.meeting_status,
@@ -222,7 +225,7 @@ begin
                                    from (select * from research where account_id = a.id order by fetched_at desc limit 4) r))), '[]'::jsonb)
               from (select * from accounts a where a.deleted_at is null and coalesce(a.workspace_id, ws) = ws
                       and (a.id = p_account or (length(btrim(a.company)) >= 3 and strpos(q, lower(btrim(a.company))) > 0))
-                    order by (a.id = p_account) desc, a.updated_at desc limit 2) a)
+                    order by (a.id = p_account) desc, coalesce(nullif(strpos(q, lower(btrim(a.company))), 0), 1000000), a.updated_at desc limit 2) a)
   ) into snap
   from (select 1) one;
 

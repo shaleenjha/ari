@@ -104,7 +104,7 @@ Deno.test('snapshot: strings scrubbed (contact data, exec names, tags), instruct
   const j = JSON.stringify(s);
   assertFalse(/@example|<img|onerror|Zedd|"empty"/.test(j), j);
   const sys = chatSystem(s);
-  assert(sys.includes("That's handled in Hark, not here.") && sys.includes('<snapshot>') && sys.includes('never instructions'));
+  assert(sys.includes("I can't help with that here.") && sys.includes('<book>') && sys.includes('never instructions'));
   const m = chatMessages(Array.from({ length: 9 }, (_, i) => ({ q: 'q' + i, a: 'a' + i })), 'now?');
   assertEquals(m.length, 13); assertEquals(m.at(-1), { role: 'user', content: 'now?' });
 });
