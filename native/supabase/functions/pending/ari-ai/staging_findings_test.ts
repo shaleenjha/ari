@@ -37,7 +37,9 @@ Deno.test('finding 1: the staging claims reach Parallel once the research allowl
   assertEquals(before.eligible.length, 0);                                     // the staging behaviour, kept when there is no research
   const sel = selectClaims(base(STAGING_CLAIMS));
   assertEquals(sel.decisions.map((d) => d.decision), [ELIGIBLE, ELIGIBLE, ELIGIBLE]);
-  for (const b of ['time', 'providerconnect', 'deepintent', 'healthtech', 'crm']) assert(sel.allowlist.includes(b), b);
+  for (const b of ['time', 'providerconnect', 'deepintent', 'healthtech']) assert(sel.allowlist.includes(b), b);
+  // review #65: the CRM vendor word now passes per claim (its own source is a research site), so it is no longer on the allowlist
+  assert(!sel.allowlist.includes('crm'));
   for (const p of ['morgan', 'pryce', 'dana', 'whitfield']) assert(!sel.allowlist.includes(p), p);
   const sent: unknown[] = [];
   const r = await factCheck(base(STAGING_CLAIMS), { cacheGet: () => Promise.resolve({}), cachePut: () => Promise.resolve(),
@@ -93,7 +95,8 @@ Deno.test('finding 1: the allowlist vetoes anyone the research uses like a perso
     { fact: 'McAllister led the review. DeVries platform notes were cited.', source_url: '' },
   ], ['Dana Whitfield']);
   for (const p of ['rowan', 'vale', 'globex', 'imogen', 'vasselrow', 'tamsin', 'oakridge', 'whitfield', 'mcallister', 'devries']) assert(!al.has(p), p);
-  assert(al.has('analytics'));                                                 // a plain brand word in a vetoed-free run still counts
+  // review #65: a run with no CamelCase / ALL-CAPS anchor adds nothing ("Whitfield Analytics platform" is a firm named after a person)
+  assert(!al.has('analytics'));
 });
 
 // ---- finding 2: the AE style guide gates DM1 on the server ----

@@ -185,7 +185,10 @@ export function looksLikePersonName(text: string, companyWords: Set<string> = ne
 // OWN public research shows it as a brand, product, company or publication, by one of these shapes in a research text:
 //  B1 CamelCase brand shape ("ProviderConnect", "DeepIntent", "HealthTech"), not a name prefix (Mc / Mac / De / La / O ...);
 //  B2 inside a capitalised run that ends with, or is followed by, a product / organisation / publication noun
-//     ("DeepIntent Audience Marketplace", "CRM environment", "World's Top HealthTech Companies list");
+//     ("DeepIntent Audience Marketplace", "World's Top HealthTech Companies list"), and ONLY when the run also holds an anchor:
+//     a CamelCase or ALL-CAPS token that is itself on the list (B1 / B3 / B4, not vetoed) or a known acronym. Review #65: a firm
+//     named after a person ("Jane Doe Group", "Smith Partners", "Whitfield Analytics platform") has no anchor and adds nothing;
+//     the generic nouns group / partners / media / company / companies are not organisation nouns any more;
 //  B3 an ALL-CAPS word (2 to 6 letters) whose possessive is followed within 6 words by a publication or list noun ("TIME's 2026 ... list");
 //  B4 a label of a research source's host name ("example" for https://www.example.com/...).
 // A token is NEVER allowlisted (veto) when the research also uses its capitalised run like a person: right after a speech /
@@ -199,8 +202,9 @@ const CAMEL = /^\p{Lu}\p{Ll}+(?:\p{Lu}\p{Ll}*)+$/u;
 const namePrefixed = (w: string) => { const m = w.match(/^(\p{Lu}\p{Ll}*)['\u2019]?\p{Lu}/u); return !!m && NAME_PREFIX.test(fold(m[1])); };
 const ORG_NOUN = new Set(('marketplace marketplaces platform platforms environment environments instance integration integrations app apps ' +
   'cloud suite api crm software tool tools magazine list lists ranking rankings index award awards network networks store portal ' +
-  'product products service audience audiences inc corp corporation llc ltd plc group labs technologies systems media journal ' +
-  'newswire wire exchange database dashboard system solution solutions program partnership partners companies company').split(' '));
+  'product products service audience audiences inc corp corporation llc ltd plc labs technologies systems journal ' +
+  'newswire wire exchange database dashboard system solution solutions program partnership').split(' '));   // review #65: no group / partners / media / company / companies
+const ALL_CAPS = /^\p{Lu}[\p{Lu}\p{N}]+$/u;
 const PUB_NOUN = new Set('list lists ranking rankings index award awards magazine report edition issue survey'.split(' '));
 const VETO_BEFORE = new Set([...CUE_BEFORE, 'mr', 'mrs', 'ms', 'mx', 'dr', 'prof', 'sir', 'dame', 'lists', 'listed', 'hired', 'hires', 'appointed', 'appoints', 'promoted']);
 const PERSON_AFTER = new Set(['he', 'she', 'his', 'her', 'him', 'hers', 'who', 'whose']);
@@ -209,6 +213,7 @@ const ROLE_TOKEN = /^(ceo|cfo|cto|cio|ciso|coo|cpo|cmo|cro|cso|cdo|chief|officer
 /** Brand / product / company / publication tokens the research itself shows, as folded words. Pure; see the rules above. */
 export function brandAllowlist(research: { fact?: string; source_url?: string }[], people: string[] = []): Set<string> {
   const ok = new Set<string>(), veto = new Set<string>();
+  const b2: { toks: string[]; low: string[] }[] = [];                                  // B2 candidate runs, judged after B1 / B3 / B4 / veto
   for (const n of people) for (const w of tokenize(n)) if (w) { veto.add(fold(w)); for (const piece of w.split(/[-'\u2019.]+/)) if (piece) veto.add(fold(piece)); }
   for (const r of research ?? []) for (const text of String(r?.fact ?? '').split(/(?<=[.!?])\s+/)) {
     const raw = text.normalize('NFC').split(SPLIT);
@@ -235,7 +240,7 @@ export function brandAllowlist(research: { fact?: string; source_url?: string }[
       if (!toks[i] || !capitalised(toks[i]) || isInitialTok(toks[i])) { i++; continue; }
       let j = i; while (j < toks.length && toks[j] && capitalised(toks[j]) && !isInitialTok(toks[j])) j++;
       const lastNoun = ORG_NOUN.has(low[j - 1]), nextNoun = j < toks.length && ORG_NOUN.has(low[j]);
-      if (lastNoun || nextNoun) for (let k = i; k < j; k++) if (!namePrefixed(toks[k])) ok.add(low[k]);
+      if (lastNoun || nextNoun) b2.push({ toks: toks.slice(i, j), low: low.slice(i, j) });
       i = j;
     }
     // B3 ALL-CAPS possessive + a publication / list noun within 6 words
@@ -253,6 +258,14 @@ export function brandAllowlist(research: { fact?: string; source_url?: string }[
     } catch { /* no url */ }
   }
   for (const v of veto) ok.delete(v);
+  // B2 (review #65): a run adds its words only when it holds an anchor, a CamelCase / ALL-CAPS token already on the list or a
+  // known acronym. Anchors are read before any B2 word is added, so one run can never anchor another.
+  const anchors = new Set(ok);
+  const anchor = (w: string, f: string) => ((CAMEL.test(w) && !namePrefixed(w)) || ALL_CAPS.test(w)) && (anchors.has(f) || ACRONYMS.has(f));
+  for (const run of b2) {
+    if (!run.toks.some((w, k) => anchor(w, run.low[k]))) continue;
+    for (let k = 0; k < run.toks.length; k++) if (!namePrefixed(run.toks[k]) && !veto.has(run.low[k])) ok.add(run.low[k]);
+  }
   for (const c of [...ok]) if (COMMON.has(c) || PARTICLES.has(c)) ok.delete(c);           // already safe; never widen a particle
   return ok;
 }
@@ -279,6 +292,9 @@ export function selectClaims(f: FactInput): { eligible: { claim: string; source:
   const companyWords = new Set([...wordsOf(f.company ?? ''), ...wordsOf((f.domain ?? '').replace(/\.[a-z]+$/i, ''))]);
   const brands = brandAllowlist(f.research ?? [], [f.contact.name ?? '', ...(f.people ?? [])].filter((n) => typeof n === 'string'));
   const title = (f.contact.title ?? '').trim();
+  const hostOf = (u: string) => { try { return new URL(u).hostname.toLowerCase().replace(/^www\./, ''); } catch { return ''; } };
+  // hosts of the account's own research rows (an https source url): the only sites a claim may cite to use a CRM vendor word
+  const researchHosts = new Set((f.research ?? []).map((r) => String(r?.source_url ?? '')).filter((u) => /^https:\/\//i.test(u)).map(hostOf).filter(Boolean));
   const seller = f.seller ?? 'Thrandvex';
   const reason = (c: string, src: string): string | null => {
     const low = fold(c);
@@ -290,10 +306,10 @@ export function selectClaims(f: FactInput): { eligible: { claim: string; source:
     if (title && forms(c).some((t) => forms(title).some((x) => t.includes(x)))) return 'blocked: mentions the contact title';
     if (mentions(c, seller)) return 'blocked: seller pitch';
     if (/(?<![\p{L}\p{N}])(ae|account executive|deal|opportunity|pipeline|meeting with us|our call)(?![\p{L}\p{N}])/u.test(low)) return 'blocked: sales or CRM data';
-    // a CRM vendor word blocks unless the account's public research names it as a vendor / product (brand allowlist), e.g. a
-    // breach "in its CRM environment": then it is a public company fact, not Owner's CRM record
-    const crm = low.match(/(?<![\p{L}\p{N}])(crm|crm)(?![\p{L}\p{N}])/gu) ?? [];
-    if (crm.some((w) => !brands.has(w))) return 'blocked: sales or CRM data';
+    // a CRM vendor word blocks unless THIS claim's own source is a research site (its host is the host of one of the account's
+    // research rows), e.g. a breach "in its CRM environment" cited to the breach article. Review #65: decided per claim,
+    // never account-wide, so a claim from Owner's own CRM text keeps blocking whatever the research says.
+    if (/(?<![\p{L}\p{N}])(crm|crm)(?![\p{L}\p{N}])/u.test(low) && !researchHosts.has(hostOf(src))) return 'blocked: sales or CRM data';
     const h = personHit(c, np, others, companyWords, brands);
     if (h) return `blocked: names a person (${h})`;
     if (c.length > 400) return 'blocked: too long to be one claim';
