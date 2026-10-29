@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.4"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.5"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -4473,6 +4473,62 @@ html.t5on .v163scan.kyscan .v163rad.kyrad{display:grid!important;width:48px;heig
 .v163scan.kyq .v163rad,html.t5on .v163scan.kyscan.kyq .v163rad.kyrad{display:none!important}
 html[data-k5="black"] .kymo .kyk{fill:#8FA3F0}
 .v18134fxc button.v18134row{width:100%;min-height:56px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+/* ===== v18.14.5 t5b (Owner Oct 29 14:59 + 15:02 IST), ui5 only: stage stepper back (A), three tabs (F),
+   one search-or-ask in the header (G), one plain menu (H), Kyte by Thrandvex lockup top left (I). ===== */
+.t5lk,#t5q{display:none}
+/* I. lockup: brand indigo on light, paper on Black (indigo on #000 fails contrast) */
+html.t5on .t5lk{display:inline-flex;align-items:center;flex:none;color:#2A4274;min-height:44px}
+html.t5on[data-k5="black"] .t5lk{color:#E7E2D9}
+html.t5on .t5lk svg{display:block;height:40px;width:auto}
+html.t5on .t5lk.sub svg{height:32px}
+html.t5on .chrome .row1{flex-wrap:wrap!important;height:auto!important;align-items:center!important;row-gap:8px}
+html.t5on .chrome .row1>.t5lk{order:0;margin-right:auto!important}
+/* the pages start under the taller bar (lockup row + title row), measured: --t5ch */
+html.t5on .pager{top:var(--t5ch,calc(env(safe-area-inset-top) + 112px))!important}
+html.t5on .chrome .row1 .who{order:10!important;flex:1 1 100%!important;min-width:0}
+html.t5on #hdAri{display:none!important}
+/* G. one search-or-ask button, H. the menu button next to it */
+html.t5on #t5q{display:grid;place-items:center;order:3;width:48px;height:48px;min-width:48px;border:0;border-radius:24px;background:none;color:var(--ink2);cursor:pointer;padding:0}
+html.t5on #t5q svg{width:22px;height:22px}
+html.t5on #v1828nav{order:4!important;width:48px;height:48px;min-width:48px;margin-left:0!important}
+html.t5on #t5q{margin-left:auto!important}
+/* sub-pages: back, then the lockup; the page's own big heading (person or account name) is the title, so the bar title goes */
+html.t5on #ov .ovt>.t5lk{margin-right:auto;margin-left:4px}
+html.t5on #ov #ovCap{display:none!important}
+html.t5on #v171acc .ph>.t5lk{margin-right:auto;margin-left:4px}
+html.t5on #v171acc .ph>.tt{display:none!important}
+html.t5on #ariPage .aptop>.t5lk{margin-right:auto;margin-left:4px}
+html.t5on #ariPage #apTt{display:none!important}
+/* F. three tabs: the Search tab leaves (search lives in the header) */
+html.t5on #v18134sb{display:none!important}
+/* H. one menu, plain rows */
+html.t5on #v1813menu [data-m="ask"]{display:none!important}
+html.t5on #v1813menu .v1813panel{background:var(--k-sheet,var(--bg))!important;color:var(--ink)!important}
+html.t5on #v1813menu .v1813mi{min-height:48px!important;padding:8px 0!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:none!important;box-shadow:none!important;outline-offset:-2px}
+html.t5on #v1813menu .v1813mi:last-child{border-bottom:0!important}
+html.t5on #v1813menu .v1813mi b{font-size:16px!important;line-height:22px!important;font-weight:600!important;color:var(--ink)!important}
+html.t5on #v1813menu .v1813mi span{font-size:13px!important;line-height:18px!important;color:var(--ink2)!important}
+html.t5on #v1813menu .v1813mh b{font-size:var(--k-title)!important;font-weight:600!important;color:var(--ink)!important}
+html.t5on #v1813menu .v1813mh b:focus,html.t5on #v1813menu .v1813mh b:focus-visible{outline:none!important}
+/* G. no match: one Ask Kyte row with the same text */
+html.t5on #v18133qf .t5ask .lg{display:grid;place-items:center}
+/* A. the stage stepper (Invite to Replied) instead of the dots, with its small progress motion */
+html.t5on #ovb .lad{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:4px!important;margin:16px 0 0!important;height:auto!important;width:100%}
+html.t5on #ovb .lad i{display:block!important;width:auto!important;height:4px!important;border-radius:2px!important;background:var(--line2)!important;position:relative;overflow:hidden;transform-origin:0 50%}
+html.t5on #ovb .lad i.d{background:var(--k-hl)!important;animation:t5ladf 480ms var(--k-std,ease) both}
+html.t5on[data-k5="black"] #ovb .lad i.d{background:var(--ink)!important}
+html.t5on #ovb .lad i:nth-child(2).d{animation-delay:60ms}html.t5on #ovb .lad i:nth-child(3).d{animation-delay:120ms}
+html.t5on #ovb .lad i:nth-child(4).d{animation-delay:180ms}html.t5on #ovb .lad i:nth-child(5).d{animation-delay:240ms}html.t5on #ovb .lad i:nth-child(6).d{animation-delay:300ms}
+html.t5on #ovb .lad i.d+i:not(.d):after,html.t5on #ovb .lad>i:first-child:not(.d):after{content:'';position:absolute;inset:0;background:var(--k-hl);opacity:.55;transform-origin:0 50%;animation:t5ladn 1.6s var(--k-std,ease) infinite alternate}
+html.t5on[data-k5="black"] #ovb .lad i.d+i:not(.d):after,html.t5on[data-k5="black"] #ovb .lad>i:first-child:not(.d):after{background:var(--ink)}
+html.t5on #ovb .ladl{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:4px!important;margin-top:6px!important}
+html.t5on #ovb .ladl span{font-family:inherit!important;font-size:12px!important;line-height:1.3!important;letter-spacing:0!important;text-transform:none!important;color:var(--ink2)!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important;hyphens:none!important}
+html.t5on #ovb .ladl span.on{color:var(--ink)!important;font-weight:600!important}
+html.t5on #ovb .t5stg{display:none!important}
+@keyframes t5ladf{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes t5ladn{from{transform:scaleX(0)}to{transform:scaleX(.4)}}
+@media (prefers-reduced-motion:reduce){html.t5on #ovb .lad i,html.t5on #ovb .lad i:after{animation:none!important}html.t5on #ovb .lad i.d+i:not(.d):after,html.t5on #ovb .lad>i:first-child:not(.d):after{transform:scaleX(.4)}}
+@media (min-width:768px){html.t5on #tbar #v18134sb{display:none!important}}
 </style></head>
 <body><div id="v162lock" class="on" role="dialog" aria-label="Privacy screen"><div class="v162lk"><div class="v162lari"></div><b id="v162lt">Privacy screen</b><span id="v162ls">Unlock to see your queue.</span><div class="v162lb" id="v162lb"></div></div></div>
 <div id="app"><svg id="ariDefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><radialGradient id="ariBody" cx="36%" cy="26%" r="78%" fx="32%" fy="20%"><stop offset="0" style="stop-color:var(--ari-b0)"/><stop offset=".58" style="stop-color:var(--ari-b1)"/><stop offset="1" style="stop-color:var(--ari-b2)"/></radialGradient><linearGradient id="ariShade" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#B8A483" stop-opacity="0"/><stop offset="1" stop-color="#9C8661" stop-opacity=".34"/></linearGradient></defs></svg>
@@ -6849,6 +6905,7 @@ setTimeout(()=>{try{if(false){sessionStorage.setItem('ari-lick','1');const h=q1(
 
 /* ---------------- 3. What's new: once per build, swipeable, with tap-to-try ---------------- */
 const LOG=[
+ {v:'v18.14.5',d:'Oct 29',items:['In the new phone-first Kyte: one search at the top right finds people and accounts, and asks Kyte when you type a question','Three tabs: Today, Accounts, Report. One menu for Find people, Exec outreach and Settings','The Kyte by Thrandvex mark sits top left on every page, and the person page shows its stage steps again']},
  {v:'v18.14.4',d:'Oct 29',items:['Redraft keeps your draft on screen with one line above it. Copy stays on and copies the text you see','The Today badge and the 1 of N count now match','Tap the account on a person to open it','The Kyte mark moves while a draft or research is on its way','Names in an open account list are a normal size on Android']},
  {v:'v18.14.3',d:'Oct 29',items:['A calmer, phone-first Kyte is built and switched off for now. One next move on Today, a meetings-first Report, a lighter person page','Light and Black themes. Settings, then Appearance: System, Light or Black','Bigger text that follows your iPhone text size, and every button is easy to tap']},
  {v:'v18.14.2',d:'Oct 29',items:['Kelvarrow is now Kyte, with a new mark at the top, on your Home Screen and in the browser tab','The calmer pages are on for everyone: one button on a person’s page, shorter About and Settings, the same latest signal on the person and account pages','A new loading mark: the creases draw in while your list loads']},
@@ -14544,6 +14601,50 @@ document.addEventListener('scroll',e=>{if(!T.on())return;const t=e.target;if(!t|
 function pass(){if(!T.on())return;T.passes++;[['header',header],['today',today],['counts',counts],['drafts',drafts],['contact',contact],['settings',settings],['report',report]].forEach(([k,f])=>{try{f()}catch(e){err(k,e)}})}
 let qd=0;const mo=new MutationObserver(()=>{if(qd||!T.on())return;qd=requestAnimationFrame(()=>{qd=0;pass()})});
 function boot(){apply();mo.observe(document.body,{childList:true,subtree:true})}
+if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
+})();
+</script>
+<script>/* ===== v18.14.5 t5b (Owner Oct 29), ui5 only. Off = v18.14.4 unchanged.
+   F three tabs (Search tab hidden), G one search-or-ask button in the header that opens the existing palette
+   (people and accounts as you type; a question or no match offers Ask Kyte with the same text through the existing Ask flow),
+   H the hamburger opens the one Kyte menu (Find people, Exec outreach and pipeline, Settings; Ask lives in G; the Go to menu is gone),
+   I the Kyte by Thrandvex lockup top left on Today, Accounts, Report, the person page, the account page and Settings
+   (sub-pages: back stays far left, the lockup sits right of it, the title moves under the bar). ===== */
+(function(){
+const G=window,H=document.documentElement,$=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const V=G.ariT5b={v:'v18.14.5',errs:[],passes:0,asks:0};
+const on=()=>H.classList.contains('t5on');
+const err=(k,e)=>{V.errs.push(k+' '+String(e&&e.message||e).slice(0,120));if(V.errs.length>20)V.errs.shift()};
+const LK='<svg viewBox="0 0 422.844 179" role="img" aria-label="Kyte by Thrandvex" focusable="false"><g transform="translate(0,17)" fill="currentColor"><path d="M48.74 54.75L86.39 84.2L118.18 36.74C121.05 32.45 120.12 26.68 116.06 23.5L85.61 -0.32L48.74 54.75ZM3.78 23.5C-0.28 26.68 -1.2 32.45 1.67 36.74L36.34 88.52L36.34 -1.97ZM80.5 93L46.9 66.71L46.9 104.29L52.9 113.25C56.25 118.25 63.59 118.25 66.94 113.25L80.5 93ZM46.9 -10.23L46.9 38.51L77.27 -6.84L67.73 -14.31C63.14 -17.9 56.7 -17.9 52.12 -14.31Z" fill-rule="nonzero"/><path d="M165.84 100L183.56 100L183.56 70.74L197.25 55.23L227.65 100L248.33 100L209.2 43.29L247.65 0L225.77 0L199.2 30.13Q195.3 34.7 191.38 39.19Q187.45 43.69 183.56 48.26L183.56 0L165.84 0ZM389.56 101.61Q397.88 101.61 404.72 98.62Q411.57 95.64 416.1 90.34Q420.63 85.03 421.97 78.12L406.13 78.12Q404.66 82.68 400.5 85.47Q396.33 88.26 389.96 88.26Q381.43 88.26 376.67 82.95Q371.9 77.65 371.57 68.99L422.84 68.99L422.84 64.36Q422.84 53.49 418.62 45.2Q414.39 36.91 406.74 32.21Q399.09 27.52 388.88 27.52Q378.95 27.52 371.3 32.32Q363.65 37.11 359.32 45.47Q354.99 53.83 354.99 64.63Q354.99 75.37 359.19 83.72Q363.38 92.08 371.17 96.85Q378.95 101.61 389.56 101.61ZM262.06 99.62L253.98 120.66Q253.93 120.78 253.97 120.86Q254.01 120.94 254.12 120.98Q254.17 121 254.21 121L271.25 121Q271.42 121 271.49 120.84L279.61 99.67Q279.63 99.62 279.62 99.56Q279.62 99.5 279.64 99.44L306.49 29.47Q306.58 29.23 306.35 29.14Q306.3 29.13 306.26 29.13L289.08 29.13Q288.9 29.13 288.85 29.29L275.95 66.04Q273.4 73.57 271.09 80.98Q271.05 81.1 270.97 81.14Q270.9 81.18 270.78 81.14Q270.65 81.1 270.61 80.98Q269.52 77.47 268.37 73.93Q267.09 70 265.75 66.04L252.79 29.29Q252.73 29.13 252.55 29.13L235.18 29.13Q234.93 29.13 234.93 29.38Q234.93 29.42 234.94 29.47L262.06 99.44Q262.1 99.53 262.06 99.62ZM355.65 29.13L341.22 29.13L341.22 9.8L338.21 9.8L324.24 13.25L324.24 29.13L311.89 29.13L311.89 42.75L324.24 42.75L324.24 82.15Q324.24 91.28 329.44 95.64Q334.64 100 345.45 100L355.65 100L355.65 86.38L348.4 86.38Q344.31 86.38 342.76 84.93Q341.22 83.49 341.22 79.66L341.22 42.75L355.65 42.75L355.65 29.13ZM371.7 57.32Q372.58 49.73 377.17 45.34Q381.77 40.94 389.15 40.94Q396.47 40.94 401.13 45.34Q405.8 49.73 406.6 57.32Z" fill-rule="nonzero"/><path d="M176.84 156.35Q179.15 156.35 180.88 155.19Q182.61 154.02 183.56 151.95Q184.52 149.88 184.52 147.14Q184.52 144.41 183.55 142.33Q182.59 140.26 180.86 139.1Q179.13 137.93 176.85 137.93Q175.12 137.93 173.7 138.65Q172.27 139.37 171.42 140.85L171.38 140.85L171.38 131L167.84 131L167.84 156L171.32 156L171.32 153.3L171.35 153.3Q172.24 154.84 173.67 155.6Q175.11 156.35 176.84 156.35ZM297.43 156.4Q299.96 156.4 301.87 155.23Q303.77 154.05 304.84 151.97Q305.9 149.89 305.9 147.17Q305.9 144.42 304.84 142.33Q303.77 140.24 301.87 139.06Q299.96 137.88 297.43 137.88Q294.9 137.88 292.98 139.06Q291.07 140.24 290 142.33Q288.94 144.42 288.94 147.17Q288.94 149.89 290 151.97Q291.07 154.05 292.98 155.23Q294.9 156.4 297.43 156.4ZM221.7 156.4Q224.54 156.4 226.64 155.48Q228.73 154.56 229.89 152.88Q231.05 151.2 231.05 148.95Q231.05 146.27 229.26 144.59Q227.48 142.91 223.72 142.02L221.02 141.39Q218.45 140.77 217.34 139.92Q216.23 139.07 216.23 137.71Q216.23 136.02 217.68 134.93Q219.12 133.85 221.39 133.85Q223.75 133.85 225.19 135.09Q226.64 136.32 226.77 138.48L230.38 138.48Q230.26 134.83 227.87 132.71Q225.48 130.6 221.44 130.6Q218.75 130.6 216.75 131.5Q214.74 132.41 213.63 134.05Q212.53 135.7 212.53 137.9Q212.53 140.5 214.26 142.12Q216 143.73 219.79 144.64L222.53 145.3Q225.13 145.92 226.23 146.81Q227.32 147.71 227.32 149.15Q227.32 150.98 225.79 152.07Q224.25 153.15 221.7 153.15Q218.9 153.15 217.33 151.76Q215.76 150.36 215.75 147.9L212.02 147.9Q212.02 151.86 214.61 154.13Q217.21 156.4 221.7 156.4ZM312.98 156L316.62 156L318.91 148.28Q319.31 146.94 319.67 145.53Q320.03 144.12 320.4 142.73Q320.75 144.12 321.11 145.53Q321.47 146.94 321.86 148.28L324.11 156L327.8 156L333.28 138.28L329.54 138.28L327.5 145.53Q327.04 147.12 326.63 148.79Q326.22 150.45 325.82 152.07Q325.4 150.45 324.98 148.79Q324.56 147.12 324.11 145.53L322.08 138.28L318.7 138.28L316.64 145.53Q316.2 147.14 315.78 148.82Q315.35 150.5 314.91 152.14Q314.51 150.5 314.1 148.82Q313.69 147.14 313.23 145.53L311.2 138.28L307.5 138.28ZM234.58 156L238.12 156L238.12 149.78L239.92 148.03L246.27 156L250.62 156L242.62 145.9L250.12 138.28L245.72 138.28L238.17 145.85L238.12 145.85L238.12 131L234.58 131ZM188.03 163.01L190.27 163.01Q193.91 163.01 195.41 159.1L203.46 138.28L199.72 138.28L196.23 148Q195.88 148.99 195.53 149.98Q195.19 150.98 194.87 151.97Q194.55 150.98 194.22 149.98Q193.88 148.99 193.53 148L189.99 138.28L186.2 138.28L193.04 155.88L192.24 157.98Q191.83 159.07 191.31 159.55Q190.78 160.03 189.94 160.03L188.03 160.03ZM252.48 163.01L254.73 163.01Q258.37 163.01 259.87 159.1L267.92 138.28L264.18 138.28L260.69 148Q260.34 148.99 259.99 149.98Q259.65 150.98 259.33 151.97Q259.01 150.98 258.68 149.98Q258.34 148.99 257.99 148L254.45 138.28L250.66 138.28L257.5 155.88L256.7 157.98Q256.29 159.07 255.76 159.55Q255.24 160.03 254.4 160.03L252.48 160.03ZM278.91 138.28L275.3 138.28L275.3 135.98Q275.3 134.86 275.76 134.39Q276.23 133.92 277.35 133.92L278.91 133.92L278.91 131L276.8 131Q274.4 131 273.08 132.16Q271.76 133.32 271.76 135.41L271.76 138.28L268.59 138.28L268.59 141.2L271.76 141.2L271.76 156L275.3 156L275.3 141.2L278.91 141.2ZM297.43 153.35Q295.15 153.35 293.84 151.68Q292.53 150.01 292.53 147.17Q292.53 144.31 293.85 142.62Q295.16 140.93 297.43 140.93Q299.69 140.93 301.01 142.63Q302.33 144.32 302.33 147.17Q302.33 149.99 301.02 151.67Q299.71 153.35 297.43 153.35ZM176.11 153.3Q173.85 153.3 172.5 151.61Q171.15 149.93 171.15 147.14Q171.15 144.34 172.5 142.65Q173.85 140.97 176.11 140.97Q178.26 140.97 179.6 142.55Q180.93 144.14 180.93 147.14Q180.93 150.14 179.6 151.72Q178.26 153.3 176.11 153.3ZM285.42 131L281.88 131L281.88 156L285.42 156Z" fill-rule="nonzero"/></g></svg>';
+const SQ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>';
+const ASKI='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18l-1 3 3.5-1.5A8 8 0 1 0 5 18z"/></svg>';
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function lk(where,cls){if(!where||where.querySelector(':scope>.t5lk'))return;const s=document.createElement('span');s.className='t5lk'+(cls?' '+cls:'');s.innerHTML=LK;
+  const bk=where.querySelector(':scope>#ovBack,:scope>.bk,:scope>#apBk');if(bk)bk.after(s);else where.insertBefore(s,where.firstChild)}
+function header(){const r=$('.chrome .row1');if(r){lk(r,'');if(!$('#t5q')){const b=document.createElement('button');b.type='button';b.id='t5q';b.className='press';
+    b.setAttribute('aria-label','Search people and accounts, or ask Kyte');b.setAttribute('aria-haspopup','dialog');b.innerHTML=SQ;r.appendChild(b)}}
+  const n=$('#v1828nav');if(n&&n.getAttribute('aria-label')!=='Menu')n.setAttribute('aria-label','Menu');
+  lk($('#ov .ovt'),'sub');lk($('#v171acc .ph'),'sub');lk($('#ariPage .aptop'),'sub')}
+/* the one menu: focus its heading on open, so no row looks outlined */
+function menu(){const m=$('#v1813menu');if(!m||m.hidden){if(m)delete m.dataset.t5f;return}if(m.dataset.t5f)return;m.dataset.t5f='1';
+  const h=m.querySelector('.v1813mh b');if(h){h.setAttribute('tabindex','-1');setTimeout(()=>{try{h.focus({preventScroll:true})}catch(e){}},40)}}
+/* search: placeholder says it asks too; no match = Ask Kyte with the same text */
+function qf(){const m=$('#v18133qf');if(!m||m.hidden)return;const i=m.querySelector('input');if(!i)return;const ph='Search people and accounts, or ask Kyte';if(i.placeholder!==ph)i.placeholder=ph;
+  const L=m.querySelector('.ql');if(!L)return;const q=i.value.trim();const none=L.querySelector(':scope>.qe')&&/^No one matches/.test(L.textContent.trim());const have=L.querySelector('.t5ask');
+  if(none&&q){if(!have||have.dataset.q!==q){if(have)have.remove();L.insertAdjacentHTML('beforeend',`<button type="button" class="qr t5ask on" data-q="${E(q)}"><span class="lg ic" aria-hidden="true">${ASKI}</span><span class="tx"><b>${E('Ask Kyte: '+q)}</b><small>Opens the chat with this question</small></span></button>`)}}
+  else if(have)have.remove()}
+function ask(q){if(!q)return;V.asks++;try{G.ariV18133&&ariV18133.close(false)}catch(e){}try{G.ariV18134&&ariV18134.ask&&ariV18134.ask(q)}catch(e){err('ask',e)}}
+G.addEventListener('click',e=>{if(!on())return;const t=e.target;if(!t||!t.closest)return;let b;
+  if((b=t.closest('#t5q'))){e.preventDefault();e.stopImmediatePropagation();try{navigator.vibrate&&navigator.vibrate(6)}catch(x){}try{ariV18133.open(b)}catch(x){err('q',x)}return}
+  if((b=t.closest('#v1828nav'))){e.preventDefault();e.stopImmediatePropagation();const h=$('#hdAri');if(h)h.click();return}
+  if((b=t.closest('#v18133qf .t5ask'))){e.preventDefault();e.stopImmediatePropagation();ask(b.dataset.q);return}},true);
+G.addEventListener('keydown',e=>{if(!on()||e.key!=='Enter')return;const m=$('#v18133qf');if(!m||m.hidden||e.target!==m.querySelector('input'))return;const a=m.querySelector('.t5ask');
+  if(a&&!m.querySelector('.qr:not(.t5ask)')){e.preventDefault();e.stopImmediatePropagation();ask(a.dataset.q)}},true);
+function chH(){const c=$('.chrome');if(!c)return;const b=Math.round(c.getBoundingClientRect().bottom);if(b>0){const v=b+'px';if(H.style.getPropertyValue('--t5ch')!==v)H.style.setProperty('--t5ch',v)}}
+G.addEventListener('resize',()=>{if(on())try{chH()}catch(e){}});
+function pass(){if(!on())return;V.passes++;[['header',header],['chH',chH],['menu',menu],['qf',qf]].forEach(([k,f])=>{try{f()}catch(e){err(k,e)}})}
+let qd=0;const mo=new MutationObserver(()=>{if(qd||!on())return;qd=requestAnimationFrame(()=>{qd=0;pass()})});
+function boot(){pass();mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']})}
 if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
 })();
 </script>
