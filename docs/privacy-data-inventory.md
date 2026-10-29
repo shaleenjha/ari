@@ -59,7 +59,7 @@
 
 | Whose record | Kept until |
 |---|---|
-| Invited, never accepted | 30 days after the invitation is withdrawn. (The day-14 withdraw was retired Oct 29 2026 by Owner; invites he still withdraws by hand follow this rule.) |
+| Invited, never accepted | 30 days after the invite was sent, or after it is withdrawn, whichever is first. (The day-14 withdraw was retired Oct 29 2026 by Owner, so the send date now starts the clock for invites nobody withdraws.) Note: the expiry job still uses the old rule (30 days after withdrawal) until a migration aligns it. |
 | Accepted, no reply | 6 months after the last activity. Any new message restarts the clock. |
 | Replied, or a meeting was set | 12 months after the last activity |
 | Anyone who asks to be deleted | Deleted right away from the database, then from the backups as they roll off (14 nights) |
