@@ -1,4 +1,4 @@
-# app E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST. 0042 security hardening and 0043 definer caller checks: LIVE in prod since Oct 24 2026 ~11:54 IST (staging first)
+# app E1 to E3 (tenancy, backfill, dual RLS) and 0036 log repair: LIVE in prod. 0037 and 0038 (S1 R5, R6): LIVE in prod since Oct 20 2026 10:25 IST. 0042 security hardening and 0043 definer caller checks: LIVE in prod since Oct 24 2026 ~11:54 IST (staging first). 0045 pair visibility, 0046 draft assumptions and 0041 AI layer: LIVE in prod since Oct 30 2026 ~11:40 IST (checks passed; ai_budget OFF, cron ari-ai-events paused; evidence work/prod_kyte_rollout_2026-10-30/, not in the repo). 0049 applied and rolled back the same minute (checks_after_0049 FAIL 4 on real data: a test fixture, fixed in this commit); 0049 to 0051 not on prod
 
 ## Status (checked Oct 19 2026, read-only, counts only; plans/audit data-side live checks)
 | Migration | Prod | Ledger row (`supabase_migrations.schema_migrations`) |

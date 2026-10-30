@@ -85,7 +85,7 @@ begin
   insert into accounts(id, company, stage, hook, one_liner) values (acc, 'Zq Chat Co', 'Target', 'Zq launched a synthetic product', 'Zq makes synthetic widgets'),
     (hold, 'Zq Chat Hold Co', 'Hold', null, null);
   insert into people(id, name, company, title, account_id, stage, review, accepted, dm, lane, route) values
-    ('P99999904901', 'Zara Chatfirst', 'Zq Chat Co', 'CISO', acc, 'Accepted', 'lead', now() - interval '3 hours', 'Zara, quick one. Worth 15 minutes?', 'shal', 'Direct'),
+    ('P99999904901', 'Zara Chatfirst', 'Zq Chat Co', 'CISO', acc, 'Accepted', 'lead', now() - interval '3650 days', 'Zara, quick one. Worth 15 minutes?', 'shal', 'Direct'),
     ('P99999904902', 'Zeno Chatreply', 'Zq Chat Co', 'CTO', acc, 'Replied', 'lead', now() - interval '5 days', null, 'shal', 'Direct'),
     ('P99999904903', 'Zelda Chatpersonal', 'Zq Chat Co', 'Friend', acc, 'Accepted', 'personal', now() - interval '2 hours', null, 'shal', 'Direct'),
     ('P99999904904', 'Zack Chatpending', 'Zq Chat Co', 'VP', acc, 'Accepted', 'pending', now() - interval '2 hours', null, 'shal', 'Direct'),
@@ -105,7 +105,9 @@ begin
   if (c->'guard'->'deny_names') ? 'Via' then raise exception 'FAIL 4: "via" in deny names'; end if;
   if (c->'snapshot'->'exec_track'->>'people')::int < 1 then raise exception 'FAIL 4: exec track count'; end if;
   r := to_jsonb((select array_agg(x->>'name' order by (x->>'rank')::int) from jsonb_array_elements(c->'snapshot'->'today'->'first_15') x where x->>'name' ~ '^Z[a-z]+ Chat'));
-  if r is null or r->>0 <> 'Zeno Chatreply' or r->>1 <> 'Zara Chatfirst' then raise exception 'FAIL 4: Today order (reply first, then first message) %', r; end if;
+  -- Zara's accept is 10 years old so she ranks first among first messages even with real pending first messages (prod, Oct 30 2026:
+  -- Today orders the oldest accept first and keeps the top 15); the order test is NULL-safe so a missing name fails here.
+  if r is null or (r->>0) is distinct from 'Zeno Chatreply' or (r->>1) is distinct from 'Zara Chatfirst' then raise exception 'FAIL 4: Today order (reply first, then first message) %', r; end if;
   if r ? 'Zane Chathold' then raise exception 'FAIL 4: a Hold account person is on Today'; end if;
   if (select (x->>'draft_ready')::boolean from jsonb_array_elements(c->'snapshot'->'today'->'first_15') x where x->>'name' = 'Zara Chatfirst') is not true then
     raise exception 'FAIL 4: draft_ready'; end if;
