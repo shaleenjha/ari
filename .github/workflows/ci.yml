@@ -56,7 +56,7 @@ jobs:
             web: ['.github/workflows/ci.yml', 'app/web/**']
             jobs: ['.github/workflows/ci.yml', 'app/jobs/**']
             sql: ['.github/workflows/ci.yml', 'app/db/**', 'native/supabase/**']
-            scripts: ['.github/workflows/ci.yml', 'scripts/**']
+            scripts: ['.github/workflows/ci.yml', 'scripts/**', 'web/ops.html']   # v18.14.11: the ops.html logic tests run when ops.html changes
             functions: ['.github/workflows/ci.yml', 'native/supabase/functions/**']
 
   web:
@@ -198,6 +198,8 @@ jobs:
       - run: python3 scripts/test_assumptions.py   # G12 draft assumptions: extraction, sources, union, store off by default, copy_check unchanged without --g12
       - run: python3 scripts/test_worker_chat_rule.py   # Oct 30 2026: the worker's chat decline names no system (docs/specs/worker_chat_rule.txt)
       - run: python3 scripts/test_keel_repo.py   # Oct 30 2026: the GitHub repo name lives in one line (scripts/keel_repo.conf) for the Kyte rename
+      - run: node scripts/test_ops_sync.js   # v18.14.11: cross-device catch-up in web/ops.html (stale mark, Sync now, long gap, hung fetch)
+      - run: python3 scripts/test_ops_no_story.py   # v18.14.11: no "How I was made" story in About, onboarding, chat or What's new
 
   anti-slop-static:
     needs: changes

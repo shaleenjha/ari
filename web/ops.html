@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.10"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.11"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -213,22 +213,10 @@ if(window.__ARI_QA_DATA&&qa.get('lock')!=='1')cached={data:window.__ARI_QA_DATA,
 window.ARI_CACHE=cached;
 window.ARI0=model(cached&&cached.data||{});
 })();
-/* Ari's memory of how it was made (from plans/ari-app-status.md and plans/ari-character.md) */
+/* Kyte's local lines. v18.14.11 (Owner Oct 30): the build story is gone; timeline stays an empty list for any old reader. */
 window.ARI_MEM={
- intro:'We’ve met. You just don’t know me in this form yet.',
- timeline:[
-  ['Kyte by Thrandvex','I’m Kyte by Thrandvex, and my mark is a kite. I prepare; you send.'],
-  ['The pebble','You could have had a visor robot. You picked the pebble instead, because I needed real character.'],
-  ['The ring','My ring sits below me, not above. A halo read as angelic, and I’m not.'],
-  ['A mouth','You asked for a mouth, tongue and all. I use it sparingly.'],
-  ['It should pop','You said the app should pop, so everything got springs, squash and stretch.'],
-  ['Tricks','My tricks were hidden. You wanted them findable, so now they come with hints.'],
-  ['LinkedIn only','LinkedIn only. The email lane is parked.'],
-  ['Your hours','I never name the city. It’s your hours and your shift.'],
-  ['I prepare, you send','I draft and remind. You press send on LinkedIn. I never do.'],
-  ['Changes','App changes are not made in here. In here I stick to your outreach.'],
-  ['v16','I’m real now: your actual Sheet, not prototype numbers.'],
-  ['Kyte','On Oct 28 I became Kyte by Thrandvex. One name for the product and for me.']],
+ intro:'I find the people, draft every message and keep the follow-ups on time.',
+ timeline:[],
  chat:'I’m Kyte. Ask me about your queue, a person or an account. I prepare, you send. I answer right here, usually within 10 minutes.'};
 </script>
 
@@ -7059,7 +7047,7 @@ const LOG=[
  {v:'v16.3',d:'Oct 15',items:['Fresh every time: I fetch the moment you open or come back, show your last data while I do, and never show zeros. The line under my name says when I last synced and when Kelvarrow last scanned','Tap your pace under Up next to see today, yesterday and the whole week','Marks are instant and can’t get lost: they wait in an outbox and retry until your Sheet has them, with Undo','One Today tab: tonight’s list grouped by Eastern, Central and Pacific send windows in your time, then the pipeline. Follow-ups and Log folded in; every tab has a label','Every person shows the next step (Mark DM2 sent, Mark replied, Mark meeting set) with Undo, wherever they appear','Draft message on every contact, trigger or not; edit it in place and copy it','Assign account for people with no account, and Personal context on every file, used in every draft','Find 4 to 5 people here replaces Map this account','A calmer chat, consistent buttons, no Updated pills, and the scan is back']},
  {v:'v16.2',d:'Oct 15',items:['Kelvarrow locks every time you open it: Face ID, fingerprint or your device PIN, with Google as the fallback. Nothing shows before you unlock','Every account in Tamsin’s, Idris’s and Bram’s books, searchable, with research status, last scan and every person you and Kelvarrow found','Account research is back on real scans, with Map this account','Send to exec track from any person file, and the exec track lists the real exec people','Lead or Personal on every person file, any time','Each card names the next step: Mark connect sent, Mark DM1 sent, with Undo','Meetings: mark an account as meeting set and outreach there is held','Much lighter: refreshes no longer redraw the screen you are on, and only the Kelvarrow you can see is animating']},
  {v:'v16.1',d:'Oct 15',items:['New connections to sort sit at the top of Today: Lead or Personal, one tap. Personal people disappear from everything','While I research someone you see me working on it, and the draft appears on its own when it’s ready','I check your Sheet every minute while I’m open, and again whenever you come back','DM1 is due the moment someone accepts. No three-day wait','A double tap counts once, a tick stays ticked until the Sheet confirms it, and a hiccup from Google gets a quiet retry']},
- {v:'v16',d:'Oct 15',items:['Kelvarrow is real now: tonight’s queue, follow-ups, accounts, report and log come from your Sheet','Every tick, snooze, skip and draft edit writes back to the Sheet','LinkedIn opens in the LinkedIn app, with the draft already copied','A proper first run, sign-in, and an installable app with offline support','I remember how I was made: it’s on About']},
+ {v:'v16',d:'Oct 15',items:['Kelvarrow is real now: tonight’s queue, follow-ups, accounts, report and log come from your Sheet','Every tick, snooze, skip and draft edit writes back to the Sheet','LinkedIn opens in the LinkedIn app, with the draft already copied','A proper first run, sign-in, and an installable app with offline support']},
  {v:'v15',d:'Oct 15',items:['A mouth in every state, and a tongue where it fits','Kelvarrow’s tricks, listed with hints and a found count','I talk when I reply, yawn when I wake, and blow a raspberry if provoked','Sends fly, ticks draw, cards settle, empty states read themselves in','This What’s new, once per build']},
  {v:'v14',d:'Oct 15',items:['One motion system for everything, squash and stretch up to 12%','My own page: Today, Look and About','Pull to refresh on Ready, bursts when you mark things done','LinkedIn only; the email lane is parked']},
  {v:'v13',d:'Oct 15',items:['I became a character: the pebble, the ring, nine faces','Phase-aware lines through your shift']},
@@ -7478,15 +7466,11 @@ function chatHistory(){const C=window.ariChat;if(!C)return;(M.queue||[]).filter(
   if(!posted.has(q.id)){posted.set(q.id,{r:false});if(!V16.sentIds.has(q.id))C.postMsg({who:'me',html:E(String(q.details||'').replace(/\s*\[context:.*\]$/,'')),ctx:null,day,time})}
   const st=posted.get(q.id);if(q.result&&!st.r){st.r=true;C.postMsg({who:'ari',html:E(q.result),ctx:null,day,time:''})}})}
 V16.sentIds=new Set();
-function memAnswer(low){const T=window.ARI_MEM.timeline;
+function memAnswer(low){ /* v18.14.11: no build story. How Kyte was made gets the decline; who Kyte is gets one plain line. */
   if(/\b(den|hark|kelvarrow|claude|anthropic)\b/.test(low))return 'I can\'t help with that here.';
-  if(/name|called/.test(low))return T[0][1];
-  if(/robot|visor|pebble|look like|why (do )?you look/.test(low))return T[1][1]+' '+T[2][1];
-  if(/mouth|tongue/.test(low))return T[3][1];
-  if(/pop|motion|animat/.test(low))return T[4][1];
-  if(/trick|easter/.test(low))return T[5][1]+' They’re on my page, under Today.';
-  if(/how (were|was) you (made|built)|remember|who are you|what are you|your story|made you/.test(low))return 'I remember it in order. '+T.slice(0,5).map(x=>x[1]).join(' ')+' The rest is on my About page.';
-  if(/send (it|this|for me)|can you send|press send/.test(low))return T[8][1]+' Copy the draft, I open LinkedIn, you tap send.';
+  if(/how (were|was|are|is) (you|kyte|this app|the app) (made|built|designed|created)|who (made|built|designed|created) (you|kyte|this app|the app)|(made|built|designed) you|your story|remember how|how i was made|pebble|visor|robot|mouth|tongue|trick|easter egg|why (do )?you look|what you look like/.test(low))return 'I can\'t help with that here.';
+  if(/who are you|what are you|what (do|can) you do|your name|are you called|who is kyte|what is kyte/.test(low))return 'I’m Kyte. I find the people, draft every message and keep the follow-ups on time. I prepare, you send.';
+  if(/send (it|this|for me)|can you send|press send/.test(low))return 'I draft and remind. You press send on LinkedIn. I never do. Copy the draft, I open LinkedIn, you tap send.';
   return ''}
 const _v14r=window.ariV14&&ariV14.respond;
 if(window.ariV14)ariV14.respond=function(txt,att,c){const low=String(txt||'').toLowerCase(),app=c&&c.entity_type==='app';
@@ -7504,12 +7488,11 @@ if(window.ariV14)ariV14.respond=function(txt,att,c){const low=String(txt||'').to
 const sb=$('#syncBtn');if(sb)sb.onclick=()=>{if(busy)return;buzz(10);try{setFace('work')}catch(e){}refresh(false).then(()=>{try{setFace('happy',1600);hop()}catch(e){}toast(`${ICO.ok} Synced with your Sheet`)})};
 /* v16.1: auto refresh lives in the v16.1 block (60s + on foreground) */
 
-/* ---------- About: how I was made + v16 ---------- */
-(function(){const about=$('#apPanes .app[data-s="2"] .apab');if(!about)return;const T=window.ARI_MEM.timeline;
-  about.insertAdjacentHTML('beforeend',`<div class="apcap" id="v16memcap"><span class="cap">How I was made</span><span class="cap">Kyte’s memory</span></div><div class="v16mem" id="v16mem">${T.map((x,i)=>`<div class="v16mi"><i></i><div><b>${E(x[0])}</b><span>${E(x[1])}</span></div></div>`).join('')}</div>
-   <div class="aprow press" id="v16onbAgain"><div><b>Run onboarding again</b><span>The first-run tour, sign-in and setup</span></div></div><div class="aprow press" id="v16out"><div><b>Signed in</b><span>${E(me()||'Not signed in')}${me()?' · tap to sign out':''}</span></div></div>`);
+/* ---------- About: v16 rows (v18.14.11: build story removed) ---------- */
+(function(){const about=$('#apPanes .app[data-s="2"] .apab');if(!about)return;
+  about.insertAdjacentHTML('beforeend',`<div class="aprow press" id="v16onbAgain"><div><b>Run onboarding again</b><span>The first-run tour, sign-in and setup</span></div></div><div class="aprow press" id="v16out"><div><b>Signed in</b><span>${E(me()||'Not signed in')}${me()?' · tap to sign out':''}</span></div></div>`);
   $('#v16onbAgain').onclick=()=>{buzz(8);LSs('ari-onb','pending');LSr('ari-onb-step');try{sessionStorage.setItem('ari-onb-force','1')}catch(e){}location.reload()};
-  $('#v16out').onclick=()=>{if(!me())return startOnb(3);if(confirm('Sign out of Kyte on this phone?'))V16.signOut()}})();
+  $('#v16out').onclick=()=>{if(!me())return startOnb(STEPS.indexOf('signin'));if(confirm('Sign out of Kyte on this phone?'))V16.signOut()}})();
 
 /* ---------- PWA: service worker, install prompt, theme colour, safe areas ---------- */
 if('serviceWorker' in navigator&&!QA&&location.protocol==='https:')navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(()=>{});
@@ -7536,31 +7519,31 @@ const _apply=apply;
    Onboarding: first run, like a brand-new install
    ========================================================= */
 const PREF={name:'Owner',scope:'LinkedIn only',aes:'Tamsin and Idris',connects:'About 15 a weekday',cadence:'DM2 at +4 days, DM3 a week after DM2',withdraw:'Withdraw after 14 days',hours:'9 pm to 6 am, your time'};
-const STEPS=['wake','what','memory','signin','essentials','notify','install','ready'];
+const STEPS=['wake','what','signin','essentials','notify','install','ready']; /* v18.14.11: memory step removed */
+const OB_SI=STEPS.indexOf('signin');
 let ob=null,obI=0;
-function startOnb(i){window.ARI_ONB=true;obI=i||+LSg('ari-onb-step',0)||0;if(tokValid()&&obI===3)obI=4;
+function startOnb(i){window.ARI_ONB=true;obI=Math.min(STEPS.length-1,i||+LSg('ari-onb-step',0)||0);if(tokValid()&&obI===OB_SI)obI=OB_SI+1;
   ob=document.createElement('div');ob.className='onb';ob.id='onb';ob.innerHTML=`<div class="onbbg"></div><div class="onbtop"><div class="onbdots">${STEPS.map(()=>'<i></i>').join('')}</div><span class="press onbskip" id="onbSkip"></span></div><div class="onbstage"><div class="onbAri" id="onbAri">${AF('sleepy','xxl')}</div></div><div class="onbcard" id="onbCard"></div>`;
   $('#app').appendChild(ob);try{window.ariFill&&ariFill(ob)}catch(e){}
-  $('#onbSkip').onclick=()=>{buzz(6);if(obI<4&&!tokValid()){go(3);return}go(Math.min(STEPS.length-1,obI+1))};
+  $('#onbSkip').onclick=()=>{buzz(6);if(obI<=OB_SI&&!tokValid()){go(OB_SI);return}go(Math.min(STEPS.length-1,obI+1))};
   go(obI,true)}
 V16.startOnb=startOnb;
 function oAri(){return $('#onbAri .arif')}
 function oFace(f){const a=oAri();if(a)a.dataset.face=f}
 function go(i,first){obI=i;LSs('ari-onb-step',String(i));const card=$('#onbCard');if(!card)return;
   $$('#onb .onbdots i').forEach((d,k)=>{d.classList.toggle('on',k===i);d.classList.toggle('d',k<i)});
-  const sk=$('#onbSkip');sk.textContent=i>=STEPS.length-1?'':i<3?'Skip intro':'Skip';sk.style.visibility=(i===3&&!tokValid())||i>=STEPS.length-1?'hidden':'';
+  const sk=$('#onbSkip');sk.textContent=i>=STEPS.length-1?'':i<OB_SI?'Skip intro':'Skip';sk.style.visibility=(i===OB_SI&&!tokValid())||i>=STEPS.length-1?'hidden':'';
   const html=view(STEPS[i]);const put=()=>{card.innerHTML=html;try{ariFill(card)}catch(e){}wire(STEPS[i]);
     if(!RM)$$('#onbCard .orv').forEach((e,k)=>A(e,[{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],SOFT,80+k*70))};
   if(first||RM)put();else A(card,[{opacity:1,transform:'none'},{opacity:0,transform:'translateX(-24px)'}],SNAP).finished.then(()=>{put();A(card,[{opacity:0,transform:'translateX(24px)'},{opacity:1,transform:'none'}],SOFT)});
   const a=$('#onbAri');if(a&&!RM)A(a,[{transform:'none'},{transform:'translateY(-10px) scale(.96,1.05)',offset:.4},{transform:'none'}],{d:560,e:'cubic-bezier(.3,.7,.4,1)'});
   if(STEPS[i]==='wake'){oFace('sleepy');setTimeout(()=>{const x=oAri();try{window.ariV15&&ariV15.yawn&&ariV15.yawn(x)}catch(e){}setTimeout(()=>oFace('happy'),900)},700)}
-  else oFace({what:'listen',memory:'sly',signin:'focus',essentials:'think',theme:'happy',notify:'idle',install:'happy',ready:'happy'}[STEPS[i]]||'idle');
-  if(STEPS[i]==='signin'&&tokValid()&&!first)setTimeout(()=>go(4),900)}
+  else oFace({what:'listen',signin:'focus',essentials:'think',theme:'happy',notify:'idle',install:'happy',ready:'happy'}[STEPS[i]]||'idle');
+  if(STEPS[i]==='signin'&&tokValid()&&!first)setTimeout(()=>go(OB_SI+1),900)}
 function nextBtn(label,id){return `<div class="onbbtn press orv" id="${id||'onbNext'}">${label}</div>`}
-function view(k){const T=window.ARI_MEM.timeline,s=M.stats;
-  if(k==='wake')return `<div class="orv cap">Hello</div><h1 class="orv">I’m Kyte.</h1><p class="orv">${E(window.ARI_MEM.intro)}</p>${nextBtn('Nice to meet you, again')}`;
+function view(k){const s=M.stats;
+  if(k==='wake')return `<div class="orv cap">Hello</div><h1 class="orv">I’m Kyte.</h1><p class="orv">${E(window.ARI_MEM.intro)}</p>${nextBtn('Nice to meet you')}`;
   if(k==='what')return `<div class="orv cap">What I do</div><h1 class="orv">I prepare. You send.</h1><div class="onbl orv"><div><b>I read your Sheet</b><span>Who to connect with tonight, who accepted, whose follow-up is due.</span></div><div><b>I draft and remember why</b><span>Every note keeps its reason and its history.</span></div><div><b>You tap send on LinkedIn</b><span>I open the LinkedIn app with the draft copied. I never press send.</span></div></div>${nextBtn('Go on')}`;
-  if(k==='memory')return `<div class="orv cap">I remember how I was made</div><h1 class="orv">Short version.</h1><div class="onbmem orv">${[0,1,3,4].map(i=>`<div><i></i><span>${E(T[i][1])}</span></div>`).join('')}</div><p class="orv fine">The full story lives on my About page.</p>${nextBtn('Fair enough')}`;
   if(k==='signin'){const ok=tokValid();return `<div class="orv cap">Sign in</div><h1 class="orv">${ok?'You’re in.':'One account opens me.'}</h1><p class="orv">${ok?E(me()):'Sign in with Owner’s Google account. Anyone else gets a polite no. Nothing secret lives on this phone.'}</p>${authErr?`<p class="orv onberr">${E(authErr)}</p>`:''}${ok?nextBtn('Continue'):`<div class="onbbtn g press orv" id="onbG"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Sign in with Google</div>`}`}
   if(k==='essentials')return `<div class="orv cap">What I already know</div><h1 class="orv">Check me.</h1><div class="onbrows orv">${[['Name',PREF.name],['Scope',PREF.scope],['AEs',PREF.aes],['Connects',PREF.connects],['Cadence',PREF.cadence],['Invites',PREF.withdraw],['Your hours',PREF.hours]].map(r=>`<div class="press"><span>${r[0]}</span><b>${E(r[1])}</b><i>${ICO.ok12}</i></div>`).join('')}</div><p class="orv fine">Wrong? Tell me on About and it gets fixed.</p>${nextBtn('All correct')}`;
   if(k==='theme')return `<div class="orv cap">Look</div><h1 class="orv">Pick a coat.</h1><div class="onbsw orv">${THEMES.map(t=>{const bg=t.id==='auto'?'linear-gradient(135deg,#F2EEE6 50%,#050505 50%)':t.bg,ac=t.id==='auto'?'linear-gradient(135deg,#2B50E8 50%,#E2B062 50%)':t.acc;return `<div class="press ${themePref===t.id?'on':''}" data-t="${t.id}"><i style="background:${bg}"><em style="background:${ac}"></em></i><b>${t.n}</b></div>`}).join('')}</div><p class="orv fine">Auto is Sand by day and Graphite in your hours.</p>${nextBtn('This one')}`;
@@ -7569,7 +7552,7 @@ function view(k){const T=window.ARI_MEM.timeline,s=M.stats;
   if(k==='ready'){const has=M.stats.people>0;return `<div class="orv cap">Tonight</div><h1 class="orv">${has?(Q.length?W(Q.length)+' things ready.':'Nothing due tonight.'):'Loading your Sheet…'}</h1>${has?`<div class="onbsum orv"><div><b>${s.cToday}</b><span>connects</span></div><div><b>${s.dm1+s.fuDue}</b><span>follow-ups</span></div><div><b>${s.rep}</b><span>replies</span></div><div><b>${M.WAIT.length}</b><span>awaiting accept</span></div></div>`:'<p class="orv fine">This takes a few seconds the first time.</p>'}${nextBtn(has?'Start tonight':'Start anyway')}`}
   return ''}
 function wire(k){const n=$('#onbNext');if(n)n.onclick=()=>{buzz(10);if(k==='ready')return finishOnb();go(obI+1)};
-  if(k==='signin'){const g=$('#onbG');if(g)g.onclick=()=>{buzz(10);LSs('ari-onb-step','4');if(QA){toast('QA: sign-in skipped');go(4);return}login(false)}}
+  if(k==='signin'){const g=$('#onbG');if(g)g.onclick=()=>{buzz(10);LSs('ari-onb-step',String(OB_SI+1));if(QA){toast('QA: sign-in skipped');go(OB_SI+1);return}login(false)}}
   if(k==='theme')$$('#onbCard .onbsw [data-t]').forEach(el=>el.onclick=e=>{setTheme(el.dataset.t,e);$$('#onbCard .onbsw [data-t]').forEach(x=>x.classList.toggle('on',x===el))});
   if(k==='essentials'){LSs('ari-prefs',JSON.stringify(PREF));$$('#onbCard .onbrows > div').forEach((r,i)=>{if(!RM)A(r.querySelector('i'),[{transform:'scale(0)'},{transform:'scale(1)'}],POP,300+i*90)})}
   if(k==='notify'){const b=$('#onbN');if(b)b.onclick=()=>{buzz(10);try{Notification.requestPermission().then(p=>{if(p==='granted'&&window.ariV17)ariV17.pushOn(false).catch(()=>{});go(obI+1)})}catch(e){go(obI+1)}};const no=$('#onbNo');if(no)no.onclick=()=>go(obI+1)}
@@ -8570,11 +8553,13 @@ V17.tsParse=tsParse;V17.istDT=istDT;V17.put=put;V17.onRow=(t,p)=>onRow17(t,p);
 const KEY17={people:'id',accounts:'id',queue:'id',brief:'key',log:'id'};
 const TBL17={people:'people',accounts:'accounts',queue:'queue',brief:'brief',log_entries:'log'};
 function bump(t,r){const v=tsParse(t==='log'?r.created_at||r.ts:r.updated_at);if(!isNaN(v)&&v>(S17.since[t]||0))S17.since[t]=v;if(t==='log'&&r.id>(S17.since.logId||0))S17.since.logId=r.id}
-function put(t,r){if(!r)return;const k=r[KEY17[t]];if(k==null)return;if(t==='queue'&&/^AS:/.test(String(k)))return; /* v18.13.8: draft assumption rows are not tasks */const cur=S17[t].get(k);
+function put(t,r,fromFetch){if(!r)return;const k=r[KEY17[t]];if(k==null)return;if(t==='queue'&&/^AS:/.test(String(k)))return; /* v18.13.8: draft assumption rows are not tasks */const cur=S17[t].get(k);
+  /* v18.14.11: only a finished fetch moves the catch-up mark. A live row or a save echo arriving after a gap would push it past rows this phone never saw. */
+  if(fromFetch)bump(t,r);
   if(t==='people'&&window.ariDraftGuard){try{r=window.ariDraftGuard(r,cur)||r}catch(e){}}
   /* never let an older copy (a late fetch page) overwrite a newer realtime row */
   if(cur&&cur.updated_at&&r.updated_at&&tsParse(cur.updated_at)>tsParse(r.updated_at))return;
-  if(r.deleted_at)S17[t].delete(k);else S17[t].set(k,Object.assign({},cur||{},r));bump(t,r)}
+  if(r.deleted_at)S17[t].delete(k);else S17[t].set(k,Object.assign({},cur||{},r))}
 
 /* rows -> exactly the payload Ari.gs ariData() returned, so every screen keeps working unchanged */
 const P_TS=['connect_sent','accepted','dm1_sent','dm2_sent','dm3_sent','replied','meeting','withdrawn'];
@@ -8617,38 +8602,45 @@ async function fullLoad(c){
     q17(c.from('queue').select('id,created,action,target,details,status,result,sheet_row,updated_at,updated_by').order('created',{ascending:false}).range(0,199)),
     q17(c.from('brief').select('*')),
     q17(c.from('log_entries').select('id,ts,person_id,event,detail,source,created_at').order('ts',{ascending:false}).range(0,149))]);
-  pe.forEach(r=>put('people',r));ac.forEach(r=>put('accounts',r));qu.forEach(r=>put('queue',r));br.forEach(r=>put('brief',r));lo.forEach(r=>put('log',r));
+  pe.forEach(r=>put('people',r,1));ac.forEach(r=>put('accounts',r,1));qu.forEach(r=>put('queue',r,1));br.forEach(r=>put('brief',r,1));lo.forEach(r=>put('log',r,1));
   S17.loaded=true;V17.counts={people:pe.length,accounts:ac.length,queue:qu.length,brief:br.length,log:lo.length}}
-async function incLoad(c){const iso=t=>new Date((S17.since[t]||0)-3000).toISOString();
+async function incLoad(c){const iso=t=>new Date((S17.since[t]||0)-60000).toISOString(); /* v18.14.11: 60 s margin for late commits */
   const [pe,ac,qu,br,lo]=await Promise.all([
     qAll((a,b)=>c.from('people').select(PCOLS).gt('updated_at',iso('people')).order('updated_at').order('id').range(a,b)),
     qAll((a,b)=>c.from('accounts').select('*').gt('updated_at',iso('accounts')).order('updated_at').order('id').range(a,b)),
     qAll((a,b)=>c.from('queue').select('id,created,action,target,details,status,result,sheet_row,updated_at,updated_by').gt('updated_at',iso('queue')).order('updated_at').order('id').range(a,b)),
     q17(c.from('brief').select('*').gt('updated_at',iso('brief'))),
     qAll((a,b)=>c.from('log_entries').select('id,ts,person_id,event,detail,source,created_at').gt('id',S17.since.logId||0).order('id').range(a,b))]);
-  pe.forEach(r=>put('people',r));ac.forEach(r=>put('accounts',r));qu.forEach(r=>put('queue',r));br.forEach(r=>put('brief',r));lo.forEach(r=>put('log',r));
+  pe.forEach(r=>put('people',r,1));ac.forEach(r=>put('accounts',r,1));qu.forEach(r=>put('queue',r,1));br.forEach(r=>put('brief',r,1));lo.forEach(r=>put('log',r,1));
   return pe.length+ac.length+qu.length+br.length+lo.length}
-let F17=null;const SY17={lastOk:+LS17.g('ari-last-ok',0)||0,lastFetch:0};
+let F17=null,F17full=false,F17to=0;const SY17={lastOk:+LS17.g('ari-last-ok',0)||0,lastFetch:0};
+V17.needFull=0;
 V17.fetch=function(why){
   if(!V17.signed())return Promise.resolve();
-  if(F17)return F17;
+  /* v18.14.11: Sync now always reloads everything; a long gap away sets needFull too (see visibilitychange below) */
+  if(why==='manual')V17.needFull=1;
+  if(F17)return V17.needFull&&!F17full?F17.then(()=>V17.fetch(why)):F17;
   /* realtime already keeps the model current: a timer tick only refetches when the live channel is down or quiet for 5 min */
-  if((why==='timer'||why==='auto')&&RT17.state==='SUBSCRIBED'&&Date.now()-SY17.lastFetch<5*60e3){syncLine();return Promise.resolve()}
+  if((why==='timer'||why==='auto')&&!V17.needFull&&RT17.state==='SUBSCRIBED'&&Date.now()-SY17.lastFetch<5*60e3){syncLine();return Promise.resolve()}
   SYNC.busy=true;document.documentElement.classList.add('v163syncing');syncLine();const t0=performance.now();
-  F17=(async()=>{const c=await READY17;if(!c){const e=new Error('Failed to fetch');throw e}
+  F17full=!S17.loaded||!!V17.needFull;
+  F17=Promise.race([(async()=>{const c=await READY17;if(!c){const e=new Error('Failed to fetch');throw e}
     if(!ST17.session){const {data}=await c.auth.getSession();ST17.session=data&&data.session||null;if(!ST17.session){const e=new Error('signed out');e.sbAuth=1;throw e}}
-    const full=!S17.loaded;
+    const first=!S17.loaded,full=first||!!V17.needFull;if(full)V17.needFull=0;
     /* v18.4: the Book (1,100+ rows, several pages) loads on its own; the queue paints as soon as people/accounts/queue are in */
     if(!V17.bookP&&(!S17.book.length||Date.now()-S17.bookAt>30*60e3))V17.bookP=loadBook(c).then(()=>{if(S17.loaded)publish17('book')}).catch(e=>console.warn('book',e)).finally(()=>{V17.bookP=null});
-    await (full?fullLoad(c):incLoad(c));if(full)V17.firstAt=Date.now();
+    try{await (full?fullLoad(c):incLoad(c))}catch(e){if(full&&!first)V17.needFull=1;throw e}if(first)V17.firstAt=Date.now();if(full)V17.fullAt=Date.now();
     SY17.lastFetch=Date.now();SYNC.lastOk=Date.now();SY17.lastOk=SYNC.lastOk;LS17.s('ari-last-ok',String(SYNC.lastOk));SYNC.err='';V17.fetchMs=Math.round(performance.now()-t0);V17.lastWhy=why;
     live17(c);publish17('fetch',true);
     if(outbox().length)flushSoon(0);
     pushBoot17();
-  })().catch(e=>{SYNC.err=String(e&&e.message||e);V17.err=SYNC.err;
+  })(),
+  /* v18.14.11: a request that hangs over a phone suspend is cut at 25 s, so F17 clears and the next try runs and rejoins live updates */
+  new Promise((_,rj)=>{F17to=setTimeout(()=>{const e=new Error('Failed to fetch');e.timeout=1;if(F17full&&S17.loaded)V17.needFull=1;V17.timeouts=(V17.timeouts||0)+1;rj(e)},25e3)})])
+  .catch(e=>{SYNC.err=String(e&&e.message||e);V17.err=SYNC.err;
     if(e&&e.sbAuth){ST17.session=null;if(!sbStored()){/* refresh token gone: back to the Sheet API and one quiet Google sign-in */trySbSignIn(why);return legacyFetch(why)}}
     if(tokValid()&&!S17.loaded)return legacyFetch(why)})
-   .finally(()=>{F17=null;SYNC.busy=false;document.documentElement.classList.remove('v163syncing');syncLine()});
+   .finally(()=>{clearTimeout(F17to);F17=null;F17full=false;SYNC.busy=false;document.documentElement.classList.remove('v163syncing');syncLine()});
   return F17};
 /* the v16.3 path (Apps Script getData), used only when Supabase is not available */
 function legacyFetch(why){V17.via='signed-out';if(!QA&&me()&&!window.ARI_ONB&&!locked17()){try{authBanner()}catch(e){}}return Promise.resolve()}
@@ -8687,7 +8679,10 @@ function onRow17(t,p){const k=TBL17[t];V17.rt.n++;V17.rt.last=Date.now();V17.rt.
   publish17('rt');try{window.ariV18&&ariV18.rt(t)}catch(e){}}
 /* phones drop the socket in the background: reconnect + catch up the moment Ari is in front again */
 let hidAt17=0;
-document.addEventListener('visibilitychange',()=>{if(document.hidden){hidAt17=Date.now();return}if(!V17.signed())return;
+document.addEventListener('visibilitychange',()=>{if(document.hidden){hidAt17=Date.now();return}
+  /* v18.14.11: away more than 10 min: the next fetch (foreground or unlock) reloads everything */
+  if(hidAt17&&Date.now()-hidAt17>10*60e3)V17.needFull=1;
+  if(!V17.signed())return;
   /* iOS/Android suspend the socket without telling us: after 20 s away, rejoin fresh and catch up again once it is live */
   if(Date.now()-hidAt17>20e3||!/^SUBSCRIBED$/.test(RT17.state)){V17.stopLive();RT17.down=1}},true);
 addEventListener('online',()=>{if(V17.signed()){CH17=null;RT17.state='';V17.fetch('online')}});
@@ -13270,7 +13265,7 @@ html.v1813.v18133kb .v184fx,html.v1813.v18133kb #pplx{bottom:0!important}
    - finished open/close animations are cleared so headers and lists are not left on half-faded layers
    - quick find in the header (also "/" and Cmd/Ctrl+K): any person or account, one tap to the file or the account page
    - desktop: centred 640 px column on whole pixels
-   - About: Ari's own words and the "How I was made" timeline back */
+   - About: Ari's own words back (v18.14.11: build story removed) */
 (function(){'use strict';
 const G=window,H=document.documentElement,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const V=G.ariV18133={v:'v18.13.3',errs:[],opens:0,cleaned:0};
@@ -13396,7 +13391,7 @@ document.addEventListener('keydown',e=>{const qfOn=H.classList.contains('v18133q
 /* ---------- About: Ari's own story (restored from v16 to v18.0), current theme ---------- */
 const LOOP=[['Find','I source people with fresh signals from Tamsin’s and Idris’s books.'],['Connect','About fifteen invites a weekday, each queued with its own reason.'],['Accepts','When someone accepts, their first message is already written.'],['Follow up','The second message at four days, the third a week after that, and I suggest withdrawing at fourteen.'],['Replies','A reply jumps the queue, with an answer drafted in a line or two.'],['Momentum','I keep score, so you only have to keep going.']];
 let BUILD='';
-function aboutHTML(){if(G.ariT4&&ariT4.on())return ariT4.aboutHTML(BUILD);const T=(G.ARI_MEM&&ARI_MEM.timeline)||[];
+function aboutHTML(){if(G.ariT4&&ariT4.on())return ariT4.aboutHTML(BUILD);
   return `<div class="v181ab v18133ab">
   <div class="apcap"><span class="cap">What I am</span><span class="cap">Kyte by Thrandvex</span></div>
   <p>I’m Kyte. I look after your LinkedIn outbound from the first search to the last follow-up, and I keep your hours.</p>
@@ -13406,8 +13401,6 @@ function aboutHTML(){if(G.ariT4&&ariT4.on())return ariT4.aboutHTML(BUILD);const 
   <div class="apnever">I never press send. I find the people, write the notes and queue them, and you send each one from LinkedIn yourself. <b>Your name, your thumb.</b></div>
   <div class="apcap"><span class="cap">How I talk</span></div>
   <p>Short, dry, and on your side. I’ll push back once, and after that it’s your call.</p>
-  <div class="apcap"><span class="cap">How I was made</span><span class="cap">Kyte’s memory</span></div>
-  <div class="v16mem">${T.map(x=>`<div class="v16mi"><i></i><div><b>${E(x[0])}</b><span>${E(x[1])}</span></div></div>`).join('')}</div>
   <div class="v18133note"><b>Want something changed?</b>App changes are not made in here. In here I stick to your outreach.</div>
   <div class="apcap"><span class="cap">Help and changes</span></div>
   <div class="aprow press" data-s171="wn"><div><b>What’s new</b><span>Everything that changed, build by build</span></div><span class="v181ch" aria-hidden="true">›</span></div>

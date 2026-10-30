@@ -55,6 +55,7 @@ INCLUDE = [
     # Oct 24 2026 (scrub build): seller settings (private values stay outside the repo) and the repo leak-scan gate
     'scripts/seller_config.py', 'scripts/repo_scan.py', 'scripts/test_repo_scan.py',
     'scripts/keel_repo.py', 'scripts/keel_repo.conf', 'scripts/test_keel_repo.py',  # Oct 30 2026: the repo name in one line (Kyte rename)
+    'scripts/test_ops_sync.js', 'scripts/test_ops_no_story.py',  # Oct 30 2026 v18.14.11: ops.html catch-up + no build story tests
     # Oct 27 2026: ingest labels step 1 (spec docs/specs/09-ingest-labels.md): code labelers + dry-run backfill, and their tests
     'scripts/ingest_labels.py', 'scripts/test_ingest_labels.py',
     'scripts/assumptions.py', 'scripts/test_assumptions.py', 'scripts/assumptions_store.conf',  # Oct 28 2026: G12 draft assumptions (copy_check imports it); the one-line worker switch (off)
