@@ -136,3 +136,17 @@ api "$PEND/0051_ai_chat_draft_rollback.sql"; api "$PEND/0051_ai_chat_draft_rollb
 [ "$(o51)" = "0000" ] || { echo "FAIL 0051 rollback ($(o51))"; exit 1; }; echo "0051 ROLLBACK CHECK PASSED"
 api "$PEND/0051_ai_chat_draft.sql"; echo "applied 0051 again after the rollback"
 chk51
+
+# 0052 scan controls (PENDING, staging first), on top of the above. Added Oct 30 2026. checks_after_0052.sql is staging-safe: synthetic
+# 2030 run rows, settings changed inside the transaction, ends in a deliberate raise ("ALL 0052 CHECKS PASSED ...").
+chk52() { local o; o=$($P -f "$HERE/checks_after_0052.sql" 2>&1 || true); echo "$o" | grep -E "ok |PASSED|FAIL|ERROR" | sed 's/^.*NOTICE:  //'
+  grep -q "ALL 0052 CHECKS PASSED" <<<"$o" || { echo "FAIL 0052 checks"; exit 1; }; }
+o52() { $P -At -c "select (select count(*) from pg_proc where proname like 'kyte_scan_%' or proname like 'kyte_worker_scan_%') || '' || (select count(*) from pg_class where relname in ('scan_settings', 'scan_control_runs')) || (select count(*) from supabase_migrations.schema_migrations where version = '0052')"; }
+api "$PEND/0052_scan_controls.sql"; echo "applied 0052"
+chk52
+api "$PEND/0052_scan_controls.sql"; echo "re-applied 0052 (idempotence): no error"
+[ "$(o52)" = "1121" ] || { echo "FAIL 0052 objects ($(o52))"; exit 1; }
+api "$PEND/0052_scan_controls_rollback.sql"; api "$PEND/0052_scan_controls_rollback.sql"; echo "rolled back 0052 (twice)"
+[ "$(o52)" = "000" ] && [ "$($P -At -c "select count(*) from pg_class where relname = 'scan_runs'")" = "1" ] || { echo "FAIL 0052 rollback ($(o52))"; exit 1; }; echo "0052 ROLLBACK CHECK PASSED"
+api "$PEND/0052_scan_controls.sql"; echo "applied 0052 again after the rollback"
+chk52

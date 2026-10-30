@@ -200,6 +200,7 @@ jobs:
       - run: python3 scripts/test_keel_repo.py   # Oct 30 2026: the GitHub repo name lives in one line (scripts/keel_repo.conf) for the Kyte rename
       - run: node scripts/test_ops_sync.js   # v18.14.11: cross-device catch-up in web/ops.html (stale mark, Sync now, long gap, hung fetch)
       - run: python3 scripts/test_ops_no_story.py   # v18.14.11: no "How I was made" story in About, onboarding, chat or What's new
+      - run: python3 scripts/test_scan_gate.py   # Oct 30 2026: scan controls gate (0052) fails open before the migration, claims and records runs
 
   anti-slop-static:
     needs: changes
