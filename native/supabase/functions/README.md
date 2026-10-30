@@ -70,7 +70,7 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
 - `pending/ari-gmail-push/`: Pub/Sub push target. Verifies Google's OIDC token (RS256, audience, push service account, expiry),
   acks 204 at once, then runs `ari-gmail-ingest` immediately and `ari-ai {internal: process}`: classify (Haiku confirms the
   accept and the person; must agree with the deterministic vanity / name match) -> draft_dm1 (Opus, `draft` route; only into an empty DM slot
-  or over Ari's own unedited text) -> `ari_notify('draft_due', 'draft:dm1:ai:<person>')` = generic "DM1 ready" push.
+  or over Kyte's own unedited text) -> `ari_notify('draft_due', 'draft:dm1:ai:<person>')` = generic "DM1 ready" push.
   Daily watch renewal via cron. The manual "Accepted" tap calls `ari-ai {action: draft_dm1, person_id, source: accepted_tap}`.
 - Idempotency: `ai_triggers` (accept by Gmail msg id, dm1 by person id) claimed in the database before any model call; ingest
   already dedupes by msg id; pushes dedupe by key. The 10-minute cron (`ari-ai-events`) is the fallback and also picks up
@@ -93,7 +93,7 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
    Apr 2021, also grant the Pub/Sub service agent `roles/iam.serviceAccountTokenCreator` on that service account.
 4. Push subscription to the function URL with an OIDC token:
    `gcloud pubsub subscriptions create ari-gmail-push-sub --topic=ari-gmail-push --push-endpoint=https://<ref>.supabase.co/functions/v1/ari-gmail-push --push-auth-service-account=ari-gmail-push-invoker@<gcp-project>.iam.gserviceaccount.com --push-auth-token-audience=https://<ref>.supabase.co/functions/v1/ari-gmail-push --ack-deadline=30 --message-retention-duration=1h --expiration-period=never`
-5. Tell Ari (SQL, Owner's go): `insert into app_config(key, value) values ('gmail_watch_topic', 'projects/<gcp-project>/topics/ari-gmail-push'), ('gmail_push_audience', 'https://<ref>.supabase.co/functions/v1/ari-gmail-push'), ('gmail_push_sa', 'ari-gmail-push-invoker@<gcp-project>.iam.gserviceaccount.com') on conflict (key) do update set value = excluded.value;`
+5. Tell Kyte (SQL, Owner's go): `insert into app_config(key, value) values ('gmail_watch_topic', 'projects/<gcp-project>/topics/ari-gmail-push'), ('gmail_push_audience', 'https://<ref>.supabase.co/functions/v1/ari-gmail-push'), ('gmail_push_sa', 'ari-gmail-push-invoker@<gcp-project>.iam.gserviceaccount.com') on conflict (key) do update set value = excluded.value;`
 6. First watch: `select public.ari_gmail_watch_kick();` then check `gmail_watch.expires_at` is about 7 days out. Renewal:
    pg_cron `ari-gmail-watch-renew` daily 01:45 IST (a watch lasts 7 days, so a missed day or two is harmless).
    The watch covers label INBOX (LinkedIn mail in the Social tab still carries INBOX); mail a filter skips the inbox for is

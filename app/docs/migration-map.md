@@ -28,7 +28,7 @@ Written Oct 17 2026 (Phase 1 groundwork). Source of truth for prod shape: schema
 | `book` | `accounts` with `stage='target'` and `flags` `book:<tier>` | 1,100 AE-book rows: import only rows the user works (stage ≠ target or has people); the rest stay a lookup table `book_entries` (Phase 2, deferred). |
 | `targets` | `workspaces.settings.targets` | |
 | `ari_prefs`, `app_config`, `brief`, `sync_state` | `workspaces.settings` / per-user prefs | `sync_state` dropped with the Sheet. |
-| `decisions`, `ari_notes` | `tasks` kind `ask` assigned to the SDR (Ari proposals) | |
+| `decisions`, `ari_notes` | `tasks` kind `ask` assigned to the SDR (Kyte proposals) | |
 | `emails` | not migrated (email tracks deferred; Wren owns email) | archived in the final dump. |
 | `scan_heartbeat` | replaced by `jobs` health (queue depth, oldest ready) | |
 | `backup_runs` | stays platform-side (not tenant data); no `workspace_id` | |

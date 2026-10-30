@@ -1,4 +1,4 @@
-# Ari nightly backup check (v18.6; S1 R3 Oct 19 2026). The backup itself runs inside Supabase (edge function ari-backup,
+# Kyte nightly backup check (v18.6; S1 R3 Oct 19 2026). The backup itself runs inside Supabase (edge function ari-backup,
 # pg_cron 03:00 IST) and needs nothing from Hark. This reads the result through rpc ari_worker_backup_status (metadata only,
 # no rows) with the restricted worker key the sandbox proxy already injects.
 #

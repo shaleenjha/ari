@@ -12,10 +12,12 @@ state file. This script refuses to push unless remote main is still exactly that
 
 Usage: python3 scripts/git_push_api.py <export_dir> [owner/repo]
        python3 scripts/git_push_api.py <export_dir> [owner/repo] --branch <name>   (review branch, see push_branch)
-Repo defaults to $KEEL_REPO or shaleenjha/ari (public by Owner's choice, Oct 24 2026). A public repo is allowed only if listed in PUBLIC_OK; any other public repo is refused.
+Repo defaults to $KEEL_REPO, else scripts/keel_repo.conf (shaleenjha/ari until the rename) (public by Owner's choice, Oct 24 2026). A public repo is allowed only if listed in PUBLIC_OK; any other public repo is refused.
 """
-PUBLIC_OK = {'shaleenjha/ari'}  # Owner, Oct 24 2026: the scrubbed repo is public
+PUBLIC_OK = {'shaleenjha/ari', 'shaleenjha/kyte'}  # Owner, Oct 24 2026: the scrubbed repo is public (kyte = the same repo after his rename)
 import os, re, sys, json, base64, subprocess, urllib.request, urllib.error
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from keel_repo import default_repo
 
 API = 'https://api.github.com'
 
@@ -51,7 +53,7 @@ def main():
     if not args:
         raise SystemExit('usage: git_push_api.py <export_dir> [owner/repo] [--branch <name>]')
     src = os.path.abspath(args[0])
-    repo = args[1] if len(args) > 1 else os.environ.get('KEEL_REPO', 'shaleenjha/ari')
+    repo = args[1] if len(args) > 1 else default_repo()
     push_branch(gh, repo, src, branch) if branch else push(gh, repo, src)
 
 

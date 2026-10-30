@@ -1,6 +1,6 @@
 # Releases
 
-Ari versions are plain numbers (decided Oct 24 2026). The stage words used in older
+Kyte versions are plain numbers (decided Oct 24 2026). The stage words used in older
 commits, branches and comments map like this:
 
 | Version | Stage | Old name | What it is |

@@ -1,10 +1,10 @@
-# Ari v18.2: write an account brief into Supabase (table account_briefs) for the Outbound HQ worker.
+# Kyte v18.2: write an account brief into Supabase (table account_briefs) for the Outbound HQ worker.
 # usage:
 #   python3 scripts/brief_upsert.py next                 -> the next brief to build (status queued, newest first) + its people, as JSON
 #   python3 scripts/brief_upsert.py building <account_id>  -> mark it building (the app shows "Researching now")
 #   python3 scripts/brief_upsert.py write <brief.json>     -> validate and upsert a finished brief (status ready)
 #   python3 scripts/brief_upsert.py guidance [ae]         -> Owner's recent draft edits (before/after) to follow as style guidance
-#                                                             (v18.11.2: one-tap switches to Ari's alternative are dropped, see copy_switch.py;
+#                                                             (v18.11.2: one-tap switches to Kyte's alternative are dropped, see copy_switch.py;
 #                                                             --raw prints the database rows unfiltered)
 #   python3 scripts/brief_upsert.py account <company>      -> v18.10 Re-scan: the account (id, hook fields) + its people, as JSON, for a brief rebuild
 #                                                             of an account whose brief is already ready (then research and `write` as usual)

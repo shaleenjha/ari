@@ -81,11 +81,11 @@ Hark runs many of these on a timer. Names here must not change without updating 
 | `reply_ingest.py` | Turns LinkedIn replies in Gmail into reply cards with 3 drafts. | Yes |
 | `accept_ingest.py` | Spots "accepted your invitation" emails. | Yes |
 | `brief_upsert.py` | Saves account briefs into the app. | Yes |
-| `draft_tag.py`, `copy_switch.py` | Label drafts so Ari learns which messages work. | Yes |
+| `draft_tag.py`, `copy_switch.py` | Label drafts so Kyte learns which messages work. | Yes |
 | `daily_report.py` | Builds and emails the morning report. | Yes |
 | `exec_track_handoff.py` | Emails the daily exec track list to your work inbox. | Yes |
 | `phase0_metrics.py` | Product numbers: meetings, accepts, replies. | Yes |
-| `copy_check.py` | The code check every drafted message must pass before Ari shows it. | Yes |
+| `copy_check.py` | The code check every drafted message must pass before Kyte shows it. | Yes |
 | `seller_config.py` | Who the seller is, the AE books and which customers a draft may name. Real values live in a private file outside the repo; the repo carries an invented demo workspace. | Yes |
 | `ari_db.py` | The one door scripts use to reach the database, with limited rights. | Yes |
 | `db_backup.py`, `backup_check.py`, `restore_drill.py`, `offsite_drive.py`, `offsite_certs.py` | Backups: make, check, practise restoring, copy offsite, lock the copy. | Yes |
@@ -93,6 +93,7 @@ Hark runs many of these on a timer. Names here must not change without updating 
 | `deploy_app2_preview.py` | Puts the new app on a separate test link for your phone check. | Yes |
 | `deploy_provenance.py` | Blocks a deploy unless the code passed the checks on GitHub. | Yes |
 | `git_sync.sh`, `git_export.py`, `git_pull_remote.py`, `git_push_api.py` | Publish code to this repo with real names removed and secrets blocked. | Yes |
+| `keel_repo.conf`, `keel_repo.py` | The GitHub repo name in one line, read by the publish and deploy scripts. | Yes |
 | `repo_scan.py` | The leak check: no real names, personal emails, phone numbers, real-looking LinkedIn links or keys. Runs in CI on every push. | Yes |
 | `test_*.py` | Automatic tests for the scripts above. | Yes |
 
@@ -112,7 +113,8 @@ Hark runs many of these on a timer. Names here must not change without updating 
 | `REPO_MAP.md` | This guide. | No |
 | `docs/specs/` | Numbered specs. 01 is the locked interaction and copy rulebook. 07 is the new look. | No for 01 and 07 |
 | `docs/runbooks/` | Step-by-step guides: database changes, git sync. | Yes |
-| `docs/privacy-data-inventory.md` | What data Ari holds, where, and for how long. | No, read once |
+| `docs/privacy-data-inventory.md` | What data Kyte holds, where, and for how long. | No, read once |
+| `docs/engineering/code-names.md` | Kyte's code name Ari: every legacy `ari` identifier that stays, and why. | Yes |
 | `.gitignore` | Tells git which files to leave out. | Yes |
 
 Plans, team notes, data files and screenshots are kept in the private workspace, not in this repo.

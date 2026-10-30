@@ -1,6 +1,6 @@
-# Ari Phase 0: the five measurements (product.md Section 9/10), from data that exists today, as ari_worker (read-only).
+# Kyte Phase 0: the five measurements (product.md Section 9/10), from data that exists today, as ari_worker (read-only).
 #   python3 scripts/phase0_metrics.py  -> JSON on stdout. Values a source can't give yet are null with a reason.
-# 1 Ari-sourced meetings: report_attribution (meeting source is mandatory since v18.6).
+# 1 Kyte-sourced meetings: report_attribution (meeting source is mandatory since v18.6).
 # 2 Accept-to-DM1 in HOURS: ari_worker_accept_dm1() (migration 0028). Exact pairs only for the median; values that arrived as a
 #   bare date are flagged in people.ts_approx (noon IST) and reported separately as all-pairs.
 # 3 Draft edit distance + 4 quick-check skip rate + 5 minutes in app: ari_worker_metrics() (migration 0027); null until then.

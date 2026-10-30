@@ -196,6 +196,7 @@ jobs:
       - run: python3 scripts/test_ingest_labels.py   # spec 09 step 1: event labels idempotent, no PII, approx flag, 0044 vocab parity
       - run: python3 scripts/test_assumptions.py   # G12 draft assumptions: extraction, sources, union, store off by default, copy_check unchanged without --g12
       - run: python3 scripts/test_worker_chat_rule.py   # Oct 30 2026: the worker's chat decline names no system (docs/specs/worker_chat_rule.txt)
+      - run: python3 scripts/test_keel_repo.py   # Oct 30 2026: the GitHub repo name lives in one line (scripts/keel_repo.conf) for the Kyte rename
 
   anti-slop-static:
     needs: changes

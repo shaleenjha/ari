@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Ari budget v1 (Council, Oct 17 2026): the worker's cheap check in ONE shell call, so an idle 10-minute run
+# Kyte budget v1 (Council, Oct 17 2026): the worker's cheap check in ONE shell call, so an idle 10-minute run
 # ends after a single tool call instead of 6 to 8 (Gmail, Queue, People, Brief, briefs, replies, exec notes).
 # Read-only. Fail-open: any error prints WORK, so the worker never misses work because this script broke.
 # usage (project folder; shell credentials [{"provider":"google","email":"owner@example.com"}]; the Supabase

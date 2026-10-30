@@ -1,4 +1,4 @@
-# app: Ari rebuild foundations (Phase 1)
+# app: Kyte rebuild foundations (Phase 1)
 
 Built beside the live app; nothing here is deployed or connected to the live project. Synthetic data only.
 

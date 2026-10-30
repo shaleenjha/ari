@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Ari worker overlap guard, code-owned (Owner, 27 Oct 2026). Replaces the model reading scheduled_task runs, which
+# Kyte worker overlap guard, code-owned (Owner, 27 Oct 2026). Replaces the model reading scheduled_task runs, which
 # mistook the run's own "running" row for another run and skipped work for an hour.
 # usage (project folder):
 #   python3 scripts/worker_lock.py acquire   -> "OK" (lock taken, exit 0) or "BUSY <age> min" (exit 3)

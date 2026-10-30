@@ -1,4 +1,4 @@
-# Ari Relay (board fix #9): LinkedIn replies from Gmail into Supabase `replies`, generic push, 3 one-tap drafts.
+# Kyte Relay (board fix #9): LinkedIn replies from Gmail into Supabase `replies`, generic push, 3 one-tap drafts.
 # usage (project folder; shell credentials [{"provider":"google","email":"owner@example.com"}]; Supabase as role ari_worker via scripts/ari_db.py):
 #   python3 scripts/reply_ingest.py scan [--days N] [--dry]   Gmail LinkedIn message emails since the last scan -> replies rows,
 #                                                             people.replied/stage for first replies, one push per reply.

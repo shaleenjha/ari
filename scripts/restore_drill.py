@@ -1,4 +1,4 @@
-# Ari restore drill for the in-Supabase backups (v18.6; .cms support S1 R3, Oct 19 2026).
+# Kyte restore drill for the in-Supabase backups (v18.6; .cms support S1 R3, Oct 19 2026).
 # usage:
 #   python3 scripts/restore_drill.py [object]                 MAINTENANCE ONLY (ARI_MAINT=1 + Management token): newest object
 #                                                             in bucket ari-backups, or the named one; a name ending .cms is read

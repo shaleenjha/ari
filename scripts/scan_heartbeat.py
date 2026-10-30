@@ -1,4 +1,4 @@
-# Ari v18.15.4 (Basalt): signal-scan heartbeat + dead-man check. No migration: rows live in the existing
+# Kyte v18.15.4 (Basalt): signal-scan heartbeat + dead-man check. No migration: rows live in the existing
 # key/value table `brief` (role ari_worker has select/insert/update there, migration 0018), one key per book:
 #   scan_hb:<book> (one per AE book in scripts/seller_config.py) -> JSON {started_at, finished_at, accounts_processed, errors}
 #   scan_hb:armed  -> ISO time the watch was armed, or empty (disarmed: no alerts while the scans are paused)

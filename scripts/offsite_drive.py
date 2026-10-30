@@ -1,5 +1,5 @@
-# Ari second-vendor offsite backup (v18.7, Oct 17 2026).
-# Daily: take the newest Ari backup, encrypt it to the offsite recipient certificate (public key only, so this job never
+# Kyte second-vendor offsite backup (v18.7, Oct 17 2026).
+# Daily: take the newest Kyte backup, encrypt it to the offsite recipient certificate (public key only, so this job never
 # holds a secret), upload it to the private Google Drive folder "Ari backups" of ops@example.com, keep the newest 14.
 #
 # Source, in order (v18.7.1, migration 0025_offsite_encrypted):

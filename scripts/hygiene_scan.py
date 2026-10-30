@@ -1,4 +1,4 @@
-# Ari data hygiene (board #31): the worker runs Ari's own checks. Flags only; it never edits, merges or links.
+# Kyte data hygiene (board #31): the worker runs Kyte's own checks. Flags only; it never edits, merges or links.
 # usage: python3 scripts/hygiene_scan.py [--dry]     (role ari_worker via scripts/ari_db.py; needs migration 0029)
 #   1. rpc ari_hygiene_scan()   -> upserts findings (accept_no_connect, duplicate_account, no_account_link,
 #                                  stale_stage, dm1_past_due), closes ones whose problem is gone

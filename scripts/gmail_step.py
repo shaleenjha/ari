@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Ari worker step 0, Gmail (spec docs/specs/04 fault #1; Owner approved Oct 21 2026 10:59 IST from Claude relay R-20261021-06).
+# Kyte worker step 0, Gmail (spec docs/specs/04 fault #1; Owner approved Oct 21 2026 10:59 IST from Claude relay R-20261021-06).
 # The ONLY writer of Brief.gmail_last_scan. Before this, the worker prompt set the cursor by hand.
 #
 #   1. reply_ingest.py scan    LinkedIn message emails -> replies (keeps its own cursor in the database)

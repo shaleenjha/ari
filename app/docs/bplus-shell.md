@@ -1,4 +1,4 @@
-# Ari 2 B+ shell (locked by Owner, Oct 24 2026 12:22 IST)
+# Kyte 2 B+ shell (locked by Owner, Oct 24 2026 12:22 IST)
 
 ## What it is
 The front end Owner locked as "B+": two places, **Stack** (home) and **Desk**, switched by the bottom pill "Stack | Desk" or a sideways swipe. Sheets from the header (Accounts, Report), a Motion detail screen, the Account page from the avatar, and a one-button Sign-in. Demo data only (synthetic people and companies in `web/src/b/demo.ts`).

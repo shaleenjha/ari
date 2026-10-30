@@ -1,4 +1,4 @@
-# Ari v18.5: the worker's only database client. PostgREST with named RPCs and table reads; no raw SQL.
+# Kyte v18.5: the worker's only database client. PostgREST with named RPCs and table reads; no raw SQL.
 # In Hark the sandbox proxy injects "Authorization: Bearer <ari_worker JWT>" for the ari project host (binding
 # "supabase-ari-bearer", vault "ari worker key (role ari_worker)"). Role ari_worker can run only the functions and
 # table operations granted in native/supabase/migrations/0018_least_privilege_worker.sql.

@@ -1,4 +1,4 @@
-# Ari health check (v18.7). Runs after every scheduled sync (task 56e17ef1). Prints nothing when healthy.
+# Kyte health check (v18.7). Runs after every scheduled sync (task 56e17ef1). Prints nothing when healthy.
 # Prints ONE line starting "ALERT:" when a problem is new or was last raised more than 12 h ago:
 #   scan heartbeat stale (> 40 min since the last completed sync), newest nightly backup failed / older than 26 h,
 #   or (once migration 0026 is applied) pushes failing. State in work/v187/health_state.json.

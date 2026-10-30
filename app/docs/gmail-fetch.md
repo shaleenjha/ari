@@ -9,7 +9,7 @@ Written Oct 17 2026 (Forge, for Relay's capability). Nothing here reads a real m
 | Fetch pass: `history.list` from the stored `historyId`, SPAM/TRASH/DRAFT/SENT skipped, already-ingested ids skipped before `messages.get`, parser + matcher, idempotent write, compare-and-set cursor | `fetchAndIngest`, job kind `gmail-ingest` (`gmailIngestHandler`) | first run, incremental, replay, truncation, 404 resync, cursor race, API error |
 | Storage: `app.ingest_cursors` (per workspace + mailbox), `app.ingest_cursor_get/advance` (CAS, forward-only unless resync), `app.ingest_record` (on conflict do nothing; foreign-workspace person ids dropped to null) | `db/migrations/0004_gmail_ingest.sql` | `db/tests/04_ingest.sql` |
 | Nightly comparison vs the current worker, report `ari.shadow-diff/v1`, markdown render, promotion rule (TS + SQL mirror) | `jobs/src/gmail/shadow.ts`, `app.shadow_report_put`, `app.shadow_promotion_ready` | `shadow.test.ts`, `04_ingest.sql` |
-| "Who is this?" confirm by a member (Ari cannot), op-id replay, conflict on second confirm, live mode then calls `person_mark` | `app.ingest_confirm_match` | `04_ingest.sql` |
+| "Who is this?" confirm by a member (Kyte cannot), op-id replay, conflict on second confirm, live mode then calls `person_mark` | `app.ingest_confirm_match` | `04_ingest.sql` |
 
 ### Fetch rules
 - **First run** (no cursor) and **expired history** (Gmail 404 on `startHistoryId`): read `users.getProfile().historyId` first, then backfill with `messages.list q="from:linkedin.com newer_than:2d"` (first run) or `newer_than:7d` (resync). Taking the head first means mail arriving mid-pass is picked up next time, never lost.

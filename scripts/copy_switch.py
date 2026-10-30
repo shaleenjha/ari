@@ -1,4 +1,4 @@
-# Ari v18.11.2 (Council ship gate fix #1, Sat 17 Oct 2026): keep Owner's one-tap SWITCHES out of the copy loop's "edits".
+# Kyte v18.11.2 (Council ship gate fix #1, Sat 17 Oct 2026): keep Owner's one-tap SWITCHES out of the copy loop's "edits".
 # Why: v18.11 saves a switch through the same setFields path as an edit, so the 0031 people trigger records it in
 # draft_edits / copy_guidance (original = Ari's pick, edited = the alternative), and a switched send is credited to the
 # pick's structure unless a role=alt draft_tags row matched the exact sent text. This module fixes it on the READ side
@@ -18,8 +18,8 @@
 #   its created_at up to 7 days after                                                                    -> dropped (switch, text unknown)
 #   sent DM whose tags.variant is role=alt, or whose body equals a known alt                             -> switched, structure = alt,
 #                                                                                                          not counted as edited
-#   sent DM edited from the alt (closer to alt than to Ari's original)                                   -> switched + edited, structure = alt
-#   sent DM with Ari's original but no alt text known, last switch log before the send pointing away from
+#   sent DM edited from the alt (closer to alt than to Kyte's original)                                   -> switched + edited, structure = alt
+#   sent DM with Kyte's original but no alt text known, last switch log before the send pointing away from
 #   the pick                                                                                             -> switched, structure = logged id
 # Pure functions take plain lists so tests run on synthetic data (work/v18112/test_copy_switch.py).
 import os, re, json, glob, difflib, datetime, urllib.parse

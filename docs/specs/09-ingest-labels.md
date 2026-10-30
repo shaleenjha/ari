@@ -24,7 +24,7 @@ into labels on every event so any slice works without a join.
 |---|---|---|
 | `connect_sent` | app tap, `li_list_ingest.py sent` | `with_note` bool, `note_tag_id` (draft_tags id), `weekday`, `hour_local` |
 | `accept` | app tap (primary), `accept_ingest.py`, `li_list_ingest.py connections` | `days_to_accept` (accept minus connect_sent), `accept_via` tap / gmail / list |
-| `dm_sent` | app Sent tap (sent_messages, 0031) | `step` 1 / 2 / 3, `draft_tag_id`, `structure`, `hook_kind`, `edited` bool, `words_changed`, `switched` bool (sent Ari's alternative, copy_switch), `asset` bool, `days_since_prev` (accept or previous DM), `late_days` vs dm2_due / dm3_due, `profile_scanned` bool |
+| `dm_sent` | app Sent tap (sent_messages, 0031) | `step` 1 / 2 / 3, `draft_tag_id`, `structure`, `hook_kind`, `edited` bool, `words_changed`, `switched` bool (sent Kyte's alternative, copy_switch), `asset` bool, `days_since_prev` (accept or previous DM), `late_days` vs dm2_due / dm3_due, `profile_scanned` bool |
 | `reply` | `reply_ingest.py` (Gmail), paste in app | code: `reply_to_step` (last send before it), `credited_tag_id`, `days_since_touch`, `text_available` bool. Judged: `intent`, `objection_type`, `sentiment`, `next_step` |
 | `meeting_booked` | app tap, account meeting fields | `touches_before`, `days_from_first_touch`, `credited_step`, `credited_tag_id`, `meeting_via` reply / ae / calendar |
 | `withdraw` | app tap, follow-ups block | `days_pending`, `reason` auto_stale / manual |

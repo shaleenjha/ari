@@ -1,4 +1,4 @@
-# Ari restore runbook (v18.6, Oct 17 2026; sections 0 and 1 revised Oct 19 2026)
+# Kyte restore runbook (v18.6, Oct 17 2026; sections 0 and 1 revised Oct 19 2026)
 
 Prod project: `ari` (rbkrqlzlblquvgmuohro). Staging: `ari-staging` (ljojwhnfgfreokqspobg).
 Owner auth uid: b14d1605-c766-4684-9a5b-71ffcab6967b.
@@ -16,7 +16,7 @@ Owner auth uid: b14d1605-c766-4684-9a5b-71ffcab6967b.
 Maintenance session only (Forge), with the Supabase Management token bound for that session. Normal Hark runs (worker, sync, backup check) cannot read the bucket: ari_worker gets 400 on storage and 403 on backup_runs, by design.
 
 ## 0. What backups exist, then decide the scope
-**The only backups are Ari's own nightly export.** Checked Oct 19 2026 through the Management API (read-only):
+**The only backups are Kyte's own nightly export.** Checked Oct 19 2026 through the Management API (read-only):
 - Supabase managed backups: **none** on this plan (backups list empty). Point-in-time recovery (PITR): **off**.
   There is no Supabase-side restore point. Do not plan on "restore from the dashboard".
 - What does exist, written once a night by `ari-backup` (03:00 IST):
@@ -77,7 +77,7 @@ Column rules (the drill does exactly this):
 - `auth.users` and `auth.identities` are in the backup. In a new project, restore them as postgres with the same ids so the owner uid stays **b14d1605-c766-4684-9a5b-71ffcab6967b** (is_owner() and every RLS policy pin that uid). If the uid changes, is_owner() returns false and the app shows nothing: update 0016E/0024 `is_owner()` to the new uid as a migration.
 - Re-enable Google as the only provider, keep email signup and password login off (signup 422, password 422 as before).
 - **Two-step factors are not backed up.** After a restore into a new project (or if mfa_factors was lost), the owner has 0 verified factors, so is_owner() falls back to aal1 and Google-only works. Owner must then re-enrol:
-  1. Open Ari > Settings > Authenticator code > Set up.
+  1. Open Kyte > Settings > Authenticator code > Set up.
   2. Delete the old "Ari" entry from the authenticator app, scan the new QR (or type the key), enter the 6-digit code.
   3. Confirm the row reads "On" and a reload asks for the code (aal2 gate).
 - If prod still holds a factor but Owner lost the authenticator: maintenance session `delete from auth.mfa_factors where user_id = 'b14d1605-c766-4684-9a5b-71ffcab6967b';` then re-enrol as above. Emergency fallback: native/supabase/rollbacks/0024_rollback.sql.

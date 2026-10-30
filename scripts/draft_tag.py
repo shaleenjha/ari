@@ -1,4 +1,4 @@
-# Ari v18.10.1 (Copy Lab Stage A): tag every draft with what it IS, so the weekly copy read can learn from sends.
+# Kyte v18.10.1 (Copy Lab Stage A): tag every draft with what it IS, so the weekly copy read can learn from sends.
 # usage (shell, project folder; runs as the restricted worker role through scripts/ari_db.py, no SQL):
 #   python3 scripts/draft_tag.py tag <person_id> <kind> <tags.json>   -> tag the person's CURRENT draft of that kind
 #        kind: dm1 | dm2 | dm3 | note (connect / exec note) | reply
@@ -14,7 +14,7 @@
 #        Optional --body-file <file> tags that exact text instead (use it right after writing a draft to the Sheet, before the
 #        10-minute sync has copied it).
 #   python3 scripts/draft_tag.py alt <person_id> <kind> <pick_tags.json> --body-file <alt.txt> --structure "S6 who owns this"
-#        -> store Ari's switch alternative (since Ari v18.11) so the app can offer it and a switched send is attributed to the
+#        -> store Kyte's switch alternative (since Kyte v18.11) so the app can offer it and a switched send is attributed to the
 #           alternative's structure. Uses the pick's tags (angle, hook...) with the alternative's structure and variant
 #           "role=alt;of=<pick id>". Run it right after tagging the pick.
 #   python3 scripts/draft_tag.py asset <person_id> <kind> <pick_tags.json> --body-file <asset.txt> [--type three_line_read]
@@ -22,7 +22,7 @@
 #           Only approved asset types (today three_line_read). variant "role=asset;type=<type>;of=<pick id>".
 #   python3 scripts/draft_tag.py untagged [limit]   -> unsent drafts whose current text has no tag yet (JSON list)
 #   python3 scripts/draft_tag.py stats [from] [to] [--raw]  -> the copy read for a window (YYYY-MM-DD; default last 14 days).
-#        v18.11.2: sends that went out as Ari's one-tap alternative are credited to the alternative's structure and not
+#        v18.11.2: sends that went out as Kyte's one-tap alternative are credited to the alternative's structure and not
 #        counted as edits (copy_switch.py); 'switched', 'by_structure_switched', raw_edited / raw_by_structure added. --raw = DB only.
 import sys, os, json, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

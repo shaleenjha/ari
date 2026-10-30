@@ -1,6 +1,6 @@
 # Draft scoring (code name Quill): draft-engine evaluation harness (Phase 1, synthetic only)
 
-Ari's drafting engine is judged by code before any model or prompt change ships. No real prospect, account or DM is used:
+Kyte's drafting engine is judged by code before any model or prompt change ships. No real prospect, account or DM is used:
 personas and the labelled corpus are invented (`jobs/src/draft-eval/synthetic.ts`).
 
 | Piece | Where |
@@ -12,4 +12,4 @@ personas and the labelled corpus are invented (`jobs/src/draft-eval/synthetic.ts
 ## How Quill uses it
 - A new engine (prompt or model) implements `DraftEngine` and runs `evaluate()` offline on the synthetic personas; the LLM run records model, tokens, cost and prompt hash like every agent job. It ships only if it clears `gate()` and beats the baseline's mean.
 - Style learning from Owner's edits (draft_revisions) becomes new labelled cases: an edit that removed a phrase adds that phrase to a rule or a labelled bad example, so the scorer tracks the house style as it moves.
-- The harness never scores or stores real prospect DMs; drafting for real people happens only inside Ari's own jobs.
+- The harness never scores or stores real prospect DMs; drafting for real people happens only inside Kyte's own jobs.

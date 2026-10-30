@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Keel: commit + push a scrubbed, code-only snapshot to the public GitHub repo shaleenjha/ari.
+# Keel: commit + push a scrubbed, code-only snapshot of Kyte to the public GitHub repo named in scripts/keel_repo.conf
+# (shaleenjha/ari until Owner renames it; then change that one line, see docs/engineering/code-names.md).
 # Run at the end of EVERY deploy:   bash scripts/git_sync.sh "Area: what changes"   (e.g. "Docs: rewrite README")
 #
 # 1. scripts/git_export.py copies the allow-listed code into the export tree,

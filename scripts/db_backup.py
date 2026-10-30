@@ -1,4 +1,4 @@
-# Ari nightly backup (fix #2, Oct 16 2026): pg_dump of the "ari" Supabase database (schema public, schema + data)
+# Kyte nightly backup (fix #2, Oct 16 2026): pg_dump of the "ari" Supabase database (schema public, schema + data)
 # into work/backups/ari_<UTC stamp>.dump (custom format) plus a manifest with exact row counts per table.
 # No stored DB password: each run gives the dedicated role ari_backup (read-only: pg_read_all_data + BYPASSRLS so pg_dump sees every row)
 # a fresh random password through the Supabase Management API (PAT injected by the Hark proxy), dumps, then sets the role NOLOGIN again.

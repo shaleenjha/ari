@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Ari Copy Lab v1 (Quill, Sat 17 Oct 2026): the MANDATORY code check on every draft, plus the deterministic
+# Kyte Copy Lab v1 (Quill, Sat 17 Oct 2026): the MANDATORY code check on every draft, plus the deterministic
 # structure pick for DM1 and the list of queued DM2s that must be regenerated. Hark decision 4 (17 Oct 15:00 IST):
 # never show Owner a flagged draft as Ari's pick; the worker redrafts (max 2 tries) until this prints PASS.
 # Rules: plans/copy-lab/anti-sameness.md (Part 1A hard rules, Part 2 repeat checks), plans/copy-lab/craft-notes.md.
@@ -13,7 +13,7 @@
 #        add --g12 [--assumptions drafter.json] [--store] to check. Prints "ASSUMPTIONS <n>: [...]" (facts with no written
 #        source, the drafter's list unioned with G12's) before the PASS/FLAG line. --store writes them to the draft's queue
 #        row AS:<person_id>:<kind> only when scripts/assumptions_store.conf says on (or ARI_ASSUMPTIONS_STORE=1 for one run).
-#   python3 scripts/copy_check.py arm <person_id>      -> JSON {arm, pick, switch, why}: which DM1 structure Ari uses
+#   python3 scripts/copy_check.py arm <person_id>      -> JSON {arm, pick, switch, why}: which DM1 structure Kyte uses
 #   python3 scripts/copy_check.py arm2 <person_id>     -> JSON {arm, variant, pick, fallback}: the person's DM2 A/B arm (Oct 22)
 #   python3 scripts/copy_check.py regen [limit]        -> JSON list of unsent DM1s and DM2s that fail the AE style guide (since 21 Oct 2026)
 #        kind exec = an exec-track note (old v1 checks only); kind note = Owner's connect note (AE guide shape).
@@ -236,7 +236,7 @@ def _check_v1(pid, kind, text, structure="", seller_line=False, rows=None, has_a
         if hit:
             flags.append("R9 copies a 6-word run from %s ('%s')" % (os.path.basename(f), sorted(hit)[0]))
             break
-    # ---- repeat checks against Ari's own drafts and sends ----
+    # ---- repeat checks against Kyte's own drafts and sends ----
     if rows is None:
         try:
             rows = corpus_rows()
@@ -588,7 +588,7 @@ def _arm_v1(pid):
 def regen(limit=200):
     # Since Wed 21 Oct 2026 (Owner, option A): every unsent DM1 and DM2 that fails the AE style guide is redrafted.
     # Sent messages are never touched. Exec-track people (their K dm is an exec note), Hold, personal, flagged
-    # and replied people are skipped. A row Ari already marked "Flagged:" is not retried.
+    # and replied people are skipped. A row Kyte already marked "Flagged:" is not retried.
     rows = corpus_rows()
     out = []
     for r in rows:

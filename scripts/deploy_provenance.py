@@ -25,7 +25,9 @@ import os, sys, json, shutil, subprocess, tempfile, urllib.request, urllib.error
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 KEEL = os.environ.get('KEEL_DIR', os.path.join(ROOT, 'work', 'keel'))
 LOCAL = os.environ.get('KEEL_EXPORT', os.path.join(KEEL, 'ari-app'))
-REPO = os.environ.get('KEEL_REPO', 'shaleenjha/ari')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from keel_repo import default_repo
+REPO = default_repo()   # $KEEL_REPO, else scripts/keel_repo.conf
 API = 'https://api.github.com'
 
 

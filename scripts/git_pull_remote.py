@@ -173,7 +173,8 @@ def main():
     from git_push_api import gh
     from git_export import INCLUDE
     export_dir = os.path.abspath(sys.argv[1])
-    repo = sys.argv[2] if len(sys.argv) > 2 else os.environ.get('KEEL_REPO', 'shaleenjha/ari')
+    from keel_repo import default_repo
+    repo = sys.argv[2] if len(sys.argv) > 2 else default_repo()
     tree = None
     if os.path.isdir(os.path.join(export_dir, '.git')):
         r = subprocess.run(['git', 'rev-parse', 'HEAD^{tree}'], cwd=export_dir, capture_output=True)
