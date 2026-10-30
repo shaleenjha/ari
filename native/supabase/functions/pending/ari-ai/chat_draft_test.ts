@@ -281,3 +281,27 @@ Deno.test('who: an unknown name stays unknown; only a pronoun leans on the perso
   assertEquals(ev.find((e) => e.ev === 'draft')!.data.person_id, 'P99999905101');
   assertEquals(f.st.targets[1].p_person, 'P99999905101');
 });
+
+Deno.test('review #76: a pronoun ask with a person on screen drafts for that person, even when a word is also a first name', async () => {
+  const f = fakeDb();
+  // the fake target matches "zeno" anywhere in the text; the screen person must win for a pronoun ask without a full name
+  const ev = await events(await handle(post({ action: 'chat', text: 'rewrite it, zeno style, shorter', context: { entity_type: 'person', entity_id: 'P99999905101' } }),
+    env(f.db, provider([reply(GOOD_DM1)]))));
+  assertEquals(ev.find((e) => e.ev === 'draft')!.data.person_id, 'P99999905101');
+  assertEquals(f.st.targets.at(-1).p_person, 'P99999905101');
+});
+
+Deno.test('review #76: a capitalised first name still wins over the person on screen', async () => {
+  const f = fakeDb();
+  const ev = await events(await handle(post({ action: 'chat', text: 'redo it for Zuri, shorter', context: { entity_type: 'person', entity_id: 'P99999905101' } }),
+    env(f.db, provider([reply(GOOD_DM2)]))));
+  assertEquals(ev.find((e) => e.ev === 'draft')!.data.person_id, 'P99999905108');
+});
+
+Deno.test('staging round 3: a thin-fact flag from the writer is not called a failed check', async () => {
+  const f = fakeDb();
+  const ev = await events(await handle(post({ action: 'chat', text: 'write Zara a first message' }), env(f.db, provider([reply(GOOD_DM1, { needs_review: true })]))));
+  const t = ev.at(-1)!.data.text;
+  assert(/One detail in it is thin/.test(t), t); assertFalse(/did not clear every check/.test(t));
+  assert(ev.find((e) => e.ev === 'draft')!.data.needs_review);
+});

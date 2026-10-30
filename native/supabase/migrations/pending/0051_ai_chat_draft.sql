@@ -185,6 +185,8 @@ begin
     return jsonb_build_object('undone', true);
   end if;
 
+  -- review #76 low 1: after an undo the draft is not on the page any more, so a later tap must not report it as saved
+  if d.saved_at is not null and d.undone_at is not null then return jsonb_build_object('saved', false, 'reason', 'undone'); end if;
   if d.saved_at is not null then return coalesce(d.save_result, '{}'::jsonb) || jsonb_build_object('repeat', true); end if;
   t := public.ari_ai_chat_draft_target(null, d.person_id, d.kind);
   if coalesce((t->>'ok')::boolean, false) is not true then

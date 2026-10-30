@@ -143,11 +143,12 @@ export function namesSystem(text: string, allowed: string[] = []): boolean {
 }
 
 // ---- what Kyte says ---------------------------------------------------------------------------------------------------------
-export function draftLine(kind: DraftKind, name: string, first: string, o: { edited: boolean; replaces: boolean; needsReview: boolean }): string {
+export function draftLine(kind: DraftKind, name: string, first: string, o: { edited: boolean; replaces: boolean; needsReview: boolean; checkFailed?: boolean }): string {
   const a = kind === 'reply' ? `Here's a reply to ${name}.` : `Here's a ${LABEL[kind]} for ${name}.`;
   const b = `Tap Save to put it on ${first}'s page. Nothing is sent.`;
   const c = o.edited ? ` Saving replaces the version you edited, so I'll check with you first.` : o.replaces ? ` Saving swaps out the current draft, and you can undo.` : '';
-  const d = o.needsReview ? ' It did not clear every check, so read it before you save.' : '';
+  // staging round 3: a draft that passed the copy check but carries the writer's own "a fact is thin" flag says that, not "a check failed"
+  const d = o.checkFailed ? ' It did not clear every check, so read it before you save.' : o.needsReview ? ' One detail in it is thin, so read it before you save.' : '';
   return `${a} ${b}${c}${d}`;
 }
 

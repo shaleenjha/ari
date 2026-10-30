@@ -28,13 +28,18 @@ export interface DraftTurn { text: string; card: ChatDraftCard | null; callId: n
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+const capFirstIn = (text: string, first?: string) => !!first && first.length >= 3 && new RegExp(`\\b${first.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(text);
+const fullNameIn = (text: string, name?: string) => !!name && name.trim().includes(' ') && text.toLowerCase().includes(name.trim().toLowerCase());
+
 /** Who the ask is for: the names in this message first, then the person on screen, then the conversation so far. */
 export async function findTarget(db: Db, text: string, kind: DraftKind | null, screenPerson: string | null, earlier: string): Promise<Target> {
   const ask = (q: string | null, p: string | null) => db.rpc<Target>('ari_ai_chat_draft_target', { p_question: q, p_person: p, p_kind: kind });
-  let t = await ask(text, null);
-  // only a pronoun ("write him one", "redo it") leans on the screen or the conversation; an unknown name stays unknown
+  // only a pronoun ("write him one", "redo it") leans on the screen or the conversation; an unknown name stays unknown.
+  // review #76 low 2: with a pronoun and a person on screen, the screen person comes first (a common word that is also someone's
+  // first name, "rewrite it, will you", must not win over who Owner is looking at); a full name in the message still wins.
   const pron = /\b(him|her|them|their|his|it|this|that|this person|that person|this one|that one|the same person)\b/i.test(text);
-  if (t?.reason === 'who' && pron && screenPerson) t = await ask(null, screenPerson);
+  let t = await ask(text, null);
+  if (pron && screenPerson && (t?.reason === 'who' || t?.reason === 'ambiguous' || (!fullNameIn(text, t?.name) && !capFirstIn(text, t?.first_name)))) t = await ask(null, screenPerson);
   if (t?.reason === 'who' && pron && earlier.trim()) t = await ask(earlier, null);
   return t ?? { ok: false, reason: 'who' };
 }
@@ -94,7 +99,7 @@ export async function chatDraftTurn(db: Db, deps: Deps, t: Target, ask: string, 
   const replaces = !!String(t.current ?? '').trim();
   const card: ChatDraftCard = { draft_id: put.draft_id, person_id: t.person_id!, name: t.name ?? '', first_name: t.first_name ?? '', kind: t.kind!,
     text: w.draft.text, needs_review: !!w.draft.needs_review, flags: w.flags, edited: !!t.edited, replaces };
-  return { text: draftLine(t.kind!, card.name, card.first_name, { edited: card.edited, replaces, needsReview: card.needs_review }), card,
+  return { text: draftLine(t.kind!, card.name, card.first_name, { edited: card.edited, replaces, needsReview: card.needs_review, checkFailed: !w.pass }), card,
     callId: w.callIds[w.callIds.length - 1], reason: null };
 }
 
