@@ -1,4 +1,4 @@
-// ari-ai (PENDING). Database access: PostgREST RPCs only, through an ALLOWLIST. The function's own named secret key ari_ai
+// kyte-ai (PENDING). Database access: PostgREST RPCs only, through an ALLOWLIST. The function's own named secret key ari_ai
 // (S1 R7 pattern: sb_secret_ key, apikey header only, no legacy fallback) for service RPCs; the caller's own JWT for the one
 // owner check. No table writes, no app_config / app_changes access: the allowlist below is the whole write surface.
 import { guardedFetch } from '../_shared/ai/http.ts';

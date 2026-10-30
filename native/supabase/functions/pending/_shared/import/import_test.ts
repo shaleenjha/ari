@@ -6,7 +6,7 @@ import { mapLemlist, Candidate, PeopleLookup } from './lemlist.ts';
 import { allowedHost } from '../ai/http.ts';
 import { route } from '../ai/router.ts';
 import { Ledger } from '../ai/run.ts';
-import { scripted } from '../../ari-ai/fakes_test_util.ts';
+import { scripted } from '../../kyte-ai/fakes_test_util.ts';
 
 Deno.env.set('SUPABASE_URL', 'https://abcdefghijklmnopqrst.supabase.co');
 

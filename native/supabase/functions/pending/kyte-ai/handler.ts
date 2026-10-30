@@ -1,4 +1,4 @@
-// ari-ai request handler (wiring in index.ts). Edge function (PENDING, not deployed; needs S1 R7 live first: it reads its own named secret key ari_ai, apikey header
+// kyte-ai request handler (wiring in main.ts). Edge function (PENDING, not deployed; needs S1 R7 live first: it reads its own named secret key ari_ai, apikey header
 // only, no legacy fallback). Deploy with Verify JWT OFF: the function checks every caller itself.
 //   App (owner only):  POST {action, ...} with the app's own session (Authorization: Bearer <user JWT>). The owner check runs
 //                      in the database as that user (ari_ai_caller -> is_owner(), so the aal2 rule applies).

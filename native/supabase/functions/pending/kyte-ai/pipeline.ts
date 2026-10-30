@@ -1,4 +1,4 @@
-// ari-ai (PENDING, Oct 28 2026). Pipeline worker for the 0047 job line: research -> brief -> dm1 -> copy_check -> fact_check.
+// kyte-ai (PENDING, Oct 28 2026). Pipeline worker for the 0047 job line: research -> brief -> dm1 -> copy_check -> fact_check.
 // Teaching notes:
 //  - The queue is pgmq. read() hides a message for VT seconds; if this invocation dies, the message comes back and another
 //    run picks it up (at-least-once). A message is archived ONLY by ari_pipeline_finish, in the same transaction that marks

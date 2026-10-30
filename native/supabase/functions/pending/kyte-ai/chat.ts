@@ -1,4 +1,4 @@
-// ari-ai action "chat" (PENDING, Oct 30 2026): live Ask Kyte. Owner only (handler.ts checks the caller first).
+// kyte-ai action "chat" (PENDING, Oct 30 2026): live Ask Kyte. Owner only (handler.ts checks the caller first).
 //   POST {action: "chat", text, context?: {screen?, entity_type?: "person" | "account", entity_id?, label?}, stream?: true}
 // SSE events: `delta` {t} while the answer is written; `replace` {t} when the final, cleaned answer differs from what was already
 // shown (the app swaps the bubble text); then `done` {text, status: "ok" | "handled", entities: [{kind, id, name, start, end}],

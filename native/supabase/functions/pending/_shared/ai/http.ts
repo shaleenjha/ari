@@ -1,6 +1,6 @@
 // Live AI layer (PENDING). The ONLY network path the AI layer uses. Two guarantees live here:
 //  1. Host allowlist: model providers, this project's own Supabase host and Google (Gmail / OAuth / certs). LinkedIn (or any
-//     other host) is refused before a socket opens, so no code path in ari-ai or ari-gmail-push can send to LinkedIn.
+//     other host) is refused before a socket opens, so no code path in kyte-ai (or its ari-ai alias) or ari-gmail-push can send to LinkedIn.
 //  2. Timeout per attempt and exactly ONE retry, only on a network error, a timeout, 429 or 5xx.
 // Keys are passed in headers by the caller and never appear in an error message (errors carry host + status only).
 

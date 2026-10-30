@@ -47,7 +47,7 @@ Checks `test/checks_after_0050.sql` (one statement, synthetic queue rows QZ0050*
 run_local.sh: apply, checks, re-apply, rollback x2 (body + ACL fingerprint identical), apply, checks. Prod: with 0049, needs a PAT from Owner.
 
 ## 0049 live Ask Kyte chat (Oct 30 2026): WRITTEN; staging rehearsal only, never prod without Owner + a fresh PAT
-Owner (Oct 30 01:29 IST): "the chat has to be AI driven". ari-ai action `chat` (functions/pending/ari-ai/chat.ts) answers at once, streamed.
+Owner (Oct 30 01:29 IST): "the chat has to be AI driven". ari-ai action `chat` (functions/pending/kyte-ai/chat.ts) answers at once, streamed.
 `0049_ai_chat.sql`: ai_calls.task gains 'chat' (constraint rebuilt from whatever the live one allows); `ai_chat` (30 days of turns, owner
 read, service write, no prompt or snapshot stored); `ari_ai_chat_begin(text)` (20 a minute / 300 a day under an advisory lock, records the
 question, prunes, returns the last 6 turns of the past 2 h); `ari_ai_chat_finish(...)`; `ari_ai_chat_context(question, person, account)`

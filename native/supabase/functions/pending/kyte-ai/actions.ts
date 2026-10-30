@@ -1,4 +1,4 @@
-// ari-ai (PENDING). The five app actions. Each one reads ONE person's (or one reply's) context, runs the routed model task,
+// kyte-ai (PENDING). The five app actions. Each one reads ONE person's (or one reply's) context, runs the routed model task,
 // validates the output and writes ONLY to that person's draft / research fields or that reply's drafts. Nothing here sends a
 // message anywhere: there is no LinkedIn client, and the host allowlist in _shared/ai/http.ts refuses linkedin.com.
 import { HttpError } from '../_shared/ai/http.ts';

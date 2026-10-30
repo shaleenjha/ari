@@ -59,7 +59,10 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
   host allowlist (LinkedIn refused), per-attempt timeout and exactly one retry (429 / 5xx / network); SSE streaming for draft and
   rewrite; Quill house-style gate (`style.ts`, verbatim copy of app/jobs/src/draft-eval/style.ts) forces `needs_review`.
   Keys only from env `ANTHROPIC_API_KEY` / `XAI_API_KEY` (`OPENAI_API_KEY` optional), never logged or returned.
-- `pending/ari-ai/`: one owner-only endpoint (app session; owner check runs in the database as the user via `ari_ai_caller()`
+- `pending/kyte-ai/` (slug `kyte-ai`; was `ari-ai` until Oct 30 2026): one owner-only endpoint. `pending/ari-ai/index.ts` is a
+  legacy alias that serves the same code under the slug `ari-ai`, because staging runs it and the database kicks (0041, 0047)
+  and `ari-gmail-push` call that slug. Deploy both until a migration repoints those callers (docs/engineering/code-names.md).
+  The endpoint (app session; owner check runs in the database as the user via `ari_ai_caller()`
   so the aal2 rule applies). Actions: `rewrite`, `draft_dm1`, `quick_research`, `deep_research` (async `ai_jobs` row; LIVE feed in
   `ai_jobs.steps`: one event per search query `{type: query, source, query}`, per url / post read `{type: read, url, title,
   domain}`, per finding as it lands `{type: finding, fact, source_url, domain}`, plus status / error; each with `seq` and `at`),
@@ -80,10 +83,10 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
   Oct 28 2026: rehearsed locally in staging's real order (0041 after 0045/0046): applies, checks pass, rollback x2 clean, 0045/0046 checks unaffected.
   Staging deploy plan: work/ai-layer/staging_deploy_plan.md (not in the repo). Spend guard: `ai_budget` (OFF by default, $50 / month, $5 / day), worst-case
   reservation under an advisory lock before every call, real cost booked after; refusals logged; one generic alert per cap.
-- Offline tests: `deno test --allow-env --allow-read pending/_shared/ai/ai_test.ts pending/ari-ai/ari_ai_test.ts
+- Offline tests: `deno test --allow-env --allow-read pending/_shared/ai/ai_test.ts pending/kyte-ai/ari_ai_test.ts
   pending/ari-gmail-push/push_test.ts` (list the files explicitly; directory discovery missed two of them here).
   CI needs one change on main (branch pushes may not edit `.github/`), in the `functions` job:
-  `deno check native/supabase/functions/pending/ari-ai/index.ts native/supabase/functions/pending/ari-gmail-push/index.ts` and
+  `deno check native/supabase/functions/pending/kyte-ai/index.ts native/supabase/functions/pending/ari-ai/index.ts native/supabase/functions/pending/ari-gmail-push/index.ts` and
   `deno test --allow-env --allow-read <the three test files>`.
 
 ### Gmail push (Pub/Sub) setup, after deploy (Google Cloud project that owns the ARI_GMAIL_CLIENT_ID OAuth client)

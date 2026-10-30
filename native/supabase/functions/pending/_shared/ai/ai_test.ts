@@ -1,5 +1,5 @@
 // Offline tests for the shared AI layer (mocked transport and providers, synthetic data). Run:
-//   deno test --allow-env native/supabase/functions/pending/_shared/ai/ native/supabase/functions/pending/ari-ai/ native/supabase/functions/pending/ari-gmail-push/
+//   deno test --allow-env native/supabase/functions/pending/_shared/ai/ native/supabase/functions/pending/kyte-ai/ native/supabase/functions/pending/ari-gmail-push/
 import { assert, assertEquals, assertRejects } from 'jsr:@std/assert@1';
 import { allowedHost, guardedFetch, HttpError, setTransport } from './http.ts';
 import { costUsd, reserveUsd, ROUTES, route } from './router.ts';
@@ -7,7 +7,7 @@ import { DraftOut, extractJson, ReplyDraftsOut, ResearchOut, TriageClassOut } fr
 import { META, rewritePrompt, splitDraft } from './prompts.ts';
 import { parseAnthropic, parseResponsesApi, anthropic } from './providers.ts';
 import { BudgetRefused, InvalidOutput, Ledger, runDraft, runDraftStream, runTask } from './run.ts';
-import { draftReply, scripted } from '../../ari-ai/fakes_test_util.ts';
+import { draftReply, scripted } from '../../kyte-ai/fakes_test_util.ts';
 import type { Provider } from './types.ts';
 
 Deno.env.set('SUPABASE_URL', 'https://abcdefghijklmnopqrst.supabase.co');

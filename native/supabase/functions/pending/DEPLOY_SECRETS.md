@@ -9,7 +9,7 @@ Set each one on the project BEFORE deploying the function. A missing secret fail
 
 Rotation of the backup hook: set both the vault secret and ARI_BACKUP_HOOK to one new `openssl rand -hex 32` value, then repeat the smoke check. If only one changed, the function logs "hook secret drift" and refuses.
 
-## Live AI layer (ari-ai, ari-gmail-push), added Oct 28 2026; staging first, plan in work/ai-layer/staging_deploy_plan.md
+## Live AI layer (kyte-ai with its legacy alias ari-ai, ari-gmail-push), added Oct 28 2026; the ari-ai rows below apply to both slugs (same code, same secrets); staging first, plan in work/ai-layer/staging_deploy_plan.md
 Both read their OWN named secret key through the built-in `SUPABASE_SECRET_KEYS` (create named keys `ari_ai` and
 `ari_gmail_push`, type secret, before the deploy; a missing key = every call 500 before any work). No ARI_SK_* secret is
 needed when the named key exists (proved on staging Oct 28 for the R7 functions). Migration 0041 must be applied first (RPCs,

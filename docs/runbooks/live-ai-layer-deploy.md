@@ -31,7 +31,8 @@ Code: branch `live/ai-layer` (`native/supabase/functions/pending/{_shared/ai,ari
 2. Apply `0041_ai_layer.sql` (one request). `ai_budget.enabled` stays false, so the new crons are no-ops.
    Verify: ledger row 0041, crons `ari-ai-events` / `ari-gmail-watch-renew` / `ari-ai-prune`, grants as in checks_after_0041.sql.
 3. Start the worker again (it is untouched by 0041).
-4. Create the named keys, set the secrets above, deploy `ari-ai` and `ari-gmail-push` with Verify JWT OFF
+4. Create the named keys, set the secrets above, deploy `kyte-ai`, its legacy alias `ari-ai` (entrypoint `ari-ai/index.ts`, same code; the database kicks and
+   `ari-gmail-push` call this slug) and `ari-gmail-push` with Verify JWT OFF
    (place `pending/_shared` at `functions/_shared` and each function dir at `functions/<slug>` for the bundle).
 5. Staging smoke (synthetic person): `update ai_budget set enabled = true`; app session -> `quick_research`, `draft_dm1`,
    `rewrite` with a chip (stream), `triage_reply`, `deep_research` + `job_stream` (watch queries, reads and findings arrive live);
@@ -44,5 +45,5 @@ Code: branch `live/ai-layer` (`native/supabase/functions/pending/{_shared/ai,ari
 
 ## Undo
 - Instant: `update ai_budget set enabled = false` (every model call refused, crons idle).
-- Push path: delete the Pub/Sub subscription. Functions: undeploy `ari-ai`, `ari-gmail-push`.
+- Push path: delete the Pub/Sub subscription. Functions: undeploy `kyte-ai`, `ari-ai`, `ari-gmail-push`.
 - Schema: `0041_ai_layer_rollback.sql` (stop the worker first). Drafts and research already written stay.

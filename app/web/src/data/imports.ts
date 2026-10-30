@@ -1,8 +1,8 @@
 // The import card's two calls, behind one seam like data/client.ts. main.tsx sets the resolver per data mode:
 //   mock and legacy  fixtures/importPlans.ts (synthetic plans, no network)
-//   live             not set yet. import_resolve is a POST to the ari-ai function, and the no-client-writes rule refuses
+//   live             not set yet. import_resolve is a POST to the kyte-ai function, and the no-client-writes rule refuses
 //                    every non-GET outside the sign-in path, with no allow escape. Wiring it needs that rule to name the
-//                    ari-ai read actions first (Owner's call, Bastion review). Until then the card says checking is off.
+//                    kyte-ai read actions first (Owner's call, Bastion review). Until then the card says checking is off.
 import type { Choices, ImportPlan, ImportRow } from './importPlan';
 
 /** Why a check failed, from the function's error codes (400 bad_request, 413 too_large, 429 spend_limit, 401). */

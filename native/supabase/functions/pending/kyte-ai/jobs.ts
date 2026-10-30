@@ -1,4 +1,4 @@
-// ari-ai (PENDING). Deep research as an async job: claude-opus-5-5 ORCHESTRATES in a tool loop; each grok_search tool call
+// kyte-ai (PENDING). Deep research as an async job: claude-opus-5-5 ORCHESTRATES in a tool loop; each grok_search tool call
 // runs Grok 4.7 with x_search or web_search for fresh signals (Owner, Oct 23 2026 15:11 IST).
 // LIVE FEED: every search query, every url/post read (title + domain) and every finding as it lands is appended to
 // ai_jobs.steps as an event ({seq, at, type, ...}) the moment it happens. The app follows it two ways: realtime on ai_jobs, or

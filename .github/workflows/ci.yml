@@ -165,6 +165,7 @@ jobs:
         with: { deno-version: v2.9.7 }   # pinned; bump on purpose, not by drift
       # ari-push and ari-backup predate strict typing (plain-JS style, pre-existing errors); they are parse-checked only.
       - run: deno check native/supabase/functions/pending/ari-worker-token/index.ts native/supabase/functions/pending/ari-gmail-oauth/index.ts native/supabase/functions/pending/ari-gmail-ingest/index.ts
+      - run: deno check native/supabase/functions/pending/kyte-ai/index.ts native/supabase/functions/pending/ari-ai/index.ts   # Oct 30 2026: kyte-ai and its legacy alias slug ari-ai
       # Every *_test.ts / *.test.ts under functions/ (incl. _shared), listed explicitly: directory discovery missed files.
       # Passes with a notice when none exist.
       - name: deno test (all edge function tests)

@@ -32,7 +32,7 @@ that keeps the old name working until every caller has moved.
 |---|---|
 | `ari-backup`, `ari-push`, `ari-gmail-ingest`, `ari-gmail-oauth` | Deployed on prod. Cron jobs, the service worker and Google's OAuth redirect URI call these slugs. |
 | `ari-gmail-push`, `ari-worker-token` | Pending. Their slugs are in pending migrations and in the Pub/Sub and broker setup docs. |
-| `ari-ai` (legacy alias of `kyte-ai`) | Staging runs it, and the database kicks (`ari_ai_kick` in 0041, the pipeline kick in 0047) plus `ari-gmail-push` call `/functions/v1/ari-ai`. The AI function is renamed to `kyte-ai` in its own commit, and `ari-ai` stays a thin alias deployed from the same code. |
+| `ari-ai` (legacy alias of `kyte-ai`) | Staging runs it, and the database kicks (`ari_ai_kick` in 0041, the pipeline kick in 0047) plus `ari-gmail-push` call `/functions/v1/ari-ai`. The AI function is now `pending/kyte-ai/` (slug `kyte-ai`). `pending/ari-ai/index.ts` is a three-line alias that serves the same `main.ts` under the old slug, and each deployment kicks only itself. On staging, keep `ari-ai` deployed. On prod, deploy both slugs at rollout, or first add a migration that repoints `ari_ai_kick` and the 0047 kick (plus a one-line `ari-gmail-push` change) to `kyte-ai`, then undeploy `ari-ai` and delete the alias folder. |
 | Named API keys `ari_ai`, `ari_gmail_push`, `ari_worker_token`; env `ARI_*` (`ARI_SK_*`, `ARI_PUBLISHABLE_KEY`, `ARI_APP_ORIGINS`, `ARI_GMAIL_*`, `ARI_WORKER_*`, `ARI_BACKUP_HOOK`, `ARI_BROKER_*`, `ARI_STYLE_B_AE`) | Set as secrets on the deployed projects. A rename means re-setting secrets on prod. |
 | Headers `x-ari-hook`, `x-ari-worker` | Shared between SQL (pg_net), the worker and the functions. Both sides would have to change at once. |
 
@@ -68,4 +68,4 @@ that keeps the old name working until every caller has moved.
 - Doc prose: README, REPO_MAP, privacy inventory, RELEASES, spec 09, RESTORE, functions README, app docs, `plans/builder-sheet.md`.
 - Script header comments (no code or output change), and the Claude review prompt.
 - The repo name now lives in one line (`scripts/keel_repo.conf`, read by `scripts/keel_repo.py`).
-- Pending AI edge function: `pending/ari-ai/` becomes `pending/kyte-ai/`, with `pending/ari-ai/index.ts` as the legacy alias (separate commit).
+- Pending AI edge function: `pending/ari-ai/` is now `pending/kyte-ai/` (code in `main.ts`, entry `index.ts`), with `pending/ari-ai/index.ts` as the legacy alias. `kyte-ai/alias_test.ts` pins that.

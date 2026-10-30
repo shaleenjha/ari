@@ -1,4 +1,4 @@
-// Drafting in Ask Kyte (PENDING, Oct 30 2026; Owner option A). Pure helpers, offline-tested (ari-ai/chat_draft_test.ts):
+// Drafting in Ask Kyte (PENDING, Oct 30 2026; Owner option A). Pure helpers, offline-tested (kyte-ai/chat_draft_test.ts):
 //  1. draftAsk(): is this chat message an ask to write / draft / redo a message for someone? Deterministic, no model.
 //  2. The prompts: the SAME ones Redraft and the DM1 drafter use (prompts.ts rewritePrompt / draftDm1Prompt), plus the AE guide's
 //     DM2 / DM3 shapes (plans/copy-lab/ae-styles.md v3) for an empty follow-up slot, and one reply prompt for a single answer.

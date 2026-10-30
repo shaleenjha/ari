@@ -1,4 +1,4 @@
-// ari-ai (PENDING). Event path: accept -> classify (Haiku) -> pipeline research (0047; DM1 follows research + brief) -> "DM1 ready".
+// kyte-ai (PENDING). Event path: accept -> classify (Haiku) -> pipeline research (0047; DM1 follows research + brief) -> "DM1 ready".
 // Fired by ari-gmail-push right after a Gmail push, by the app's manual "Accepted" tap (action draft_dm1), and by the
 // 10-minute cron as the fallback. Idempotent: ai_triggers ('accept', gmail msg id) and ('dm1', person id) are claimed
 // once in the database before any model call, so a redelivered Pub/Sub message or an overlapping cron run does nothing.

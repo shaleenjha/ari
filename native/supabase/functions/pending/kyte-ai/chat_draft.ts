@@ -1,4 +1,4 @@
-// ari-ai: drafting in Ask Kyte (PENDING, Oct 30 2026; Owner option A, DECISIONS.md). Two halves:
+// kyte-ai: drafting in Ask Kyte (PENDING, Oct 30 2026; Owner option A, DECISIONS.md). Two halves:
 //  1. chatDraftTurn(): inside action "chat", when Owner asks Kyte to write / draft / redo a message for a named person. The person
 //     and the rules come from SQL (ari_ai_chat_draft_target, 0051: review pending, personal, Hold, exec track, customer / do-not-
 //     contact, meeting set, withdrawn, already sent, DMs stop after a reply, not before they accept). Eligible: the draft is written
