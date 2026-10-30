@@ -83,11 +83,9 @@ Branch `live/ai-layer`. Nothing here is deployed, no migration is applied, no se
   Oct 28 2026: rehearsed locally in staging's real order (0041 after 0045/0046): applies, checks pass, rollback x2 clean, 0045/0046 checks unaffected.
   Staging deploy plan: work/ai-layer/staging_deploy_plan.md (not in the repo). Spend guard: `ai_budget` (OFF by default, $50 / month, $5 / day), worst-case
   reservation under an advisory lock before every call, real cost booked after; refusals logged; one generic alert per cap.
-- Offline tests: `deno test --allow-env --allow-read pending/_shared/ai/ai_test.ts pending/kyte-ai/ari_ai_test.ts
-  pending/ari-gmail-push/push_test.ts` (list the files explicitly; directory discovery missed two of them here).
-  CI needs one change on main (branch pushes may not edit `.github/`), in the `functions` job:
-  `deno check native/supabase/functions/pending/kyte-ai/index.ts native/supabase/functions/pending/ari-ai/index.ts native/supabase/functions/pending/ari-gmail-push/index.ts` and
-  `deno test --allow-env --allow-read <the three test files>`.
+- Offline tests: CI's `functions` job runs every `*_test.ts` under functions/ (listed explicitly by `find`; directory discovery
+  missed files) and, since Oct 30 2026, `deno check` on `pending/kyte-ai/index.ts`, `pending/ari-ai/index.ts` (the legacy alias) and
+  `pending/ari-gmail-push/index.ts`. Nothing left to add to ci.yml.
 
 ### Gmail push (Pub/Sub) setup, after deploy (Google Cloud project that owns the ARI_GMAIL_CLIENT_ID OAuth client)
 1. Enable the Pub/Sub API. `gcloud pubsub topics create ari-gmail-push`

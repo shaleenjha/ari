@@ -40,7 +40,7 @@ Code: branch `live/ai-layer` (`native/supabase/functions/pending/{_shared/ai,ari
    `monthly_cap_usd` to 0.05 and confirm a 429 `spend_limit`; then disable again.
 6. Prod: repeat 2 to 4, then Owner's go -> `update ai_budget set enabled = true`.
 7. Gmail push: README "Gmail push (Pub/Sub) setup" steps 1 to 6.
-8. Add the CI lines from the README to `.github/workflows/ci.yml` on main.
+8. (Done Oct 30 2026: CI deno-checks kyte-ai, ari-ai and ari-gmail-push and runs all their tests.)
 9. After each prod deploy, move the pending dirs over the live ones (same rule as R7).
 
 ## Undo
