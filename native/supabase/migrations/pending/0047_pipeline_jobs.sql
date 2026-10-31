@@ -148,7 +148,12 @@ begin
   end if;
   select pgmq.send('ari_pipeline', jsonb_build_object('job_id', j)) into m;
   update pipeline_jobs set msg_id = m where id = j;
-  if p_kick then perform ari_pipeline_kick(); end if;
+  -- a failed kick (missing gmail_fn_base, pg_net error) must never abort the caller's write (the people Accepted trigger):
+  -- the job and its message are already queued and the 1-minute ari-pipeline cron kicks again (review-lows backlog, #50)
+  if p_kick then
+    begin perform ari_pipeline_kick();
+    exception when others then raise warning 'ari_pipeline_kick failed (cron retries): %', sqlerrm; end;
+  end if;
   return jsonb_build_object('job_id', j, 'existing', false, 'msg_id', m);
 end $$;
 
