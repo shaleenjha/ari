@@ -56,6 +56,7 @@ INCLUDE = [
     'scripts/seller_config.py', 'scripts/repo_scan.py', 'scripts/test_repo_scan.py',
     'scripts/keel_repo.py', 'scripts/keel_repo.conf', 'scripts/test_keel_repo.py',  # Oct 30 2026: the repo name in one line (Kyte rename)
     'scripts/test_ops_sync.js', 'scripts/test_ops_no_story.py',  # Oct 30 2026 v18.14.11: ops.html catch-up + no build story tests
+    'scripts/test_ops_today.js',  # Nov 2 2026 v18.14.12: Today remove closes relay replies + no list redraw
     # Oct 27 2026: ingest labels step 1 (spec docs/specs/09-ingest-labels.md): code labelers + dry-run backfill, and their tests
     'scripts/ingest_labels.py', 'scripts/test_ingest_labels.py',
     'scripts/scan_gate.py', 'scripts/test_scan_gate.py',  # Oct 30 2026: scan controls gate (0052), called by the LinkedIn read scan tasks

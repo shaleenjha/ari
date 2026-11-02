@@ -15,7 +15,7 @@ try{var EA=Element.prototype.animate;Element.prototype.animate=function(k,o){try
 })();
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="ari-build" content="v18.14.11"><meta name="ari-rev" content="05ae22f947">
+<meta name="ari-build" content="v18.14.12"><meta name="ari-rev" content="05ae22f947">
 <title>Kyte by Thrandvex</title>
 <link rel="manifest" href="/ari.webmanifest">
 <meta name="theme-color" content="#E7E2D9"><meta name="color-scheme" content="light">
@@ -11125,6 +11125,7 @@ setInterval(()=>{if(!locked()&&!document.hidden){const r=document.getElementById
 </script>
 <script>/* ===== Ari v18.4 Relay: queue first on Today, replies pinned #1, Today's 15, one person per screen (board fixes #9, #10) ===== */
 (function(){'use strict';
+const setH=(el,h)=>{if(el.__ariH===h&&el.firstChild===el.__ariFC)return false;el.innerHTML=h;el.__ariH=h;el.__ariFC=el.firstChild;return true}; /* v18.14.12: compare with the string we last wrote, never innerHTML (escaped quotes and in-place edits never match it) */
 const V184=window.ariV184={v:'v18.4',top:null,at:0,err:'',errs:[],prefs:{push_show_names:false,today15_cap_per_account:4},drafting:{},spread:[],acked:0,loads:0};
 const DM_CAP=4;/* per-account cap applies to DM2s too: at most 4 DM2s to one account per day */
 const $=s=>document.querySelector(s);
@@ -11165,6 +11166,13 @@ function load(why){if(LP)return LP;if(!signed())return Promise.resolve();
   clearTimeout(V184.fastT);if(Object.keys(V184.drafting).length)V184.fastT=setTimeout(()=>load('drafting'),6000);
   deepLink()})();return LP}
 V184.load=load;
+/* v18.14.12 (Owner Nov 2): Remove from queue on a relay reply also closes the reply. The Today pin reads replies.status, never people.skipped. */
+const R1812=()=>{try{window.ariV1812&&ariV1812.render&&ariV1812.render()}catch(e){}};
+async function dismissRelay(id){const rid=+id;if(id==null||id===''||!isFinite(rid))return false;
+  const T=V184.top;if(T&&T.replies)T.replies=T.replies.filter(r=>String(r.id)!==String(rid));render();R1812();
+  let ok=true;try{await rpc('ari_reply_done',{p_id:rid,p_outcome:'dismissed',p_body:null})}catch(e){ok=false;V184.errs.push('remove '+String(e&&e.message||e))}
+  try{if(LP)await LP}catch(e){}await load('remove');R1812();return ok}
+V184.dismissRelay=dismissRelay;
 async function prefsLoad(){try{const c=await V17().ready();if(!c||!signed())return;const {data}=await c.from('ari_prefs').select('key,value');(data||[]).forEach(r=>{if(r.key in V184.prefs)V184.prefs[r.key]=r.value})}catch(e){}}
 let RCH=null;
 async function live(){if(RCH||!signed())return;try{const c=await V17().ready();if(!c)return;
@@ -11213,10 +11221,10 @@ function t15HTML(){const T=V184.top;if(!signed())return '';if(!T||!Array.isArray
   const rows=L.map((r,i)=>`<div class="v184row press" role="button" data-v184c="${i}"><span class="rk">${E(r.rank||i+1)}</span><div class="t"><b>${E(r.company||'')}</b><span> · ${E(r.title||'')}</span><small>${E(r.why||'')}</small></div></div>`).join('');
   return `<div class="v184card">${hd}<div class="v184wk"><span>${E(s7)} of ${E(ceil)} this week</span><i class="${bc}"><b style="width:${pct}%"></b></i><span>cap ${E(cap)}/account</span></div>${rows}${warn}
   <div class="v184start press" role="button" data-v184go="c">Start, ${L.length} to send</div></div>`}
-function render(){try{if(!mount())return;const st=$('#v184st');if(st)st.innerHTML=stHTML();
-  const rp=$('#v184rep'),R=(V184.top&&V184.top.replies)||[];if(rp){const h=R.length?`<div class="v184cap"><span>Replies</span><span>${R.length}</span></div>`+R.map(repHTML).join(''):'';if(rp.innerHTML!==h)rp.innerHTML=h}
-  const t=$('#v184t15');if(t){const h=t15HTML();if(t.innerHTML!==h)t.innerHTML=h}
-  const sp=$('#v184sp');if(sp){const h=V184.spread.length?V184.spread.map(s=>`<div class="v184hint">${E(s.n)} more DM2${s.n===1?'':'s'} at ${E(s.company)} wait for tomorrow: at most ${DM_CAP} to one account a day.</div>`).join(''):'';if(sp.innerHTML!==h)sp.innerHTML=h}
+function render(){try{if(!mount())return;const st=$('#v184st');if(st)setH(st,stHTML());
+  const rp=$('#v184rep'),R=(V184.top&&V184.top.replies)||[];if(rp){const h=R.length?`<div class="v184cap"><span>Replies</span><span>${R.length}</span></div>`+R.map(repHTML).join(''):'';setH(rp,h)}
+  const t=$('#v184t15');if(t)setH(t,t15HTML());
+  const sp=$('#v184sp');if(sp){const h=V184.spread.length?V184.spread.map(s=>`<div class="v184hint">${E(s.n)} more DM2${s.n===1?'':'s'} at ${E(s.company)} wait for tomorrow: at most ${DM_CAP} to one account a day.</div>`).join(''):'';setH(sp,h)}
   const g=document.querySelector('[data-v184go="q"]');if(g){const n=qItems().length;g.hidden=!n||ld();g.textContent=n?`Start · ${n}`:''}
 }catch(e){V184.errs.push('render '+e)}}
 V184.render=render;
@@ -11274,7 +11282,7 @@ function wireFx(o){o.addEventListener('click',async e=>{const s=e.target.closest
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx,it=cur();
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
-  if(a==='remove'){const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);const MU=window.ariV16&&ariV16.mutate;if(!MU){toast('Couldn’t remove that yet.');return}Promise.resolve(MU('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)).catch(()=>toast('Couldn’t remove that yet. Try again in a moment.'));FX.items.splice(FX.i,1);FX.i--;return advance()}
+  if(a==='remove'){const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;const rid=it&&(it.k==='reply'||it.k==='relay')&&it.id!=null&&isFinite(+it.id)?+it.id:null;/* v18.14.12: a relay reply also gets closed */if(!pid){if(rid!=null)dismissRelay(rid);return advance()}const d=new Date(Date.now()+19800000).toISOString().slice(0,10);const MU=window.ariV16&&ariV16.mutate;if(!MU){toast('Couldn’t remove that yet.');return}Promise.resolve(MU('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)).catch(()=>toast('Couldn’t remove that yet. Try again in a moment.'));if(rid!=null)dismissRelay(rid);FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='anyway'){it.full=false;fxRender();return}
   if(a==='paste')return pasteFor(it.id,true);
@@ -12045,6 +12053,7 @@ setTimeout(tick,0);
       never replaces it, it shows as an alternative.
    No new data paths: reads ariM / ariV184 / ariV182; writes through ariV16.mutate and the existing apply_op (queue set). */
 (function(){'use strict';
+const setH=(el,h)=>{if(el.__ariH===h&&el.firstChild===el.__ariFC)return false;el.innerHTML=h;el.__ariH=h;el.__ariFC=el.firstChild;return true}; /* v18.14.12: compare with the string we last wrote, never innerHTML (escaped quotes and in-place edits never match it) */
 const V=window.ariV1812={v:'v18.12',errs:[],renders:0,opened:0,logged:0,blocked:0,replaced:0,restored:0,moves:{},fights:{},lp:0};
 const $=s=>document.querySelector(s);
 const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12175,7 +12184,7 @@ function mount(){const rd=$('#ready');if(!rd)return null;const top=$('#v184top')
     const stk=document.getElementById('stk');if(stk&&stk.parentNode===rd&&moveOK(stk,'stk'))rpi.appendChild(stk)}
   const pxs=$('#v1812pxs');if(pxs){const h=PROXY.map(id=>{const o=document.getElementById(id);if(!o||!o.innerHTML.trim())return '';
       return `<div class="${E(o.className)} v1812px" role="button" tabindex="0" data-v1812px="${id}" aria-label="${E(o.getAttribute('aria-label')||o.textContent.trim().slice(0,60))}">${o.innerHTML.replace(/\sid="[^"]*"/g,'')}</div>`}).join('');
-    if(pxs.innerHTML!==h)pxs.innerHTML=h}
+    setH(pxs,h)}
   /* everything else visible on Today folds into More (hidden leftovers stay where they are) */
   const mi=$('#v1812mi');if(mi)[...rd.children].forEach(el=>{if(el===top||el===more||TAIL.includes(el.id)||SKIP.has(el.id)||el.dataset.v184==='qsec'||el.id==='v184sp'&&!el.textContent.trim())return;
     if(el.classList.contains('sec')&&el.nextElementSibling&&el.nextElementSibling.classList.contains('list')){const l=el.nextElementSibling;if((shown(el)||shown(l))&&moveOK(el,'sec:'+el.textContent.slice(0,12))){mi.appendChild(el);mi.appendChild(l)}return}
@@ -12191,8 +12200,8 @@ const T3=()=>{try{return !!(window.ariT3&&ariT3.today())}catch(e){return false}}
 const CTX=()=>({doneToday,minutes,needsHTML,signed:signed(),loading:loading(),toSend});
 V.needsHTML=needsHTML;
 function render(){try{if(locked())return;const w=mount();if(!w)return;V.renders++;const L=items();V.L=L;const t3=T3();
-  const st=$('#v1812st');if(st){const h=t3?ariT3.status(L,CTX()):statusHTML(L);if(st.innerHTML!==h)st.innerHTML=h}
-  const q=$('#v1812q');if(q){const h=t3?ariT3.queue(L,CTX()):queueHTML(L);if(h!==LAST||q.innerHTML!==h){q.innerHTML=h;LAST=h}}
+  const st=$('#v1812st');if(st){const h=t3?ariT3.status(L,CTX()):statusHTML(L);setH(st,h)}
+  const q=$('#v1812q');if(q){const h=t3?ariT3.queue(L,CTX()):queueHTML(L);if(h!==LAST)q.__ariH=null;if(setH(q,h))V.qw=(V.qw||0)+1;LAST=h}
   const ms=$('#v1812ms');if(ms){const t=moreSummary();if(ms.textContent!==t)ms.textContent=t}
   /* v18.14.4: the tab badge shows the same total as "1 of N" */
   if(!t3){const t=L.length?String(L.length):'';document.querySelectorAll('.tbi[data-i="0"] .dot,.tab[data-i="0"] .bd,.ri[data-i="0"] .rb').forEach(b=>{if(b.textContent!==t)b.textContent=t;b.style.display=t?'':'none'})}
@@ -12249,7 +12258,7 @@ function wire(o){o.addEventListener('click',e=>{const g=e.target.closest('[data-
   const b=e.target.closest('[data-fx]');if(!b)return;const a=b.dataset.fx;
   if(a==='close')return closeFocus();
   if(a==='more'){const m=o.querySelector('.fxmenu');if(m)m.hidden=!m.hidden;return}
-  if(a==='remove'){const it=cur();const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;if(!pid)return advance();const d=new Date(Date.now()+19800000).toISOString().slice(0,10);const MU=window.ariV16&&ariV16.mutate;if(!MU){toast('Couldn’t remove that yet.');return}Promise.resolve(MU('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)).catch(()=>toast('Couldn’t remove that yet. Try again in a moment.'));FX.items.splice(FX.i,1);FX.i--;return advance()}
+  if(a==='remove'){const it=cur();const pid=it&&it.pid;const RF=it&&it.k==='connect'?{skipped:new Date(Date.now()+19800000).toISOString().slice(0,10),stage:'Hold',next_action:'Removed from queue by Owner'}:null;const rid=it&&it.k==='relay'&&it.id!=null&&isFinite(+it.id)?+it.id:null;const DR=id=>{try{window.ariV184&&ariV184.dismissRelay&&ariV184.dismissRelay(id)}catch(e){V.errs.push('remove '+e)}};/* v18.14.12: a relay reply also gets closed */if(!pid){if(rid!=null)DR(rid);return advance()}const d=new Date(Date.now()+19800000).toISOString().slice(0,10);const MU=window.ariV16&&ariV16.mutate;if(!MU){toast('Couldn’t remove that yet.');return}Promise.resolve(MU('setFields',[pid,RF||{skipped:d}],`${E(String(it.name||'').split(' ')[0])} removed. Undo from their person file.`)).catch(()=>toast('Couldn’t remove that yet. Try again in a moment.'));if(rid!=null)DR(rid);FX.items.splice(FX.i,1);FX.i--;return advance()}
   if(a==='skip')return advance();
   if(a==='sent')return logSent(curText());
   if(a==='edited'){const ed=o.querySelector('.fxedit');if(ed){ed.hidden=false;const t=ed.querySelector('textarea');t.value=curText();t.focus()}return}
@@ -12776,7 +12785,7 @@ function entry(){try{const w=$('#v1812');if(!w)return;let el=$('#pplent');const 
   const ev=L.filter(p=>evOf(p)&&canConnect(p)).length,T=tags(L.filter(canConnect)).slice(0,2);
   const h=`<span class="press" role="button" data-pe="">Find people</span>${ev?`<span class="press" role="button" data-pe="__ev">🎟 Events <small>${ev}</small></span>`:''}${T.map(([t,n])=>`<span class="press" role="button" data-pe="${E(t)}">${E(human(t))} <small>${n}</small></span>`).join('')}`;
   if(!el){el=document.createElement('div');el.id='pplent';el.className='pplent';el.addEventListener('click',e=>{const b=e.target.closest('[data-pe]');if(b){F.q='';const s=$('#pplx .srch');if(s)s.value='';open(b.dataset.pe)}})}
-  const st=$('#v1812st');if(st&&st.nextElementSibling!==el)st.after(el);if(el.innerHTML!==h)el.innerHTML=h}catch(e){V.errs.push('entry '+e)}}
+  const st=$('#v1812st');if(st&&st.nextElementSibling!==el)st.after(el);if(el.__ariH!==h||el.firstChild!==el.__ariFC){el.innerHTML=h;el.__ariH=h;el.__ariFC=el.firstChild}}catch(e){V.errs.push('entry '+e)}} /* v18.14.12: no innerHTML compare */
 setInterval(entry,2500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(entry,400)});
 setTimeout(entry,1200);
@@ -14604,11 +14613,11 @@ function header(){const h=$('#hdAri');if(h&&!h.querySelector('.t5me'))h.insertAd
 /* ---------- Today ---------- */
 function today(){const q=$('#v1812q');if(!q)return;let L=null;const items=()=>{if(L)return L;try{L=(G.ariV1812&&ariV1812.items&&ariV1812.items())||[]}catch(e){L=[]}return L};
   $$('.v1813tile',q).forEach(b=>{const i=+b.dataset.v1812i,it=items()[i]||{};const st=(b.querySelector('.v1813st')||{}).textContent||'',co=(b.querySelector('.s')||{}).textContent||'';
-    const key=i+'|'+st+'|'+co+'|'+(b.querySelector('b')||{}).textContent;if(b.dataset.t5===key)return;b.dataset.t5=key;
+    const wn=when(it),key=i+'|'+st+'|'+co+'|'+(b.querySelector('b')||{}).textContent+'|'+wn;if(b.dataset.t5===key)return;b.dataset.t5=key;
     $$('.t5mono,.t5sub,.t5when',b).forEach(x=>x.remove());
     const m=document.createElement('span');m.className='t5mono';m.setAttribute('aria-hidden','true');m.textContent=(co.trim()[0]||(it.name||'?')[0]||'?').toUpperCase();b.insertBefore(m,b.firstChild);
     const s=document.createElement('span');s.className='t5sub';s.textContent=[st.trim(),co.trim()].filter(Boolean).join(' · ');b.appendChild(s);
-    const w=document.createElement('span');w.className='t5when';w.textContent=when(it);b.appendChild(w)});
+    const w=document.createElement('span');w.className='t5when';w.textContent=wn;b.appendChild(w)});
   $$('.v1813call',q).forEach(c=>{if(c.classList.contains('t5call'))return;c.classList.add('t5call');c.setAttribute('role','button');c.tabIndex=0;c.setAttribute('aria-haspopup','dialog');
     c.insertAdjacentHTML('beforeend','<span class="t5chev" aria-hidden="true">›</span>')});
   $$('.v1813sec>b',q).forEach(b=>{if(/^needs your call$/i.test(b.textContent.trim()))b.textContent='Your call'})}
