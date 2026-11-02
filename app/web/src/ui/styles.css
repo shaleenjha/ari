@@ -1,0 +1,219 @@
+@import './tokens.css';
+/* S2 (v18.17.0): Lamp & Dawn tokens from tokens.css (generated from tokens/tokens.json; never edit it by hand), Material 3
+   sizes from the S2 spec (docs/specs/07_s2_visual_spec.md): 4 px grid, 16 margins, buttons 40 / 56, rows min-height 56 / 64 / 88, nav 64, 48 px targets.
+   Every colour, size, radius and curve is a var(); raw values only in tokens.css (design lint). */
+/* Instrument Sans (OFL, self-hosted in public/fonts, precached by public/sw.js), variable 400 to 700, Latin. */
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url('/fonts/instrument-sans-latin-wght.woff2') format('woff2'); }
+/* Metric-matched fallbacks (S2 package values), so the swap to Instrument Sans changes glyphs and not layout. */
+@font-face { font-family: 'IS Fallback A'; src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('LiberationSans');
+  size-adjust: 103.25%; ascent-override: 93.95%; descent-override: 24.21%; line-gap-override: 0%; }
+@font-face { font-family: 'IS Fallback R'; src: local('Roboto'), local('Roboto-Regular');
+  size-adjust: 102.70%; ascent-override: 94.45%; descent-override: 24.34%; line-gap-override: 0%; }
+:root { font-size: 100%; }
+* { box-sizing: border-box; }
+a, button, textarea { touch-action: manipulation; }
+html, body { margin: 0; background: var(--canvas); color: var(--text-1); }
+body { font-family: var(--font); font-size: var(--fs-body); line-height: var(--lh-body); font-weight: var(--fw-body); letter-spacing: var(--ls-body);
+  font-variant-numeric: tabular-nums; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+b, strong { font-weight: var(--fw-body-strong); }
+.ic { flex: none; display: inline-block; vertical-align: middle; }
+.ic-16 { width: var(--icon-s); height: var(--icon-s); } .ic-20 { width: var(--icon-m); height: var(--icon-m); } .ic-24 { width: var(--icon-l); height: var(--icon-l); }
+.shell { position: relative; min-height: 100dvh; display: flex; flex-direction: column; max-width: var(--sheet-max); margin: 0 auto; }
+.screen { flex: 1; min-width: 0; padding: env(safe-area-inset-top) var(--margin) calc(var(--nav-h) + var(--s-4) + env(safe-area-inset-bottom)); overflow-wrap: anywhere; }
+.screen:focus { outline: none; }
+
+/* Header (48) and title (22/28). */
+.hd { display: flex; align-items: center; gap: var(--s-2); min-height: var(--header-h); margin-top: var(--s-1); }
+/* The title keeps its own width and the count line takes the rest, right-aligned, so the count's box starts at the same x
+   whether it holds the loading bar or the numbers (Today CLS 0, v18.17.2). */
+.hd h1 { flex: 0 1 auto; min-width: 0; margin: 0; font-size: var(--fs-title); line-height: var(--lh-title); font-weight: var(--fw-title); letter-spacing: var(--ls-title); }
+.hd h1:focus:not(:focus-visible) { outline: none; }
+.hd .count { flex: 1 0 auto; margin: 0; color: var(--text-2); white-space: nowrap; text-align: right; }
+.hd .count b { color: var(--text-1); }
+.hd .count i { font-style: normal; color: var(--text-3); }
+.back { min-width: var(--target); min-height: var(--target); margin-left: calc(var(--s-4) * -1); display: grid; place-items: center; color: var(--text-1); text-decoration: none; }
+.back .ic { transform: scaleX(-1); }
+.meta, .muted { color: var(--text-2); }
+p.muted, p.meta { margin: 0 0 var(--s-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); letter-spacing: var(--ls-meta); }
+/* Caps eyebrow ("UP NEXT · 8"): 11/16 600 +0.08em text-3, 24 above. */
+.sub { margin: var(--s-6) 0 var(--s-2); font-size: var(--fs-caps); line-height: var(--lh-caps); font-weight: var(--fw-caps); letter-spacing: var(--ls-caps);
+  text-transform: uppercase; color: var(--text-3); }
+
+/* Cards: surface-1, hairline, r20, padding 16. A card that is a link is a module row (56) with a chevron. */
+.card { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-2) var(--s-4); margin: var(--s-3) 0 0; min-height: var(--row-1);
+  background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-card); color: inherit; text-decoration: none; }
+.card > b, .cardhead > b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card > .ic, .cardhead > .ic:first-child { color: var(--text-2); }
+.card .chev, .cardhead .chev { color: var(--text-3); transition: transform var(--dur-spatial-fast) var(--spring-spatial-fast); }
+.cardhead .chev.open { transform: rotate(90deg); }
+.card.col, .row.col { flex-direction: column; align-items: stretch; }
+.card.col { padding: var(--s-4); }
+.card.pin { border-color: var(--accent); }
+.card.pin > .ic:first-child { color: var(--accent); }
+.card span, .row span { display: block; color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); letter-spacing: var(--ls-meta); }
+.card > span.n, .cardhead > span { white-space: nowrap; color: var(--text-3); }
+.cardhead { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: var(--s-3); min-height: var(--target); cursor: pointer; width: 100%; }
+.who > b { white-space: normal; }
+
+/* Rows: min-height 64 (Up next), 88 (Today's 15), dividers are hairlines (the last row keeps its hairline too, so
+   a short queue's first row matches a placeholder row; v18.17.1). Names one line with ellipsis; meta wraps. */
+.rows { list-style: none; padding: 0; margin: 0; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); padding: var(--s-2) 0; min-height: var(--row-2);
+  border-bottom: 1px solid var(--hairline); contain: layout style; }
+.row a { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--s-3); min-height: var(--target); color: inherit; text-decoration: none; }
+.row .txt { font-size: var(--fs-body); line-height: var(--lh-body); font-weight: var(--fw-body); letter-spacing: var(--ls-body); color: inherit; }
+.row .txt, .rowbox { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+/* The placeholder box takes the link's 48 target height, so with border-box (64 min, 8+8 padding, 1 hairline) a placeholder
+   row and a real row both land at 65 and Today does not shift (v18.17.1). */
+.rowbox { min-height: var(--target); }
+.row .txt > b, .row .txt > span, .rowbox > .skelline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .txt > b { color: var(--text-1); }
+.row .side { flex: none; display: inline-flex; align-items: center; gap: var(--s-1); color: var(--text-3); font-size: var(--fs-meta); line-height: var(--lh-meta); }
+.row .side.ready { color: var(--accent); }
+.row em { font-style: normal; font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); color: var(--text-3); white-space: nowrap; }
+.rows.tall .row { min-height: var(--row-3); }
+.row.done span, .row.sent .txt > b { color: var(--text-2); }
+.row .sentmark { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--target); color: var(--done); white-space: nowrap; }
+
+/* Buttons. Outlined S: the element is the 48 target, the 40 visual is ::before (border, r12; pressed r8). Filled: amber,
+   ink on accent, min 48. Key (M): 56, padding 24, 20 icon, gap 8, r16; pressed r12, scale .96, accent-pressed. */
+.btn { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: var(--btn-gap);
+  min-height: var(--target); min-width: var(--target); padding: 0 var(--btn-s-pad); border: 0; border-radius: var(--r-btn-s); background: transparent; color: var(--text-1);
+  font: inherit; font-size: var(--fs-body-strong); line-height: var(--lh-body-strong); font-weight: var(--fw-body-strong); text-align: center; text-decoration: none; cursor: pointer;
+  transition: transform var(--dur-spatial-fast) var(--spring-spatial-fast), background-color var(--dur-effects-default) var(--spring-effects-default); }
+.btn::before { content: ''; position: absolute; z-index: -1; inset: var(--s-1) 0; border: 1px solid var(--border); border-radius: var(--r-btn-s);
+  transition: border-radius var(--dur-spatial-fast) var(--spring-spatial-fast); }
+.btn:active:not([aria-disabled="true"]):not(:disabled) { transform: scale(0.96); transition-duration: var(--dur-short2); }
+.btn:active:not([aria-disabled="true"]):not(:disabled)::before { border-radius: var(--r-btn-s-pressed); }
+.btn.ghost { color: var(--text-1); }
+.btn.fill { background: var(--accent); color: var(--on-accent); }
+.btn.fill::before { border-color: var(--accent); border-radius: inherit; }
+.btn.fill:active:not([aria-disabled="true"]):not(:disabled) { background: var(--accent-pressed); border-radius: var(--r-btn-s-pressed); }
+.btn.key { width: 100%; min-height: var(--btn-m); padding: 0 var(--btn-m-pad); border-radius: var(--r-btn-m);
+  font-size: var(--fs-button); line-height: var(--lh-button); font-weight: var(--fw-button); letter-spacing: var(--ls-button); }
+.btn.key:active:not([aria-disabled="true"]):not(:disabled) { border-radius: var(--r-btn-m-pressed); }
+.btn.text::before { border-color: transparent; }
+.btn.text { color: var(--text-2); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.btn:focus-visible, .cardhead:focus-visible, .tabs a:focus-visible, .row a:focus-visible, .card:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* A label span inside a button keeps the button's type and ink (not the row/card meta style). */
+.btn span, .row .btn span, .card .btn span { display: inline; color: inherit; font: inherit; letter-spacing: inherit; }
+.btn.wide { width: 100%; justify-content: flex-start; text-align: left; }
+.btn.center { display: flex; width: 100%; }
+/* An option button ("Who is this?"): full width, min-height 56 (never a fixed height), the name on line one and
+   company · role as meta on line two. 12 block padding keeps both lines 8 clear of the 4-inset outline at any text size. */
+.btn.opt { width: 100%; min-height: var(--row-1); flex-direction: column; align-items: flex-start; justify-content: center; gap: 0;
+  padding: var(--s-3) var(--btn-s-pad); text-align: left; }
+.btn.opt > b, .btn.opt > .m { display: block; max-width: 100%; }
+.btn.opt > b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn.opt > .m { color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); letter-spacing: var(--ls-meta); }
+.acts { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+.acts.col { flex-direction: column; margin-top: var(--s-2); }
+.confirm { display: flex; flex-direction: column; gap: var(--s-2); }
+.confirm > span, .who > span, .status { color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); letter-spacing: var(--ls-meta); }
+.status { margin: 0; }
+
+/* Replies: the quoted reply sits in a well (canvas, r8, padding 12). The draft is the editable well. */
+.quote { margin: 0 0 var(--s-3); padding: var(--s-3); background: var(--canvas); border-radius: var(--r-well); }
+.rows .row.col { padding: var(--s-4) 0; }
+.claims { padding-left: 0; list-style: none; } .claims li { margin: var(--s-2) 0; }
+.tag { font-style: normal; font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); padding: 0 var(--s-2); border-radius: var(--r-chip);
+  margin-right: var(--s-2); background: var(--surface-2); border: 1px solid var(--hairline); }
+.draftbox, .draft { display: flex; flex-direction: column; gap: var(--s-3); }
+.draft textarea { min-height: calc(var(--lh-body) * 6 + var(--s-6)); padding: var(--s-3); border-radius: var(--r-well); border: 1px solid var(--border);
+  background: var(--canvas); color: var(--text-1); font: inherit; resize: vertical; }
+.draft textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Report: a 2 column <dl>, gap 8. Tiles surface-1, r16, padding 16, min 112: numbered caps eyebrow, metric 28/32. */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); margin: var(--s-3) 0 0; }
+.stat { min-width: 0; min-height: calc(var(--s-12) * 2 + var(--s-4)); padding: var(--s-4); background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-tile);
+  display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: var(--s-2); }
+.stat.lead { grid-column: 1 / -1; }
+.stat dt { font-size: var(--fs-caps); line-height: var(--lh-caps); font-weight: var(--fw-caps); letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--text-2); }
+.stat dt .n { color: var(--text-3); margin-right: var(--s-2); }
+.stat dd { margin: 0; font-size: var(--fs-metric); line-height: var(--lh-metric); font-weight: var(--fw-metric); letter-spacing: var(--ls-metric); }
+.stat small { font-size: var(--fs-body); line-height: var(--lh-body); color: var(--text-2); }
+.signout { display: flex; margin: var(--s-6) 0 var(--s-4); }
+
+/* Nav: 64 + safe area, surface-1, hairline top, three equal tabs (24 icon, gap 4, label 12/16 500). Inactive text-3;
+   active text-1 with a 16 x 2 amber tick on the top edge. */
+.tabs { position: fixed; bottom: 0; left: 0; right: 0; z-index: 2; display: flex; justify-content: center; background: var(--surface-1);
+  border-top: 1px solid var(--hairline); padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.tabs a { position: relative; flex: 1; max-width: calc(var(--sheet-max) / 3); min-height: var(--nav-h); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--s-1); color: var(--text-3); text-decoration: none; font-size: var(--fs-label); line-height: var(--lh-label); font-weight: var(--fw-label); letter-spacing: var(--ls-label);
+  transition: color var(--dur-effects-default) var(--spring-effects-default); }
+.tabs a::before { content: ''; position: absolute; top: -1px; left: 50%; width: var(--s-4); height: 2px; margin-left: calc(var(--s-2) * -1); background: var(--accent);
+  transform: scaleX(0); transition: transform var(--dur-spatial-fast) var(--spring-spatial-fast); }
+.tabs a.on { color: var(--text-1); }
+.tabs a.on::before { transform: scaleX(1); }
+
+/* Toast (48): 16 above the nav, surface-2, hairline, r12, padding 0 4 0 16. */
+.toast { position: fixed; z-index: 3; left: var(--margin); right: var(--margin); bottom: calc(var(--nav-h) + var(--s-4) + env(safe-area-inset-bottom)); max-width: calc(var(--sheet-max) - var(--s-8));
+  margin: 0 auto; min-height: var(--snackbar-h); display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); padding: 0 var(--s-1) 0 var(--s-4);
+  background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--r-snackbar); color: var(--text-1); }
+.toast .btn { color: var(--accent); }
+.toast .btn::before { border-color: transparent; }
+
+/* Offline line: the offline icon at 16 then "Offline · loaded 6:15 PM" in text-2. */
+.offline-line { display: flex; align-items: center; gap: var(--s-2); }
+
+/* Phase 1 read-only: one pill, and write controls dimmed with aria-disabled (WCAG 1.4.3 inactive; still 48 targets). */
+.robar { display: flex; align-items: center; gap: var(--s-2); padding: calc(env(safe-area-inset-top) + var(--s-2)) var(--margin) 0; }
+.ro .screen { padding-top: 0; }
+.ropill { flex: none; min-height: var(--s-6); display: inline-flex; align-items: center; padding: 0 var(--s-2); border-radius: var(--r-full);
+  border: 1px solid var(--border); color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); pointer-events: none; }
+.roline { margin: 0; min-width: 0; color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); }
+.signin .btn { margin-top: var(--s-2); }
+
+/* Skeleton: identical geometry (CLS 0). Every line keeps its full line box and draws a surface-3 bar inside it (8 px in a
+   body line, 16 in a name line). The pulse runs only while loading and only with motion allowed: opacity .5 to .8,
+   alternating, 5 cycles max, then holds at .65. */
+.skelline, .card .skelline, .row .skelline { display: flex; align-items: center; }
+.skelline::before { content: '\200b'; width: 0; } /* keeps the full text line box, so the bar never changes the row height */
+.bar { display: inline-block; height: var(--s-2); vertical-align: middle; border-radius: var(--r-chip); background: var(--surface-3); font-style: normal; opacity: .65; }
+.stat dd .bar { height: var(--s-4); }
+.skel.pin { border-color: var(--hairline); }
+.skelbtn { display: block; }
+.skelbtn::before { background: var(--surface-3); border-color: var(--surface-3); }
+@media (prefers-reduced-motion: no-preference) {
+  /* lint-allow: raw-motion skeleton pulse 1.6 s linear, 5 alternating cycles (spec 07 §3 Skeleton and §5 icon 9; the package has no token for it) */
+  .skel .bar, .skel .skelbtn::before, [aria-busy="true"] dd .bar { animation: skelpulse 1.6s linear 5 alternate; }
+}
+@keyframes skelpulse { from { opacity: .5; } to { opacity: .8; } }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* Skip link: no size until focused (so it is not a tap target), then a 48 pill at the top left. */
+.skip { position: absolute; left: var(--s-2); top: var(--s-2); z-index: 10; width: 0; height: 0; overflow: hidden; padding: 0; border-radius: var(--r-btn-s);
+  background: var(--text-1); color: var(--on-accent); text-decoration: none; }
+.skip:focus, .skip:focus-visible { width: auto; height: auto; min-height: var(--target); padding: 0 var(--s-4); display: flex; align-items: center;
+  outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Import a CSV (spec 08). The file input sits inside its label button (sr-only), so the label is the 48 target and the
+   focus ring follows keyboard focus on the input. Options are radio labels in the .btn.opt shape; the chosen one carries
+   the check glyph and a text-1 edge (glyph plus edge, never colour alone). Unchosen options keep the glyph's space. */
+/* The real input covers its label: the whole label is the input's hit box (48+), invisible, still focusable. */
+.imp-hit { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.imp-pick { margin: var(--s-3) 0 var(--s-2); cursor: pointer; }
+.imp-pick:has(.imp-hit:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.imp-pick.is-busy { opacity: .5; cursor: default; }
+.imp-file { color: var(--text-1); overflow-wrap: anywhere; }
+.imp-facts { margin-top: var(--s-2); }
+.card.imp-adds { flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; }
+.card.imp-adds > b { white-space: normal; }
+.card.imp-adds > span.n { white-space: normal; color: var(--text-2); }
+.imp-flag { gap: var(--s-2); content-visibility: auto; contain-intrinsic-size: auto 240px; }   /* up to 100 rows */
+.imp-flag .imp-detail { color: var(--text-1); }
+.row .imp-quiet { color: var(--text-3); }
+.imp-opts { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+.btn.opt.imp-opt { flex-direction: row; align-items: center; justify-content: flex-start; gap: var(--s-2); cursor: pointer; }
+.btn.opt.imp-opt.on::before { border-color: var(--text-1); }
+.imp-opt .imp-mark { visibility: hidden; color: var(--text-1); }
+.imp-opt.on .imp-mark { visibility: visible; }
+.row .imp-opt .imp-optlabel { display: block; flex: 1; min-width: 0; color: var(--text-1); font-size: var(--fs-body); line-height: var(--lh-body); font-weight: var(--fw-body); }
+.imp-opt.on .imp-optlabel { font-weight: var(--fw-body-strong); }
+.imp-opt:has(.imp-hit:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.imp-search { align-self: flex-start; color: var(--text-1); padding: 0 var(--s-2); }
+.imp-search:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.imp-notes { margin: var(--s-3) 0 0; padding: 0; list-style: none; color: var(--text-2); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--fw-meta); }
+.imp-approve { margin-top: var(--s-6); display: flex; flex-direction: column; gap: var(--s-2); }

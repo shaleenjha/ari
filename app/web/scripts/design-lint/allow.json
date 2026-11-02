@@ -1,0 +1,3 @@
+{
+  "//": "Per-file rule switches: { \"<path relative to app/web>\": [\"<rule> <reason>\"] }. Genuine false positives only, each with a reason. Prefer an inline `lint-allow: <rule> <reason>` on the line."
+}
