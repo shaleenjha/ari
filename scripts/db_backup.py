@@ -6,7 +6,7 @@
 #        python3 scripts/db_backup.py restore-test [dump]  -> restore into a throwaway local Postgres 17 and compare row counts
 # Needs /usr/lib/postgresql/17/bin (sudo apt-get install -y postgresql-17 on a fresh sandbox; the script installs it if missing).
 import os, sys, json, glob, secrets, subprocess, datetime, time, shutil
-REF = 'rbkrqlzlblquvgmuohro'
+REF = 'your-prod-project-ref'
 # v18.7.1: maintenance-only. Refuses to touch the Management API unless a maintenance session opts in explicitly
 # (ARI_MAINT=1) with a fresh short-lived token. No scheduled or worker run sets it.
 if __name__ == '__main__' and os.environ.get('ARI_MAINT') != '1':

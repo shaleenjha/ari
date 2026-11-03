@@ -52,7 +52,7 @@ def token_file():
 def broker_url():
     if os.environ.get('ARI_BROKER_URL'):
         return os.environ['ARI_BROKER_URL']
-    sb = os.environ.get('ARI_SB_URL') or 'https://rbkrqlzlblquvgmuohro.supabase.co'
+    sb = os.environ.get('ARI_SB_URL') or 'https://your-prod-project-ref.supabase.co'
     m = re.match(r'https://([a-z0-9]{20})\.supabase\.co/?$', sb)
     if not m:
         raise BrokerError('ERR broker: cannot derive the functions host from ARI_SB_URL; set ARI_BROKER_URL')

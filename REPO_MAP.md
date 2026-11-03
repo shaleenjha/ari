@@ -6,6 +6,7 @@ A plain guide to what is in this repo. Read it top to bottom once. After that, u
 
 ## The short version
 
+- Kyte was shut down on Nov 3 2026. Start with `docs/kyte/` for the story, the architecture and how to rebuild it. Where this map says "live" or "being built", read it as "as of the sunset".
 - `web/` is the app you use today. It is frozen. Only safety fixes go in.
 - `app/` is the new app being built. All new screens go here.
 - `native/supabase/` is the database: its change history, backups and server functions. The name "native" is old and misleading.

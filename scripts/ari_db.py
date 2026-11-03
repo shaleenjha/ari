@@ -7,8 +7,8 @@
 # ari-worker-token broker, cached in the token file) and a 401 re-fetches it once. Off by default: behaviour unchanged.
 import os, json, gzip, time, urllib.request, urllib.error
 import ari_token
-SB_URL = os.environ.get('ARI_SB_URL') or 'https://rbkrqlzlblquvgmuohro.supabase.co'
-SB_PUBLISHABLE = os.environ.get('ARI_SB_APIKEY') or 'sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl'
+SB_URL = os.environ.get('ARI_SB_URL') or 'https://your-prod-project-ref.supabase.co'
+SB_PUBLISHABLE = os.environ.get('ARI_SB_APIKEY') or 'sb_publishable_YOUR_PUBLISHABLE_KEY'
 
 def headers(actor='hark', extra=None, force=False):
     h = {'apikey': SB_PUBLISHABLE, 'Content-Type': 'application/json', 'x-ari-actor': actor, 'Accept-Encoding': 'gzip'}

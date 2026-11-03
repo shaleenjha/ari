@@ -18,6 +18,7 @@ items drop off. Blocks keep their time once created. Queue logic mirrors model()
 Needs shell credentials provider google, email owner@example.com. Never fails the worker: errors print
 one line and exit 0.
 """
+FOCUS_BLOCKS_OFF = True  # Owner Nov 2 2026 22:33 IST: remove all Ari/Kyte calendar events, make no more
 WITHDRAW_PAUSED = True  # Owner Oct 27 19:40 IST: hold withdrawals for now
 import datetime as dt, hashlib, json, re, subprocess, sys
 
@@ -233,6 +234,8 @@ def connects(items, have, cursor, sd, now, dry, relayout):
 
 
 def main():
+    if FOCUS_BLOCKS_OFF:
+        print("focus blocks: off (Owner Nov 2 2026: no Ari/Kyte calendar events)"); return
     dry, cleanup, relayout = "--dry" in sys.argv, "--cleanup" in sys.argv, "--relayout" in sys.argv
     if not dry:                        # DM3 a week after DM2 (Owner Oct 22): fix dm3_due first so blocks read the rule
         try:

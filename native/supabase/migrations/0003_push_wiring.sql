@@ -22,7 +22,7 @@ grant execute on function public.ari_push_config() to service_role;
 create or replace function public.ari_push_kick() returns bigint
 language sql security definer set search_path = public as $$
   select net.http_post(
-    url := 'https://rbkrqlzlblquvgmuohro.supabase.co/functions/v1/ari-push',
+    url := 'https://your-prod-project-ref.supabase.co/functions/v1/ari-push',
     headers := jsonb_build_object('content-type', 'application/json',
                  'x-ari-hook', (select decrypted_secret from vault.decrypted_secrets where name = 'ari_push_hook_secret')),
     body := '{"source":"db"}'::jsonb,

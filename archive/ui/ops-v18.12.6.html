@@ -6308,7 +6308,7 @@ window.ariV15={batch,rasp,lick,yawn,talk,unlock,spot,openWN,closeWN,sparkle};
 (function(){
 const V16={};window.ariV16=V16;
 /* v18.3: the old Sheet web app is retired (security fix F1). Ari reads and writes Supabase only. */
-const CLIENT_ID='262003808991-jm21iuc9rkk5n0oel6r38o6oiqinobmb.apps.googleusercontent.com';
+const CLIENT_ID='YOUR_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com';
 const ALLOW='owner@example.com';
 const LSg=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},LSs=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},LSr=k=>{try{localStorage.removeItem(k)}catch(e){}};
 const E=window.ariEsc,D=window.ariDates,LI=window.ariLI,QS=new URLSearchParams(location.search);
@@ -7651,8 +7651,8 @@ V163.boot=function(){mountSync();setupTabs();syncLine();try{V163.after()}catch(e
    fallback. Web push via the ari-push edge function.
    ===================================================================== */
 const V17=window.ariV17={v:'v17.1',via:'',rt:{n:0,last:0}};
-const SB_URL='https://rbkrqlzlblquvgmuohro.supabase.co',SB_KEY='sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl';
-const VAPID17='BNOi3VJ08tMJAamrNc3a_wiuO_R0-yXIq8oUD1iNNZnzb1BZkaFzggo2tM1vgEuZYnsQxb3AbWwWkfrnQ6eUA5I';
+const SB_URL='https://your-prod-project-ref.supabase.co',SB_KEY='sb_publishable_YOUR_PUBLISHABLE_KEY';
+const VAPID17='YOUR_VAPID_PUBLIC_KEY';
 const SBK='ari-sb',IST_MS=330*60e3;
 const UA17=navigator.userAgent||'',IOS17=/iPhone|iPad|iPod/i.test(UA17)||(/Macintosh/.test(UA17)&&navigator.maxTouchPoints>1),AND17=/Android/i.test(UA17);
 const DEVICE17=IOS17?'iphone':AND17?'android':'web';

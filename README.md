@@ -1,102 +1,54 @@
 # Kyte
 
-Private repository. Do not make public.
+Kyte was my LinkedIn outbound prep system. I'm an SDR, and the part of the job I kept slipping on was LinkedIn, mostly follow-ups. So over about three weeks (Oct 13 to Nov 3 2026) I built this with Hark, my AI agent.
 
-Kyte is an outbound prep system for one sales rep. Kyte prepares, Owner sends. Kyte finds the right accounts and people, drafts the messages, tracks who accepted and who replied, and stops at the first meeting set. Nothing is sent automatically, and LinkedIn is always worked by a human.
+Kyte did the prep and I did the sending. It found accounts with a real, dated reason to reach out, picked the people, drafted the invite and the three DMs, noticed accepts and replies from LinkedIn's notification emails, and told me who to message tonight. It never sent anything. Every invite and every DM went out by hand from my own LinkedIn. That rule never changed.
 
-## Features
+It started as a Google Sheet with an Apps Script page, then became a phone app called Den, then Ari, then a bird name for about a day, then Kyte. The backend was Supabase, the app was one big installable web page, and the "brain" was a set of scheduled Hark tasks that ran every 10 minutes during my US-hours shift.
 
-- Account and people research, ranked into a short daily list.
-- Drafted connection notes and DMs that follow the house style (short, plain, no hype).
-- Follow-up timing: who is due today, and what to say.
-- Reply and accept tracking from LinkedIn notification emails (Gmail, read only, optional).
-- A daily report of what moved.
-- Nightly encrypted backups with an offsite copy.
+## How it ended
+
+On Nov 3 2026 I shut it down. I already run a Claude setup at work, and my LinkedIn work moved in there. Running two systems for the same job didn't make sense. The app is deleted, the scheduled tasks are paused, the database is paused for 30 days and gets deleted after Dec 3 2026.
+
+This repo is what's left, and it's meant to be enough to bring Kyte back if I ever want to. There's no data in here, by design: no people, no companies, no messages, no keys.
+
+## Read this next
+
+- [docs/kyte/journey.md](docs/kyte/journey.md): the story, version by version, what worked and what didn't
+- [docs/kyte/architecture.md](docs/kyte/architecture.md): how the pieces fit, with diagrams
+- [docs/kyte/data-model.md](docs/kyte/data-model.md): every table, the stages and the cadence rules
+- [docs/kyte/components.md](docs/kyte/components.md): every script, function and migration in one line each
+- [docs/kyte/REBUILD.md](docs/kyte/REBUILD.md): from zero to working, step by step
+- [docs/kyte/tasks/](docs/kyte/tasks/README.md): the scheduled task prompts, the part you replug
+- [docs/kyte/sunset.md](docs/kyte/sunset.md): what got shut down, when, and what's left
+- [REPO_MAP.md](REPO_MAP.md): a plain tour of every folder
 
 ## Repo layout
 
-New here? Read [`REPO_MAP.md`](REPO_MAP.md) first. It is a plain guide to every folder.
+- `web/`: the app as it last ran (`ops.html` at `/ops`), service worker, manifest, public pages.
+- `app/`: a rebuild I started and then stopped on Oct 28. React PWA on demo data, background jobs, practice schema.
+- `native/supabase/`: the database. Baseline, migrations with rollbacks and checks, edge functions, restore notes. "native" is an old name.
+- `scripts/`: what the scheduled tasks ran: sync, Gmail ingest, copy checks, reports, backups, deploys, and the export that publishes this repo.
+- `docs/`: specs, runbooks, engineering notes, and the Kyte record in `docs/kyte/`.
+- `archive/`: old UI versions and mockups, on made-up data.
 
-- `web/`: the live installable web app (`ops.html`, frozen), service worker, manifest, public pages.
-- `app/`: the new app. `app/web` is the React PWA, `app/jobs` holds background jobs and the draft eval, `app/db` holds the practice schema and its tests.
-- `native/supabase/`: database migrations, rollbacks, tests and edge functions.
-- `scripts/`: sync, reports, backups, deploy and the git export used to publish this repo.
-- `docs/`: specs, runbooks and engineering notes.
-
-## Requirements
-
-- Node 22 and npm (app/web, app/jobs)
-- Python 3.12 (scripts)
-- Deno 2 (edge functions)
-- PostgreSQL 17 client tools (SQL tests)
-
-## Local setup
-
-New app (`app/web`):
+## Running the tests
 
 ```
-cd app/web
-npm ci
-npm run dev          # local dev server
-npm run typecheck
-npm test             # unit tests
-npm run lint:slop    # design tokens, copy and query rules
-npm run lint:design  # needs: npx playwright install chromium webkit
-npm run e2e
-npm run build
+cd app/web && npm ci && npm test        # rebuild app unit tests
+cd app/jobs && npm ci && npm test       # jobs, Gmail parser, draft eval
+bash native/supabase/migrations/pending/test/run_local.sh   # needs a local Postgres 17
+python3 scripts/test_repo_scan.py       # and the other scripts/test_*.py
 ```
 
-Background jobs (`app/jobs`):
+CI runs all of it on every push, plus a leak scan over the whole repo.
 
-```
-cd app/jobs
-npm ci
-npm run typecheck
-npm test
-npm run eval:drafts  # scores drafts against the house style
-```
+## About the scrub
 
-Database tests (a local Postgres 17 on port 5432):
-
-```
-bash app/db/run_tests.sh
-bash native/supabase/migrations/pending/test/run_local.sh
-```
-
-Edge functions (`native/supabase/functions`):
-
-```
-deno check native/supabase/functions/pending/ari-worker-token/index.ts
-deno test --allow-env --allow-read $(find native/supabase/functions -name '*_test.ts' -o -name '*.test.ts')
-```
-
-Scripts:
-
-```
-python3 scripts/test_hygiene_scan.py   # and the other scripts/test_*.py files
-```
-
-## Deploy
-
-Deploys are approved by Owner, every time. The only deploy command is:
-
-```
-python3 scripts/deploy_web.py --target=production --confirm
-```
-
-Anything else aborts. `web/ops.html` is locked by `plans/base-lock.json` (not in this repo); only data loss or security fixes change it. Commits reach this repo only through `scripts/git_sync.sh`. See [`docs/engineering/commit-convention.md`](docs/engineering/commit-convention.md).
-
-## Privacy
-
-- The public privacy policy is [`web/privacy.html`](web/privacy.html).
-- What data Kyte holds and where: [`docs/privacy-data-inventory.md`](docs/privacy-data-inventory.md).
-- This repo is a scrubbed export. Names of people, companies and employers in demo data and copy are replaced with placeholders, so strings here may not match the running deployment exactly.
-- Public-by-design values are present: the Supabase project URL, its publishable (anon) key, and the Web Push VAPID public key. No service keys, tokens or private keys are stored here; they are injected at runtime.
+Every file gets here through `scripts/git_sync.sh`, which copies an allow-list of files, swaps real names for placeholders, and refuses to commit if it finds a name, email, phone number, LinkedIn link or key. So the demo data, some identifiers and a couple of names (a company shows up as Thrandvex, an old product name as Kelvarrow) won't match what actually ran. That's on purpose.
 
 ## License
 
-All rights reserved. See [`LICENSE`](LICENSE).
-
-## Credits
+All rights reserved. See [LICENSE](LICENSE). If you want to reach me, my GitHub profile is the way.
 
 Built with Hark and Claude.

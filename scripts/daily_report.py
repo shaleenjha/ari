@@ -24,8 +24,8 @@ import ari_token  # S1 R7
 SHEET = 'SHEET_ID_PLACEHOLDER'
 TO = 'work@example.com'
 TZ = ZoneInfo('Asia/Kolkata')
-SB_URL = os.environ.get('ARI_SB_URL') or 'https://rbkrqlzlblquvgmuohro.supabase.co'
-SB_PUBLISHABLE = os.environ.get('ARI_SB_APIKEY') or 'sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl'
+SB_URL = os.environ.get('ARI_SB_URL') or 'https://your-prod-project-ref.supabase.co'
+SB_PUBLISHABLE = os.environ.get('ARI_SB_APIKEY') or 'sb_publishable_YOUR_PUBLISHABLE_KEY'
 MAX_ACCOUNTS = 30
 MAX_DUE = 8
 STAGE_FIELDS = {'connect': 'connect_sent', 'accept': 'accepted', 'dm1': 'dm1_sent', 'dm2': 'dm2_sent',

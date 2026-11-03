@@ -10,7 +10,7 @@
 # native/supabase/baseline), loads every public table from the JSON with json_populate_recordset, and compares row counts
 # with the backup. Result: work/backups/drill_<object>.json (counts only, no rows).
 import os, sys, json, glob, gzip, shutil, subprocess, urllib.request
-REF = os.environ.get('ARI_PROJECT_REF') or 'rbkrqlzlblquvgmuohro'  # R7 staging drill: ARI_PROJECT_REF=ljojwhnfgfreokqspobg
+REF = os.environ.get('ARI_PROJECT_REF') or 'your-prod-project-ref'  # R7 staging drill: ARI_PROJECT_REF=your-staging-project-ref
 # v18.7.1: maintenance-only. Refuses to touch the Management API unless a maintenance session opts in explicitly
 # (ARI_MAINT=1) with a fresh short-lived token. No scheduled or worker run sets it.
 # --file mode reads a local copy and needs no token, so it is allowed outside maintenance sessions.

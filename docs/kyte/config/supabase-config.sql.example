@@ -1,0 +1,26 @@
+-- Kyte: one-time config after the migrations (run as postgres in the SQL editor). Placeholders only.
+
+-- 1. Web push (VAPID). Generate a P-256 key pair (e.g. `npx web-push generate-vapid-keys`, then convert the private key to a JWK).
+select vault.create_secret('<VAPID private key as JWK JSON>', 'ari_vapid_private_jwk');
+insert into public.app_config(key, value) values ('vapid_public_key', '<base64url P-256 public key>')
+  on conflict (key) do update set value = excluded.value;
+
+-- 2. Hook secrets the database sends to edge functions (x-ari-hook). One random value each.
+select vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'ari_push_hook_secret');
+select vault.create_secret('<same 64 hex chars as the ARI_BACKUP_HOOK function secret>', 'ari_backup_hook_secret');
+select vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'ari_gmail_hook_secret');
+-- ari_ai_hook_secret is created by 0041 itself.
+
+-- 3. Where the database calls its functions (only if a migration did not already set it to your ref).
+insert into public.app_config(key, value) values ('gmail_fn_base', 'https://<your-project-ref>.supabase.co/functions/v1')
+  on conflict (key) do update set value = excluded.value;
+
+-- 4. Privacy: lock-screen pushes show no names unless you turn this on.
+insert into public.app_config(key, value) values ('push_show_names', 'false') on conflict (key) do nothing;
+
+-- 5. Kill switches stay off until you decide otherwise.
+-- update public.ai_budget set enabled = false where id = 1;          -- AI layer (0041) off
+-- select cron.alter_job((select jobid from cron.job where jobname = 'ari-ai-events'), active := false);
+
+-- 6. Check: the public key must read nothing.
+-- From outside: curl "https://<ref>.supabase.co/rest/v1/people?select=id&limit=1" -H "apikey: <publishable key>"   -> [] or 401/permission denied

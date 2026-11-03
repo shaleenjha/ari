@@ -16,7 +16,7 @@ that keeps the old name working until every caller has moved.
 
 ## Legacy names kept, and why
 
-### Database (prod `rbkrqlzlblquvgmuohro`, staging `ljojwhnfgfreokqspobg`)
+### Database (prod `your-prod-project-ref`, staging `your-staging-project-ref`)
 | Kept | Why |
 |---|---|
 | Role `ari_worker` | The prod worker signs in as it. Grants, RLS policies and the broker (`ari-worker-token`) name it. |

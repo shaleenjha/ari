@@ -1,0 +1,11 @@
+{
+  "seller": "<Your company>",
+  "aes": {"ae1": "<AE 1 full name>", "ae2": "<AE 2 full name>", "ae3": "<AE 3 full name>"},
+  "style_a_ae": "ae1",
+  "style_b_ae": "ae2",
+  "allowed_customers": ["<customer a>", "<customer b>"],
+  "style_b_customer": "<the one customer style B may name>",
+  "style_b_customer_label": "<Customer B label>",
+  "never_name": {"match": "<customer>", "label": "<Customer never to name>"},
+  "competitors": ["<competitor a>", "<competitor b>"]
+}

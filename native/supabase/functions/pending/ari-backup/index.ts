@@ -21,7 +21,7 @@ import * as pkijs from "https://esm.sh/pkijs@3.2.4?target=es2022";
 // test with a throwaway cert. Prod, a custom domain or an unparseable URL always get the built-in bundle, so neither recipient
 // (Hark vault, owner) can be dropped by a secret change.
 const OFFSITE_BUCKET = "ari-offsite";
-const STAGING_REF = "ljojwhnfgfreokqspobg";
+const STAGING_REF = "your-staging-project-ref";
 // Two recipients: "Ari offsite backup recipient" (key in the Hark vault) and "Ari backup - owner" (key held by the owner,
 // SHA-256 21:90:2D:64:51:9D:70:E9:3D:BF:32:B1:8B:3E:8A:76:CE:83:20:E0:48:D2:5D:8A:78:8A:6B:89:0E:10:AF:D9).
 const OFFSITE_CERT = `-----BEGIN CERTIFICATE-----

@@ -62,7 +62,7 @@ do $$ declare t text; begin
 end $$;
 revoke all on sequence public.gmail_ingest_runs_id_seq from public, anon, authenticated;
 
-insert into public.app_config(key, value) values ('gmail_fn_base', 'https://rbkrqlzlblquvgmuohro.supabase.co/functions/v1') on conflict (key) do nothing;
+insert into public.app_config(key, value) values ('gmail_fn_base', 'https://your-prod-project-ref.supabase.co/functions/v1') on conflict (key) do nothing;
 do $$ begin
   if not exists (select 1 from vault.secrets where name = 'ari_gmail_hook_secret') then
     perform vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'ari_gmail_hook_secret', 'x-ari-hook for edge function ari-gmail-ingest');

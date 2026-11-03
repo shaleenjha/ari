@@ -1,4 +1,4 @@
--- 0036 (Oct 18 2026, Otto). Tested on staging ljojwhnfgfreokqspobg 00:35 IST: fix, idempotent rerun, wrong-content refusal, unappend backfill only, anon/authenticated denied.
+-- 0036 (Oct 18 2026, Otto). Tested on staging your-staging-project-ref 00:35 IST: fix, idempotent rerun, wrong-content refusal, unappend backfill only, anon/authenticated denied.
 -- Spec docs/specs/05_log_history_repair.md. Why: ari_worker may only UPDATE log_entries(sheet_key) (0018) and cannot DELETE,
 -- so the worker cannot rewrite the content of the 3 column-swapped Log rows, nor undo an appended row on rollback.
 -- Two narrow SECURITY DEFINER functions, ari_worker only:

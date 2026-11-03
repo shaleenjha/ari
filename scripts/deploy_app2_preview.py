@@ -19,9 +19,9 @@ PROV = deploy_provenance.check()
 env = dict(os.environ)
 if LIVE:
     # Public values only (same ones web/ops.html ships). RLS + the user's Google sign-in decide what is readable.
-    env.update(VITE_ARI_DATA='live', VITE_ARI_SUPABASE_URL='https://rbkrqlzlblquvgmuohro.supabase.co',
-               VITE_ARI_SUPABASE_KEY='sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl',
-               VITE_ARI_GOOGLE_CLIENT_ID='262003808991-jm21iuc9rkk5n0oel6r38o6oiqinobmb.apps.googleusercontent.com')
+    env.update(VITE_ARI_DATA='live', VITE_ARI_SUPABASE_URL='https://your-prod-project-ref.supabase.co',
+               VITE_ARI_SUPABASE_KEY='sb_publishable_YOUR_PUBLISHABLE_KEY',
+               VITE_ARI_GOOGLE_CLIENT_ID='YOUR_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com')
 b = subprocess.run(['npm', 'run', 'build'], cwd=WEB, capture_output=True, text=True, env=env)
 if b.returncode != 0:
     print(b.stdout[-2000:], b.stderr[-2000:]); sys.exit('build failed')

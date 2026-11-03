@@ -1,6 +1,6 @@
 # Kyte restore runbook (v18.6, Oct 17 2026; sections 0 and 1 revised Oct 19 2026)
 
-Prod project: `ari` (rbkrqlzlblquvgmuohro). Staging: `ari-staging` (ljojwhnfgfreokqspobg).
+Prod project: `ari` (your-prod-project-ref). Staging: `ari-staging` (your-staging-project-ref).
 Owner auth uid: b14d1605-c766-4684-9a5b-71ffcab6967b.
 
 ## What a backup is

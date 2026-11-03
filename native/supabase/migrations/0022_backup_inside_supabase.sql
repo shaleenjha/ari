@@ -22,7 +22,7 @@ insert into storage.buckets (id, name, public) values ('ari-backups', 'ari-backu
 
 create or replace function public.ari_backup_kick() returns bigint language sql security definer set search_path = public as $$
   select net.http_post(
-    url := 'https://rbkrqlzlblquvgmuohro.supabase.co/functions/v1/ari-backup',  -- staging: its own ref (see fixlog)
+    url := 'https://your-prod-project-ref.supabase.co/functions/v1/ari-backup',  -- staging: its own ref (see fixlog)
     headers := jsonb_build_object('content-type', 'application/json',
                  'x-ari-hook', (select decrypted_secret from vault.decrypted_secrets where name = 'ari_backup_hook_secret')),
     body := '{"source":"cron"}'::jsonb, timeout_milliseconds := 10000);

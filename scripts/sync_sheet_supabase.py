@@ -26,10 +26,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ari_token  # S1 R7 (off unless ARI_WORKER_BROKER=1)
 
 SHEET_ID = "SHEET_ID_PLACEHOLDER"
-SB_URL = os.environ.get("ARI_SB_URL") or "https://rbkrqlzlblquvgmuohro.supabase.co"
+SB_URL = os.environ.get("ARI_SB_URL") or "https://your-prod-project-ref.supabase.co"
 # Public publishable key (safe to ship). In Hark the proxy binding "supabase-ari-bearer" injects
 # "Authorization: Bearer <ari_worker JWT>" (v18.5); the gateway also needs an apikey, so we send the publishable one.
-SB_PUBLISHABLE = os.environ.get("ARI_SB_APIKEY") or "sb_publishable_jC4J7_kj6zUiAB6_zs6_NQ_6D1gMVxl"
+SB_PUBLISHABLE = os.environ.get("ARI_SB_APIKEY") or "sb_publishable_YOUR_PUBLISHABLE_KEY"
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 LOCK_MINUTES = 8
 

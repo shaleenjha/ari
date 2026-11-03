@@ -57,6 +57,9 @@ INCLUDE = [
     'scripts/keel_repo.py', 'scripts/keel_repo.conf', 'scripts/test_keel_repo.py',  # Oct 30 2026: the repo name in one line (Kyte rename)
     'scripts/test_ops_sync.js', 'scripts/test_ops_no_story.py',  # Oct 30 2026 v18.14.11: ops.html catch-up + no build story tests
     'scripts/test_ops_today.js',  # Nov 2 2026 v18.14.12: Today remove closes relay replies + no list redraw
+    # Nov 3 2026 (sunset): the Kyte record (docs, scrubbed task prompts, config templates) and the two scripts the
+    # LinkedIn read and profile scan tasks call, so a rebuild has every script its prompts name
+    'docs/kyte/**', 'scripts/li_list_ingest.py', 'scripts/profile_scan.py',
     # Oct 27 2026: ingest labels step 1 (spec docs/specs/09-ingest-labels.md): code labelers + dry-run backfill, and their tests
     'scripts/ingest_labels.py', 'scripts/test_ingest_labels.py',
     'scripts/scan_gate.py', 'scripts/test_scan_gate.py',  # Oct 30 2026: scan controls gate (0052), called by the LinkedIn read scan tasks
@@ -296,6 +299,25 @@ def private_names(rules, ignore):
     return {n for n in names if keep(n)}, {n for n in real if keep(n)}
 
 
+_SQ = {}
+
+
+def _squashed(n):
+    if n not in _SQ:
+        _SQ[n] = re.sub(r'[^a-z0-9]', '', n.lower())
+    return _SQ[n]
+
+
+def file_matcher(names, real, body):
+    """Same matches as name_matcher(names, real) on this body, built only from the names that occur in it as plain
+    substrings (a regex match needs the substring, so nothing is lost). Nov 3 2026: the one combined regex of 3,000+
+    names took about 17 s on ops.html and pushed the export past the 120 s shell limit."""
+    low = body.lower()
+    present = {n for n in names if n in body}
+    real_present = {n for n in real if _squashed(n) in low}
+    return name_matcher(present, real_present) if (present or real_present) else (None, None)
+
+
 def name_matcher(names, real):
     """One combined case-sensitive regex for the names (fast on the 1.4 MB ops.html), plus a lowercase squashed form
     of longer names (catches keys like 'acmehealth' in a lookup table)."""
@@ -329,6 +351,17 @@ def main():
         p = os.path.join(OUT, e)
         shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
 
+    # Result cache (Nov 3 2026, the full export ran past the 120 s shell limit). Private, in KEEL_DIR, never exported.
+    # The key covers everything that can change a file's output or findings: the scrub map, the name lists, this
+    # script and repo_scan.py, plus the file's path and source text. Any change there means a fresh scrub and scan.
+    CACHE = os.path.join(KEEL, '.export_cache')
+    os.makedirs(CACHE, exist_ok=True)
+    h = hashlib.sha256()
+    for f in (os.path.join(KEEL, 'scrub_map.json'), os.path.abspath(__file__), os.path.abspath(repo_scan.__file__)):
+        h.update(open(f, 'rb').read())
+    h.update(json.dumps([sorted(names), sorted(real)]).encode())
+    run_key = h.hexdigest()
+
     problems, n = [], 0
     for src, dst in collect():
         sp, dp = os.path.join(ROOT, src), os.path.join(OUT, dst)
@@ -337,21 +370,32 @@ def main():
         if src.endswith(BINARY):
             shutil.copy2(sp, dp)
             continue
-        t = open(sp, encoding='utf-8').read()
+        raw = open(sp, encoding='utf-8').read()
+        ck = os.path.join(CACHE, hashlib.sha256((run_key + '\0' + dst + '\0' + raw).encode()).hexdigest() + '.json')
+        if os.path.exists(ck):   # same source, same rules, names and code as a run already scanned: reuse its result
+            hit = json.load(open(ck, encoding='utf-8'))
+            open(dp, 'w', encoding='utf-8').write(hit['text'])
+            problems += [tuple(x) for x in hit['problems']]
+            continue
+        found = []
+        t = raw
         if dst in TRANSFORMS:
             t = TRANSFORMS[dst](t)
         if dst not in NO_SCRUB and not dst.endswith(GENERATED):
             t = scrub(t, dst, rules, files)
         open(dp, 'w', encoding='utf-8').write(t)
-        problems += repo_scan.scan_text(dst, t)
+        found += repo_scan.scan_text(dst, t)
         if dst not in NO_SCRUB and not dst.endswith(GENERATED) and dst not in repo_scan.VENDORED:
             body = repo_scan.strip_data(t)
-            if name_rx:
-                for m in set(name_rx.findall(body)):
-                    problems.append((dst, 'real_name', m))
-            if squash_rx:
-                for m in set(squash_rx.findall(body.lower())):
-                    problems.append((dst, 'real_name_key', m))
+            f_rx, f_sq = file_matcher(names, real, body) if (name_rx or squash_rx) else (None, None)
+            if f_rx:
+                for m in set(f_rx.findall(body)):
+                    found.append((dst, 'real_name', m))
+            if f_sq:
+                for m in set(f_sq.findall(body.lower())):
+                    found.append((dst, 'real_name_key', m))
+        problems += found
+        json.dump({'text': t, 'problems': found}, open(ck, 'w', encoding='utf-8'))
     print('exported files:', n, '->', OUT)
     if problems:
         print('SCAN FAILED, %d findings:' % len(problems))

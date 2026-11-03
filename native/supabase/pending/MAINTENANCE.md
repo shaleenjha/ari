@@ -1,7 +1,7 @@
 # Maintenance session (v18.7 batch) - one short-lived Supabase PAT, staging first
 
 Hark requests a short-lived PAT from Owner through Hark Secured Login at the start, and Owner revokes it at the end.
-Order: apply each step on **ari-staging** first, run its check, then on **prod (rbkrqlzlblquvgmuohro)**. Rollbacks sit next to each file.
+Order: apply each step on **ari-staging** first, run its check, then on **prod (your-prod-project-ref)**. Rollbacks sit next to each file.
 
 | # | What | How | Check | Rollback |
 |---|---|---|---|---|

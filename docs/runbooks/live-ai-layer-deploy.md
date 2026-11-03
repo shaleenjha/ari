@@ -21,7 +21,7 @@ Code: branch `live/ai-layer` (`native/supabase/functions/pending/{_shared/ai,ari
 | `OPENAI_API_KEY` | optional, unused | backup stub only |
 
 ## Token scope needed (short-lived, from Owner; revoke after)
-- Supabase access token for project rbkrqlzlblquvgmuohro (staging ljojwhnfgfreokqspobg first) that can: deploy Edge Functions,
+- Supabase access token for project your-prod-project-ref (staging your-staging-project-ref first) that can: deploy Edge Functions,
   write function secrets, create API keys (the two named secret keys), and run SQL (apply 0041, app_config rows, ai_budget).
 - Google Cloud: an account with Pub/Sub Admin + Service Account Admin on the project that owns the Gmail OAuth client.
 - GitHub: none for deploy. CI change on main needs a normal push to main (branch pushes refuse `.github/`).

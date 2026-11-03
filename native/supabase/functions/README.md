@@ -1,10 +1,10 @@
-# Supabase edge functions (prod project rbkrqlzlblquvgmuohro)
+# Supabase edge functions (prod project your-prod-project-ref)
 
 Source of the four live edge functions, brought into the repo in S1 R2 (Oct 19 2026, Claude Supabase audit S4).
 Read-only: nothing here was deployed or changed. Deploying a function is a separate, Owner-approved step.
 
 ## Live versions and how they were checked
-Listed with `GET /v1/projects/rbkrqlzlblquvgmuohro/functions` and each live bundle fetched with
+Listed with `GET /v1/projects/your-prod-project-ref/functions` and each live bundle fetched with
 `GET .../functions/<slug>/body` (read-only token), Oct 19 2026 about 13:20 IST. The live bundle is an ESZIP holding the
 transpiled module (types stripped). Each `<slug>/index.ts` here was transpiled the same way and compared with the live
 module after removing comments, whitespace, semicolons, parentheses and trailing commas: **all four are identical**.
@@ -32,7 +32,7 @@ So these files are what runs, apart from formatting and comments.
   `PENDING_IN_FUNCTION` in `scripts/backup_check.py`.
   Also (Claude R-03, Oct 19 2026): the plaintext copy to ari-staging is removed (`STAGING_URL` / `STAGING_SECRET_KEY` are no
   longer read; `backup_runs.offsite` is always false), and `OFFSITE_CERT_PEM` is honoured only on the staging
-  project (`ljojwhnfgfreokqspobg.supabase.co`, allowlist, issue #4 follow-up); prod, a custom domain, an unparseable or
+  project (`your-staging-project-ref.supabase.co`, allowlist, issue #4 follow-up); prod, a custom domain, an unparseable or
   missing URL all get the built-in two-recipient bundle. After the deploy, delete the two
   STAGING_* function secrets and the old plaintext objects in ari-staging's ari-backups bucket.
 
